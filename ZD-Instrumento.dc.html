@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="min-height:100vh;background:radial-gradient(1100px 560px at 85% -10%,#12220e 0%,transparent 60%),#070b06;color:#ecebe5;font-family:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace">
+
+<header style="position:sticky;top:0;z-index:20;background:rgba(7,11,6,.9);backdrop-filter:blur(8px);border-bottom:1px solid #1d2c19">
+  <div style="max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <a href="index.html" style="display:flex;align-items:center;gap:12px;color:#ecebe5;text-decoration:none">
+      <img src="src/logo-badge.jpg" alt="Zero Day · Music Exploits" style="height:40px;border-radius:3px;background:#ecebe5;padding:2px">
+      <span style="font-size:13px;font-weight:700;letter-spacing:.14em">ZERO DAY<span style="color:#7fdc5c"> · </span>MUSIC EXPLOITS</span>
+    </a>
+    <nav style="margin-left:auto;display:flex;align-items:center;gap:22px;font-size:12px;letter-spacing:.12em;flex-wrap:wrap">
+      <a href="#probar" style="color:#a9b8a2;text-decoration:none">PROBAR</a>
+      <a href="#manual" style="color:#a9b8a2;text-decoration:none">MANUAL</a>
+      <a href="#teclado" style="color:#a9b8a2;text-decoration:none">TECLADO</a>
+      <a href="#descargar" style="{{ sAccentBtnSm }}">DESCARGAR </a>
+    </nav>
+  </div>
+</header>
+
+<section style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:48px">
+  <a href="index.html#instrumentos" style="font-size:12px;letter-spacing:.14em;color:#7c8f75;text-decoration:none;align-self:flex-start;padding:10px 0">← TODOS LOS INSTRUMENTOS</a>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:56px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <span style="{{ sAccentLabel }}">{{ num }} · {{ type }}</span>
+      <h1 style="margin:0;font-size:clamp(42px,6.4vw,82px);line-height:1;letter-spacing:-.03em;font-weight:800;text-wrap:balance">{{ name }}</h1>
+      <p style="{{ sTagline }}">{{ tagline }}</p>
+      <p style="margin:0;font-size:16px;line-height:1.7;color:#a9b8a2;max-width:580px;text-wrap:pretty">{{ what }}</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px">
+        <a href="#descargar" style="{{ sAccentBtn }}">DESCARGAR GRATIS</a>
+        <a href="#probar" style="border:1px solid #2a3f24;color:#ecebe5;font-size:15px;letter-spacing:.06em;padding:15px 24px;border-radius:3px;text-decoration:none">▶ Probar ahora</a>
+      </div>
+    </div>
+    <dl style="{{ sSpec }}">
+      <sc-for list="{{ spec }}" as="r" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:14px 0;border-bottom:1px solid #1d2c19">
+          <dt style="font-size:11px;letter-spacing:.14em;color:#7c8f75;padding-top:2px">{{ r.k }}</dt>
+          <dd style="margin:0;font-size:14px;line-height:1.5;color:#ecebe5;word-break:break-word">{{ r.v }}</dd>
+        </div>
+      </sc-for>
+    </dl>
+  </div>
+</section>
+
+<section id="probar" style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #1d2c19;padding-bottom:18px">
+    <h2 style="margin:0;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em">Probalo acá</h2>
+    <a href="{{ file }}" target="_blank" rel="noopener" style="font-size:12px;letter-spacing:.14em;color:#a9b8a2;text-decoration:none;padding:10px 0">ABRIR EN PANTALLA COMPLETA ↗</a>
+  </div>
+  <div style="position:relative;border:1px solid #1d2c19;border-radius:4px;overflow:hidden;background:#030502;height:min(80vh,760px)">
+    <sc-if value="{{ previewOn }}" hint-placeholder-val="{{ false }}">
+      <iframe src="{{ file }}" title="{{ name }}" allow="autoplay; midi" style="width:100%;height:100%;border:0;display:block"></iframe>
+    </sc-if>
+    <sc-if value="{{ previewOff }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ loadPreview }}" style="position:absolute;inset:0;width:100%;border:0;background:repeating-linear-gradient(0deg,rgba(127,220,92,.04) 0 1px,transparent 1px 3px),#050904;color:#ecebe5;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+        <span style="{{ sPlay }}">▶</span>
+        <span style="font-size:15px;letter-spacing:.1em">Cargar {{ name }}</span>
+        <span style="font-size:12px;color:#7c8f75">El primer toque enciende el audio</span>
+      </button>
+    </sc-if>
+  </div>
+</section>
+
+<section id="manual" style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #1d2c19;padding-bottom:18px">
+    <h2 style="margin:0;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em">Manual de usuario</h2>
+    <span style="font-size:12px;letter-spacing:.14em;color:#7c8f75">{{ sectionCount }} SECCIONES</span>
+  </div>
+  <div style="display:flex;gap:56px;flex-wrap:wrap;align-items:flex-start">
+    <nav style="flex:1 1 200px;max-width:260px;position:sticky;top:88px;display:flex;flex-direction:column;gap:2px;font-size:13px">
+      <sc-for list="{{ sections }}" as="s" hint-placeholder-count="6">
+        <a href="{{ s.href }}" style="display:flex;gap:12px;padding:9px 0;color:#a9b8a2;text-decoration:none;border-bottom:1px solid #121c10"><span style="color:#5d7555">{{ s.n }}</span><span>{{ s.t }}</span></a>
+      </sc-for>
+    </nav>
+    <div style="flex:999 1 480px;min-width:0;display:flex;flex-direction:column;gap:44px">
+      <sc-for list="{{ sections }}" as="s" hint-placeholder-count="4">
+        <article id="{{ s.id }}" style="display:flex;flex-direction:column;gap:14px;scroll-margin-top:88px">
+          <h3 style="margin:0;font-size:20px;letter-spacing:-.01em;display:flex;gap:14px;align-items:baseline"><span style="{{ s.numStyle }}">{{ s.n }}</span>{{ s.t }}</h3>
+          <sc-if value="{{ s.p }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font-size:15px;line-height:1.7;color:#a9b8a2;text-wrap:pretty;max-width:680px">{{ s.p }}</p>
+          </sc-if>
+          <sc-if value="{{ s.hasItems }}" hint-placeholder-val="{{ true }}">
+            <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid #1d2c19">
+              <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="3">
+                <li style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:4px 24px;padding:12px 0;border-bottom:1px solid #1d2c19;font-size:14px;line-height:1.6">
+                  <strong style="color:#ecebe5;font-weight:700">{{ it.term }}</strong>
+                  <span style="color:#a9b8a2;text-wrap:pretty">{{ it.desc }}</span>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+          <sc-for list="{{ s.notes }}" as="nt" hint-placeholder-count="0">
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#a9b8a2;background:#0b1209;border:1px solid #1d2c19;border-radius:3px;padding:12px 14px;display:flex;gap:10px;max-width:680px"><span style="{{ accentText }}">▸</span><span>{{ nt }}</span></p>
+          </sc-for>
+        </article>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="teclado" style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #1d2c19;padding-bottom:18px">
+    <h2 style="margin:0;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em">Teclado de PC</h2>
+    <sc-if value="{{ keysNote }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;letter-spacing:.14em;color:#7c8f75">{{ keysNote }}</span></sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px">
+    <sc-for list="{{ keys }}" as="k" hint-placeholder-count="5">
+      <div style="background:#0d150b;border:1px solid #1d2c19;border-radius:4px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <sc-for list="{{ k.chips }}" as="c" hint-placeholder-count="1">
+            <kbd style="font:inherit;font-size:13px;min-width:32px;height:32px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;background:#16220f;border:1px solid #2a3f24;border-bottom-width:3px;border-radius:3px;color:#ecebe5">{{ c }}</kbd>
+          </sc-for>
+          <sc-if value="{{ k.text }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#ecebe5">{{ k.text }}</span></sc-if>
+        </div>
+        <span style="font-size:13px;line-height:1.5;color:#a9b8a2">{{ k.a }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ hasBehavior }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+      <span style="font-size:12px;letter-spacing:.14em;color:#7c8f75">COMPORTAMIENTO SEGÚN TRANSPORTE</span>
+      <sc-for list="{{ behavior }}" as="b" hint-placeholder-count="3">
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2;display:flex;gap:10px"><span style="{{ accentText }}">▸</span><span>{{ b }}</span></p>
+      </sc-for>
+    </div>
+  </sc-if>
+  <div style="margin-top:24px;border-top:1px solid #1d2c19;padding-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px 40px">
+    <span style="font-size:12px;letter-spacing:.14em;color:#7c8f75">ESTADO DEL ROADMAP</span>
+    <p style="margin:0;font-size:14px;line-height:1.7;color:#a9b8a2;text-wrap:pretty;grid-column:span 2">{{ roadmap }}</p>
+  </div>
+</section>
+
+<section id="descargar" style="max-width:1180px;margin:0 auto;padding:40px 24px 80px">
+  <div style="{{ sDlBox }}">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <span style="{{ sAccentLabel }}">DESCARGA GRATUITA</span>
+      <h2 style="margin:0;font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.02em;text-wrap:balance">Llevate {{ name }}.</h2>
+      <p style="margin:0;font-size:15px;line-height:1.65;color:#a9b8a2;text-wrap:pretty">Ingresá tu mail, te mandamos un código de 6 dígitos y se habilita la descarga. Si ya verificaste tu mail en otro instrumento, descargás directo.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#7c8f75;margin-top:6px">
+        <span style="display:flex;gap:10px"><span style="{{ accentText }}">✓</span>{{ file }}</span>
+        <span style="display:flex;gap:10px"><span style="{{ accentText }}">✓</span>Un solo archivo HTML, funciona sin conexión</span>
+        <span style="display:flex;gap:10px"><span style="{{ accentText }}">✓</span>Instalable como app (PWA)</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;gap:6px;font-size:11px;letter-spacing:.14em;flex-wrap:wrap">
+        <span style="{{ stepStyle1 }}">1 · MAIL</span>
+        <span style="{{ stepStyle2 }}">2 · CÓDIGO</span>
+        <span style="{{ stepStyle3 }}">3 · DESCARGA</span>
+      </div>
+
+      <sc-if value="{{ isEmail }}" hint-placeholder-val="{{ true }}">
+        <form onSubmit="{{ submitEmail }}" novalidate="" style="display:flex;flex-direction:column;gap:14px">
+          <label for="zd-mail" style="font-size:13px;color:#a9b8a2">Tu mail</label>
+          <input id="zd-mail" type="email" autocomplete="email" inputMode="email" placeholder="vos@ejemplo.com" value="{{ email }}" onInput="{{ onEmail }}" style="background:#070b06;border:1px solid #2a3f24;border-radius:3px;color:#ecebe5;font:inherit;font-size:17px;padding:16px;outline-color:#7fdc5c;min-height:54px">
+          <label style="display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:#7c8f75;cursor:pointer">
+            <input type="checkbox" checked="{{ news }}" onChange="{{ onNews }}" style="accent-color:#7fdc5c;width:18px;height:18px;margin:0;flex:none">
+            Avisarme cuando salga C2 · Sync Master Envelopment
+          </label>
+          <button type="submit" disabled="{{ busy }}" style="{{ sSubmit }}">{{ emailBtn }}</button>
+        </form>
+      </sc-if>
+
+      <sc-if value="{{ isCode }}" hint-placeholder-val="{{ false }}">
+        <form onSubmit="{{ submitCode }}" style="display:flex;flex-direction:column;gap:14px">
+          <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2">Mandamos un código a <strong style="color:#ecebe5">{{ email }}</strong>. Vence en 10 minutos.</p>
+          <label for="zd-code" style="font-size:13px;color:#a9b8a2">Código de verificación</label>
+          <input id="zd-code" autocomplete="one-time-code" inputMode="numeric" maxLength="6" placeholder="······" value="{{ code }}" onInput="{{ onCode }}" style="{{ sCodeInput }}">
+          <button type="submit" style="{{ sSubmit }}">VERIFICAR</button>
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px">
+            <button type="button" onClick="{{ changeEmail }}" style="background:none;border:0;color:#a9b8a2;font:inherit;padding:10px 0;cursor:pointer;min-height:44px">← Cambiar mail</button>
+            <button type="button" onClick="{{ resend }}" disabled="{{ resendDisabled }}" style="{{ sLinkBtn }}">{{ resendLabel }}</button>
+          </div>
+          <sc-if value="{{ demoCode }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px dashed #3e7a2b;border-radius:3px;padding:12px 14px;font-size:12px;line-height:1.5;color:#a9b8a2;display:flex;flex-direction:column;gap:4px">
+              <span style="color:#7c8f75;letter-spacing:.12em">MODO DEMO · SIN SERVIDOR DE MAIL</span>
+              <span>El mail que llegaría dice: <strong style="color:#7fdc5c;letter-spacing:.2em">{{ demoCode }}</strong></span>
+            </div>
+          </sc-if>
+        </form>
+      </sc-if>
+
+      <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <p style="margin:0;font-size:14px;color:#a9b8a2">Verificado: <strong style="color:#7fdc5c">{{ email }}</strong></p>
+          <a href="{{ file }}" download="{{ file }}" style="{{ sSubmitLink }}">⭳ DESCARGAR- {{ name }}</a>
+          <a href="index.html#descargar" style="font-size:13px;color:#a9b8a2;text-decoration:none;padding:10px 0">Descargar los 5 juntos →</a>
+          <button type="button" onClick="{{ reset }}" style="align-self:flex-start;background:none;border:0;color:#7c8f75;font:inherit;font-size:12px;padding:10px 0;cursor:pointer;min-height:44px">Usar otro mail</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+        <p role="alert" style="margin:0;font-size:13px;line-height:1.5;color:#ff5c3a;display:flex;gap:8px"><span>✕</span><span>{{ error }}</span></p>
+      </sc-if>
+      <sc-if value="{{ info }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font-size:12px;line-height:1.5;color:#7c8f75">{{ info }}</p>
+      </sc-if>
+    </div>
+  </div>
+</section>
+
+<section style="max-width:1180px;margin:0 auto;padding:20px 24px 90px;display:flex;flex-direction:column;gap:20px">
+  <span style="font-size:12px;letter-spacing:.14em;color:#7c8f75">EL RESTO DE LA SUITE</span>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px">
+    <sc-for list="{{ others }}" as="o" hint-placeholder-count="4">
+      <a href="{{ o.href }}" style="{{ o.card }}" style-hover="{{ o.cardHover }}">
+        <span style="font-size:11px;letter-spacing:.14em;color:#7c8f75">{{ o.type }}</span>
+        <span style="font-size:17px;font-weight:700;color:#ecebe5">{{ o.name }}</span>
+        <span style="{{ o.go }}">Ver →</span>
+      </a>
+    </sc-for>
+  </div>
+</section>
+
+<footer style="border-top:1px solid #1d2c19">
+  <div style="max-width:1180px;margin:0 auto;padding:28px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:12px;letter-spacing:.12em;color:#7c8f75">
+    <img src="src/logo-badge.jpg" alt="" style="height:28px;border-radius:2px;background:#ecebe5;padding:2px">
+    <span>ZERO DAY · MUSIC EXPLOITS - Argentina 2026</span>
+    <a href="index.html" style="margin-left:auto;color:#7c8f75;text-decoration:none">INICIO</a>
+  </div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;slug&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cronbeat&quot;,&quot;monomoon&quot;,&quot;nebularp&quot;,&quot;sirens&quot;,&quot;acid&quot;],&quot;default&quot;:&quot;cronbeat&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;demoMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Verificación&quot;}}">
+const D = {
+  cronbeat: {
+    num: '01', name: 'CronBeat-8:08', file: './descargables/CronBeat-808.html', page: 'landing-cronbeat.html', c: 'oklch(.82 .16 80)', dark: 'oklch(.55 .12 70)',
+    type: 'CAJA DE RITMOS', tagline: '"Machine Drum lab"',
+    what: 'Una caja de ritmos completa: secuenciador de patrones tocable en vivo, banco de pads con samples propios, editor de sample no destructivo, cadena de efectos por pista, modo canción y exportación a WAV/MIDI. Pensada para sonar bien desde el primer patrón y funcionar como laboratorio de sonido a la vez.',
+    plays: 'Teclado de PC, mouse, touch', exports: 'WAV · MIDI · JSON',
+    sections: [
+      { t: 'Pestañas principales', items: ['Secuenciador — programación de patrones.', 'Pads en vivo — tocar los pads en tiempo real (mouse, touch o teclado).', 'FX — cadena de efectos (reverb, delay, phaser, drive) con envío por pista.', 'Editor — editor de sample no destructivo.', 'Canción — modo arreglo, encadenando patrones.'] },
+      { t: 'Transporte y control general', items: ['▶ Tocar — play/stop del patrón o la canción.', 'REC — con el transporte sonando, tus golpes en los pads quedan grabados en el patrón.', 'BPM (▲/▼ o flechas de teclado) y Tap tempo — tempo global.', 'SWING — humaniza/desplaza los tiempos pares.', 'MASTER — volumen general de salida.', 'Metrónomo — click de referencia.', 'Aleatorio — genera variación automática del patrón actual.', 'Limpiar — vacía el patrón activo.', 'Guardar JSON / Abrir — exporta/importa el proyecto completo (patrones, FX, samples, canción).', 'Patrón→MIDI — exporta el patrón actual como archivo MIDI.', '×1 / ×2 / ×4 / ×8 — cantidad de compases al exportar a WAV.', 'Exportar WAV — renderiza el audio a archivo descargable.', 'Copiar / Pegar (dentro de Patrón) — clona un patrón a otro slot.', 'Patrones A–H — 8 slots de patrón, encadenables en el modo Canción.'] },
+      { t: 'Editor de sample (no destructivo)', p: 'El original del sample nunca se pisa — todo lo que hacés ahí es reversible.', notes: ['Cargá un sample desde el Secuenciador o desde Pads en vivo, y seleccionalo en "Sample a editar".'], items: ['▶ Escuchar / Revertir / Cargar sample…', 'Recorte y tono: Inicio (%), Fin (%), Tono (semitonos), Ganancia (dB).', 'Envolvente: Ataque / fade-in (ms), Caída / fade-out (ms).', 'Normalizar e Invertir.', 'Compresor (on/off): Umbral (dB), Ratio (ej. 4:1).'] },
+      { t: 'FX (por inserto/envío)', items: ['Reverb (envío) — Tamaño (s), Cola, Nivel.', 'Delay (envío) — Tiempo (ms), Repetición (feedback), Nivel.', 'Phaser (inserto) — Velocidad (Hz), Profundidad, Realimentación.', 'Drive (inserto) — Carácter: Overdrive / Distorsión / Fuzz, más Tono (Hz).', 'Cantidad por pista: cada pista tiene sus propios envíos REV / DLY / PHS / DRV.'] },
+      { t: 'Modo Canción', items: ['▶ Reproducir canción / Loop canción.', '+ Bloque — agrega un bloque que reproduce un patrón (A–H) durante N compases, en orden.', 'Canción→MIDI — exporta el arreglo completo a MIDI.'] },
+      { t: 'Mantenimiento', items: ['Reiniciar proyecto — borra todo lo autoguardado en este navegador (usar con cuidado).'] }
+    ],
+    keys: [['Fila de pads (varias teclas)', 'Tocar pads'], ['Espacio', 'Tocar / parar transporte'], ['REC (botón)', 'Graba tus golpes al patrón, con el transporte sonando'], ['Selección de patrón', 'Cambia entre patrones A–H'], ['+', 'Agregar bloque a la Canción'], ['← →', 'Ajustan el tempo'], ['Shift (al tocar un pad)', 'Golpe con acento']],
+    roadmap: 'Fases 1 a 5 completas: modo canción, autoguardado, PWA, export JSON/WAV, editor de sample no destructivo, y export/import MIDI de patrones y canciones. Único punto pendiente (opcional): choke groups (silenciar un pad al disparar otro, ej. hi-hat abierto/cerrado).'
+  },
+  monomoon: {
+    num: '02', name: "MonoMoon'70", file: './descargables/MonoMoon70.html', page: 'landing-monomoon.html', c: '#f2a63c', dark: '#8a5a17',
+    type: 'SINTETIZADOR MONOFÓNICO', tagline: '"Monophonic Synthetizer"',
+    what: 'Un sintetizador analógico virtual monofónico estilo Minimoog: banco de osciladores, filtro escalera (ladder) de 24 dB/oct con auto-oscilación, doble envolvente, matriz de modulación, modos de voz (Mono/Unison/Duo), osciloscopio en pantalla y gestión completa de patches.',
+    plays: 'Teclado de PC, mouse, touch, Web MIDI', exports: 'WAV · JSON',
+    sections: [
+      { t: 'Encendido y cabecera', items: ['Pulsá para encender — desbloquea el audio al primer toque.', 'Preset (selector) — presets de fábrica listos para tocar.', 'Biblioteca (selector) — tus propios patches guardados; ícono 🗑 para borrar.', 'Guardar… — guarda el patch actual en la biblioteca del navegador.', '⭳ JSON / ⭱ JSON — exportar / importar un patch como archivo.', '● Grabar (con contador 00:00) — graba lo que tocás y lo deja listo para exportar.', 'Indicador MIDI — muestra conexión Web MIDI activa.', 'Instalar app — PWA instalable.'] },
+      { t: 'Banco de osciladores', p: 'Mezclador de osciladores más Ruido (Nivel, tipo Blanco/Rosa).' },
+      { t: 'Filtro — Escalera Moog', items: ['Corte (cutoff), Énfasis (resonancia), Seguim. (keyboard tracking).'], notes: ['24 dB/oct, con resonancia hasta auto-oscilación (el filtro puede sonar como un oscilador propio al máximo).'] },
+      { t: 'Amplitud — Contorno y salida', items: ['Volumen general y Afinación (tuning) del instrumento.'], notes: ['Envolvente ADSR: Ataque, Caída, Sostén, Relaj.'] },
+      { t: 'Modulación', items: ['Osc3 → teclado (si el oscilador 3 sigue o no el teclado).', 'Mod → Osciladores / Mod → Filtro (destinos de la modulación).'], notes: ['Fuente: mezcla de Osc3 · Ruido.', 'Truco clásico: poné Osc3 en rango LO y sin seguimiento de teclado para que actúe como LFO, combinado con Ruido. La profundidad se controla con la rueda Mod.'] },
+      { t: 'Contorno de filtro (2ª envolvente)', items: ['Cantidad, Ataque, Caída, Sostén, Relaj.'], notes: ['Esta envolvente barre el corte del filtro en octavas. Cantidad negativa cierra el filtro en vez de abrirlo.'] },
+      { t: 'Voz', items: ['Mono / Unison (voces detuneadas apiladas, con control de Detune unison) / Duo (tocás 2 teclas y suena el intervalo: osc1 = voz aguda, osc2/3 = voz grave).'] },
+      { t: 'Osciloscopio', p: 'Visualización en tiempo real de la forma de onda de salida.' },
+      { t: 'Controladores', items: ['Glide (portamento).', 'Disparo: Single / Multi (retrigger de la envolvente en legato).', 'Rueda Pitch → bend de hasta ±2 semitonos, vuelve al centro al soltar.', 'Rueda Mod → profundidad de toda la matriz de modulación.', 'Octava (− / C4 / +).'] }
+    ],
+    keys: [['A S D F G H J K L Ñ', 'Teclas blancas'], ['W E T Y U O P', 'Teclas negras'], ['Mouse / dedos', 'Tocar directamente sobre el teclado en pantalla; deslizar = glissando'], ['Z / X', 'Bajar / subir octava'], ['Espacio', 'Pánico (corta todas las notas sonando)']],
+    roadmap: 'Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); persistencia de patches (JSON + IndexedDB con biblioteca local), librería de presets clásicos, export WAV, Web MIDI y PWA instalable (F4). Roadmap cerrado.'
+  },
+  nebularp: {
+    num: '03', name: 'NEBULARP 2035', file: './descargables/Nebularp_2035.html', page: 'landing-nebularp.html', c: '#9a8cff', dark: '#4f43a8',
+    type: 'ARPEGIADOR CÓSMICO', tagline: '"motor dormido" hasta que tocás un acorde',
+    what: 'Un arpegiador ambiental y generativo: sostenés (o dejás en Latch) un acorde y el instrumento lo recorre solo, con una voz cósmica en unísono, espacio (reverb + delay ping-pong), modulación (chorus + auto-paneo) y una capa de drone grave. Todo cuantizado a una escala mística elegida.',
+    plays: 'Mouse, multitáctil, teclado de PC', exports: 'WAV · JSON',
+    sections: [
+      { t: 'Arranque', items: ['Iniciar — arranca el motor de audio.', 'Tap tempo — define el tempo del arpegio a golpes.', 'Latch — el acorde sostenido queda sonando manos libres; tocar uno nuevo lo reemplaza.'], notes: ['Estado inicial: "motor dormido — tocá un acorde".', 'Se toca con mouse o dedo; arrastrar = glissando; multitáctil = acordes con varios dedos a la vez.'] },
+      { t: 'Escala mística', items: ['Escala y Tónica (root) — todo lo que tocás se cuantiza para sonar siempre dentro del clima elegido.'] },
+      { t: 'Arpegiador', items: ['Patrón — orden en que se recorren las notas sostenidas.', 'Subdivisión — velocidad rítmica del recorrido.', 'Rango de octavas — cuánto se extiende hacia arriba/abajo.', 'Movimiento — cómo evoluciona el recorrido en el tiempo.', 'Ritmo euclidiano (Euclid) — activable, con contador propio para generar patrones rítmicos matemáticos en vez de un recorrido continuo.'] },
+      { t: 'Pad', p: 'Envolvente y filtro base de cada voz — el carácter "cósmico" se termina de armar en los paneles de abajo.' },
+      { t: 'Voz cósmica', p: 'Unísono: varios osciladores desafinados entre sí y esparcidos en estéreo, más un barrido de filtro maestro.' },
+      { t: 'Espacio', p: 'Reverb amplia + delay ping-pong: la profundidad y el "eco galáctico" del sonido.' },
+      { t: 'Modulación', p: 'Chorus + auto-paneo: anchura estéreo y movimiento que evolucionan solos, sin intervención manual constante.' },
+      { t: 'Drone', p: 'Capa grave sostenida en la tónica — el colchón de fondo, que sigue automáticamente a la Escala elegida.' },
+      { t: 'Notas sostenidas', p: 'Panel que muestra en vivo qué notas está recorriendo el arpegiador en este momento (vacío cuando no hay nada sostenido).' }
+    ],
+    keysNote: "MISMO MAPEO ESTILO PIANO QUE MONOMOON'70",
+    keys: [["Teclado tipo piano (igual que MonoMoon'70)", 'Tocar notas / acordes'], ['Z', 'Bajar octava'], ['X', 'Subir octava'], ['− / C4 / +', 'Selector de octava base'], ['Espacio', 'Play / Stop del transporte']],
+    behavior: ['Con el transporte detenido, las teclas suenan como un pad sostenido (para probar sonido).', 'Con el transporte en marcha, sostener un acorde hace que el arpegiador lo recorra automáticamente.', 'Con Latch activo, el acorde queda sonando solo, manos libres, hasta tocar uno nuevo.'],
+    roadmap: "Se completó el documento de planificación y el prompt de handoff para desarrollo (mismas condiciones que CronBeat-8:08 y MonoMoon'70: 100% client-side)."
+  },
+  sirens: {
+    num: '04', name: 'J4-Sirens Station', file: './descargables/J4-Sirens_Station.html', page: 'landing-sirens.html', c: '#f06ad8', dark: '#8f2f7f',
+    type: 'DUB SIREN', tagline: 'Dub siren web psicodélica',
+    what: 'Una sirena dub completa: motor de síntesis con varios modos, cadena de efectos dub (tape echo, reverb spring/plate, phaser), un pad X-Y para performance en vivo, visualizador psicodélico en pantalla completa, y banco de presets con export/import JSON.',
+    plays: 'Teclado de PC, mouse, touch', exports: 'WAV · JSON',
+    sections: [
+      { t: 'Encendido', p: 'Tocá para encender — activa el audio; subí un poco el volumen del sistema al empezar.' },
+      { t: 'Motor de sirena', items: ['WAIL (fase 1) — modo de sirena activo.', 'CH-A — lectura en Hz de la frecuencia actual del canal.', 'Ampliar — expande el visualizador.', 'Modo de sirena (selector) — distintos comportamientos de barrido/oscilación.'] },
+      { t: 'Oscilador · Filtro · Movimiento', items: ['Forma de onda del oscilador.', 'Shape del movimiento — la curva con la que se mueve la sirena (barrido, salto, etc.).'] },
+      { t: 'Envolvente · Glide · Salida', p: 'Controla el ataque/liberación del sonido y el portamento entre notas/frecuencias.' },
+      { t: 'Modulación — 2 LFO', p: 'Dos LFOs independientes para modular parámetros del motor.' },
+      { t: 'Cadena de efectos dub', items: ['Tape Echo — delay a cinta, con eco repetible.', 'Spring/Plate Reverb — reverb de resorte o placa, con Carácter ajustable.', 'Phaser Dub.'], notes: ['De fábrica: echo throw / feedback infinito / kill switches para los cortes clásicos de dub en vivo.'] },
+      { t: 'Pad X-Y', p: 'Pad táctil asignable: Eje X y Eje Y se pueden mapear a distintos parámetros del motor para tocar en vivo con un dedo.' },
+      { t: 'Disparo', items: ['SIREN — botón de disparo; mantené apretado para sostener el sonido.', '[ESPACIO] — mismo disparo desde el teclado.'] },
+      { t: 'Patches · Presets', items: ['Banco de fábrica — 11 presets de fábrica (ampliado en la última fase).', 'Guardar en este navegador.', 'Exportar / Importar JSON — Exportar, Copiar (al portapapeles), Importar archivo, Aplicar JSON.'] },
+      { t: 'Extras de la última fase', items: ['Ring modulator.', 'Bitcrusher — vía AudioWorklet, con fallback para navegadores sin soporte.', 'Drift extra de tono en modo Drone.'], notes: ['Visualizador CRT / psicodélico: osciloscopio, Lissajous y mandala, con pantalla completa.'] }
+    ],
+    keysNote: 'MAPEO DE 2 OCTAVAS',
+    keys: [['Z S X D C …', 'Primera octava'], ['Q 2 W …', 'Segunda octava'], ['ESPACIO', 'Disparo de sirena (mantener apretado)']],
+    roadmap: '4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch básico · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y sistema de presets (fábrica + localStorage + export/import JSON) · F4 ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Entregado como artifact HTML.'
+  },
+  acid: {
+    num: '05', name: 'ACID BASS-303', file: './descargables/Acid_Bass-303.html', page: 'landing-acid.html', c: '#dcef3a', dark: '#7c8a12',
+    type: 'BAJO ÁCIDO', tagline: '"Sub-Zero Edition"',
+    what: 'Un bajo ácido tipo TB-303 modernizado: secuenciador clásico de 16 pasos con note/accent/slide/gate, filtro resonante con distorsión, generador de patrones por escala, pad X-Y de performance en vivo, y patches con export a JSON/MIDI/WAV.',
+    plays: 'Teclado de PC, mouse, touch / tablet', exports: 'WAV · MIDI · JSON',
+    sections: [
+      { t: 'Encendido y transporte', items: ['▶ PLAY — arranca el secuenciador.', 'TAP — tap tempo.'] },
+      { t: 'Performance · Live tweak (pad X-Y)', p: 'El gesto acid clásico: arrastrá con el dedo mientras suena — X = Cutoff, Y = Resonance.', items: ['Nota en curso — muestra la nota que está sonando.', 'SLIDE — indicador de ligado entre pasos.'] },
+      { t: 'Oscilador', items: ['Forma de onda — ◺ SAW · ⊓ SQR (cuadrada) · △ TRI (triangular) · ⊔ PULSE.', 'SUB — −1 OCT / −2 OCT (oscilador sub una o dos octavas abajo).'] },
+      { t: 'Filtro resonante', items: ['Modo — LP 18dB (pasabajos) / BP (pasabanda) / HP (pasaaltos).', 'Distorsión multietapa — saturación en cascada sobre la señal filtrada.'] },
+      { t: 'Secuenciador · 16 pasos', items: ['Patrón — grilla de 16 pasos con nota/acento/slide/gate por paso.', 'OCT (− / 0 / +) — transporte de octava del patrón.', 'SWING — humaniza el groove.', 'INIT ACID — resetea a un patrón acid básico.', 'CLEAR — vacía el patrón.'] },
+      { t: 'Generador de patrones', items: ['Escalas — Menor, Frigio, Pentatónica, Cromática.', 'Densidad — cuántos pasos tienen nota activa (ej. 70%).', '⚡ RANDOM — genera un patrón nuevo al azar dentro de la escala/densidad elegidas.', '✦ MUTAR — muta ligeramente el patrón actual, sin regenerarlo desde cero.'] },
+      { t: 'Patches · Banco · Export', items: ['⭳ Guardar JSON / ⭱ Cargar JSON — patch completo.', '♪ Exportar MIDI — el patrón como archivo MIDI.', 'WAV — elegí 1 / 2 / 4 compases y ◉ Exportar WAV para renderizar el audio.', 'Banco de fábrica — 8 patrones acid genéricos de referencia.'] },
+      { t: 'Teclado · Tocar / Programar', notes: ['Tocá para escuchar libremente.', 'Con un paso seleccionado en el secuenciador (tocando su nota), la tecla del teclado programa esa nota en ese paso.'] }
+    ],
+    keys: [['A W S E D F T G Y H U J K', 'Notas (mapeo tipo piano)'], ['Z / X', 'Octava del teclado (− / +)'], ['Espacio', 'Play / Stop']],
+    roadmap: '4 fases completas: F1 motor de síntesis + secuenciador clásico de 16 pasos (note/accent/slide/gate) · F2 modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · F3 touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · F4 patches y banco de fábrica (guardar/cargar JSON, export MIDI y WAV, 8 patrones de fábrica).'
+  }
+};
+const ORDER = ['cronbeat', 'monomoon', 'nebularp', 'sirens', 'acid'];
+const DISPOSABLE = ['mailinator.com','guerrillamail.com','10minutemail.com','tempmail.com','temp-mail.org','yopmail.com','trashmail.com','sharklasers.com','getnada.com','dispostable.com','maildrop.cc','throwawaymail.com','fakeinbox.com','emailondeck.com','mohmal.com'];
+const TYPOS = { 'gmial.com':'gmail.com','gmal.com':'gmail.com','gmail.co':'gmail.com','gnail.com':'gmail.com','hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','outlok.com':'outlook.com','yahooo.com':'yahoo.com','yaho.com':'yahoo.com' };
+const RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/;
+const KEYTOK = /^(\S{1,3}|Espacio|ESPACIO|Shift|…)$/;
+
+class Component extends DCLogic {
+  state = { step: 'email', email: '', code: '', news: true, busy: false, error: '', info: '', preview: false, cooldown: 0, attempts: 0 };
+
+  componentDidMount() {
+    try {
+      const v = JSON.parse(localStorage.getItem('zd-web-verified') || 'null');
+      if (v && v.email) this.setState({ step: 'done', email: v.email });
+    } catch (e) {}
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  async hasMx(domain) {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4000);
+    try {
+      const r = await fetch('https://dns.google/resolve?name=' + encodeURIComponent(domain) + '&type=MX', { signal: ctl.signal });
+      const j = await r.json();
+      if (j.Status === 3) return false;
+      return !!(j.Answer && j.Answer.length) || null;
+    } catch (e) { return null; } finally { clearTimeout(t); }
+  }
+  async sendCode(email) {
+    const code = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
+    this.pending = { code, exp: Date.now() + 600000 };
+    let sent = false;
+    if (typeof window.ZD_SEND_CODE === 'function') {
+      try { await window.ZD_SEND_CODE(email, code); sent = true; } catch (e) { throw new Error('No pudimos enviar el mail. Probá de nuevo en un momento.'); }
+    }
+    this.demo = sent ? '' : code;
+    clearInterval(this.timer);
+    this.setState({ cooldown: 30 });
+    this.timer = setInterval(() => this.setState(s => {
+      if (s.cooldown <= 1) { clearInterval(this.timer); return { cooldown: 0 }; }
+      return { cooldown: s.cooldown - 1 };
+    }), 1000);
+  }
+  submitEmail = async (e) => {
+    e.preventDefault();
+    const email = this.state.email.trim().toLowerCase(), domain = email.split('@')[1] || '';
+    if (!RE.test(email)) return this.setState({ error: 'Ese mail no tiene un formato válido.', info: '' });
+    if (TYPOS[domain]) return this.setState({ error: '¿Quisiste decir ' + email.split('@')[0] + '@' + TYPOS[domain] + '?', info: '' });
+    if (DISPOSABLE.includes(domain)) return this.setState({ error: 'No aceptamos mails temporales. Usá uno propio.', info: '' });
+    this.setState({ busy: true, error: '', info: '' });
+    const mx = await this.hasMx(domain);
+    if (mx === false) return this.setState({ busy: false, error: 'El dominio ' + domain + ' no recibe mails.' });
+    try { await this.sendCode(email); } catch (err) { return this.setState({ busy: false, error: err.message }); }
+    this.setState({ busy: false, step: 'code', email, code: '', attempts: 0, info: mx === null ? 'No pudimos chequear el dominio; el código confirma que el mail es tuyo.' : '' });
+  };
+  submitCode = (e) => {
+    e.preventDefault();
+    const p = this.pending, code = this.state.code.trim();
+    if (!p) return this.setState({ error: 'Pedí un código nuevo.' });
+    if (Date.now() > p.exp) return this.setState({ error: 'El código venció. Pedí uno nuevo.' });
+    if (this.state.attempts >= 5) return this.setState({ error: 'Demasiados intentos. Pedí un código nuevo.' });
+    if (code !== p.code) return this.setState(s => ({ attempts: s.attempts + 1, error: 'Código incorrecto. Te quedan ' + (4 - s.attempts) + ' intentos.' }));
+    this.pending = null; this.demo = '';
+    try { localStorage.setItem('zd-web-verified', JSON.stringify({ email: this.state.email, news: this.state.news, at: new Date().toISOString() })); } catch (e2) {}
+    this.setState({ step: 'done', error: '', info: '' });
+  };
+  resend = async () => {
+    if (this.state.cooldown) return;
+    try { await this.sendCode(this.state.email); this.setState({ code: '', attempts: 0, error: '', info: 'Te mandamos un código nuevo.' }); }
+    catch (err) { this.setState({ error: err.message }); }
+  };
+
+  renderVals() {
+    const slug = D[this.props.slug] ? this.props.slug : 'cronbeat';
+    const I = D[slug], c = I.c, s = this.state, demoMode = this.props.demoMode ?? true;
+    const idx = { email: 1, code: 2, done: 3 }[s.step];
+    const stepStyle = (n) => Object.assign({ padding: '6px 10px', borderRadius: 2 }, n === idx ? { background: c, color: '#070b06', fontWeight: 700, border: '1px solid ' + c } : n < idx ? { color: c, border: '1px solid ' + I.dark } : { color: '#5d7555', border: '1px solid #1d2c19' });
+    const btn = { background: c, color: '#070b06', border: 0, borderRadius: 3, font: 'inherit', fontWeight: 800, fontSize: 15, letterSpacing: '.06em', padding: 16, minHeight: 54, cursor: 'pointer', boxShadow: '0 4px 0 ' + I.dark, textDecoration: 'none', textAlign: 'center' };
+    const split = (str) => { const i = str.indexOf(' — '); return i < 0 ? { term: str, desc: '' } : { term: str.slice(0, i), desc: str.slice(i + 3) }; };
+    const sections = I.sections.map((x, i) => ({
+      n: String(i + 1).padStart(2, '0'), t: x.t, id: 'm-' + (i + 1), href: '#m-' + (i + 1), p: x.p || '',
+      items: (x.items || []).map(split), hasItems: !!(x.items && x.items.length), notes: x.notes || [],
+      numStyle: { fontSize: 12, color: c, letterSpacing: '.1em' }
+    }));
+    const keys = I.keys.map(([k, a]) => {
+      const toks = k.split(' ').filter(t => t !== '/');
+      const chipable = toks.every(t => KEYTOK.test(t));
+      return { chips: chipable ? toks : [], text: chipable ? '' : k, a };
+    });
+    return {
+      name: I.name, num: I.num, type: I.type, tagline: I.tagline, what: I.what, file: I.file, roadmap: I.roadmap,
+      keysNote: I.keysNote || '', keys, behavior: I.behavior || [], hasBehavior: !!I.behavior,
+      sections, sectionCount: sections.length,
+      spec: [{ k: 'ARCHIVO', v: I.file }, { k: 'TIPO', v: I.type.charAt(0) + I.type.slice(1).toLowerCase() }, { k: 'SE TOCA CON', v: I.plays }, { k: 'EXPORTA', v: I.exports }, { k: 'GUARDA', v: 'Autoguardado en el navegador' }, { k: 'APP', v: 'PWA instalable · sin conexión' }],
+      accentText: { color: c },
+      sAccentLabel: { fontSize: 12, letterSpacing: '.2em', color: c },
+      sTagline: { margin: 0, fontSize: 16, color: c },
+      sAccentBtn: Object.assign({}, btn, { padding: '16px 26px', minHeight: 0 }),
+      sAccentBtnSm: { background: c, color: '#070b06', fontWeight: 700, padding: '10px 16px', borderRadius: 3, boxShadow: '0 3px 0 ' + I.dark, textDecoration: 'none' },
+      sSpec: { margin: 0, background: '#0d150b', border: '1px solid #1d2c19', borderTop: '3px solid ' + c, borderRadius: 4, padding: '8px 24px 12px' },
+      sPlay: { width: 72, height: 72, borderRadius: '50%', border: '2px solid ' + c, color: c, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 },
+      sDlBox: { background: '#0d150b', border: '1px solid #2a3f24', borderTop: '3px solid ' + c, borderRadius: 6, padding: 'clamp(28px,5vw,56px)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,380px),1fr))', gap: 48, boxShadow: '0 0 0 1px #030502,0 8px 0 #030502' },
+      sSubmit: btn, sSubmitLink: Object.assign({}, btn, { display: 'flex', alignItems: 'center', justifyContent: 'center' }),
+      sCodeInput: { background: '#070b06', border: '1px solid #2a3f24', borderRadius: 3, color: c, font: 'inherit', fontSize: 30, letterSpacing: '.5em', textAlign: 'center', padding: 14, outlineColor: c, minHeight: 64 },
+      sLinkBtn: { background: 'none', border: 0, color: c, font: 'inherit', padding: '10px 0', cursor: 'pointer', minHeight: 44 },
+      previewOn: s.preview, previewOff: !s.preview, loadPreview: () => this.setState({ preview: true }),
+      stepStyle1: stepStyle(1), stepStyle2: stepStyle(2), stepStyle3: stepStyle(3),
+      isEmail: s.step === 'email', isCode: s.step === 'code', isDone: s.step === 'done',
+      email: s.email, code: s.code, news: s.news, busy: s.busy,
+      emailBtn: s.busy ? 'VERIFICANDO…' : 'ENVIARME EL CÓDIGO',
+      onEmail: (e) => this.setState({ email: e.target.value, error: '' }),
+      onNews: (e) => this.setState({ news: e.target.checked }),
+      onCode: (e) => this.setState({ code: e.target.value.replace(/\D/g, '').slice(0, 6), error: '' }),
+      submitEmail: this.submitEmail, submitCode: this.submitCode, resend: this.resend,
+      resendDisabled: s.cooldown > 0, resendLabel: s.cooldown > 0 ? 'Reenviar en ' + s.cooldown + 's' : 'Reenviar código',
+      changeEmail: () => { this.pending = null; this.setState({ step: 'email', code: '', error: '', info: '' }); },
+      demoCode: demoMode && s.step === 'code' ? this.demo : '',
+      error: s.error, info: s.info,
+      reset: () => { try { localStorage.removeItem('zd-web-verified'); } catch (e) {} this.setState({ step: 'email', email: '', code: '', error: '', info: '' }); },
+      others: ORDER.filter(k => k !== slug).map(k => ({
+        name: D[k].name, type: D[k].type, href: D[k].page,
+        card: { display: 'flex', flexDirection: 'column', gap: 8, padding: '18px 20px', background: '#0d150b', border: '1px solid #1d2c19', borderTop: '3px solid ' + D[k].c, borderRadius: 4, textDecoration: 'none', minHeight: 44 },
+        cardHover: { background: '#111b0f' },
+        go: { fontSize: 12, color: D[k].c, marginTop: 4 }
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
