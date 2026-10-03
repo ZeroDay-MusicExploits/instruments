@@ -25,16 +25,6 @@
     }, { once: true });
   });
 
-  // Tabs de "Probalo acá" en el índice: mejora de accesibilidad sobre el truco CSS de radios.
-  document.querySelectorAll('[data-preview-tabs] input[type="radio"]').forEach(function (input) {
-    var label = document.getElementById(input.getAttribute('aria-labelledby') || '');
-    input.addEventListener('change', function () {
-      document.querySelectorAll('[data-preview-tabs] label').forEach(function (l) { l.setAttribute('aria-selected', 'false'); });
-      var lbl = document.querySelector('label[for="' + input.id + '"]');
-      if (lbl) lbl.setAttribute('aria-selected', 'true');
-    });
-  });
-
   // Menú móvil: cerrar al elegir un link.
   document.querySelectorAll('.site-menu').forEach(function (menu) {
     menu.querySelectorAll('a').forEach(function (a) {

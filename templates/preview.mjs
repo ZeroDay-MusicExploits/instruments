@@ -35,7 +35,7 @@ export function renderPreviewTabs({ order, instruments }) {
     </div>`;
     })
     .join('\n    ');
-  return `<div class="preview-tabs-wrap" data-preview-tabs role="tablist" aria-label="Elegir instrumento para probar">
+  return `<div class="preview-tabs-wrap" data-preview-tabs aria-label="Elegir instrumento para probar">
     ${inputs}
     ${panes}
   </div>`;
