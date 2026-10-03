@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /legacy/
+
+Sitemap: https://zeroday-musicexploits.github.io/instruments/sitemap.xml
