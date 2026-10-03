@@ -332,37 +332,85 @@ El CSS instrumento por instrumento (qué tan alto va el pad, cuántas columnas
 tienen los steps, qué pasa en landscape) va en un `<style id="zd-mobile-skin">`
 propio, colgado de `html.zd-m`. Ese `<style>` **no** es parte del bloque.
 
-## `zd-pwa` v1 — service worker e Instalar
+## `zd-pwa` v2 — service worker, Instalar y la oferta proactiva
 
-Sin configuración: el slug sale del `<link rel="manifest">` del `<head>`, así
-que el bloque es idéntico en los 5 sin ni una línea que cambie. (Es la única
-diferencia con el borrador de `docs/pwa.md`, que llevaba `var SLUG` adentro —
-eso rompería la verificación byte a byte de SPEC 3.1.2.)
+Sin configuración: el manifest sale del `<link rel="manifest">` del `<head>`,
+el nombre de `document.title` o `apple-mobile-web-app-title`, y — solo para el
+aviso de `file://` — la URL de `<link rel="canonical">` si existe. El bloque
+es idéntico en los 5 sin ni una línea que cambie.
 
 ```js
-ZD.pwa.install()      // dispara beforeinstallprompt, o el hint de iOS
-ZD.pwa.refresh()      // re-evalúa si mostrar el botón
-ZD.pwa.active         // pasó las 3 condiciones de activación
+ZD.pwa.install()      // dispara deferredPrompt.prompt(), el hint de iOS o el
+                       // aviso de "abrí esto en Safari/Chrome" segun el caso
+ZD.pwa.refresh()      // re-evalua item de menu, icono del header y boton de escritorio
+ZD.pwa.active         // pasó las condiciones de activación (http(s) + top window)
 ZD.pwa.registered     // el SW quedó registrado
 ZD.pwa.manifest       // href del manifest que usó
 ZD.pwa.isStandalone()
 ```
 
-Condiciones de activación (SPEC 3.2), las tres: `http:`/`https:`,
-`window.top === window` y `HEAD` al manifest con respuesta OK. En `file://` o
-dentro de un iframe el bloque retorna antes de tocar nada: cero
-`console.error`, cero service worker. Registra `../sw.js` con `scope: '../'`
-resueltos contra `location.href`.
+**Banner propio, independiente del shell y del menú.** Al entrar a la página
+(o cuando llega `beforeinstallprompt`, aunque sea después de cargar), si
+`canInstall()` es cierto y no está en standalone/iframe/`file://`/descartado/
+con un sheet abierto, arma un banner descartable y lo monta él mismo:
 
-El botón Instalar se resuelve **tarde**, por delegación de `click` sobre
-`#zd-install-btn`, así que puede ser creado después por el shell. Queda oculto
-si ya corre en standalone, dentro de un iframe, en `file://` o si no hay forma
-de instalar.
+- Con `ZD.mobile.active` (shell móvil activo): lo inserta como **primer hijo**
+  de `ZD.mobile.stage()`. `#zd-stage` es `flex-direction:column` y el panel
+  del pad XY vive con `flex:1; min-height:0` — el banner (`flex:none`) nunca
+  tapa `PLAY`/transporte (viven en `#zd-top`, fuera del stage) ni el pad XY:
+  achica el espacio disponible, no lo superpone. Se probaron las dos
+  ubicaciones candidatas (debajo de la barra superior vs. encima de las tabs)
+  con capturas a 360×640; "encima de las tabs" tapaba el pad XY porque en esa
+  resolución el pad termina a ~10 px del borde de las tabs — se descartó.
+- Sin shell activo (escritorio ancho): según la variante — ver abajo.
 
-El toast "Nueva versión · Recargar" sale cuando el SW manda
-`{type:'zd-sw-updated'}` **y** ya había un controller (no en el primer
-install).
+Tres variantes, elegidas por `variant()`:
 
+| Variante | Cuándo | Contenido |
+| --- | --- | --- |
+| `install` | hay `deferredPrompt` | "Instalá **{nombre}** como app" + `[↓ Instalar]` + `[Ahora no]`. En escritorio sin shell **no** se muestra el banner: alcanza con el botón del header (abajo). |
+| `ios` | `isIOS()` (Safari/CriOS/FxiOS — todos WebKit, se detectan igual) y no standalone | mismo mensaje + ícono de Compartir (SVG inline) + "Compartir → Agregar a inicio". Sin botón Instalar: iOS no tiene API programática. |
+| `embedded` | navegador embebido (Instagram/Facebook/TikTok/Line/WeChat/Twitter por user-agent) | "Abrí este link en Safari o Chrome para instalar." + `[Ahora no]`. |
+
+`[Ahora no]` guarda `Date.now()` en `localStorage['zd:pwa:dismissed']`; no
+reaparece durante 14 días. El ítem del menú (`#zd-install-btn`) y un ícono
+`↓` que el bloque inyecta en `#zd-top` (antes de `#zd-tmenu`, solo con el
+shell activo) **no** dependen de ese descarte: siguen disponibles y llaman al
+mismo `doInstall()`. `[↓ Instalar]` llama a `deferredPrompt.prompt()` desde el
+click (gesto del usuario); si el usuario acepta o dispara `appinstalled`, toast
+"App instalada" y el banner no vuelve (al quedar en standalone, `variant()`
+da `null` en la próxima carga).
+
+**Escritorio sin shell:** si hay `deferredPrompt`, un botón fijo
+`↓ Instalar` arriba a la derecha (propio del bloque, no toca el `<header>`
+del instrumento). En Safari/Firefox de escritorio no hay evento, así que no
+se muestra nada.
+
+**`file://`:** rama aparte, antes de cualquier otra cosa — cero `fetch`, cero
+intento de SW. Si hay `<link rel="canonical">` y no se descartó (clave propia
+`zd:pwa:dismissed-local`, mismos 14 días), un aviso de un renglón: "Estás
+usando el archivo local..." + `[Abrir web]` (abre el canonical) + `[✕]`. Sin
+canonical: nada. El mismo `#zd-install-btn` del menú, bajo `file://`, no
+"instala": navega al canonical.
+
+**Iframe:** se detecta primero que nada (`window.top !== window`) y corta
+antes de tocar el DOM o `localStorage`: cero banner, cero CSS inyectado, cero
+listener. `ZD.pwa.active` queda en `false`.
+
+Condiciones de activación del service worker (SPEC 3.2): `http:`/`https:`,
+top window y `HEAD` al manifest con respuesta OK. Registra `../sw.js` con
+`scope` resueltos contra `location.href`. El toast "Nueva versión · Recargar"
+sale cuando el SW manda `{type:'zd-sw-updated'}` **y** ya había un controller
+(no en el primer install).
+
+Accesibilidad: el banner es `role="region"` con `aria-label`; los botones son
+`<button>`/`<a>` reales (el `:focus-visible` global del instrumento ya les da
+el anillo de foco); al cerrar, si el foco estaba adentro, vuelve a `body`. Las
+transiciones quedan anuladas por la regla global
+`@media (prefers-reduced-motion:reduce){ *{transition:none!important} }` que
+ya tiene cada instrumento. Los colores salen de los tokens `--zd-*` /
+`--inst-accent` del propio instrumento (mismos pares que ya usa `zd-ui` para
+toasts y diálogos).
 
 ### Glifos
 

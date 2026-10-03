@@ -54,14 +54,41 @@ sobra (SPEC R2, "Quitar el manifest armado con `blob:`").
 
 ## 2 · El bloque `zd-pwa`
 
-> **Actualización (v1 final).** El bloque que quedó en los instrumentos ya no
-> lleva `var SLUG` adentro: una línea distinta por archivo rompe la
-> verificación byte a byte de SPEC 3.1.2. El slug sale del
-> `<link rel="manifest">` del `<head>` (el de la sección 1), así que el bloque
-> es idéntico en los 5 sin configuración. La API final y el código tal como
-> quedó están en [`docs/zd-blocks.md`](zd-blocks.md). El borrador de abajo se
-> mantiene porque documenta las condiciones de activación y el contrato con
-> `sw.js`, que no cambiaron.
+> **Actualización (v2).** El síntoma "no me ofrece instalar" no era un bug de
+> instalabilidad: probado por HTTP bajo `/instruments/`,
+> `Page.getInstallabilityErrors` da `[]`, el manifest valida (nombre, íconos
+> 192/512/512-maskable en 200, `start_url` dentro de `scope`, `display`), el
+> SW queda activo y controlando, y la consola queda limpia — ver el reporte
+> completo al pie de esta sección. Lo que faltaba era una **oferta
+> proactiva**: v1 solo ofrecía instalar desde un ítem dentro del menú ☰ del
+> shell móvil, y en escritorio ancho (donde el shell no se activa) no había
+> ningún botón. v2 agrega un banner propio al abrir (independiente del menú y
+> del shell), un botón "↓ Instalar" en escritorio, hint real de iOS, aviso de
+> navegador embebido y aviso de `file://`. La API y el comportamiento
+> completo están en [`docs/zd-blocks.md`](zd-blocks.md#zd-pwa-v2--service-worker-instalar-y-la-oferta-proactiva);
+> el código tal como quedó pegado en los instrumentos vive en
+> [`tools/blocks/zd-pwa.html`](../tools/blocks/zd-pwa.html). El borrador de
+> abajo (de la v1) se mantiene porque documenta las condiciones de activación
+> y el contrato con `sw.js`, que no cambiaron.
+>
+> **Reporte de instalabilidad (Chromium, servido en `/instruments/`):**
+>
+> ```text
+> Page.getInstallabilityErrors → { "installabilityErrors": [] }
+> manifest: 200 · name "ACID BASS-303" · short_name "Acid Bass" · display "standalone"
+> start_url resuelto dentro de scope: true
+> íconos 192/512/512-maskable: 200, 200, 200
+> service worker: registrado, activo, controlando la pagina (controller: true)
+> consola: sin mensajes
+> ```
+>
+> `beforeinstallprompt` **no** se pudo disparar de forma nativa en una sola
+> carga automatizada con un perfil limpio de Chromium (headless, un solo
+> `goto` + un click) — es la heurística de engagement de Chrome (visitas /
+> tiempo en el sitio), no algo que dependa de esta página: con
+> `getInstallabilityErrors` en `[]` la página ya cumple los requisitos. Para
+> el resto de las pruebas (Paso 3) se sintetiza el evento con
+> `prompt()`/`userChoice` propios, como pide la consigna.
 
 
 Va antes de `</body>`, **después** de `zd-ui` (usa `ZD.toast`, definido
@@ -191,18 +218,56 @@ Para forzar una nueva versión: subir `VERSION` en `sw.js` (`zd-v1` →
 
 ## 5 · A verificar en dispositivo
 
-- [ ] Instalar desde Chrome/Edge Android (`beforeinstallprompt`) y
-      confirmar que el ícono y el nombre corto son los correctos.
-- [ ] iOS Safari: "Compartir → Agregar a inicio", ícono apple-touch
-      correcto, abre en `standalone` sin barra de Safari.
-- [ ] Desktop (Chrome/Edge): instalar desde el ícono de la barra de
-      direcciones.
+Todo lo de abajo se verificó con Chromium + Playwright (manifest, SW,
+`getInstallabilityErrors`, el banner con `beforeinstallprompt` sintético, los
+breakpoints, `file://`, iframe, UA de iOS y de Instagram — ver
+`docs/SPEC.md` 3.5 y el reporte de la sección 2). Nada de esto se probó en un
+dispositivo físico ni en Safari/Firefox real: queda pendiente.
+
+### iOS Safari y standalone
+
+- [ ] Banner con el hint de Compartir real (no el emulado): que el ícono de
+      iOS y el texto "Agregar a inicio" coincidan con lo que Safari muestra.
+- [ ] "Compartir → Agregar a inicio", ícono apple-touch correcto, abre en
+      `standalone` sin barra de Safari.
+- [ ] En standalone real (no `navigator.standalone` emulado): ni el banner
+      ni el ícono "↓" ni el ítem del menú aparecen.
+- [ ] CriOS y FxiOS (Chrome/Firefox en iOS) en iOS 16.4+: confirmar que el
+      banner de iOS aparece igual (son WebKit por debajo) y que "Agregar a
+      inicio" desde su Compartir funciona.
+- [ ] Instagram/Facebook/TikTok en iOS: confirmar que el navegador embebido
+      real dispara el aviso "Abrí este link en Safari o Chrome" (la detección
+      es por user-agent; algunas apps cambian su UA entre versiones).
+
+### Android Chrome
+
+- [ ] `beforeinstallprompt` real (no sintético): el banner aparece solo tras
+      el gesto/engagement que pide Chrome, y el ícono + nombre corto en el
+      diálogo nativo son los correctos.
+- [ ] Aceptar la instalación real: toast "App instalada", banner no vuelve,
+      ícono "↓" e ítem de menú se esconden (ya en standalone).
+- [ ] "Ahora no" en un dispositivo real: confirmar que el banner no vuelve
+      durante 14 días de uso normal (no solo con el reloj adelantado).
+
+### Edge/Chrome de escritorio
+
+- [ ] Instalar desde el botón propio "↓ Instalar" del header (no el ícono de
+      la barra de direcciones) y confirmar que dispara el mismo flujo nativo.
+- [ ] Instalar desde el ícono de la barra de direcciones directamente: que el
+      botón del header se esconda después (via el evento `appinstalled`).
+- [ ] Safari/Firefox de escritorio: confirmar que no aparece ningún botón ni
+      banner (no hay `beforeinstallprompt` en ninguno de los dos).
+
+### Service worker y actualizaciones
+
 - [ ] Abrir instalado, pasar a modo avión, recargar: debe abrir desde
-      cache (sin pantalla de "sin conexión" del navegador).
+      cache (sin pantalla de "sin conexión" del navegador). Ya verificado
+      con `context.setOffline(true)` en Playwright; falta el modo avión real.
 - [ ] Subir `VERSION` en `sw.js`, volver a abrir con conexión: aparece
       el toast "Nueva versión · Recargar" (y **no** aparece en un
       install limpio).
-- [ ] Abrir el instrumento en `file://`: sin errores en consola, sin
-      intento de registrar SW.
+- [ ] Abrir el instrumento en `file://` desde el Finder/Explorador (doble
+      clic real, no `file://` tipeado en la barra): mismo aviso discreto,
+      sin errores en consola, sin intento de registrar SW.
 - [ ] Abrir el instrumento embebido en un iframe (como lo sirve el
-      sitio): sin intento de registrar SW en esa instancia.
+      sitio): sin intento de registrar SW en esa instancia, sin banner.
