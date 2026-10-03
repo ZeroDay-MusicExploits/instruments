@@ -51,6 +51,14 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   display: flex;
   flex-direction: column;
 }
+/* Sin un width explícito, un hijo directo de un flex container en columna
+   puede terminar tan ancho como su contenido más ancho (ej. la tabla de
+   compatibilidad, min-width:560px) en vez de quedar al ancho del viewport
+   — y entonces lo que debería scrollear puertas adentro (.table-wrap)
+   termina empujando todo el documento a lo ancho. width:100% fuerza el
+   ancho real del flex container; min-width:0 evita el mismo problema en
+   sentido contrario (no achicarse por debajo del contenido). */
+.page > * { min-width: 0; width: 100%; }
 .page--plain { background: radial-gradient(900px 500px at 50% 0%, #12220e 0%, transparent 65%), var(--zd-bg); }
 
 .wrap { max-width: var(--zd-max); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
@@ -282,7 +290,7 @@ kbd { font: inherit; font-size: 12.5px; min-width: 30px; height: 30px; padding: 
    atributo y dejaría los paneles invisibles aunque JS saque `hidden`). */
 
 /* ---------- compat table / faq ---------- */
-.table-wrap { overflow-x: auto; border: 1px solid var(--zd-line); border-radius: 4px; }
+.table-wrap { max-width: 100%; overflow-x: auto; border: 1px solid var(--zd-line); border-radius: 4px; }
 table.compat { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13px; }
 table.compat th, table.compat td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--zd-line); white-space: nowrap; }
 table.compat thead th { color: var(--zd-dim); font-size: 12px; letter-spacing: .1em; background: var(--zd-panel); }
