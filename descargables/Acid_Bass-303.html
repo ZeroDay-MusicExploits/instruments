@@ -151,7 +151,8 @@
   .step.selected{ border-color:var(--silver); }
   .step.sliding::after{content:""; position:absolute; right:-4px; top:50%; width:8px; height:8px; margin-top:-4px; background:var(--blue); border-radius:50%; box-shadow:0 0 8px var(--blue); z-index:2;}
   .step .idx{font-family:var(--zd-mono); font-size:11px; color:var(--muted); text-align:center; letter-spacing:.05em;}
-  .step .note{font-family:var(--zd-mono); font-weight:700; font-size:14px; text-align:center; background:var(--panel); border:1px solid var(--edge); border-radius:6px; padding:8px 2px; color:var(--text); cursor:pointer;}
+  .step .note{font-family:var(--zd-mono); font-weight:700; font-size:14px; text-align:center; background:var(--panel); border:1px solid var(--edge); border-radius:6px; padding:8px 2px; color:var(--text); cursor:pointer;
+    width:100%; letter-spacing:0; box-shadow:none; min-height:0;}
   .step.selected .note{background:var(--panel-2); color:#fff; border-color:var(--silver);}
   .step.rest .note{color:#565c66; text-decoration:line-through;}
   .step .nud{display:flex; gap:4px;}
@@ -224,6 +225,9 @@
     --zd-void:#070b06; --zd-chassis:#0d140b; --zd-well:#050804; --zd-panel:#111b0f; --zd-panel-2:#172414; --zd-panel-3:#1f301b;
     --zd-line:#2a3f24; --zd-line-soft:#1d2c19; --zd-outline:#030502;
     --zd-phosphor:#7fdc5c; --zd-phosphor-hi:#b6f59a; --zd-phosphor-dim:#3e7a2b; --zd-phosphor-glow:rgba(127,220,92,.45);
+    /* phosphor-dim sirve para bordes y glows, pero como texto da 3,4:1. Para
+       texto va este, que pasa AA sobre los fondos oscuros del skin. */
+    --zd-phosphor-txt:#55a03c;
     --zd-paper:#ecebe5; --zd-ink:#e6eddf; --zd-ink-dim:#a3b699; --zd-ink-faint:#859a7b; --zd-alert:#ff5c3a;
     --zd-mono:ui-monospace,"JetBrains Mono","SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;
     --zd-r:4px; --zd-r-lg:8px;
@@ -312,12 +316,12 @@
   .xypad .cursor{border-radius:3px; background:radial-gradient(circle, var(--orange), rgba(220,239,58,.15)); border:2px solid var(--zd-void);
     box-shadow:0 0 0 1px var(--orange), 0 0 20px var(--orange)}
   .xypad.hot .cursor{box-shadow:0 0 0 1px var(--orange), 0 0 30px var(--orange), 0 0 60px rgba(220,239,58,.45)}
-  .xypad .axlabel{color:var(--zd-phosphor-dim); font-weight:700}
+  .xypad .axlabel{color:var(--zd-phosphor-txt); font-weight:700}
   .lcd{background:#030602; border:2px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), inset 0 2px 14px #000; border-radius:var(--zd-r-lg);
     background-image:repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 1px, transparent 1px 3px)}
-  .lcd-cap{color:var(--zd-phosphor-dim)}
+  .lcd-cap{color:var(--zd-phosphor-txt)}
   .lcd-note{color:var(--zd-phosphor); text-shadow:0 0 16px var(--zd-phosphor-glow)}
-  .lcd-glide{color:#1f3a3e}
+  .lcd-glide{color:#55909a}
   .glidebar{background:#0b1512; border-radius:1px}
 
   input[type=range]::-webkit-slider-runnable-track{border-radius:1px; border:1px solid var(--zd-outline);
@@ -340,7 +344,7 @@
   .step.sliding::after{border-radius:1px}
   .step .note{background:var(--zd-well); border:1px solid var(--zd-line); border-radius:3px; min-height:40px; box-shadow:none}
   .step.selected .note{background:var(--zd-panel-3); color:var(--zd-phosphor-hi); border-color:var(--zd-phosphor); box-shadow:0 0 12px -4px var(--zd-phosphor)}
-  .step.rest .note{color:#4d5f46}
+  .step.rest .note{color:#7b9271}
   .step .nud button, .step .toggles button{background:var(--zd-panel); min-height:32px; box-shadow:0 0 0 1px var(--zd-line-soft), 0 2px 0 var(--zd-outline)}
   .step .toggles button.on-a{box-shadow:0 0 0 1px var(--orange), 0 0 10px -2px var(--orange)}
   .step .toggles button.on-s{box-shadow:0 0 0 1px var(--blue), 0 0 10px -2px var(--blue)}
@@ -2035,8 +2039,8 @@ window.ZD_M = {
       <button id="playBtn" class="btn-play">▶ PLAY</button>
       <button id="tapBtn" class="btn-tap">TAP</button>
       <div class="knob-bank" id="tempoKnob" style="gap:0;"></div>
-      <div class="tempo-box"><input id="bpmInput" class="bpm-input" type="number" min="40" max="300" step="1" value="130"></div>
-      <canvas id="scope" width="360" height="104"></canvas>
+      <div class="tempo-box"><input id="bpmInput" class="bpm-input" type="number" min="40" max="300" step="1" value="130" aria-label="Tempo en BPM"></div>
+      <canvas id="scope" width="360" height="104" aria-hidden="true"></canvas>
       <span id="clipLed" class="clip-led" role="status" hidden>CLIP</span>
     </div>
   </section>
@@ -2045,7 +2049,7 @@ window.ZD_M = {
     <p class="ptitle live">PERFORMANCE · LIVE TWEAK</p>
     <div class="perf-grid">
       <div class="xypad-wrap">
-        <div class="xypad" id="xypad">
+        <div class="xypad" id="xypad" role="group" tabindex="0" aria-label="Pad XY de performance: eje X cutoff, eje Y resonancia. Flechas para mover, Inicio y Fin para los extremos.">
           <div class="cross-h" id="crossH"></div><div class="cross-v" id="crossV"></div><div class="cursor" id="xyCursor"></div>
           <span class="axlabel ax-x">CUTOFF →</span><span class="axlabel ax-y">↑ RESONANCE</span>
         </div>
@@ -2064,12 +2068,12 @@ window.ZD_M = {
     <p class="ptitle">OSCILADOR</p>
     <div class="rowfull">
       <span class="name">FORMA DE ONDA</span>
-      <div class="seg" id="waveSeg">
-        <button data-wave="0" class="sel">◺ SAW</button><button data-wave="1">⊓ SQR</button>
-        <button data-wave="2">△ TRI</button><button data-wave="3">⊔ PULSE</button>
+      <div class="seg" id="waveSeg" role="group" aria-label="Forma de onda">
+        <button type="button" data-wave="0" class="sel" aria-pressed="true">◺ SAW</button><button type="button" data-wave="1" aria-pressed="false">⊓ SQR</button>
+        <button type="button" data-wave="2" aria-pressed="false">△ TRI</button><button type="button" data-wave="3" aria-pressed="false">⊔ PULSE</button>
       </div>
       <div class="oct-ctrl"><span>SUB</span>
-        <div class="seg blue" id="subOctSeg"><button data-so="-1" class="sel">−1 OCT</button><button data-so="-2">−2 OCT</button></div>
+        <div class="seg blue" id="subOctSeg" role="group" aria-label="Octava del sub"><button type="button" data-so="-1" class="sel" aria-pressed="true">−1 OCT</button><button type="button" data-so="-2" aria-pressed="false">−2 OCT</button></div>
       </div>
     </div>
     <div class="knob-bank" id="oscKnobs"></div>
@@ -2079,7 +2083,7 @@ window.ZD_M = {
     <p class="ptitle">FILTRO RESONANTE</p>
     <div class="rowfull">
       <span class="name">MODO</span>
-      <div class="seg" id="modeSeg"><button data-mode="0" class="sel">LP 18dB</button><button data-mode="1">BP</button><button data-mode="2">HP</button></div>
+      <div class="seg" id="modeSeg" role="group" aria-label="Modo del filtro"><button type="button" data-mode="0" class="sel" aria-pressed="true">LP 18dB</button><button type="button" data-mode="1" aria-pressed="false">BP</button><button type="button" data-mode="2" aria-pressed="false">HP</button></div>
     </div>
     <div class="knob-bank" id="filtKnobs"></div>
   </section>
@@ -2092,16 +2096,16 @@ window.ZD_M = {
   <section class="panel" id="seqPanel">
     <p class="ptitle">SECUENCIADOR · 16 PASOS</p>
     <div class="seq-top">
-      <div class="oct-ctrl"><span>PATRÓN OCT</span><button class="mini" id="octDown">−</button><span class="octv" id="octVal">0</span><button class="mini" id="octUp">+</button></div>
-      <div class="oct-ctrl" style="min-width:200px; flex:1;"><span>SWING</span><input type="range" id="swing" min="0" max="0.66" step="0.001" value="0" style="max-width:180px;"><span class="octv" id="v_swing" style="color:var(--orange);">0%</span></div>
+      <div class="oct-ctrl"><span>PATRÓN OCT</span><button class="mini" id="octDown" aria-label="Bajar una octava el patrón">−</button><span class="octv" id="octVal" role="status" aria-label="Octava del patrón">0</span><button class="mini" id="octUp" aria-label="Subir una octava el patrón">+</button></div>
+      <div class="oct-ctrl" style="min-width:200px; flex:1;"><span>SWING</span><input type="range" id="swing" min="0" max="0.66" step="0.001" value="0" style="max-width:180px;" aria-label="Swing"><span class="octv" id="v_swing" style="color:var(--orange);">0%</span></div>
       <div class="spacer"></div>
       <button class="mini" id="initBtn">INIT ACID</button>
       <button class="mini warn" id="clearBtn">CLEAR</button>
     </div>
     <div class="gen-row">
       <span class="lbl">GENERADOR</span>
-      <select id="scaleSel"><option value="menor">Menor</option><option value="frigio">Frigio</option><option value="penta">Pentatónica</option><option value="cromatica">Cromática</option></select>
-      <div class="dens"><span class="lbl">DENSIDAD</span><input type="range" id="density" min="0.2" max="1" step="0.01" value="0.7"><span class="v" id="v_density">70%</span></div>
+      <select id="scaleSel" aria-label="Escala del generador"><option value="menor">Menor</option><option value="frigio">Frigio</option><option value="penta">Pentatónica</option><option value="cromatica">Cromática</option></select>
+      <div class="dens"><span class="lbl">DENSIDAD</span><input type="range" id="density" min="0.2" max="1" step="0.01" value="0.7" aria-label="Densidad del generador"><span class="v" id="v_density">70%</span></div>
       <button class="mini gen" id="randBtn">⚡ RANDOM</button>
       <button class="mini mut" id="mutBtn">✦ MUTAR</button>
     </div>
@@ -2136,12 +2140,12 @@ window.ZD_M = {
   <section class="panel" id="ioPanel">
     <p class="ptitle io">PATCHES · BANCO · EXPORT</p>
     <div class="act-row">
-      <input id="patchName" class="patch-name" type="text" placeholder="nombre del patch" maxlength="40">
+      <input id="patchName" class="patch-name" type="text" placeholder="nombre del patch" maxlength="40" aria-label="Nombre del patch">
       <button class="btn-io json" id="saveJson">⭳ GUARDAR JSON</button>
       <button class="btn-io json" id="loadJson">⭱ CARGAR JSON</button>
       <button class="btn-io midi" id="expMidi">♪ EXPORTAR MIDI</button>
       <div class="oct-ctrl"><span>WAV</span>
-        <select id="barsSel"><option value="1">1 compás</option><option value="2" selected>2 compases</option><option value="4">4 compases</option></select>
+        <select id="barsSel" aria-label="Compases a renderizar en el WAV"><option value="1">1 compás</option><option value="2" selected>2 compases</option><option value="4">4 compases</option></select>
       </div>
       <button class="btn-io wav" id="expWav">◉ EXPORTAR WAV</button>
       <button class="mini gen" id="bankSave">⊕ GUARDAR EN BANCO</button>
@@ -2158,7 +2162,7 @@ window.ZD_M = {
     <p class="ptitle">TECLADO · TOCAR / PROGRAMAR</p>
     <div class="kb-wrap">
       <div class="kb-top">
-        <div class="oct-ctrl"><span>OCT TECLADO</span><button class="mini" id="kbOctDown">−</button><span class="octv" id="kbOctVal">2</span><button class="mini" id="kbOctUp">+</button></div>
+        <div class="oct-ctrl"><span>OCT TECLADO</span><button class="mini" id="kbOctDown" aria-label="Bajar la octava del teclado">−</button><span class="octv" id="kbOctVal" role="status" aria-label="Octava del teclado">2</span><button class="mini" id="kbOctUp" aria-label="Subir la octava del teclado">+</button></div>
         <div class="kb-hint">Tocá para escuchar. Con un paso <b>seleccionado</b> (tocá su nota), la tecla lo programa.<br>
           <kbd>A W S E D F T G Y H U J K</kbd> = notas · <kbd>Z</kbd>/<kbd>X</kbd> octava · <kbd>Space</kbd> play/stop</div>
       </div>
@@ -2475,6 +2479,17 @@ xypad.addEventListener('pointerdown', e=>{ e.preventDefault(); padDrag=true; xyp
 xypad.addEventListener('pointermove', e=>{ if(padDrag) padSet(e); });
 const padEnd=e=>{ padDrag=false; xypad.classList.remove('hot'); try{xypad.releasePointerCapture(e.pointerId);}catch(_){} };
 xypad.addEventListener('pointerup',padEnd); xypad.addEventListener('pointercancel',padEnd);
+// el pad tambien se mueve con el teclado; los mismos valores estan en los knobs
+xypad.addEventListener('keydown', e=>{ const d=e.shiftKey?0.01:0.04;
+  if(e.key==='ArrowRight') setParam('cutoff',params.cutoff+d);
+  else if(e.key==='ArrowLeft') setParam('cutoff',params.cutoff-d);
+  else if(e.key==='ArrowUp') setParam('reso',params.reso+d);
+  else if(e.key==='ArrowDown') setParam('reso',params.reso-d);
+  else if(e.key==='Home'){ setParam('cutoff',0); setParam('reso',0); }
+  else if(e.key==='End'){ setParam('cutoff',1); setParam('reso',1); }
+  else return;
+  e.preventDefault();
+  xypad.setAttribute('aria-label','Pad XY: cutoff '+CTRL.cutoff.fmt(params.cutoff)+', resonancia '+CTRL.reso.fmt(params.reso)); });
 
 // sliders swing / density
 function bindSlider(id,key,valId,fmt,after){ const inp=$('#'+id), out=$('#'+valId);
@@ -2490,9 +2505,11 @@ function setFilterStatus(type){ const e=$('#filterStatus'), t=$('#filterStatusTx
   if(type==='worklet'){ e.classList.add('ok'); t.textContent='MOTOR worklet · polyBLEP + SVF'; } else { e.classList.add('fb'); t.textContent='MOTOR nativo · fallback'; } }
 
 // selectores reusables
-function setWaveUI(w){ params.wave=w; $$('#waveSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.wave===w)); Engine.setWave(w); markDirty(); }
-function setSubOctUI(o){ params.subOct=o; $$('#subOctSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.so===o)); Engine.setSub(params.sub,o); markDirty(); }
-function setModeUI(m){ params.fmode=m; $$('#modeSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.mode===m)); Engine.setMode(m); if(!Seq.playing) Engine.setBaseCutoffNow(); markDirty(); }
+function segSel(sel,attr,val){ $$(sel).forEach(x=>{ const on=+x.dataset[attr]===val;
+  x.classList.toggle('sel',on); x.setAttribute('aria-pressed',on?'true':'false'); }); }
+function setWaveUI(w){ params.wave=w; segSel('#waveSeg button','wave',w); Engine.setWave(w); markDirty(); }
+function setSubOctUI(o){ params.subOct=o; segSel('#subOctSeg button','so',o); Engine.setSub(params.sub,o); markDirty(); }
+function setModeUI(m){ params.fmode=m; segSel('#modeSeg button','mode',m); Engine.setMode(m); if(!Seq.playing) Engine.setBaseCutoffNow(); markDirty(); }
 $('#waveSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setWaveUI(+b.dataset.wave); });
 $('#subOctSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setSubOctUI(+b.dataset.so); });
 $('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setModeUI(+b.dataset.mode); });
@@ -2672,27 +2689,44 @@ function renderSeq(){ seqEl.innerHTML='';
   for(let i=0;i<STEPS;i++){ const st=pattern[i];
     const col=el('div','step'+(i%4===0?' group4':'')+(st.gate==='rest'?' rest':'')+(selectedStep===i?' selected':'')+(st.slide?' sliding':'')+(st.accent?' accented':'')); col.dataset.i=i;
     const idx=el('div','idx'); idx.textContent=String(i+1).padStart(2,'0');
-    const note=el('div','note'); note.textContent=stepLabel(i); note.addEventListener('click',()=>selectStep(i));
-    const nud=el('div','nud'); const dn=el('button'); dn.textContent='▽'; const up=el('button'); up.textContent='△';
+    const note=el('button','note'); note.type='button'; note.textContent=stepLabel(i);
+    note.setAttribute('aria-pressed', selectedStep===i ? 'true' : 'false');
+    note.setAttribute('aria-label', stepAria(i));
+    note.addEventListener('click',()=>selectStep(i));
+    const nud=el('div','nud');
+    const dn=el('button'); dn.type='button'; dn.textContent='▽'; dn.setAttribute('aria-label','Paso '+(i+1)+': bajar un semitono');
+    const up=el('button'); up.type='button'; up.textContent='△'; up.setAttribute('aria-label','Paso '+(i+1)+': subir un semitono');
     dn.addEventListener('click',()=>{ st.note--; if(st.gate==='rest') st.gate='note'; refreshStep(i); previewStep(i); });
     up.addEventListener('click',()=>{ st.note++; if(st.gate==='rest') st.gate='note'; refreshStep(i); previewStep(i); }); nud.append(dn,up);
     const tog=el('div','toggles');
-    const aBtn=el('button','a'+(st.accent?' on-a':'')); aBtn.textContent='A'; aBtn.addEventListener('click',()=>{ st.accent=!st.accent; refreshStep(i); });
-    const sBtn=el('button','s'+(st.slide?' on-s':'')); sBtn.textContent='S'; sBtn.addEventListener('click',()=>{ st.slide=!st.slide; refreshStep(i); }); tog.append(aBtn,sBtn);
+    const aBtn=el('button','a'+(st.accent?' on-a':'')); aBtn.textContent='A'; aBtn.type='button';
+    aBtn.setAttribute('aria-label','Paso '+(i+1)+': accent'); aBtn.setAttribute('aria-pressed', st.accent?'true':'false');
+    aBtn.addEventListener('click',()=>{ st.accent=!st.accent; refreshStep(i); });
+    const sBtn=el('button','s'+(st.slide?' on-s':'')); sBtn.textContent='S'; sBtn.type='button';
+    sBtn.setAttribute('aria-label','Paso '+(i+1)+': slide'); sBtn.setAttribute('aria-pressed', st.slide?'true':'false');
+    sBtn.addEventListener('click',()=>{ st.slide=!st.slide; refreshStep(i); }); tog.append(aBtn,sBtn);
     const gate=el('button','g gatebtn gate-'+st.gate); gate.textContent=st.gate==='note'?'●':st.gate==='tie'?'‿':'·';
-    gate.title='Nota / tie / silencio';
+    gate.type='button'; gate.setAttribute('aria-label','Paso '+(i+1)+': nota, tie o silencio');
     gate.addEventListener('click',()=>{ st.gate=st.gate==='note'?'tie':st.gate==='tie'?'rest':'note'; refreshStep(i); });
     col.append(idx,gate,note,nud,tog); seqEl.appendChild(col); }
   renderStepEdit(); }
 // etiqueta de la celda: silencio, tie (no retrigea, la nota no importa) o nombre de nota
 function stepLabel(i){ const st=pattern[i]; return st.gate==='rest'?'···':st.gate==='tie'?'‿':noteName(patNote(i)); }
+// lo mismo en palabras, para lectores de pantalla
+function stepAria(i){ const st=pattern[i];
+  const g = st.gate==='rest' ? 'silencio' : st.gate==='tie' ? 'ligadura' : 'nota '+noteName(patNote(i));
+  return 'Paso '+(i+1)+': '+g+(st.accent?', con accent':'')+(st.slide?', con slide':''); }
 function refreshStep(i){ const st=pattern[i], col=seqEl.querySelector('.step[data-i="'+i+'"]'); if(!col) return;
   col.classList.toggle('rest',st.gate==='rest'); col.classList.toggle('sliding',st.slide); col.classList.toggle('accented',st.accent);
-  col.querySelector('.note').textContent=stepLabel(i);
-  col.querySelector('.a').classList.toggle('on-a',st.accent); col.querySelector('.s').classList.toggle('on-s',st.slide);
+  const nEl=col.querySelector('.note'); nEl.textContent=stepLabel(i); nEl.setAttribute('aria-label',stepAria(i));
+  const aEl=col.querySelector('.a'), sEl=col.querySelector('.s');
+  aEl.classList.toggle('on-a',st.accent); aEl.setAttribute('aria-pressed',st.accent?'true':'false');
+  sEl.classList.toggle('on-s',st.slide); sEl.setAttribute('aria-pressed',st.slide?'true':'false');
   const g=col.querySelector('.gatebtn'); g.className='g gatebtn gate-'+st.gate; g.textContent=st.gate==='note'?'●':st.gate==='tie'?'‿':'·';
   if(i===selectedStep) renderStepEdit(); markDirty(); }
-function selectStep(i){ selectedStep=(selectedStep===i)?-1:i; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===selectedStep));
+function markSelected(){ $$('.step').forEach(c=>{ const on=+c.dataset.i===selectedStep;
+  c.classList.toggle('selected',on); const n=c.querySelector('.note'); if(n) n.setAttribute('aria-pressed',on?'true':'false'); }); }
+function selectStep(i){ selectedStep=(selectedStep===i)?-1:i; markSelected();
   renderStepEdit(); if(selectedStep>=0) previewStep(selectedStep); }
 function previewStep(i){ const st=pattern[i]; if(st.gate!=='rest') auditionNote(patNote(i),true); }
 
@@ -2725,7 +2759,7 @@ function renderStepEdit(){ const i=selectedStep, on=i>=0;
   SE.acc.setAttribute('aria-pressed',st.accent?'true':'false');
   SE.sld.setAttribute('aria-pressed',st.slide?'true':'false'); }
 function seStep(delta){ if(selectedStep<0) return; selectStepAt((selectedStep+delta+STEPS)%STEPS); }
-function selectStepAt(i){ selectedStep=i; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===i)); renderStepEdit(); previewStep(i); }
+function selectStepAt(i){ selectedStep=i; markSelected(); renderStepEdit(); previewStep(i); }
 function seNudge(semis){ if(selectedStep<0) return; const st=pattern[selectedStep];
   st.note=clamp(st.note+semis,0,127-patternOct*12); if(st.gate==='rest') st.gate='note';
   refreshStep(selectedStep); previewStep(selectedStep); }
@@ -2760,11 +2794,19 @@ function checkClip(){ let peak=0; for(let i=0;i<scopeBuf.length;i++){ const d=Ma
 let scopeStarted=false, scopeBuf=null, scopeCtx=null, scopeCanvas=null;
 function startScope(){ if(scopeStarted) return; scopeStarted=true; scopeCanvas=$('#scope'); scopeCtx=scopeCanvas.getContext('2d'); scopeBuf=new Uint8Array(Engine.analyser.fftSize); }
 let scopeFrames=0, scopeVisible=true;
+// con prefers-reduced-motion el osciloscopio queda en una linea fija (SPEC R6)
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+let scopeStatic=false;
+reduceMotion.addEventListener && reduceMotion.addEventListener('change',()=>{ scopeStatic=false; });
 function drawScope(){
   // en el shell movil el scope vive en un sheet: no gastamos frames si esta oculto
   if((scopeFrames++ % 15)===0) scopeVisible=!!scopeCanvas.offsetParent;
   if(!scopeVisible) return;
   const w=scopeCanvas.width, h=scopeCanvas.height;
+  if(reduceMotion.matches){ if(scopeStatic) return; scopeStatic=true;
+    scopeCtx.clearRect(0,0,w,h); scopeCtx.lineWidth=2; scopeCtx.strokeStyle='#5c6470';
+    scopeCtx.beginPath(); scopeCtx.moveTo(0,h/2); scopeCtx.lineTo(w,h/2); scopeCtx.stroke(); return; }
+  scopeStatic=false;
   scopeCtx.clearRect(0,0,w,h); scopeCtx.lineWidth=2; scopeCtx.strokeStyle=Seq.playing?'#b6ff3a':'#5c6470'; scopeCtx.beginPath(); const n=scopeBuf.length, slice=w/n;
   for(let i=0;i<n;i++){ const v=scopeBuf[i]/128-1, y=h/2+v*(h/2-3), x=i*slice; if(i===0) scopeCtx.moveTo(x,y); else scopeCtx.lineTo(x,y); } scopeCtx.stroke(); }
 requestAnimationFrame(drawLoop);
@@ -2835,7 +2877,7 @@ function restoreSession(d){ if(!d || typeof d!=='object') return false;
   if(d.patch) loadPatch(d.patch);
   if(typeof d.kbOct==='number'){ kbOct=clamp(Math.round(d.kbOct),0,6); $('#kbOctVal').textContent=kbOct; }
   if(typeof d.selectedStep==='number' && d.selectedStep>=0 && d.selectedStep<STEPS){
-    selectedStep=d.selectedStep; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===selectedStep)); renderStepEdit(); }
+    selectedStep=d.selectedStep; markSelected(); renderStepEdit(); }
   return true; }
 
 async function resetAll(){
