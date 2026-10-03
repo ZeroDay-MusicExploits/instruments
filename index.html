@@ -44,7 +44,8 @@ gtag('config', 'G-ZNGM11BR5S');
     <nav class="site-nav" aria-label="Principal">
       <a href="#instrumentos">INSTRUMENTOS</a>
       <a href="#probar">PROBAR</a>
-      <a href="#como">CÓMO SE USA</a>
+      <a href="#compatibilidad">COMPATIBILIDAD</a>
+      <a href="#faq">FAQ</a>
       <a href="#descargar" class="btn btn--accent btn--sm">DESCARGAR GRATIS</a>
     </nav>
     <details class="site-menu">
@@ -52,7 +53,8 @@ gtag('config', 'G-ZNGM11BR5S');
       <nav class="site-menu__panel" aria-label="Menú">
         <a href="#instrumentos">INSTRUMENTOS</a>
       <a href="#probar">PROBAR</a>
-      <a href="#como">CÓMO SE USA</a>
+      <a href="#compatibilidad">COMPATIBILIDAD</a>
+      <a href="#faq">FAQ</a>
         
         <a href="#descargar" class="btn btn--accent btn--sm">DESCARGAR GRATIS</a>
       </nav>
@@ -239,6 +241,40 @@ gtag('config', 'G-ZNGM11BR5S');
       <li><span class="step-label">03 · INSTALAR</span><p>Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.</p></li>
       <li><span class="step-label">04 · GUARDAR Y EXPORTAR</span><p>El trabajo se autoguarda en el navegador y se exporta/importa a JSON. Cada instrumento muestra en su manual qué formatos exporta hoy.</p></li>
     </ol>
+  </section>
+
+  <section class="wrap block" id="compatibilidad">
+    <div class="section-head" style="margin-bottom:28px">
+      <h2 class="h2">Compatibilidad</h2>
+      <span class="label">VERIFICADO EN MDN / CANIUSE · OCT 2026</span>
+    </div>
+    <div class="table-wrap">
+      <table class="compat">
+        <thead>
+          <tr><th>Navegador</th><th>Sistema</th><th>Audio (tocar)</th><th>Web MIDI</th></tr>
+        </thead>
+        <tbody>
+        <tr><td>Chrome / Edge</td><td>Windows, macOS, Linux</td><td class="yes">Sí</td><td class="yes">Sí</td></tr>
+          <tr><td>Firefox</td><td>Windows, macOS, Linux</td><td class="yes">Sí</td><td class="yes">Sí</td></tr>
+          <tr><td>Safari</td><td>macOS</td><td class="yes">Sí</td><td class="no">No</td></tr>
+          <tr><td>Chrome</td><td>Android</td><td class="yes">Sí</td><td class="yes">Sí</td></tr>
+          <tr><td>Safari</td><td>iOS / iPadOS</td><td class="yes">Sí</td><td class="no">No</td></tr>
+          <tr><td>Cualquier navegador en iOS (Chrome, Firefox…)</td><td>iOS / iPadOS</td><td class="yes">Sí</td><td class="no">No</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin:14px 0 0;font-size:13px;line-height:1.6;color:var(--zd-dim)">Web MIDI no existe en Safari ni en ningún navegador de iOS (todos corren sobre WebKit ahí): MonoMoon'70 detecta que <code>navigator.requestMIDIAccess</code> no está y lo indica en pantalla en vez de fallar en silencio. El resto del audio (Web Audio API) funciona en los seis.</p>
+  </section>
+
+  <section class="wrap block" id="faq">
+    <div class="section-head" style="margin-bottom:28px"><h2 class="h2">Preguntas frecuentes</h2></div>
+    <div class="faq">
+    <details><summary>¿Por qué no suena en iPhone?</summary><p>Todos los navegadores en iOS (Safari y también Chrome/Firefox, que ahí corren sobre el mismo motor) necesitan un toque para desbloquear el audio — es una política del navegador, no un bug. Con el switch de silencio físico activado, el comportamiento puede variar según el instrumento: no lo afirmamos como resuelto en los 5 sin probarlo en el dispositivo real.</p></details>
+    <details><summary>¿Se guardan mis datos?</summary><p>Lo que tocás queda en tu propio navegador (localStorage / IndexedDB), nunca en un servidor. Hoy el autoguardado automático (tocar → recargar → mismo estado) funciona en CronBeat-8:08; en los otros 4, el respaldo es manual vía exportar/importar JSON — cada landing dice exactamente qué guarda.</p></details>
+    <details><summary>¿Puedo instalar el HTML descargado?</summary><p>No directamente: un HTML abierto en file:// no puede registrar service worker ni manifest (los navegadores exigen https o localhost para eso). Instalá desde la web (PWA) o bajá el HTML para usarlo local — un HTML descargado no se instala como app.</p></details>
+    <details><summary>¿Qué datos recopila el sitio?</summary><p>El formulario de descarga pide tu mail para un código de verificación (hoy se muestra en pantalla, modo demo) y manda el dominio de ese mail a dns.google para chequear que reciba correo. Las páginas del sitio (no los instrumentos) usan Google Analytics. Nada de esto sale de index.html/landing-*.html hacia los instrumentos. Detalle completo en privacidad.html.</p></details>
+    </div>
+    <p style="margin:18px 0 0;font-size:13px;color:var(--zd-dim)">¿Encontraste un bug o te falta algo? <a href="https://github.com/ZeroDay-MusicExploits/instruments/issues">Abrí un issue en el repo</a>. <!-- TODO: sumar un contacto directo (mail/formulario) cuando el titular defina uno --></p>
   </section>
 
   <section class="wrap block" id="descargar">
