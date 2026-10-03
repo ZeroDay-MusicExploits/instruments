@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ACID BASS-303</title>
 <style>
   :root{
@@ -17,7 +17,11 @@
   html,body{margin:0;padding:0;}
   body{background:radial-gradient(1200px 600px at 50% -10%, #191c22 0%, var(--bg) 60%), var(--bg);
     color:var(--text); font-family:var(--zd-mono); line-height:1.35;
-    min-height:100vh; padding:14px; -webkit-user-select:none; user-select:none;}
+    min-height:100vh; padding:14px;}
+  @supports (min-height:100dvh){ body{min-height:100dvh;} }
+  /* -webkit-touch-callout / user-select solo en superficies de tocar (SPEC R1) */
+  .knob,.xypad,.keyboard,.key,.seq,.step,.seg,.chip,.btn-play,.step-edit,.lcd,canvas#scope{
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;}
   .wrap{max-width:1120px; margin:0 auto;}
 
   header{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;}
@@ -95,13 +99,13 @@
   .xypad .cursor{ position:absolute; width:28px; height:28px; margin:-14px 0 0 -14px; border-radius:50%;
     background:radial-gradient(circle, var(--orange), rgba(255,106,43,.15)); border:2px solid #fff; box-shadow:0 0 20px var(--orange); pointer-events:none; transition:box-shadow .1s; }
   .xypad.hot .cursor{ box-shadow:0 0 30px var(--orange), 0 0 60px rgba(255,106,43,.5); }
-  .xypad .axlabel{ position:absolute; font-family:var(--zd-mono); font-size:10px; color:var(--muted); letter-spacing:.14em; pointer-events:none; }
+  .xypad .axlabel{ position:absolute; font-family:var(--zd-mono); font-size:11px; color:var(--muted); letter-spacing:.14em; pointer-events:none; }
   .ax-x{ right:8px; bottom:6px; } .ax-y{ left:6px; top:6px; }
   .perf-hint{ font-family:var(--zd-mono); font-size:11px; color:var(--muted); }
 
   .lcd{ flex:1; min-width:180px; background:#0b120e; border:1px solid #20321f; border-radius:10px; padding:14px;
     display:flex; flex-direction:column; justify-content:center; align-items:center; gap:6px; }
-  .lcd-cap{ font-family:var(--zd-mono); font-size:10px; letter-spacing:.2em; color:#3d5240; }
+  .lcd-cap{ font-family:var(--zd-mono); font-size:11px; letter-spacing:.2em; color:#3d5240; }
   .lcd-note{ font-family:var(--zd-mono); font-size:46px; font-weight:700; color:var(--lime); text-shadow:0 0 16px rgba(182,255,58,.45); line-height:1; }
   .lcd-note.glide{ color:var(--blue); text-shadow:0 0 18px rgba(77,180,255,.6); }
   .lcd-glide{ font-family:var(--zd-mono); font-size:12px; letter-spacing:.24em; color:#26343d; }
@@ -146,7 +150,7 @@
   .step.glide-active{ box-shadow:0 0 0 1px var(--blue), 0 0 16px rgba(77,180,255,.45) !important; }
   .step.selected{ border-color:var(--silver); }
   .step.sliding::after{content:""; position:absolute; right:-4px; top:50%; width:8px; height:8px; margin-top:-4px; background:var(--blue); border-radius:50%; box-shadow:0 0 8px var(--blue); z-index:2;}
-  .step .idx{font-family:var(--zd-mono); font-size:10px; color:var(--muted); text-align:center; letter-spacing:.05em;}
+  .step .idx{font-family:var(--zd-mono); font-size:11px; color:var(--muted); text-align:center; letter-spacing:.05em;}
   .step .note{font-family:var(--zd-mono); font-weight:700; font-size:14px; text-align:center; background:var(--panel); border:1px solid var(--edge); border-radius:6px; padding:8px 2px; color:var(--text); cursor:pointer;}
   .step.selected .note{background:var(--panel-2); color:#fff; border-color:var(--silver);}
   .step.rest .note{color:#565c66; text-decoration:line-through;}
@@ -157,8 +161,8 @@
   .step .toggles button.g{font-size:14px;}
   .step .toggles button.on-a{background:var(--orange); color:#12130f; border-color:var(--orange);}
   .step .toggles button.on-s{background:var(--blue); color:#08131c; border-color:var(--blue);}
-  .step .gatebtn.tie{color:var(--lime); border-color:#3c4a26;}
-  .step .gatebtn.rest{color:var(--red); border-color:#4a2b2b;}
+  .step .gatebtn.gate-tie{color:var(--lime); border-color:#3c4a26;}
+  .step .gatebtn.gate-rest{color:var(--red); border-color:#4a2b2b;}
 
   /* ---------- patches / banco ---------- */
   .act-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;}
@@ -178,11 +182,26 @@
   .kb-hint kbd{font-family:var(--zd-mono); background:var(--rack); border:1px solid var(--edge); border-bottom-width:2px; border-radius:4px; padding:1px 5px; color:var(--silver); font-size:11px;}
   .keyboard{position:relative; height:120px; display:flex; user-select:none; touch-action:none;}
   .key{position:relative; flex:1; background:linear-gradient(180deg,#e9ecf1,#c3c8d0); border:1px solid #7c828c; border-radius:0 0 6px 6px; margin-right:-1px; cursor:pointer;}
-  .key .lab{position:absolute; bottom:6px; left:0; right:0; text-align:center; font-family:var(--zd-mono); font-size:10px; color:#3a3f47;}
+  .key .lab{position:absolute; bottom:6px; left:0; right:0; text-align:center; font-family:var(--zd-mono); font-size:11px; color:#3a3f47;}
   .key.black{position:absolute; top:0; width:8%; height:64%; background:linear-gradient(180deg,#2a2d33,#131519); border:1px solid #000; border-radius:0 0 5px 5px; z-index:3; cursor:pointer;}
   .key.black .lab{color:#c6ccd6;}
   .key.down{background:linear-gradient(180deg,var(--orange-2),var(--orange));}
   .key.black.down{background:linear-gradient(180deg,var(--orange),#b1481c);}
+
+  /* ---------- editor del paso seleccionado ---------- */
+  .step-edit{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .step-edit .se-group{display:flex; align-items:center; gap:7px;}
+  .step-edit .se-lbl{font-size:11px; letter-spacing:.12em; color:var(--muted);}
+  .step-edit button{min-height:44px; min-width:44px; padding:0 11px; font-size:13px;}
+  .step-edit .se-num{font-size:16px; font-weight:800; color:var(--silver); min-width:32px; text-align:center; font-variant-numeric:tabular-nums;}
+  .step-edit .se-note{font-size:22px; font-weight:800; color:var(--orange); min-width:66px; text-align:center; font-variant-numeric:tabular-nums;}
+  .step-edit .se-tog button{font-weight:700; letter-spacing:.06em;}
+  .step-edit .se-tog button.a[aria-pressed="true"]{background:var(--orange); color:#12130f; border-color:var(--orange);}
+  .step-edit .se-tog button.s[aria-pressed="true"]{background:var(--blue); color:#08131c; border-color:var(--blue);}
+  .step-edit.off{opacity:.5;}
+  .step-edit.off .se-note{color:var(--muted);}
+  /* slider alternativo de cada knob: solo aparece en el shell movil */
+  .knob-slider{display:none;}
 
   footer{color:var(--muted); font-size:11px; font-family:var(--zd-mono); margin-top:6px; text-align:center; line-height:1.7;}
   @media (max-width:560px){ body{padding:10px;} .brand h1{font-size:19px;} canvas#scope{width:140px;} .tempo-box{margin-left:0;} .lcd-note{font-size:38px;} }
@@ -232,11 +251,11 @@
   header{padding:4px 0 14px; border-bottom:2px solid var(--zd-line-soft); margin-bottom:14px}
   .brand{align-items:center; gap:16px; flex-wrap:nowrap}
   .brand .zd-text{display:flex; flex-direction:column; gap:6px}
-  .brand .hw{font-size:9.5px; letter-spacing:.2em; color:var(--zd-phosphor)}
+  .brand .hw{font-size:11px; letter-spacing:.2em; color:var(--zd-phosphor)}
   .brand h1{font-size:24px; font-weight:800; letter-spacing:.03em}
   .brand h1::before{content:">_ "; color:var(--zd-phosphor)}
   .brand h1 b{color:var(--orange); text-shadow:0 0 14px rgba(220,239,58,.35)}
-  .brand .sub{font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--zd-ink-faint)}
+  .brand .sub{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--zd-ink-faint)}
   .status{border-radius:3px; background:var(--zd-well); border-color:var(--zd-line)}
   .status .dot{border-radius:2px}
 
@@ -258,7 +277,7 @@
     color:var(--zd-phosphor); text-shadow:0 0 10px var(--zd-phosphor-glow); font-size:26px; font-weight:800; width:92px; border-radius:var(--zd-r); padding:6px 8px}
   canvas#scope{background:#030602; border:2px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), inset 0 2px 10px #000; border-radius:var(--zd-r)}
 
-  .knob-label{color:var(--zd-ink-dim); font-weight:700; font-size:10.5px; letter-spacing:.1em}
+  .knob-label{color:var(--zd-ink-dim); font-weight:700; font-size:11px; letter-spacing:.1em}
   .knob-ring{background:conic-gradient(from 225deg, var(--orange) 0 calc(var(--pct,0)*270deg), #1a2716 calc(var(--pct,0)*270deg) 270deg, transparent 270deg 360deg)}
   .knob.blue .knob-ring{background:conic-gradient(from 225deg, var(--blue) 0 calc(var(--pct,0)*270deg), #1a2716 calc(var(--pct,0)*270deg) 270deg, transparent 270deg 360deg)}
   .knob-body{background:radial-gradient(circle at 42% 32%, #26381f, #0b1209 72%); border:2px solid var(--zd-outline);
@@ -331,88 +350,753 @@
   footer{color:var(--zd-ink-faint); letter-spacing:.14em; padding-top:10px; border-top:1px solid var(--zd-line-soft); margin-top:4px}
   @media (max-width:560px){ .zd-logo{height:48px} .brand{flex-wrap:wrap} }
 </style>
-<style id="zd-mobile">
-  /* ===== ZERO DAY · layout mobile horizontal (solo presentación) ===== */
-  #zd-mbar,#zd-mback,#zd-mdrawer,#zd-rotate{display:none}
-  body.zd-m{--zd-avail:calc(100vh - 64px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
-    padding:calc(58px + env(safe-area-inset-top,0px)) calc(6px + env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) calc(6px + env(safe-area-inset-left,0px)) !important;
-    min-height:0 !important; display:block !important}
-  @supports (height:100dvh){ body.zd-m{--zd-avail:calc(100dvh - 64px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))} }
-  body.zd-m #zd-mbar{display:flex; position:fixed; z-index:40; left:0; right:0; top:0; height:calc(52px + env(safe-area-inset-top,0px));
-    padding:env(safe-area-inset-top,0px) calc(8px + env(safe-area-inset-right,0px)) 0 calc(8px + env(safe-area-inset-left,0px));
-    align-items:center; gap:6px; background:var(--zd-chassis); border-bottom:2px solid var(--zd-outline); box-shadow:0 1px 0 var(--zd-line), 0 10px 24px -12px #000; font-family:var(--zd-mono); color:var(--zd-ink)}
-  .zd-mlogo{height:34px; width:auto; flex:none; background:var(--zd-paper); padding:2px; border-radius:2px; box-shadow:0 0 0 1px var(--zd-outline), 0 2px 0 var(--zd-outline)}
-  .zd-mtitle{font-size:12px; font-weight:800; letter-spacing:.04em; white-space:nowrap}
-  .zd-mtitle b{color:var(--inst-accent)}
-  .zd-mtr{display:flex; align-items:center; gap:6px; flex:none}
-  .zd-mmenus{display:flex; gap:5px; margin-left:auto; overflow-x:auto; scrollbar-width:none; padding:3px 1px 5px}
-  .zd-mmenus::-webkit-scrollbar{display:none}
-  .zd-mbtn{flex:none; height:40px; padding:0 9px; border-radius:var(--zd-r); border:1px solid var(--zd-outline); background:var(--zd-panel-2); color:var(--zd-ink);
-    box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm); font:700 10.5px var(--zd-mono); letter-spacing:.06em; cursor:pointer; touch-action:manipulation; white-space:nowrap}
-  .zd-mbtn::after{content:" ▾"; opacity:.6}
-  .zd-mbtn.on{background:var(--inst-accent); color:var(--zd-void); box-shadow:0 0 0 1px var(--inst-accent), var(--zd-hard-sm)}
-  .zd-mbtn.on::after{content:" ▴"}
-  .zd-mbtn:active{transform:translateY(2px); box-shadow:0 0 0 1px var(--zd-line)}
-  body.zd-m #zd-mback{display:block; position:fixed; inset:calc(52px + env(safe-area-inset-top,0px)) 0 0 0; z-index:44; background:rgba(3,5,2,.62);
-    opacity:0; visibility:hidden; transition:opacity .14s, visibility 0s .14s}
-  body.zd-m #zd-mdrawer{display:flex; flex-direction:column; gap:8px; position:fixed; z-index:45;
-    top:calc(58px + env(safe-area-inset-top,0px)); left:calc(8px + env(safe-area-inset-left,0px)); right:calc(8px + env(safe-area-inset-right,0px));
-    max-height:calc(100% - 70px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
-    padding:8px 10px 10px; background:var(--zd-panel); border:2px solid var(--zd-outline); border-radius:var(--zd-r-lg);
-    box-shadow:0 0 0 1px var(--inst-accent), 0 4px 0 var(--zd-outline), 0 24px 40px -10px #000; font-family:var(--zd-mono); color:var(--zd-ink);
-    opacity:0; visibility:hidden; transform:translateY(-6px); transition:opacity .14s, transform .14s, visibility 0s .14s}
-  body.zd-m.zd-mopen #zd-mback{opacity:1; visibility:visible; transition:opacity .14s}
-  body.zd-m.zd-mopen #zd-mdrawer{opacity:1; visibility:visible; transform:none; transition:opacity .14s, transform .14s}
-  .zd-mhead{display:flex; align-items:center; gap:8px; flex:none}
-  .zd-mdot{width:9px; height:9px; border-radius:2px; background:var(--inst-accent); box-shadow:0 0 8px var(--inst-accent)}
-  .zd-mdtitle{font-size:11px; font-weight:800; letter-spacing:.2em; flex:1}
-  .zd-mclose{width:44px; height:34px; border-radius:var(--zd-r); border:1px solid var(--zd-outline); background:var(--zd-panel-2); color:var(--zd-ink); box-shadow:0 0 0 1px var(--zd-line); font-size:14px; cursor:pointer}
-  .zd-mbody{overflow:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; min-height:0; padding:2px 2px 4px}
-  .zd-mpane{display:none; gap:10px; align-items:flex-start}
-  .zd-mpane.on{display:flex}
-  .zd-mpane > *{flex:none; margin:0 !important}
-  #zd-rotate{position:fixed; inset:0; z-index:300; background:var(--zd-void); color:var(--zd-ink); font-family:var(--zd-mono);
-    flex-direction:column; align-items:center; justify-content:center; gap:20px; text-align:center; padding:30px}
-  #zd-rotate img{width:150px; background:var(--zd-paper); padding:3px; border-radius:3px; box-shadow:0 0 0 2px var(--zd-outline), 0 4px 0 var(--zd-outline); transform:rotate(-1.5deg)}
-  .zd-rphone{width:36px; height:60px; border:3px solid var(--zd-phosphor); border-radius:7px; box-shadow:0 0 16px -4px var(--zd-phosphor); animation:zdrot 2.4s ease-in-out infinite}
-  @keyframes zdrot{0%,30%{transform:rotate(0)} 60%,100%{transform:rotate(90deg)}}
-  #zd-rotate b{font-size:15px; letter-spacing:.14em}
-  #zd-rotate span{font-size:11px; color:var(--zd-ink-faint); max-width:240px; line-height:1.5}
-  @media (orientation:portrait) and (max-width:820px) and (pointer:coarse){ #zd-rotate{display:flex} }
-  @media (max-width:900px){ .zd-mtitle{display:none} }
+<style id="zd-mobile-skin">
+  /* ===== ACID BASS-303 · piel del shell portrait (zd-mobile v2) =====
+     Solo presentación: qué nodo ocupa qué lugar lo decide window.ZD_M y el
+     reparto de alto lo decide este archivo. Nada de esto es parte del bloque. */
 
-  body.zd-m .wrap{max-width:none; height:calc(var(--zd-avail) - 4px); display:flex; flex-direction:column; gap:6px}
-  body.zd-m .wrap > header, body.zd-m .wrap > footer, body.zd-m .wrap > section:has(> .transport){display:none}
-  body.zd-m .wrap > .panel{margin:0; padding:6px 8px}
-  body.zd-m .wrap > section:has(#seq){order:-1; flex:none}
-  body.zd-m .wrap > section:has(#seq) > .ptitle, body.zd-m .wrap > section:has(#xypad) > .ptitle{display:none}
-  body.zd-m .wrap > section:has(#xypad){flex:1; min-height:0}
-  body.zd-m .perf-grid{height:100%; flex-wrap:nowrap; gap:8px}
-  body.zd-m .xypad-wrap{min-width:0; flex:1}
-  body.zd-m .xypad{aspect-ratio:auto; height:100%; min-height:0}
-  body.zd-m .perf-hint{display:none}
-  body.zd-m .lcd{flex:none; width:128px; min-width:0; padding:8px}
-  body.zd-m .lcd-note{font-size:32px}
-  body.zd-m .perf-grid > #scope{width:150px; height:auto; align-self:stretch; flex:none}
-  body.zd-m .seq-scroll{padding-bottom:4px}
-  body.zd-m .seq{grid-auto-columns:minmax(54px,1fr); gap:4px}
-  body.zd-m .step{padding:4px 3px; gap:3px}
-  body.zd-m .step .note{padding:4px 2px; min-height:34px; font-size:12px}
-  body.zd-m .step .nud button, body.zd-m .step .toggles button{min-height:28px; padding:0}
-  #zd-mbar .btn-play{min-height:40px; min-width:0; padding:0 12px; font-size:12px}
-  #zd-mbar #tapBtn{min-height:40px; padding:0 10px; font-size:11px}
-  #zd-mbar .tempo-box{margin:0}
-  #zd-mbar .bpm-input{width:66px; font-size:18px; padding:3px 6px}
-  .zd-mpane .panel{margin:0}
-  .zd-mpane .knob-bank{flex-wrap:nowrap}
-  .zd-mpane .seq-top, .zd-mpane .gen-row{margin:0; flex-wrap:nowrap}
-  .zd-mpane .seq-top .spacer{display:none}
-  .zd-mpane .oct-ctrl input[type=range]{width:150px; flex:none}
-  .zd-mpane .gen-row .dens input{width:130px}
-  .zd-mpane .keyboard{width:calc(100vw - 120px)}
-  .zd-mpane .act-row{flex-wrap:nowrap}
-  .zd-mpane .bank{max-width:520px}
+  /* ---- zona de tocar: steps 2×8, editor de paso, pad XY ---- */
+  html.zd-m #zd-stage > .panel{padding:7px 8px; border-radius:var(--zd-r); box-shadow:0 0 0 1px var(--zd-line);}
+  html.zd-m #zd-stage > .panel > .ptitle{display:none;}
+  html.zd-m #zd-stage > #seqPanel,
+  html.zd-m #zd-stage > #stepEditPanel{flex:none;}
+  html.zd-m #zd-stage > #perfPanel{flex:1; min-height:0; display:flex; flex-direction:column;}
+
+  /* steps: 8 columnas × 2 filas, sin scroll horizontal. A 360px de ancho
+     salen ~38,5px por columna con alto 50px (SPEC R1 acepta 38–40 si h≥48). */
+  html.zd-m #seqPanel .seq-scroll{overflow:visible; padding:0;}
+  html.zd-m #seqPanel .seq{grid-auto-flow:row; grid-template-columns:repeat(8,minmax(0,1fr));
+    grid-auto-columns:auto; gap:3px; min-width:0;}
+  html.zd-m #seqPanel .step{padding:4px 2px; gap:2px; min-height:50px; justify-content:center;}
+  html.zd-m #seqPanel .step .nud,
+  html.zd-m #seqPanel .step .toggles,
+  html.zd-m #seqPanel .step .gatebtn{display:none;}
+  html.zd-m #seqPanel .step .idx{font-size:11px; line-height:1;}
+  html.zd-m #seqPanel .step .note{padding:5px 1px; min-height:30px; font-size:12.5px; border-radius:3px;}
+  html.zd-m #seqPanel .step.accented .note{background:var(--orange); color:var(--zd-void);
+    border-color:var(--orange); font-weight:800;}
+  html.zd-m #seqPanel .step.selected{box-shadow:0 0 0 2px var(--zd-phosphor);}
+  html.zd-m #seqPanel .step.sliding::after{right:3px; top:auto; bottom:3px; margin:0; width:7px; height:7px;}
+  html.zd-m #seqPanel .step.group4{box-shadow:inset 0 3px 0 rgba(220,239,58,.5);}
+  html.zd-m #seqPanel .step.group4.selected{box-shadow:inset 0 3px 0 rgba(220,239,58,.5), 0 0 0 2px var(--zd-phosphor);}
+
+  /* editor de paso: 2 filas fijas (nav + nota arriba, accent/slide/gate abajo).
+     Todos los targets siguen midiendo >=44px en el eje corto (SPEC R1). */
+  html.zd-m #stepEditPanel .step-edit{display:grid; grid-template-columns:auto 1fr; align-items:center; gap:5px;}
+  html.zd-m #stepEditPanel .step-edit .se-group{gap:4px;}
+  html.zd-m #stepEditPanel .step-edit .se-group:nth-child(2){justify-content:flex-end;}
+  html.zd-m #stepEditPanel .step-edit .se-tog{grid-column:1 / -1; gap:5px;}
+  html.zd-m #stepEditPanel .step-edit .se-tog button{flex:1; min-width:0; padding:0 4px;}
+  html.zd-m #stepEditPanel .step-edit button{min-height:44px; min-width:44px; padding:0 7px; font-size:12px;}
+  html.zd-m #stepEditPanel .se-note{font-size:19px; min-width:52px;}
+  html.zd-m #stepEditPanel .se-num{min-width:30px;}
+  html.zd-m #stepEditPanel .se-lbl{display:none;}
+  /* a 360px no entran los saltos de octava sin bajar de 44px: quedan >=390px.
+     El salto de octava del patron entero sigue en la pestana SEQ. */
+  @media (max-width:389px){ html.zd-m #stepEditPanel #seOctDown, html.zd-m #stepEditPanel #seOctUp{display:none;} }
+
+  /* pad XY protagonista + nota en curso como franja arriba */
+  html.zd-m #perfPanel .perf-grid{flex-direction:column; flex-wrap:nowrap; gap:6px; height:100%; min-height:0;}
+  html.zd-m #perfPanel .lcd{order:-1; flex:none; width:auto; min-width:0; flex-direction:row;
+    align-items:center; justify-content:flex-start; gap:10px; padding:4px 10px;}
+  html.zd-m #perfPanel .lcd-cap{display:none;}
+  html.zd-m #perfPanel .lcd-note{font-size:21px;}
+  html.zd-m #perfPanel .lcd-glide{font-size:11px; letter-spacing:.16em;}
+  html.zd-m #perfPanel .glidebar{width:auto; flex:1; min-width:40px;}
+  html.zd-m #perfPanel .xypad-wrap{flex:1; min-height:0; min-width:0;}
+  html.zd-m #perfPanel .xypad{aspect-ratio:auto; height:100%; min-height:120px;}
+  html.zd-m #perfPanel .perf-hint{display:none;}
+
+  /* ---- barra superior: transporte compacto ---- */
+  html.zd-m #zd-top .btn-play{min-width:76px; min-height:40px; padding:0 10px; font-size:12px; letter-spacing:.06em;}
+  html.zd-m #zd-top .tempo-box{gap:0; margin:0;}
+  html.zd-m #zd-top .bpm-input{width:58px; font-size:17px; padding:3px 5px;}
+  @media (max-width:430px){ html.zd-m #zd-top .zd-ttitle{display:none;} }
+
+  /* ---- paneles dentro de los sheets ---- */
+  html.zd-m #zd-sheet .panel{padding:8px 9px; border-radius:var(--zd-r); box-shadow:0 0 0 1px var(--zd-line);}
+  html.zd-m #zd-sheet .panel > .ptitle{margin:0 0 8px;}
+  html.zd-m #zd-sheet .rowfull{margin:0 0 9px; gap:10px;}
+  html.zd-m #zd-sheet .seq-top,
+  html.zd-m #zd-sheet .gen-row{flex-wrap:wrap; gap:10px;}
+  html.zd-m #zd-sheet .seq-top .spacer{display:none;}
+  html.zd-m #zd-sheet .seq-top .oct-ctrl{min-width:0;}
+  html.zd-m #zd-sheet .act-row{gap:9px; margin:0;}
+  html.zd-m #zd-sheet .patch-name{width:100%;}
+  html.zd-m #zd-sheet .bank{gap:7px;}
+  html.zd-m #zd-sheet .kb-wrap{gap:9px;}
+  html.zd-m #zd-sheet .keyboard{height:116px;}
+  html.zd-m #zd-sheet canvas#scope{width:100%; height:46px;}
+  html.zd-m #zd-sheet .seg{flex-wrap:wrap;}
+  html.zd-m #zd-sheet #filterStatus{align-self:flex-start;}
+
+  /* knobs en los sheets: knob chico + slider alternativo táctil (SPEC R1) */
+  html.zd-m #zd-sheet .knob-bank{display:grid; grid-template-columns:1fr; gap:7px; flex-wrap:nowrap;}
+  html.zd-m #zd-sheet .knob-wrap{flex-direction:row; align-items:center; gap:9px; width:auto;
+    background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r); padding:4px 8px;}
+  html.zd-m #zd-sheet .knob-wrap .knob{order:0; width:42px; height:42px; flex:none;}
+  html.zd-m #zd-sheet .knob-wrap .knob-label{order:1; flex:none; width:74px; min-height:0;
+    text-align:left; justify-content:flex-start; font-size:11px; letter-spacing:.06em;}
+  html.zd-m #zd-sheet .knob-wrap .knob-slider{order:2; display:block; flex:1; min-width:64px; height:44px;}
+  html.zd-m #zd-sheet .knob-wrap .knob-val{order:3; flex:none; width:62px; text-align:right; font-size:12px;}
+  @media (min-width:620px){ html.zd-m #zd-sheet .knob-bank{grid-template-columns:1fr 1fr;} }
+
+  /* ---- landscape y tablets: mejora progresiva, no otro layout ---- */
+  @media (min-width:600px){
+    html.zd-m #seqPanel .step{min-height:58px;}
+    html.zd-m #perfPanel .lcd-note{font-size:26px;}
+  }
+  @media (orientation:landscape) and (min-width:560px) and (max-height:600px){
+    html.zd-m #zd-stage{flex-flow:row wrap; align-content:stretch; gap:5px;}
+    html.zd-m #zd-stage > #seqPanel{flex:1 1 56%; min-width:270px;}
+    html.zd-m #zd-stage > #stepEditPanel{flex:1 1 40%;}
+    html.zd-m #zd-stage > #perfPanel{flex:1 1 100%; min-height:110px;}
+    html.zd-m #perfPanel .perf-grid{flex-direction:row;}
+    html.zd-m #perfPanel .lcd{order:0; flex:none; width:110px; flex-direction:column; justify-content:center;}
+    html.zd-m #perfPanel .lcd-note{font-size:22px;}
+    html.zd-m #perfPanel .glidebar{width:78%; flex:none;}
+    html.zd-m #stepEditPanel .step-edit{gap:4px;}
+    html.zd-m #zd-sheet{max-height:80dvh;}
+    html.zd-m #zd-sheet.peek{max-height:60dvh;}
+  }
 </style>
+
+<!-- ===== bloques ZD compartidos · ver docs/zd-blocks.md =====
+     Se copian byte a byte en los 5 instrumentos (SPEC 3.1.2) y se verifican con
+     `node tools/check-blocks.mjs`. No editarlos acá: editar tools/blocks/.
+     Orden: zd-ui · zd-store · zd-audio · zd-dl · zd-midi · zd-rec ·
+            config window.ZD_M · zd-mobile · zd-pwa                     ===== -->
+<script>
+/* ZD-BLOCK:zd-ui v1 */
+/* Toasts, modales con Promise y accesibilidad de controles continuos.
+   Reemplaza alert/confirm/prompt. Sin dependencias, sin referencias al
+   instrumento: inyecta su propio CSS y usa los tokens --zd-* del skin. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.ui) return;
+
+  var CSS = [
+    '.zd-toasts{position:fixed;z-index:400;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;',
+    'bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 24px));pointer-events:none;font-family:var(--zd-mono,monospace)}',
+    'html.zd-m .zd-toasts{bottom:calc(72px + env(safe-area-inset-bottom,0px))}',
+    '.zd-toast{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:var(--zd-r,4px);',
+    'background:var(--zd-panel,#14181c);color:var(--zd-ink,#e9ebef);border:2px solid var(--zd-outline,#000);',
+    'box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 4px 0 var(--zd-outline,#000),0 18px 30px -12px #000;',
+    'font-size:12.5px;line-height:1.35;opacity:0;transform:translateY(8px);transition:opacity .16s,transform .16s}',
+    '.zd-toast.in{opacity:1;transform:none}',
+    '.zd-toast .zd-tmsg{flex:1;min-width:0}',
+    '.zd-toast.err{box-shadow:0 0 0 1px var(--zd-alert,#ff5c3a),0 4px 0 var(--zd-outline,#000),0 18px 30px -12px #000}',
+    '.zd-toast button{flex:none;min-height:36px;padding:0 11px;font:700 11.5px var(--zd-mono,monospace);letter-spacing:.06em;',
+    'cursor:pointer;color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));',
+    'border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px);touch-action:manipulation}',
+    '.zd-toast button.zd-tx{background:transparent;color:var(--zd-ink-dim,#a3b699);min-width:36px;padding:0 8px;font-size:13px}',
+    '.zd-scrim{position:fixed;inset:0;z-index:500;background:rgba(3,5,2,.68);display:flex;align-items:center;justify-content:center;',
+    'padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));',
+    'opacity:0;transition:opacity .14s}',
+    '.zd-scrim.in{opacity:1}',
+    '.zd-dlg{width:min(440px,100%);max-height:84dvh;display:flex;flex-direction:column;gap:12px;padding:14px;',
+    'background:var(--zd-panel,#14181c);color:var(--zd-ink,#e9ebef);border:2px solid var(--zd-outline,#000);border-radius:var(--zd-r-lg,8px);',
+    'box-shadow:0 0 0 1px var(--inst-accent,var(--zd-phosphor,#7fdc5c)),0 4px 0 var(--zd-outline,#000),0 26px 44px -10px #000;',
+    'font-family:var(--zd-mono,monospace);transform:translateY(10px);transition:transform .14s}',
+    '.zd-scrim.in .zd-dlg{transform:none}',
+    '.zd-dlg h2{margin:0;font-size:12px;font-weight:800;letter-spacing:.2em;color:var(--zd-ink-dim,#a3b699)}',
+    '.zd-dlg .zd-dbody{font-size:13.5px;line-height:1.5;overflow:auto;overscroll-behavior:contain;white-space:pre-wrap;min-height:0}',
+    '.zd-dlg input[type=text]{width:100%;min-height:44px;padding:0 10px;font:13.5px var(--zd-mono,monospace);',
+    'color:var(--zd-ink,#e9ebef);background:var(--zd-well,#050804);border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px)}',
+    '.zd-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}',
+    '.zd-dact button{min-height:44px;padding:0 15px;font:700 12px var(--zd-mono,monospace);letter-spacing:.06em;cursor:pointer;',
+    'color:var(--zd-ink,#e9ebef);background:var(--zd-panel-2,#1c2430);border:1px solid var(--zd-outline,#000);',
+    'border-radius:var(--zd-r,4px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 2px 0 var(--zd-outline,#000);touch-action:manipulation}',
+    '.zd-dact button.pri{color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '.zd-dact button.dng{box-shadow:0 0 0 1px var(--zd-alert,#ff5c3a),0 2px 0 var(--zd-outline,#000)}',
+    '.zd-dact button:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24)}',
+    '@media (prefers-reduced-motion:reduce){.zd-toast,.zd-scrim,.zd-dlg{transition:none}}'
+  ].join('');
+
+  var styleEl = document.createElement('style');
+  styleEl.id = 'zd-ui-css';
+  styleEl.textContent = CSS;
+  (document.head || document.documentElement).appendChild(styleEl);
+
+  function mk(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function body() { return document.body || document.documentElement; }
+
+  /* ---------- toasts ---------- */
+  var host = null;
+  function toastHost() {
+    if (!host) { host = mk('div', 'zd-toasts'); host.setAttribute('role', 'status'); host.setAttribute('aria-live', 'polite'); }
+    var want = body();
+    if (host.parentNode !== want) want.appendChild(host);
+    return host;
+  }
+  function toast(msg, opts) {
+    opts = opts || {};
+    var box = mk('div', 'zd-toast' + (opts.kind === 'error' ? ' err' : ''));
+    box.appendChild(mk('span', 'zd-tmsg', String(msg == null ? '' : msg)));
+    var done = false, timer = null;
+    function close() {
+      if (done) return; done = true;
+      if (timer) clearTimeout(timer);
+      box.classList.remove('in');
+      setTimeout(function () { if (box.parentNode) box.remove(); }, 200);
+    }
+    if (opts.action && opts.action.label) {
+      var b = mk('button', null, opts.action.label);
+      b.type = 'button';
+      b.addEventListener('click', function () { close(); try { opts.action.onClick(); } catch (e) {} });
+      box.appendChild(b);
+    }
+    if (opts.action2 && opts.action2.label) {
+      var b2 = mk('button', null, opts.action2.label);
+      b2.type = 'button';
+      b2.addEventListener('click', function () { close(); try { opts.action2.onClick(); } catch (e) {} });
+      box.appendChild(b2);
+    }
+    var x = mk('button', 'zd-tx', '✕');
+    x.type = 'button'; x.setAttribute('aria-label', 'Cerrar aviso');
+    x.addEventListener('click', close);
+    box.appendChild(x);
+    toastHost().appendChild(box);
+    requestAnimationFrame(function () { box.classList.add('in'); });
+    var ms = opts.ms == null ? (opts.action ? 9000 : 3600) : opts.ms;
+    if (ms > 0) timer = setTimeout(close, ms);
+    return { close: close, el: box };
+  }
+
+  /* ---------- modales ---------- */
+  var openDlg = null;
+  function dialog(cfg) {
+    cfg = cfg || {};
+    return new Promise(function (resolve) {
+      var prevFocus = document.activeElement;
+      var scrim = mk('div', 'zd-scrim');
+      var dlg = mk('div', 'zd-dlg');
+      dlg.setAttribute('role', 'dialog');
+      dlg.setAttribute('aria-modal', 'true');
+      var h = mk('h2', null, cfg.title || 'AVISO');
+      var hid = 'zd-dlg-t-' + Math.random().toString(36).slice(2, 8);
+      h.id = hid; dlg.setAttribute('aria-labelledby', hid);
+      dlg.appendChild(h);
+      var bodyBox = mk('div', 'zd-dbody');
+      if (cfg.node) bodyBox.appendChild(cfg.node); else bodyBox.textContent = String(cfg.message == null ? '' : cfg.message);
+      dlg.appendChild(bodyBox);
+      var input = null;
+      if (cfg.input) {
+        input = mk('input'); input.type = 'text';
+        input.value = cfg.input.value == null ? '' : String(cfg.input.value);
+        if (cfg.input.placeholder) input.placeholder = cfg.input.placeholder;
+        if (cfg.input.maxlength) input.maxLength = cfg.input.maxlength;
+        input.setAttribute('aria-label', cfg.input.label || cfg.title || 'Valor');
+        dlg.appendChild(input);
+      }
+      var acts = mk('div', 'zd-dact');
+      var list = cfg.actions || [{ label: 'OK', value: true, primary: true }];
+      var cancelVal = cfg.cancelValue === undefined ? null : cfg.cancelValue;
+      function finish(v) {
+        if (openDlg !== state) return;
+        openDlg = null;
+        document.removeEventListener('keydown', onKey, true);
+        scrim.classList.remove('in');
+        setTimeout(function () { if (scrim.parentNode) scrim.remove(); }, 180);
+        try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {}
+        resolve(v);
+      }
+      list.forEach(function (a) {
+        var b = mk('button', (a.primary ? 'pri' : '') + (a.danger ? ' dng' : ''), a.label);
+        b.type = 'button';
+        b.addEventListener('click', function () { finish(a.value === undefined ? true : (typeof a.value === 'function' ? a.value(input) : a.value)); });
+        acts.appendChild(b);
+      });
+      dlg.appendChild(acts);
+      scrim.appendChild(dlg);
+      function onKey(e) {
+        if (openDlg !== state) return;
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(cancelVal); return; }
+        if (e.key === 'Tab') {
+          var f = dlg.querySelectorAll('button,input,[tabindex]:not([tabindex="-1"])');
+          if (!f.length) return;
+          var first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }
+      var state = {};
+      scrim.addEventListener('pointerdown', function (e) { if (e.target === scrim && cfg.dismissable !== false) finish(cancelVal); });
+      if (input) input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          var pri = list.filter(function (a) { return a.primary; })[0] || list[list.length - 1];
+          finish(pri.value === undefined ? true : (typeof pri.value === 'function' ? pri.value(input) : pri.value));
+        }
+      });
+      body().appendChild(scrim);
+      openDlg = state;
+      document.addEventListener('keydown', onKey, true);
+      requestAnimationFrame(function () {
+        scrim.classList.add('in');
+        var target = input || dlg.querySelector('.zd-dact button.pri') || dlg.querySelector('.zd-dact button');
+        if (target) try { target.focus(); } catch (e) {}
+      });
+    });
+  }
+
+  var modal = {
+    open: dialog,
+    alert: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'AVISO', message: message, cancelValue: undefined,
+        actions: [{ label: opts.ok || 'ENTENDIDO', value: undefined, primary: true }] });
+    },
+    error: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'ERROR', message: message, cancelValue: undefined,
+        actions: [{ label: opts.ok || 'CERRAR', value: undefined, primary: true }] });
+    },
+    confirm: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'CONFIRMAR', message: message, cancelValue: false,
+        actions: [{ label: opts.cancel || 'CANCELAR', value: false },
+                  { label: opts.ok || 'SEGUIR', value: true, primary: true, danger: !!opts.danger }] });
+    },
+    prompt: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'NOMBRE', message: message, cancelValue: null,
+        input: { value: opts.value, placeholder: opts.placeholder, maxlength: opts.maxlength, label: opts.label },
+        actions: [{ label: opts.cancel || 'CANCELAR', value: null },
+                  { label: opts.ok || 'GUARDAR', value: function (inp) { return inp ? inp.value : ''; }, primary: true }] });
+    }
+  };
+
+  /* ---------- accesibilidad de controles continuos (knobs, pads) ---------- */
+  function a11ySlider(el, cfg) {
+    if (!el || !cfg) return;
+    var min = cfg.min, max = cfg.max, span = max - min;
+    var coarse = cfg.step || span / 50, fine = cfg.fineStep || span / 200, page = cfg.pageStep || span / 10;
+    el.setAttribute('role', 'slider');
+    el.setAttribute('aria-label', cfg.label || '');
+    el.setAttribute('aria-valuemin', String(min));
+    el.setAttribute('aria-valuemax', String(max));
+    if (!el.hasAttribute('tabindex')) el.tabIndex = 0;
+    function refresh(v) {
+      el.setAttribute('aria-valuenow', String(Math.round(v * 1e4) / 1e4));
+      el.setAttribute('aria-valuetext', cfg.format ? cfg.format(v) : String(v));
+    }
+    el.addEventListener('keydown', function (e) {
+      var cur = cfg.get(), d = 0;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') d = e.shiftKey ? fine : coarse;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') d = -(e.shiftKey ? fine : coarse);
+      else if (e.key === 'PageUp') d = page;
+      else if (e.key === 'PageDown') d = -page;
+      else if (e.key === 'Home') { e.preventDefault(); cfg.set(min); refresh(cfg.get()); return; }
+      else if (e.key === 'End') { e.preventDefault(); cfg.set(max); refresh(cfg.get()); return; }
+      else if ((e.key === 'Enter' || e.key === ' ') && cfg.onEnter) { e.preventDefault(); cfg.onEnter(); return; }
+      else return;
+      e.preventDefault();
+      cfg.set(Math.min(max, Math.max(min, cur + d)));
+      refresh(cfg.get());
+    });
+    refresh(cfg.get());
+    return { refresh: refresh };
+  }
+
+  ZD.ui = { toast: toast, modal: modal, a11ySlider: a11ySlider, el: mk };
+  ZD.toast = toast;
+  ZD.modal = modal;
+})();
+/* /ZD-BLOCK:zd-ui */
+</script>
+
+<script id="zd-mobile-config">
+/* Config del shell portrait de ACID BASS-303. El bloque zd-mobile no sabe nada
+   del instrumento: todo lo específico (selectores, textos, orden) vive acá.
+   Se mantiene el nombre window.ZD_M de la v1 (SPEC 3.1.3). Ver docs/zd-blocks.md. */
+window.ZD_M = {
+  name: 'Acid Bass-303',
+  titleParts: ['ACID ', 'BASS-303'],
+  transport: ['#playBtn', '.tempo-box'],
+  keep: ['#seqPanel', '#stepEditPanel', '#perfPanel'],
+  tabs: [
+    { id:'seq',  label:'SEQ',    title:'SECUENCIADOR · TEMPO · TECLADO',
+      nodes:['#tempoKnob', '#tapBtn', '#scope', '.seq-top', '#kbPanel'] },
+    { id:'snd',  label:'SONIDO', title:'OSCILADOR · DISTORSIÓN', peek:true,
+      nodes:['#oscPanel', '#distPanel'] },
+    { id:'filt', label:'FILTRO', title:'FILTRO RESONANTE', peek:true,
+      nodes:['#filtPanel', '#filterStatus'] },
+    { id:'pat',  label:'PATRÓN', title:'GENERADOR · BANCO DE FÁBRICA',
+      nodes:['.gen-row', '.bank-lbl', '#bank'] },
+    { id:'exp',  label:'EXPORT', title:'PATCHES · EXPORT',
+      nodes:['#ioPanel'] }
+  ],
+  menuTitle: 'MENÚ',
+  menu: [
+    { label: '← Sitio', href: '../index.html' }
+  ]
+};
+</script>
+<script>
+/* ZD-BLOCK:zd-mobile v2 */
+/* Shell portrait-first: barra superior 48px + zona de tocar + tabs 56px +
+   bottom sheets. Se configura entero por window.ZD_M (ningun selector ni
+   texto del instrumento vive aca). Un solo movimiento de nodos al activarse:
+   la media query de activacion no menciona la orientacion, asi que rotar el
+   telefono no vuelve a mover nada. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.mobile) return;
+
+  var CSS = [
+    /* ---- metricas y reset del shell ---- */
+    'html.zd-m{height:100%}',
+    'html.zd-m body{margin:0!important;padding:0!important;min-height:0!important;height:100%;overflow:hidden;',
+    '--zd-top-h:48px;--zd-tabs-h:56px;--zd-sat:env(safe-area-inset-top,0px);--zd-sab:env(safe-area-inset-bottom,0px);',
+    '--zd-sal:env(safe-area-inset-left,0px);--zd-sar:env(safe-area-inset-right,0px);',
+    '--zd-stage-h:calc(100vh - var(--zd-top-h) - var(--zd-tabs-h) - var(--zd-sat) - var(--zd-sab))}',
+    '@supports (height:100dvh){html.zd-m body{--zd-stage-h:calc(100dvh - var(--zd-top-h) - var(--zd-tabs-h) - var(--zd-sat) - var(--zd-sab))}}',
+    'html.zd-m body::before{display:none}',
+    'html.zd-m .wrap{display:none!important}',
+    'html:not(.zd-m) #zd-top,html:not(.zd-m) #zd-stage,html:not(.zd-m) #zd-tabs,',
+    'html:not(.zd-m) #zd-scrim,html:not(.zd-m) #zd-sheet{display:none!important}',
+
+    /* ---- barra superior ---- */
+    '#zd-top{position:fixed;z-index:40;left:0;right:0;top:0;display:flex;align-items:center;gap:7px;',
+    'height:calc(var(--zd-top-h) + var(--zd-sat));padding:var(--zd-sat) calc(8px + var(--zd-sar)) 0 calc(8px + var(--zd-sal));',
+    'background:var(--zd-chassis,#0d140b);border-bottom:2px solid var(--zd-outline,#000);',
+    'box-shadow:0 1px 0 var(--zd-line,#2a3f24),0 10px 24px -14px #000;',
+    'font-family:var(--zd-mono,monospace);color:var(--zd-ink,#e9ebef)}',
+    '#zd-top .zd-tlogo{height:30px;width:auto;flex:none;background:var(--zd-paper,#ecebe5);padding:2px;border-radius:2px;',
+    'box-shadow:0 0 0 1px var(--zd-outline,#000),0 2px 0 var(--zd-outline,#000)}',
+    '#zd-top .zd-ttitle{font-size:12px;font-weight:800;letter-spacing:.04em;white-space:nowrap;flex:none}',
+    '#zd-top .zd-ttitle b{color:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '#zd-top .zd-ttr{display:flex;align-items:center;gap:6px;margin-left:auto;min-width:0;overflow:hidden}',
+    '#zd-top .zd-ttr>*{margin:0!important}',
+    '#zd-tmenu{flex:none;width:44px;height:40px;cursor:pointer;font:700 15px var(--zd-mono,monospace);',
+    'color:var(--zd-ink,#e9ebef);background:var(--zd-panel-2,#1c2430);border:1px solid var(--zd-outline,#000);',
+    'border-radius:var(--zd-r,4px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 2px 0 var(--zd-outline,#000);touch-action:manipulation}',
+    '#zd-tmenu:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24)}',
+    '@media (max-width:359px){#zd-top .zd-ttitle{display:none}}',
+
+    /* ---- zona de tocar ---- */
+    '#zd-stage{position:fixed;left:0;right:0;z-index:10;display:flex;flex-direction:column;gap:6px;',
+    'top:calc(var(--zd-top-h) + var(--zd-sat));height:var(--zd-stage-h);',
+    'padding:6px calc(7px + var(--zd-sar)) 6px calc(7px + var(--zd-sal));',
+    'overscroll-behavior:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}',
+    '#zd-stage>*{margin:0!important;min-height:0}',
+
+    /* ---- tabs ---- */
+    '#zd-tabs{position:fixed;z-index:42;left:0;right:0;bottom:0;display:flex;align-items:stretch;',
+    'height:calc(var(--zd-tabs-h) + var(--zd-sab));padding:0 var(--zd-sar) var(--zd-sab) var(--zd-sal);',
+    'background:var(--zd-chassis,#0d140b);border-top:2px solid var(--zd-outline,#000);',
+    'box-shadow:0 -1px 0 var(--zd-line,#2a3f24),0 -10px 24px -14px #000}',
+    '#zd-tabs button{flex:1 1 0;min-width:0;min-height:52px;display:flex;align-items:center;justify-content:center;',
+    'cursor:pointer;background:transparent;border:0;border-right:1px solid var(--zd-line-soft,#1d2c19);',
+    'font:700 11.5px var(--zd-mono,monospace);letter-spacing:.07em;color:var(--zd-ink-dim,#a3b699);',
+    'touch-action:manipulation;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+    '#zd-tabs button:last-child{border-right:0}',
+    '#zd-tabs button[aria-expanded=true]{color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+
+    /* ---- scrim + sheet ---- */
+    '#zd-scrim{position:fixed;z-index:44;left:0;right:0;top:calc(var(--zd-top-h) + var(--zd-sat));',
+    'bottom:calc(var(--zd-tabs-h) + var(--zd-sab));background:rgba(3,5,2,.6);opacity:0;visibility:hidden;',
+    'transition:opacity .16s,visibility 0s .16s}',
+    'html.zd-m.zd-sheet-full #zd-scrim{opacity:1;visibility:visible;transition:opacity .16s}',
+    '#zd-sheet{position:fixed;z-index:45;left:0;right:0;bottom:calc(var(--zd-tabs-h) + var(--zd-sab));',
+    'display:flex;flex-direction:column;max-height:70dvh;',
+    'padding:0 calc(7px + var(--zd-sar)) 8px calc(7px + var(--zd-sal));',
+    'background:var(--zd-panel,#111b0f);border-top:2px solid var(--zd-outline,#000);',
+    'box-shadow:0 -1px 0 var(--inst-accent,var(--zd-phosphor,#7fdc5c)),0 -26px 44px -16px #000;',
+    'font-family:var(--zd-mono,monospace);color:var(--zd-ink,#e9ebef);',
+    'transform:translateY(110%);transition:transform .18s ease-out;visibility:hidden}',
+    '@supports not (height:100dvh){#zd-sheet{max-height:70vh}}',
+    '#zd-sheet.peek{max-height:45dvh}',
+    'html.zd-m.zd-sheet-open #zd-sheet{transform:none;visibility:visible}',
+    '#zd-sheet .zd-handle{flex:none;align-self:center;width:72px;height:26px;margin:0;padding:0;border:0;background:transparent;',
+    'cursor:grab;touch-action:none;display:flex;align-items:center;justify-content:center}',
+    '#zd-sheet .zd-handle::before{content:"";width:46px;height:4px;border-radius:2px;background:var(--zd-line,#2a3f24)}',
+    '#zd-sheet .zd-shead{flex:none;display:flex;align-items:center;gap:8px;padding:0 2px 7px}',
+    '#zd-sheet .zd-sdot{width:9px;height:9px;flex:none;border-radius:2px;background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));',
+    'box-shadow:0 0 8px var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '#zd-sheet h2{flex:1;margin:0;font-size:11.5px;font-weight:800;letter-spacing:.18em;color:var(--zd-ink-dim,#a3b699);',
+    'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+    '#zd-sheet .zd-sclose{flex:none;width:44px;height:36px;cursor:pointer;font-size:14px;color:var(--zd-ink,#e9ebef);',
+    'background:var(--zd-panel-2,#1c2430);border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px);',
+    'box-shadow:0 0 0 1px var(--zd-line,#2a3f24);touch-action:manipulation}',
+    '#zd-sheet .zd-sbody{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px 2px 4px}',
+    '#zd-sheet .zd-pane{display:none;flex-direction:column;gap:9px}',
+    '#zd-sheet .zd-pane.on{display:flex}',
+    '#zd-sheet .zd-pane>*{margin:0!important}',
+    '#zd-sheet .zd-mitem{display:flex;align-items:center;gap:9px;min-height:48px;padding:0 12px;text-decoration:none;',
+    'cursor:pointer;font:700 12.5px var(--zd-mono,monospace);letter-spacing:.05em;color:var(--zd-ink,#e9ebef);',
+    'background:var(--zd-well,#050804);border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px);',
+    'box-shadow:0 0 0 1px var(--zd-line,#2a3f24);touch-action:manipulation;text-align:left;width:100%}',
+    '#zd-sheet .zd-mitem[hidden]{display:none}',
+    '#zd-sheet .zd-mnote{font-size:11.5px;line-height:1.5;color:var(--zd-ink-faint,#859a7b);padding:2px 2px 0}',
+    '@media (prefers-reduced-motion:reduce){#zd-sheet,#zd-scrim{transition:none}}'
+  ].join('');
+
+  /* La media query de activacion no menciona orientacion: rotar no re-mueve nodos. */
+  var MQ = '(pointer:coarse) and (max-width:1024px), (max-width:820px)';
+  var mq = window.matchMedia(MQ);
+
+  var st = document.createElement('style');
+  st.id = 'zd-mobile-css';
+  st.textContent = CSS;
+  (document.head || document.documentElement).appendChild(st);
+  if (mq.matches) document.documentElement.classList.add('zd-m');
+
+  function mk(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function all(sel) {
+    if (typeof sel === 'function') { try { return [].concat(sel()).filter(Boolean); } catch (e) { return []; } }
+    if (sel && sel.nodeType) return [sel];
+    try { return Array.prototype.slice.call(document.querySelectorAll(sel)); } catch (e) { return []; }
+  }
+
+  var built = false, active = false, moves = [], open = null;
+  var top, stage, tabsBar, scrim, sheet, sheetBody, sheetTitle, panes = {}, tabBtns = {}, cfgTabs = [], C = null;
+
+  function build() {
+    if (built) return;
+    built = true;
+    C = window.ZD_M || {};
+    cfgTabs = (C.tabs || []).slice(0, 5);
+
+    top = mk('div'); top.id = 'zd-top';
+    var logoSrc = C.logo || (function () { var l = document.querySelector('.zd-logo, .brand img'); return l ? l.getAttribute('src') : ''; })();
+    if (logoSrc) {
+      var logo = mk('img', 'zd-tlogo');
+      logo.alt = C.logoAlt || 'Zero Day · Music Exploits';
+      logo.src = logoSrc;
+      top.appendChild(logo);
+    }
+    var ttl = mk('span', 'zd-ttitle');
+    buildTitle(ttl, C.titleParts || C.name || '');
+    top.appendChild(ttl);
+    var tr = mk('div', 'zd-ttr');
+    top.appendChild(tr);
+    var menuBtn = mk('button', null, '⋯');
+    menuBtn.id = 'zd-tmenu'; menuBtn.type = 'button';
+    menuBtn.setAttribute('aria-label', 'Menú');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.setAttribute('aria-haspopup', 'dialog');
+    top.appendChild(menuBtn);
+
+    stage = mk('main'); stage.id = 'zd-stage';
+
+    tabsBar = mk('nav'); tabsBar.id = 'zd-tabs';
+    tabsBar.setAttribute('aria-label', 'Secciones');
+
+    scrim = mk('div'); scrim.id = 'zd-scrim';
+
+    sheet = mk('div'); sheet.id = 'zd-sheet';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'false');
+    var handle = mk('button', 'zd-handle');
+    handle.type = 'button'; handle.setAttribute('aria-label', 'Cerrar panel');
+    var head = mk('div', 'zd-shead');
+    head.appendChild(mk('span', 'zd-sdot'));
+    sheetTitle = mk('h2');
+    var hid = 'zd-sheet-title';
+    sheetTitle.id = hid;
+    sheet.setAttribute('aria-labelledby', hid);
+    head.appendChild(sheetTitle);
+    var close = mk('button', 'zd-sclose', '✕');
+    close.type = 'button'; close.setAttribute('aria-label', 'Cerrar panel');
+    head.appendChild(close);
+    sheetBody = mk('div', 'zd-sbody');
+    sheet.append(handle, head, sheetBody);
+
+    cfgTabs.forEach(function (t) {
+      var pane = mk('div', 'zd-pane');
+      pane.dataset.tab = t.id;
+      sheetBody.appendChild(pane);
+      panes[t.id] = pane;
+      var b = mk('button', null, t.label);
+      b.type = 'button';
+      b.dataset.tab = t.id;
+      b.setAttribute('aria-expanded', 'false');
+      b.setAttribute('aria-controls', 'zd-sheet');
+      b.addEventListener('click', function () { toggle(t.id); });
+      tabsBar.appendChild(b);
+      tabBtns[t.id] = b;
+    });
+
+    /* panel de menu: "<- Sitio", instalar y lo que agregue la config */
+    var menuPane = mk('div', 'zd-pane');
+    menuPane.dataset.tab = '__menu';
+    sheetBody.appendChild(menuPane);
+    panes.__menu = menuPane;
+    (C.menu || []).forEach(function (m) {
+      var node;
+      if (m.href) {
+        node = mk('a', 'zd-mitem', m.label);
+        node.href = m.href;
+        node.rel = 'noopener';
+        if (m.target) node.target = m.target;
+      } else {
+        node = mk('button', 'zd-mitem', m.label);
+        node.type = 'button';
+        if (m.onClick) node.addEventListener('click', function () { close_(); m.onClick(); });
+      }
+      if (m.id) node.id = m.id;
+      if (m.hidden) node.hidden = true;
+      menuPane.appendChild(node);
+    });
+    (C.menuNotes || []).forEach(function (txt) { menuPane.appendChild(mk('div', 'zd-mnote', txt)); });
+    menuBtn.addEventListener('click', function () { toggle('__menu'); });
+    tabBtns.__menu = menuBtn;
+
+    document.body.append(top, stage, tabsBar, scrim, sheet);
+
+    close.addEventListener('click', close_);
+    scrim.addEventListener('click', close_);
+    window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && open) { e.stopPropagation(); close_(); } });
+    dragToClose(handle);
+    dragToClose(head);
+
+    moveNodes(tr);
+  }
+
+  /* El titulo acepta ['ACID ','BASS-303'] -> el 2do tramo va en <b>. */
+  function buildTitle(host, parts) {
+    var list = Array.isArray(parts) ? parts : [String(parts)];
+    list.forEach(function (p, i) {
+      if (i % 2 === 1) { var b = document.createElement('b'); b.textContent = p; host.appendChild(b); }
+      else host.appendChild(document.createTextNode(p));
+    });
+  }
+
+  function moveNodes(tr) {
+    var plan = [];
+    function q(list, target) { (list || []).forEach(function (s) { all(s).forEach(function (n) { plan.push([n, target]); }); }); }
+    q(C.transport, tr);
+    q(C.keep, stage);
+    cfgTabs.forEach(function (t) { q(t.nodes, panes[t.id]); });
+    plan.forEach(function (p) {
+      var n = p[0], t = p[1];
+      if (!t || !n || !n.parentNode) return;
+      var ph = document.createComment('zd-m');
+      n.parentNode.insertBefore(ph, n);
+      t.appendChild(n);
+      moves.push({ n: n, ph: ph });
+    });
+  }
+  function restoreNodes() {
+    for (var i = moves.length - 1; i >= 0; i--) {
+      var m = moves[i];
+      if (m.ph.parentNode) { m.ph.parentNode.insertBefore(m.n, m.ph); m.ph.remove(); }
+    }
+    moves = [];
+  }
+
+  function fire() { requestAnimationFrame(function () { window.dispatchEvent(new Event('resize')); }); }
+
+  function show(id) {
+    var tab = id === '__menu' ? { id: '__menu', title: (C.menuTitle || 'MENÚ'), peek: false } : cfgTabs.filter(function (t) { return t.id === id; })[0];
+    if (!tab) return;
+    open = id;
+    for (var k in panes) panes[k].classList.toggle('on', k === id);
+    for (var b in tabBtns) tabBtns[b].setAttribute('aria-expanded', b === id ? 'true' : 'false');
+    sheetTitle.textContent = tab.title || tab.label || '';
+    sheet.classList.toggle('peek', !!tab.peek);
+    sheet.setAttribute('aria-modal', tab.peek ? 'false' : 'true');
+    sheet.style.transform = '';
+    document.documentElement.classList.add('zd-sheet-open');
+    document.documentElement.classList.toggle('zd-sheet-full', !tab.peek);
+    if (ZD.mobile) ZD.mobile.openTab = id;
+    fire();
+  }
+  function close_() {
+    if (!open) return;
+    open = null;
+    for (var k in panes) panes[k].classList.remove('on');
+    for (var b in tabBtns) tabBtns[b].setAttribute('aria-expanded', 'false');
+    sheet.style.transform = '';
+    document.documentElement.classList.remove('zd-sheet-open', 'zd-sheet-full');
+    if (ZD.mobile) ZD.mobile.openTab = null;
+    fire();
+  }
+  function toggle(id) { if (open === id) close_(); else show(id); }
+
+  /* swipe hacia abajo sobre el handle / cabecera para cerrar */
+  function dragToClose(el) {
+    var y0 = 0, t0 = 0, dragging = false;
+    el.addEventListener('pointerdown', function (e) {
+      if (e.target.closest && e.target.closest('.zd-sclose')) return;
+      dragging = true; y0 = e.clientY; t0 = performance.now();
+      sheet.style.transition = 'none';
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dy = Math.max(0, e.clientY - y0);
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+    });
+    function end(e) {
+      if (!dragging) return;
+      dragging = false;
+      sheet.style.transition = '';
+      try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+      var dy = Math.max(0, e.clientY - y0), dt = performance.now() - t0;
+      sheet.style.transform = '';
+      if (dy > 64 || (dy > 24 && dt < 220)) close_();
+    }
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+  }
+
+  function enter() {
+    if (active) return;
+    build();
+    active = true;
+    document.documentElement.classList.add('zd-m');
+    if (C && C.onEnter) try { C.onEnter(); } catch (e) {}
+    fire();
+  }
+  function exit() {
+    if (!active) return;
+    active = false;
+    close_();
+    restoreNodes();
+    document.documentElement.classList.remove('zd-m');
+    if (C && C.onExit) try { C.onExit(); } catch (e) {}
+    fire();
+  }
+  function apply() {
+    if (mq.matches) enter();
+    else { if (built) exit(); else document.documentElement.classList.remove('zd-m'); }
+  }
+
+  function init() {
+    apply();
+    if (mq.addEventListener) mq.addEventListener('change', apply);
+    else if (mq.addListener) mq.addListener(apply);
+  }
+
+  ZD.mobile = {
+    mq: MQ,
+    get active() { return active; },
+    openTab: null,
+    open: show, close: close_, toggle: toggle,
+    stage: function () { return stage; },
+    pane: function (id) { return panes[id]; }
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+/* /ZD-BLOCK:zd-mobile */
+</script>
 
 
 </head>
@@ -428,7 +1112,7 @@
     <div id="filterStatus" class="status"><span class="dot"></span><span id="filterStatusTxt">iniciando…</span></div>
   </header>
 
-  <section class="panel">
+  <section class="panel" id="transportPanel">
     <div class="transport">
       <button id="playBtn" class="btn-play">▶ PLAY</button>
       <button id="tapBtn" class="btn-tap">TAP</button>
@@ -438,7 +1122,7 @@
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="perfPanel">
     <p class="ptitle live">PERFORMANCE · LIVE TWEAK</p>
     <div class="perf-grid">
       <div class="xypad-wrap">
@@ -457,7 +1141,7 @@
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="oscPanel">
     <p class="ptitle">OSCILADOR</p>
     <div class="rowfull">
       <span class="name">FORMA DE ONDA</span>
@@ -472,7 +1156,7 @@
     <div class="knob-bank" id="oscKnobs"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="filtPanel">
     <p class="ptitle">FILTRO RESONANTE</p>
     <div class="rowfull">
       <span class="name">MODO</span>
@@ -481,12 +1165,12 @@
     <div class="knob-bank" id="filtKnobs"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="distPanel">
     <p class="ptitle">DISTORSIÓN MULTIETAPA</p>
     <div class="knob-bank" id="distKnobs"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="seqPanel">
     <p class="ptitle">SECUENCIADOR · 16 PASOS</p>
     <div class="seq-top">
       <div class="oct-ctrl"><span>PATRÓN OCT</span><button class="mini" id="octDown">−</button><span class="octv" id="octVal">0</span><button class="mini" id="octUp">+</button></div>
@@ -505,8 +1189,32 @@
     <div class="seq-scroll"><div class="seq" id="seq"></div></div>
   </section>
 
+  <section class="panel" id="stepEditPanel">
+    <p class="ptitle">EDITOR DE PASO</p>
+    <div class="step-edit off" id="stepEdit">
+      <div class="se-group">
+        <span class="se-lbl">PASO</span>
+        <button class="mini" id="sePrev" aria-label="Paso anterior">◀</button>
+        <span class="se-num" id="seNum">—</span>
+        <button class="mini" id="seNext" aria-label="Paso siguiente">▶</button>
+      </div>
+      <div class="se-group">
+        <button class="mini" id="seOctDown" aria-label="Bajar una octava">−12</button>
+        <button class="mini" id="seDown" aria-label="Bajar un semitono">−</button>
+        <span class="se-note" id="seNoteTxt" role="status" aria-live="polite" aria-label="Nota del paso">—</span>
+        <button class="mini" id="seUp" aria-label="Subir un semitono">+</button>
+        <button class="mini" id="seOctUp" aria-label="Subir una octava">+12</button>
+      </div>
+      <div class="se-group se-tog">
+        <button class="mini a" id="seAccent" aria-pressed="false">ACCENT</button>
+        <button class="mini s" id="seSlide" aria-pressed="false">SLIDE</button>
+        <button class="mini" id="seGate" aria-label="Tipo de paso">· SILENCIO</button>
+      </div>
+    </div>
+  </section>
+
   <!-- PATCHES / BANCO / EXPORT -->
-  <section class="panel">
+  <section class="panel" id="ioPanel">
     <p class="ptitle io">PATCHES · BANCO · EXPORT</p>
     <div class="act-row">
       <input id="patchName" class="patch-name" type="text" placeholder="nombre del patch" maxlength="40">
@@ -523,7 +1231,7 @@
     <div class="bank" id="bank"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="kbPanel">
     <p class="ptitle">TECLADO · TOCAR / PROGRAMAR</p>
     <div class="kb-wrap">
       <div class="kb-top">
@@ -781,16 +1489,41 @@ function setParam(key,val){ const c=CTRL[key]; if(c.step) val=Math.round(val/c.s
 function makeKnob(mount,key,label,opt){ opt=opt||{}; const c=CTRL[key];
   const wrap=el('div','knob-wrap'+(opt.accent?' accent':'')); const lab=el('div','knob-label'); lab.textContent=label;
   const knob=el('div','knob'+(opt.blue?' blue':'')); const ring=el('div','knob-ring'), body=el('div','knob-body'), notch=el('div','knob-notch');
-  body.appendChild(notch); knob.append(ring,body); const val=el('div','knob-val'); wrap.append(lab,knob,val); mount.appendChild(wrap);
-  const widget={ update(v){ const norm=(v-c.min)/(c.max-c.min); notch.style.transform='rotate('+(norm*270-135)+'deg)'; ring.style.setProperty('--pct',norm); val.textContent=c.fmt(v); } };
+  body.appendChild(notch); knob.append(ring,body); const val=el('div','knob-val');
+  // slider alternativo: oculto en escritorio, visible dentro de los sheets del shell movil (SPEC R1)
+  const sld=el('input','knob-slider'); sld.type='range'; sld.min=c.min; sld.max=c.max;
+  sld.step=c.step||((c.max-c.min)/200); sld.tabIndex=-1; sld.setAttribute('aria-label',label+' (slider)');
+  wrap.append(lab,knob,val,sld); mount.appendChild(wrap);
+  let a11y=null;
+  const widget={ update(v){ const norm=(v-c.min)/(c.max-c.min);
+    notch.style.transform='rotate('+(norm*270-135)+'deg)'; ring.style.setProperty('--pct',norm); val.textContent=c.fmt(v);
+    sld.value=v; sld.style.setProperty('--fill',(norm*100)+'%'); if(a11y) a11y.refresh(v); } };
   c.widgets.push(widget);
-  let dragging=false, startY=0, startNorm=0;
-  knob.addEventListener('pointerdown', e=>{ e.preventDefault(); dragging=true; startY=e.clientY; startNorm=(params[key]-c.min)/(c.max-c.min); knob.setPointerCapture(e.pointerId); knob.classList.add('grab'); Engine.ensure(); });
-  knob.addEventListener('pointermove', e=>{ if(!dragging) return; const sens=e.shiftKey?0.28:1, dy=(startY-e.clientY)*sens, norm=clamp(startNorm+dy/180,0,1); setParam(key,c.min+norm*(c.max-c.min)); });
-  const end=e=>{ if(!dragging) return; dragging=false; try{knob.releasePointerCapture(e.pointerId);}catch(_){} knob.classList.remove('grab'); };
+  function askValue(){ if(!(window.ZD&&ZD.modal)) return;
+    ZD.modal.prompt('Entre '+c.fmt(c.min)+' y '+c.fmt(c.max)+'. Valor actual: '+c.fmt(params[key])+'.',
+      { title:label, value:String(Math.round(params[key]*1e4)/1e4), maxlength:12, label:label })
+      .then(v=>{ if(v==null) return; const n=parseFloat(String(v).replace(',','.'));
+        if(isNaN(n)) ZD.toast('Ese valor no es un número', {kind:'error'}); else setParam(key,n); }); }
+  a11y = (window.ZD&&ZD.ui) ? ZD.ui.a11ySlider(knob,{ min:c.min, max:c.max, step:(c.step||(c.max-c.min)/50),
+    fineStep:(c.step||(c.max-c.min)/200), pageStep:(c.max-c.min)/10, label:label,
+    get:()=>params[key], set:v=>setParam(key,v), format:v=>c.fmt(v), onEnter:askValue }) : null;
+  let dragging=false, startY=0, startNorm=0, moved=0, lpTimer=null, lpFired=false, lastTap=0;
+  function clearLP(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } }
+  knob.addEventListener('pointerdown', e=>{ e.preventDefault(); dragging=true; moved=0; lpFired=false;
+    startY=e.clientY; startNorm=(params[key]-c.min)/(c.max-c.min); knob.setPointerCapture(e.pointerId); knob.classList.add('grab');
+    clearLP(); lpTimer=setTimeout(()=>{ lpTimer=null; lpFired=true; dragging=false; knob.classList.remove('grab'); askValue(); }, 550);
+    if(window.ZD&&ZD.audio) ZD.audio.unlock(); else Engine.ensure(); });
+  knob.addEventListener('pointermove', e=>{ if(!dragging) return; const dyAbs=Math.abs(startY-e.clientY);
+    if(dyAbs>6) clearLP(); moved=Math.max(moved,dyAbs);
+    const sens=e.shiftKey?0.28:1, dy=(startY-e.clientY)*sens, norm=clamp(startNorm+dy/180,0,1); setParam(key,c.min+norm*(c.max-c.min)); });
+  const end=e=>{ clearLP(); if(!dragging) return; dragging=false;
+    try{knob.releasePointerCapture(e.pointerId);}catch(_){} knob.classList.remove('grab');
+    if(lpFired || moved>6) return;
+    const now=performance.now(); if(now-lastTap<320){ setParam(key,c.def); lastTap=0; } else lastTap=now; };
   knob.addEventListener('pointerup',end); knob.addEventListener('pointercancel',end);
-  knob.addEventListener('dblclick', ()=>setParam(key,c.def));
   knob.addEventListener('wheel', e=>{ e.preventDefault(); const step=(c.max-c.min)*(e.shiftKey?0.005:0.02); setParam(key,params[key]-Math.sign(e.deltaY)*step); }, {passive:false});
+  sld.addEventListener('input', ()=>setParam(key,parseFloat(sld.value)));
+  sld.addEventListener('pointerdown', ()=>{ if(window.ZD&&ZD.audio) ZD.audio.unlock(); else Engine.ensure(); });
   return widget;
 }
 makeKnob($('#tempoKnob'),'tempo','TEMPO');
@@ -963,24 +1696,30 @@ FACTORY.forEach(pset=>{ const chip=el('button','chip'); chip.textContent=pset.na
 const seqEl=$('#seq');
 function renderSeq(){ seqEl.innerHTML='';
   for(let i=0;i<STEPS;i++){ const st=pattern[i];
-    const col=el('div','step'+(i%4===0?' group4':'')+(st.gate==='rest'?' rest':'')+(selectedStep===i?' selected':'')+(st.slide?' sliding':'')); col.dataset.i=i;
+    const col=el('div','step'+(i%4===0?' group4':'')+(st.gate==='rest'?' rest':'')+(selectedStep===i?' selected':'')+(st.slide?' sliding':'')+(st.accent?' accented':'')); col.dataset.i=i;
     const idx=el('div','idx'); idx.textContent=String(i+1).padStart(2,'0');
-    const note=el('div','note'); note.textContent=st.gate==='rest'?'···':noteName(patNote(i)); note.addEventListener('click',()=>selectStep(i));
+    const note=el('div','note'); note.textContent=stepLabel(i); note.addEventListener('click',()=>selectStep(i));
     const nud=el('div','nud'); const dn=el('button'); dn.textContent='▽'; const up=el('button'); up.textContent='△';
     dn.addEventListener('click',()=>{ st.note--; if(st.gate==='rest') st.gate='note'; refreshStep(i); previewStep(i); });
     up.addEventListener('click',()=>{ st.note++; if(st.gate==='rest') st.gate='note'; refreshStep(i); previewStep(i); }); nud.append(dn,up);
     const tog=el('div','toggles');
     const aBtn=el('button','a'+(st.accent?' on-a':'')); aBtn.textContent='A'; aBtn.addEventListener('click',()=>{ st.accent=!st.accent; refreshStep(i); });
     const sBtn=el('button','s'+(st.slide?' on-s':'')); sBtn.textContent='S'; sBtn.addEventListener('click',()=>{ st.slide=!st.slide; refreshStep(i); }); tog.append(aBtn,sBtn);
-    const gate=el('button','g gatebtn '+st.gate); gate.textContent=st.gate==='note'?'●':st.gate==='tie'?'‿':'·';
+    const gate=el('button','g gatebtn gate-'+st.gate); gate.textContent=st.gate==='note'?'●':st.gate==='tie'?'‿':'·';
+    gate.title='Nota / tie / silencio';
     gate.addEventListener('click',()=>{ st.gate=st.gate==='note'?'tie':st.gate==='tie'?'rest':'note'; refreshStep(i); });
-    col.append(idx,gate,note,nud,tog); seqEl.appendChild(col); } }
+    col.append(idx,gate,note,nud,tog); seqEl.appendChild(col); }
+  renderStepEdit(); }
+// etiqueta de la celda: silencio, tie (no retrigea, la nota no importa) o nombre de nota
+function stepLabel(i){ const st=pattern[i]; return st.gate==='rest'?'···':st.gate==='tie'?'‿':noteName(patNote(i)); }
 function refreshStep(i){ const st=pattern[i], col=seqEl.querySelector('.step[data-i="'+i+'"]'); if(!col) return;
-  col.classList.toggle('rest',st.gate==='rest'); col.classList.toggle('sliding',st.slide);
-  col.querySelector('.note').textContent=st.gate==='rest'?'···':noteName(patNote(i));
+  col.classList.toggle('rest',st.gate==='rest'); col.classList.toggle('sliding',st.slide); col.classList.toggle('accented',st.accent);
+  col.querySelector('.note').textContent=stepLabel(i);
   col.querySelector('.a').classList.toggle('on-a',st.accent); col.querySelector('.s').classList.toggle('on-s',st.slide);
-  const g=col.querySelector('.gatebtn'); g.className='g gatebtn '+st.gate; g.textContent=st.gate==='note'?'●':st.gate==='tie'?'‿':'·'; }
-function selectStep(i){ selectedStep=(selectedStep===i)?-1:i; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===selectedStep)); if(selectedStep>=0) previewStep(selectedStep); }
+  const g=col.querySelector('.gatebtn'); g.className='g gatebtn gate-'+st.gate; g.textContent=st.gate==='note'?'●':st.gate==='tie'?'‿':'·';
+  if(i===selectedStep) renderStepEdit(); }
+function selectStep(i){ selectedStep=(selectedStep===i)?-1:i; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===selectedStep));
+  renderStepEdit(); if(selectedStep>=0) previewStep(selectedStep); }
 function previewStep(i){ const st=pattern[i]; if(st.gate!=='rest') auditionNote(patNote(i),true); }
 
 const lcdNote=$('#lcdNote'), lcdGlide=$('#lcdGlide'), glideBar=$('#glideBar');
@@ -995,6 +1734,38 @@ function updateLCD(i){ if(i<0){ lcdNote.textContent='—'; lcdNote.classList.rem
   lcdNote.classList.toggle('glide',glideIn); lcdGlide.classList.toggle('on',glideIn);
   if(glideIn){ glideBar.classList.remove('on'); void glideBar.offsetWidth; glideBar.classList.add('on'); if(playingStepEl) playingStepEl.classList.add('glide-active'); } }
 
+
+// ---------- editor del paso seleccionado (siempre visible en portrait) ----------
+const SE={ box:$('#stepEdit'), num:$('#seNum'), note:$('#seNoteTxt'), acc:$('#seAccent'), sld:$('#seSlide'), gate:$('#seGate') };
+const SE_BTNS=['#sePrev','#seNext','#seOctDown','#seDown','#seUp','#seOctUp','#seAccent','#seSlide','#seGate'].map(q=>$(q));
+const GATE_LABEL={ note:'● NOTA', tie:'‿ TIE', rest:'· SILENCIO' };
+function renderStepEdit(){ const i=selectedStep, on=i>=0;
+  SE.box.classList.toggle('off',!on);
+  SE_BTNS.forEach(b=>{ if(b) b.disabled=!on; });
+  if(!on){ SE.num.textContent='—'; SE.note.textContent='—'; SE.gate.textContent=GATE_LABEL.rest;
+    SE.acc.setAttribute('aria-pressed','false'); SE.sld.setAttribute('aria-pressed','false'); return; }
+  const st=pattern[i];
+  SE.num.textContent=String(i+1).padStart(2,'0');
+  SE.note.textContent=stepLabel(i);
+  SE.gate.textContent=GATE_LABEL[st.gate]||GATE_LABEL.rest;
+  SE.acc.setAttribute('aria-pressed',st.accent?'true':'false');
+  SE.sld.setAttribute('aria-pressed',st.slide?'true':'false'); }
+function seStep(delta){ if(selectedStep<0) return; selectStepAt((selectedStep+delta+STEPS)%STEPS); }
+function selectStepAt(i){ selectedStep=i; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===i)); renderStepEdit(); previewStep(i); }
+function seNudge(semis){ if(selectedStep<0) return; const st=pattern[selectedStep];
+  st.note=clamp(st.note+semis,0,127-patternOct*12); if(st.gate==='rest') st.gate='note';
+  refreshStep(selectedStep); previewStep(selectedStep); }
+$('#sePrev').addEventListener('click',()=>seStep(-1));
+$('#seNext').addEventListener('click',()=>seStep(1));
+$('#seDown').addEventListener('click',()=>seNudge(-1));
+$('#seUp').addEventListener('click',()=>seNudge(1));
+$('#seOctDown').addEventListener('click',()=>seNudge(-12));
+$('#seOctUp').addEventListener('click',()=>seNudge(12));
+$('#seAccent').addEventListener('click',()=>{ if(selectedStep<0) return; const st=pattern[selectedStep]; st.accent=!st.accent; refreshStep(selectedStep); });
+$('#seSlide').addEventListener('click',()=>{ if(selectedStep<0) return; const st=pattern[selectedStep]; st.slide=!st.slide; refreshStep(selectedStep); });
+$('#seGate').addEventListener('click',()=>{ if(selectedStep<0) return; const st=pattern[selectedStep];
+  st.gate=st.gate==='note'?'tie':st.gate==='tie'?'rest':'note'; refreshStep(selectedStep); });
+
 $('#octUp').addEventListener('click',()=>{ patternOct=clamp(patternOct+1,-3,3); $('#octVal').textContent=patternOct; renderSeq(); });
 $('#octDown').addEventListener('click',()=>{ patternOct=clamp(patternOct-1,-3,3); $('#octVal').textContent=patternOct; renderSeq(); });
 $('#initBtn').addEventListener('click',()=>{ pattern=initPattern(); selectedStep=-1; renderSeq(); });
@@ -1004,7 +1775,12 @@ renderSeq();
 function drawLoop(){ if(Seq.playing && Engine.ctx){ const now=Engine.ctx.currentTime; while(Seq.drawQueue.length && Seq.drawQueue[0].time<=now) setPlayingStep(Seq.drawQueue.shift().step); } drawScope(); requestAnimationFrame(drawLoop); }
 let scopeStarted=false, scopeBuf=null, scopeCtx=null, scopeCanvas=null;
 function startScope(){ if(scopeStarted) return; scopeStarted=true; scopeCanvas=$('#scope'); scopeCtx=scopeCanvas.getContext('2d'); scopeBuf=new Uint8Array(Engine.analyser.fftSize); }
-function drawScope(){ if(!scopeStarted) return; const w=scopeCanvas.width, h=scopeCanvas.height; Engine.analyser.getByteTimeDomainData(scopeBuf);
+let scopeFrames=0, scopeVisible=true;
+function drawScope(){ if(!scopeStarted) return;
+  // en el shell movil el scope vive en un sheet: no gastamos frames si esta oculto
+  if((scopeFrames++ % 15)===0) scopeVisible=!!scopeCanvas.offsetParent;
+  if(!scopeVisible) return;
+  const w=scopeCanvas.width, h=scopeCanvas.height; Engine.analyser.getByteTimeDomainData(scopeBuf);
   scopeCtx.clearRect(0,0,w,h); scopeCtx.lineWidth=2; scopeCtx.strokeStyle=Seq.playing?'#b6ff3a':'#5c6470'; scopeCtx.beginPath(); const n=scopeBuf.length, slice=w/n;
   for(let i=0;i<n;i++){ const v=scopeBuf[i]/128-1, y=h/2+v*(h/2-3), x=i*slice; if(i===0) scopeCtx.moveTo(x,y); else scopeCtx.lineTo(x,y); } scopeCtx.stroke(); }
 requestAnimationFrame(drawLoop);
@@ -1121,79 +1897,6 @@ window.addEventListener('pointerdown', primeAudio);
   }
 })();
 
-</script>
-<script id="zd-mobile-js">
-/* ZERO DAY · capa de presentación mobile horizontal. No toca el motor: solo reubica nodos existentes en menús cuando la pantalla es un teléfono en horizontal. */
-window.ZD_M={name:'Acid Bass-303', title:'ACID <b>BASS-303</b>',
-  place:[['#scope','.perf-grid']],
-  transport:['#playBtn','#tapBtn','.tempo-box'],
-  menus:[
-    {id:'osc',label:'OSC',title:'OSCILADOR',nodes:['.wrap > section:nth-of-type(3)']},
-    {id:'filt',label:'FILTRO',title:'FILTRO RESONANTE',nodes:['.wrap > section:nth-of-type(4)','#filterStatus']},
-    {id:'dist',label:'DIST',title:'DISTORSIÓN MULTIETAPA',nodes:['.wrap > section:nth-of-type(5)']},
-    {id:'seq',label:'SEQ',title:'SECUENCIADOR · TEMPO',nodes:['#tempoKnob','.seq-top','.gen-row']},
-    {id:'kb',label:'TECLADO',title:'TECLADO · TOCAR / PROGRAMAR',nodes:['.wrap > section:nth-of-type(8)']},
-    {id:'patch',label:'PATCH',title:'PATCHES · BANCO · EXPORT',nodes:['.wrap > section:nth-of-type(7)']}
-  ]};
-
-(function(){
-  "use strict";
-  var C=window.ZD_M; if(!C) return;
-  var mq=window.matchMedia('(orientation:landscape) and (max-height:540px)');
-  var logoEl=document.querySelector('.zd-logo, .brand .logo'); var logoSrc=logoEl?logoEl.src:'';
-  function el(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
-  var bar=el('div'); bar.id='zd-mbar';
-  var logo=el('img','zd-mlogo'); logo.alt='Zero Day · Music Exploits'; logo.src=logoSrc;
-  var title=el('span','zd-mtitle',C.title||'');
-  var tr=el('div','zd-mtr'); var menus=el('div','zd-mmenus'); menus.setAttribute('role','menubar');
-  bar.append(logo,title,tr,menus);
-  var back=el('div'); back.id='zd-mback';
-  var dr=el('div'); dr.id='zd-mdrawer'; dr.setAttribute('role','dialog'); dr.setAttribute('aria-modal','false');
-  var head=el('div','zd-mhead','<span class="zd-mdot"></span><span class="zd-mdtitle"></span>');
-  var closeBtn=el('button','zd-mclose','✕'); closeBtn.type='button'; closeBtn.setAttribute('aria-label','Cerrar menú'); head.appendChild(closeBtn);
-  var body=el('div','zd-mbody'); dr.append(head,body);
-  var dtitle=head.querySelector('.zd-mdtitle');
-  var panes={}, btns={}, open=null;
-  C.menus.forEach(function(m){
-    var p=el('div','zd-mpane'); p.dataset.m=m.id; body.appendChild(p); panes[m.id]=p;
-    var b=el('button','zd-mbtn',m.label); b.type='button'; b.setAttribute('aria-expanded','false'); b.setAttribute('aria-haspopup','true');
-    b.addEventListener('click',function(e){ toggle(m.id); if(e.detail) b.blur(); });
-    menus.appendChild(b); btns[m.id]=b;
-    if(m.closeOnClick) p.addEventListener('click',function(e){ if(e.target.closest('button')) setTimeout(close,140); });
-  });
-  var rot=el('div','','<img alt="Zero Day · Music Exploits"><div class="zd-rphone"></div><b>GIRÁ EL TELÉFONO</b><span>'+(C.name||'este instrumento')+' se toca en horizontal</span>'); rot.id='zd-rotate'; rot.querySelector('img').src=logoSrc;
-  document.body.append(bar,back,dr,rot);
-  function fire(){ requestAnimationFrame(function(){ window.dispatchEvent(new Event('resize')); }); }
-  function show(id){ open=id; for(var k in panes){ var on=k===id; panes[k].classList.toggle('on',on); btns[k].classList.toggle('on',on); btns[k].setAttribute('aria-expanded',on?'true':'false'); }
-    var m=C.menus.filter(function(x){return x.id===id;})[0]; dtitle.textContent=m.title||m.label; document.body.classList.add('zd-mopen'); fire(); }
-  function close(){ if(!open) return; open=null; for(var k in panes){ panes[k].classList.remove('on'); btns[k].classList.remove('on'); btns[k].setAttribute('aria-expanded','false'); } document.body.classList.remove('zd-mopen'); }
-  function toggle(id){ if(open===id) close(); else show(id); }
-  back.addEventListener('click',close); closeBtn.addEventListener('click',close);
-  window.addEventListener('keydown',function(e){ if(e.key==='Escape' && open){ close(); } });
-  function resolve(s){ if(typeof s==='function') return [].concat(s()).filter(Boolean); return Array.prototype.slice.call(document.querySelectorAll(s)); }
-  var moves=[], slots=[], active=false;
-  function enter(){
-    if(active) return; active=true; moves=[]; slots=[];
-    (C.slots||[]).forEach(function(s){ var ref=document.querySelector(s.before); if(!ref) return; var d=el('div',s.cls||''); d.id=s.id; ref.parentNode.insertBefore(d,ref); slots.push(d); });
-    var plan=[];
-    function q(list,target){ list.forEach(function(s){ resolve(s).forEach(function(n){ plan.push([n,target]); }); }); }
-    (C.place||[]).forEach(function(p){ q([p[0]],p[1]); });
-    q(C.transport||[],tr);
-    C.menus.forEach(function(m){ q(m.nodes,panes[m.id]); });
-    plan.forEach(function(p){ var n=p[0], t=typeof p[1]==='string'?document.querySelector(p[1]):p[1]; if(!t||!n.parentNode) return;
-      var ph=document.createComment('zd'); n.parentNode.insertBefore(ph,n); t.appendChild(n); moves.push({n:n,ph:ph}); });
-    document.body.classList.add('zd-m'); if(C.onEnter) C.onEnter(); fire();
-  }
-  function exit(){
-    if(!active) return; active=false; close(); if(C.onExit) C.onExit();
-    for(var i=moves.length-1;i>=0;i--){ var m=moves[i]; if(m.ph.parentNode){ m.ph.parentNode.insertBefore(m.n,m.ph); m.ph.remove(); } }
-    slots.forEach(function(d){ d.remove(); }); moves=[]; slots=[];
-    document.body.classList.remove('zd-m'); fire();
-  }
-  function apply(){ if(mq.matches) enter(); else exit(); }
-  if(mq.addEventListener) mq.addEventListener('change',apply); else mq.addListener(apply);
-  apply();
-})();
 </script>
 </body>
 </html>
