@@ -7,9 +7,8 @@
 <p align="center"><strong>Laboratorio de instrumentos web · 100% client-side · sin backend</strong></p>
 
 <p align="center">
-  <a href="index.html">Sitio web</a> ·
+  <a href="https://zeroday-musicexploits.github.io/instruments/">Sitio web</a> ·
   <a href="#cómo-usar-cualquiera-de-los-5">Cómo se usa</a> ·
-  <a href="#estructura-del-repositorio">Estructura</a> ·
   <a href="#compatibilidad">Compatibilidad</a>
 </p>
 
@@ -33,8 +32,6 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 - [4 · J4-Sirens Station — Dub siren](#4--j4-sirens-station--dub-siren)
 - [5 · ACID BASS-303 — Bajo ácido](#5--acid-bass-303--bajo-ácido)
 - [C2 · Sync Master Envelopment](#c2--sync-master-envelopment)
-- [Sitio web](#sitio-web)
-- [Estructura del repositorio](#estructura-del-repositorio)
 - [Compatibilidad](#compatibilidad)
 - [Privacidad](#privacidad)
 - [Nombres oficiales de archivo](#nombres-oficiales-de-archivo)
@@ -400,41 +397,11 @@ Plataforma central de Zero Day · Music Exploits que integra los 5 instrumentos 
 
 ---
 
-## Sitio web
 
-El sitio de promoción y descarga gratuita también es 100% estático: se puede publicar tal cual en GitHub Pages, Netlify o cualquier hosting de archivos.
-
-| Página | Archivo | Contenido |
-|---|---|---|
-| Inicio | `index.html` | Presentación de la suite, prueba en vivo de los 5 instrumentos y descarga con verificación de mail |
-| Landing por instrumento | `landing-cronbeat.html` · `landing-monomoon.html` · `landing-nebularp.html` · `landing-sirens.html` · `landing-acid.html` | Descripción, prueba en vivo, manual de usuario, atajos de teclado y descarga individual |
-| Privacidad | `privacidad.html` | Qué datos se piden y cómo se usan |
-| Error | `404.html` | Página no encontrada, con accesos a los 5 instrumentos |
-
-Las 5 landings comparten una sola plantilla, `ZD-Instrumento.dc.html`: los textos del manual de cada instrumento se editan ahí.
 
 **Descarga con verificación de mail.** El formulario valida el formato, detecta errores de tipeo comunes (`gmial.com`), rechaza mails temporales y consulta que el dominio reciba correo. Después envía un código de 6 dígitos que vence a los 10 minutos. Una vez verificado, el mail queda recordado en ese navegador para descargar desde cualquier landing.
 
 > **Envío del código.** Sin un servicio de mail conectado, el sitio funciona en modo demo y muestra el código en pantalla. Para enviarlo de verdad hay que definir `window.ZD_SEND_CODE(email, code)` con un servicio como EmailJS, Resend o Brevo. Como la verificación corre en el navegador, para una protección real el código y los archivos deberían servirse desde un backend.
-
----
-
-## Estructura del repositorio
-
-```
-├── index.html                  Sitio: inicio
-├── landing-*.html              Sitio: una landing por instrumento (5)
-├── ZD-Instrumento.dc.html      Plantilla compartida de las landings
-├── privacidad.html             Sitio: privacidad
-├── 404.html                    Sitio: página no encontrada
-├── support.js                  Runtime de las páginas del sitio
-├── CronBeat-808.html           Instrumentos (autocontenidos)
-├── MonoMoon70.html
-├── Nebularp_2035.html
-├── J4-Sirens_Station.html
-├── Acid_Bass-303.html
-└── src/                        Logo y estilos compartidos
-```
 
 ---
 
