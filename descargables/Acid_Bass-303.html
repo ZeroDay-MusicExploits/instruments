@@ -182,6 +182,11 @@
   .chip-u .chip-x:hover{border-color:var(--red);}
   .bank-empty{font-family:var(--zd-mono); font-size:11.5px; color:var(--muted); align-self:center;}
   .wav-result:not(:empty){margin-bottom:14px;}
+  /* indicador de clip: mide la salida, no la toca */
+  .clip-led{font-family:var(--zd-mono); font-size:11px; font-weight:800; letter-spacing:.12em; padding:7px 11px;
+    border-radius:var(--radius-s); color:#12130f; background:var(--red); border:1px solid var(--red);
+    box-shadow:0 0 14px -2px var(--red); align-self:center;}
+  .io-note{font-family:var(--zd-mono); font-size:11.5px; line-height:1.5; color:var(--muted); margin-bottom:12px;}
 
   .kb-wrap{display:flex; flex-direction:column; gap:10px;}
   .kb-top{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
@@ -873,6 +878,199 @@
 /* /ZD-BLOCK:zd-store */
 </script>
 <script>
+/* ZD-BLOCK:zd-audio v1 */
+/* Desbloqueo de audio en el gesto, audioSession, manejo de interrupted /
+   suspended, Screen Wake Lock y decodeAudioData con fallback.
+   No crea ni conoce el grafo: el instrumento le pasa getContext/ensure. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.audio) return;
+
+  var cfg = { getContext: null, ensure: null, onResumed: null, label: 'Tocá para reanudar' };
+  var unlocked = false, playing = false, silent = null, overlay = null, wakeLock = null, wakeWanted = false;
+
+  /* ---------- contexto ---------- */
+  function options(extra) {
+    var o = { latencyHint: 'interactive' };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+  function ctx() { try { return cfg.getContext ? cfg.getContext() : null; } catch (e) { return null; } }
+
+  /* ---------- audioSession: que suene con el switch de silencio ---------- */
+  function setSession() {
+    try { if (navigator.audioSession && 'type' in navigator.audioSession) { navigator.audioSession.type = 'playback'; return true; } } catch (e) {}
+    return false;
+  }
+  function silentWavUri() {
+    var sr = 8000, n = sr / 2, bytes = new Uint8Array(44 + n * 2), dv = new DataView(bytes.buffer), o = 0;
+    function s(t) { for (var i = 0; i < t.length; i++) dv.setUint8(o++, t.charCodeAt(i)); }
+    function u32(v) { dv.setUint32(o, v, true); o += 4; }
+    function u16(v) { dv.setUint16(o, v, true); o += 2; }
+    s('RIFF'); u32(36 + n * 2); s('WAVE'); s('fmt '); u32(16); u16(1); u16(1); u32(sr); u32(sr * 2); u16(2); u16(16); s('data'); u32(n * 2);
+    var str = '';
+    for (var i = 0; i < bytes.length; i += 4096) str += String.fromCharCode.apply(null, bytes.subarray(i, i + 4096));
+    return 'data:audio/wav;base64,' + btoa(str);
+  }
+  function startSilentLoop() {
+    if (silent) { var p = silent.play(); if (p && p.catch) p.catch(function () {}); return; }
+    try {
+      silent = document.createElement('audio');
+      silent.loop = true; silent.preload = 'auto'; silent.volume = 0.0001;
+      silent.setAttribute('playsinline', ''); silent.setAttribute('aria-hidden', 'true');
+      silent.src = silentWavUri();
+      /* Va al DOM: un elemento suelto no reproduce de forma confiable. */
+      silent.style.cssText = 'position:fixed;width:0;height:0;opacity:0;pointer-events:none';
+      (document.body || document.documentElement).appendChild(silent);
+      var pr = silent.play();
+      if (pr && pr.catch) pr.catch(function () {});
+    } catch (e) { silent = null; }
+  }
+
+  /* ---------- overlay "Toca para reanudar" ---------- */
+  var CSS = [
+    '.zd-resume{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;',
+    'background:rgba(3,5,2,.82);color:var(--zd-ink,#e9ebef);font-family:var(--zd-mono,monospace);text-align:center;padding:24px;',
+    '-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}',
+    '.zd-resume.on{display:flex}',
+    '.zd-resume b{font-size:15px;letter-spacing:.14em}',
+    '.zd-resume span{font-size:12.5px;color:var(--zd-ink-dim,#a3b699);max-width:300px;line-height:1.5}',
+    '.zd-resume i{width:56px;height:56px;border-radius:50%;border:3px solid var(--inst-accent,var(--zd-phosphor,#7fdc5c));',
+    'box-shadow:0 0 22px -6px var(--inst-accent,var(--zd-phosphor,#7fdc5c))}'
+  ].join('');
+  function ensureOverlay() {
+    if (overlay) return overlay;
+    var st = document.createElement('style'); st.id = 'zd-audio-css'; st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+    overlay = document.createElement('div');
+    overlay.className = 'zd-resume';
+    overlay.setAttribute('role', 'button');
+    overlay.tabIndex = 0;
+    overlay.setAttribute('aria-label', cfg.label);
+    var i = document.createElement('i');
+    var b = document.createElement('b'); b.textContent = cfg.label;
+    var sp = document.createElement('span'); sp.textContent = 'El navegador pausó el audio. Un toque lo vuelve a habilitar.';
+    overlay.appendChild(i); overlay.appendChild(b); overlay.appendChild(sp);
+    function go(e) { if (e) e.preventDefault(); unlock().then(function (ok) { if (ok) hideResume(); }); }
+    overlay.addEventListener('pointerup', go);
+    overlay.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') go(e); });
+    (document.body || document.documentElement).appendChild(overlay);
+    return overlay;
+  }
+  function showResume() { ensureOverlay().classList.add('on'); }
+  function hideResume() { if (overlay) overlay.classList.remove('on'); }
+
+  /* ---------- unlock ---------- */
+  function unlock() {
+    setSession();
+    startSilentLoop();
+    var r;
+    try { r = cfg.ensure ? cfg.ensure() : null; } catch (e) { r = null; }
+    var p = (r && typeof r.then === 'function') ? r : Promise.resolve(r);
+    return p.then(function () {
+      var c = ctx();
+      if (!c) return false;
+      if (c.state === 'running') { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} return true; }
+      return c.resume().then(function () {
+        var ok = c.state === 'running';
+        if (ok) { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+        return ok;
+      }, function () { return false; });
+    }, function () { return false; });
+  }
+
+  /* Un gesto cualquiera destraba. Se registra en captura para correr DENTRO
+     del handler del gesto (requisito de iOS) sin pisar los handlers propios. */
+  function bindGesture(target) {
+    var t = target || window;
+    function once(e) {
+      if (e.type === 'keydown' && (e.key === 'Tab' || e.key === 'Escape')) return;
+      unlock();
+    }
+    t.addEventListener('pointerup', once, true);
+    t.addEventListener('click', once, true);
+    t.addEventListener('keydown', once, true);
+    t.addEventListener('touchend', once, true);
+  }
+
+  /* ---------- interrupciones (iOS: llamada, Siri, segundo plano) ---------- */
+  function tryResume() {
+    var c = ctx();
+    if (!c) return;
+    if (c.state === 'running') { hideResume(); return; }
+    /* interrupted es estado propio de Safari; suspended es el estandar. */
+    c.resume().then(function () {
+      if (c.state === 'running') { hideResume(); if (wakeWanted) requestWake(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+      else if (playing) showResume();
+    }, function () { if (playing) showResume(); });
+  }
+  function watchContext(c) {
+    if (!c || c.__zdWatched) return;
+    c.__zdWatched = true;
+    try {
+      c.addEventListener('statechange', function () {
+        if (c.state === 'running') hideResume();
+        else if (playing && (c.state === 'suspended' || c.state === 'interrupted')) showResume();
+      });
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') { tryResume(); if (wakeWanted) requestWake(); }
+  });
+  window.addEventListener('pageshow', function () { tryResume(); });
+  window.addEventListener('focus', function () { tryResume(); });
+
+  /* ---------- Screen Wake Lock ---------- */
+  function requestWake() {
+    if (!('wakeLock' in navigator)) return Promise.resolve(false);
+    if (wakeLock) return Promise.resolve(true);
+    if (document.visibilityState !== 'visible') return Promise.resolve(false);
+    return navigator.wakeLock.request('screen').then(function (s) {
+      wakeLock = s;
+      s.addEventListener('release', function () { wakeLock = null; });
+      return true;
+    }, function () { return false; });
+  }
+  function releaseWake() {
+    var s = wakeLock; wakeLock = null;
+    if (!s) return Promise.resolve(false);
+    return s.release().then(function () { return true; }, function () { return false; });
+  }
+  function setPlaying(on) {
+    playing = !!on;
+    wakeWanted = playing;
+    if (playing) { watchContext(ctx()); requestWake(); }
+    else { releaseWake(); hideResume(); }
+  }
+
+  /* ---------- decodeAudioData con fallback a callbacks ---------- */
+  function decode(c, arrayBuffer) {
+    return new Promise(function (resolve, reject) {
+      var r;
+      try { r = c.decodeAudioData(arrayBuffer, resolve, reject); } catch (e) { reject(e); return; }
+      if (r && typeof r.then === 'function') r.then(resolve, reject);
+    });
+  }
+
+  function attach(o) {
+    for (var k in o) cfg[k] = o[k];
+    watchContext(ctx());
+    return ZD.audio;
+  }
+
+  ZD.audio = {
+    attach: attach, options: options, unlock: unlock, bindGesture: bindGesture,
+    setPlaying: setPlaying, resume: tryResume, decode: decode,
+    requestWake: requestWake, releaseWake: releaseWake,
+    showResume: showResume, hideResume: hideResume, setSession: setSession,
+    get unlocked() { return unlocked; },
+    get hasWakeLock() { return !!wakeLock; }
+  };
+})();
+/* /ZD-BLOCK:zd-audio */
+</script>
+<script>
 /* ZD-BLOCK:zd-dl v1 */
 /* Descarga de blobs y lectura de archivos. <a download> por defecto; en iOS
    (y donde el atributo download no alcanza) usa Web Share con archivo.
@@ -1435,7 +1633,7 @@
 window.ZD_M = {
   name: 'Acid Bass-303',
   titleParts: ['ACID ', 'BASS-303'],
-  transport: ['#playBtn', '.tempo-box'],
+  transport: ['#playBtn', '.tempo-box', '#clipLed'],
   keep: ['#seqPanel', '#stepEditPanel', '#perfPanel'],
   tabs: [
     { id:'seq',  label:'SEQ',    title:'SECUENCIADOR · TEMPO · TECLADO',
@@ -1839,6 +2037,7 @@ window.ZD_M = {
       <div class="knob-bank" id="tempoKnob" style="gap:0;"></div>
       <div class="tempo-box"><input id="bpmInput" class="bpm-input" type="number" min="40" max="300" step="1" value="130"></div>
       <canvas id="scope" width="360" height="104"></canvas>
+      <span id="clipLed" class="clip-led" role="status" hidden>CLIP</span>
     </div>
   </section>
 
@@ -1948,6 +2147,7 @@ window.ZD_M = {
       <button class="mini gen" id="bankSave">⊕ GUARDAR EN BANCO</button>
     </div>
     <div id="wavResult" class="wav-result" role="status" aria-live="polite"></div>
+    <div class="io-note" id="midiNote" hidden></div>
     <div class="bank-lbl" id="userBankLbl">BANCO DE USUARIO — se guarda solo en este navegador</div>
     <div class="bank" id="userBank"></div>
     <div class="bank-lbl" id="factoryBankLbl" style="margin-top:14px;">BANCO DE FÁBRICA — patrones de referencia (estilo genérico)</div>
@@ -2103,7 +2303,8 @@ function makeFuzzCurve(a){ const n=1024, c=new Float32Array(n), pre=1+a*7, asym=
 // ---------- Motor online ----------
 const Engine={ ctx:null, oscU:null, filtU:null, vca:null, driveSh:null, fuzzSh:null, master:null, analyser:null, started:false,
   async ensure(){ if(this.started){ if(this.ctx.state==='suspended') await this.ctx.resume(); return; }
-    const ctx = HOST ? HOST.ctx : new (window.AudioContext||window.webkitAudioContext)(); this.ctx=ctx; const ok=await loadWorklet(ctx);
+    const opts = (window.ZD&&ZD.audio) ? ZD.audio.options() : {latencyHint:'interactive'};
+    const ctx = HOST ? HOST.ctx : new (window.AudioContext||window.webkitAudioContext)(opts); this.ctx=ctx; const ok=await loadWorklet(ctx);
     this.oscU=ok?makeOscWorklet(ctx):makeOscNative(ctx); this.filtU=ok?makeFiltWorklet(ctx):makeFiltBiquad(ctx);
     const vca=ctx.createGain(); vca.gain.value=0.0001; const driveSh=ctx.createWaveShaper(); driveSh.oversample='4x';
     const fuzzSh=ctx.createWaveShaper(); fuzzSh.oversample='4x'; const master=ctx.createGain(); master.gain.value=params.volume*0.9;
@@ -2136,8 +2337,10 @@ const Seq={ playing:false, bpm:130, current:0, nextTime:0, lookahead:25, aheadTi
   swing:0, schedPrevSlide:false, schedPrevFreq:midiToFreq(BASE_MIDI), drawQueue:[],
   stepDur(){ return (60/this.bpm)/4; },
   start(){ if(this.playing) return; this.playing=true; this.current=0; this.schedPrevSlide=false; this.schedPrevFreq=midiToFreq(patNote(0));
-    this.nextTime=Engine.ctx.currentTime+0.06; if(!HOST) this.timer=setInterval(()=>this.scheduler(), this.lookahead); },
-  stop(){ this.playing=false; clearInterval(this.timer); this.timer=null; if(Engine.started) Engine.releaseAmp(Engine.ctx.currentTime); this.drawQueue.length=0; setPlayingStep(-1); },
+    this.nextTime=Engine.ctx.currentTime+0.06; if(!HOST) this.timer=setInterval(()=>this.scheduler(), this.lookahead);
+    if(window.ZD&&ZD.audio) ZD.audio.setPlaying(true); },
+  stop(){ this.playing=false; clearInterval(this.timer); this.timer=null; if(Engine.started) Engine.releaseAmp(Engine.ctx.currentTime); this.drawQueue.length=0; setPlayingStep(-1);
+    if(window.ZD&&ZD.audio) ZD.audio.setPlaying(false); },
   scheduler(){ const now=Engine.ctx.currentTime; while(this.nextTime<now+this.aheadTime){ const i=this.current;
     const swOff=(i%2===1)?this.swing*this.stepDur()*0.5:0, evT=this.nextTime+swOff; this.scheduleStep(i,evT); this.drawQueue.push({step:i,time:evT}); this.nextTime+=this.stepDur(); this.current=(i+1)%STEPS; } },
   scheduleStep(i,t){ const st=pattern[i], dur=this.stepDur(), next=pattern[(i+1)%STEPS], slideTime=Math.min(0.055,dur*0.9);
@@ -2267,7 +2470,8 @@ CTRL.cutoff.widgets.push({ update:v=>{ const x=(v*100)+'%'; xyCursor.style.left=
 CTRL.reso.widgets.push({ update:v=>{ const y=((1-v)*100)+'%'; xyCursor.style.top=y; crossH.style.top=y; } });
 let padDrag=false;
 function padSet(e){ const r=xypad.getBoundingClientRect(); const x=clamp((e.clientX-r.left)/r.width,0,1), y=clamp((e.clientY-r.top)/r.height,0,1); setParam('cutoff',x); setParam('reso',1-y); }
-xypad.addEventListener('pointerdown', e=>{ e.preventDefault(); padDrag=true; xypad.classList.add('hot'); xypad.setPointerCapture(e.pointerId); Engine.ensure(); padSet(e); });
+xypad.addEventListener('pointerdown', e=>{ e.preventDefault(); padDrag=true; xypad.classList.add('hot'); xypad.setPointerCapture(e.pointerId);
+  if(window.ZD&&ZD.audio) ZD.audio.unlock(); else Engine.ensure(); padSet(e); });
 xypad.addEventListener('pointermove', e=>{ if(padDrag) padSet(e); });
 const padEnd=e=>{ padDrag=false; xypad.classList.remove('hot'); try{xypad.releasePointerCapture(e.pointerId);}catch(_){} };
 xypad.addEventListener('pointerup',padEnd); xypad.addEventListener('pointercancel',padEnd);
@@ -2296,7 +2500,8 @@ $('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button');
 // transport
 const playBtn=$('#playBtn');
 async function togglePlay(){ if(HOST){ if(Seq.playing) HOST.transport.stop(); else HOST.transport.play(); return; }   // embebido: el botón maneja TODO el rig por el hub
-  await Engine.ensure();
+  // el resume tiene que pasar dentro del handler del gesto (iOS)
+  if(window.ZD&&ZD.audio) await ZD.audio.unlock(); else await Engine.ensure();
   if(Seq.playing){ Seq.stop(); playBtn.classList.remove('on'); playBtn.textContent='▶ PLAY'; }
   else { Seq.swing=params.swing; Seq.start(); playBtn.classList.add('on'); playBtn.textContent='■ STOP'; } }
 playBtn.addEventListener('click', togglePlay);
@@ -2541,15 +2746,25 @@ $('#initBtn').addEventListener('click',()=>{ pattern=initPattern(); selectedStep
 $('#clearBtn').addEventListener('click',()=>{ pattern=Array.from({length:STEPS},()=>makeStep()); selectedStep=-1; renderSeq(); markDirty(); });
 renderSeq();
 
-function drawLoop(){ if(Seq.playing && Engine.ctx){ const now=Engine.ctx.currentTime; while(Seq.drawQueue.length && Seq.drawQueue[0].time<=now) setPlayingStep(Seq.drawQueue.shift().step); } drawScope(); requestAnimationFrame(drawLoop); }
+function drawLoop(){ if(Seq.playing && Engine.ctx){ const now=Engine.ctx.currentTime; while(Seq.drawQueue.length && Seq.drawQueue[0].time<=now) setPlayingStep(Seq.drawQueue.shift().step); }
+  if(scopeStarted){ Engine.analyser.getByteTimeDomainData(scopeBuf); checkClip(); drawScope(); }
+  requestAnimationFrame(drawLoop); }
+// Indicador de clip: solo mide el buffer que ya leimos. No hay limitador en el
+// master porque eso cambiaria el sonido (ver el reporte de R5).
+const clipLed=$('#clipLed'); let clipUntil=0, clipOn=false;
+function checkClip(){ let peak=0; for(let i=0;i<scopeBuf.length;i++){ const d=Math.abs(scopeBuf[i]-128); if(d>peak) peak=d; }
+  const now=performance.now();
+  if(peak>=126) clipUntil=now+700;              // |muestra| >= ~0,98 de escala completa
+  const on=now<clipUntil;
+  if(on!==clipOn){ clipOn=on; clipLed.hidden=!on; } }
 let scopeStarted=false, scopeBuf=null, scopeCtx=null, scopeCanvas=null;
 function startScope(){ if(scopeStarted) return; scopeStarted=true; scopeCanvas=$('#scope'); scopeCtx=scopeCanvas.getContext('2d'); scopeBuf=new Uint8Array(Engine.analyser.fftSize); }
 let scopeFrames=0, scopeVisible=true;
-function drawScope(){ if(!scopeStarted) return;
+function drawScope(){
   // en el shell movil el scope vive en un sheet: no gastamos frames si esta oculto
   if((scopeFrames++ % 15)===0) scopeVisible=!!scopeCanvas.offsetParent;
   if(!scopeVisible) return;
-  const w=scopeCanvas.width, h=scopeCanvas.height; Engine.analyser.getByteTimeDomainData(scopeBuf);
+  const w=scopeCanvas.width, h=scopeCanvas.height;
   scopeCtx.clearRect(0,0,w,h); scopeCtx.lineWidth=2; scopeCtx.strokeStyle=Seq.playing?'#b6ff3a':'#5c6470'; scopeCtx.beginPath(); const n=scopeBuf.length, slice=w/n;
   for(let i=0;i<n;i++){ const v=scopeBuf[i]/128-1, y=h/2+v*(h/2-3), x=i*slice; if(i===0) scopeCtx.moveTo(x,y); else scopeCtx.lineTo(x,y); } scopeCtx.stroke(); }
 requestAnimationFrame(drawLoop);
@@ -2570,7 +2785,8 @@ function kbBaseMidi(){ return 12*(kbOct+1); }
 $('#kbOctUp').addEventListener('click',()=>{ kbOct=clamp(kbOct+1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); });
 $('#kbOctDown').addEventListener('click',()=>{ kbOct=clamp(kbOct-1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); });
 let activeSemi=null;
-async function keyDownSemi(semi,e){ await Engine.ensure(); const midi=kbBaseMidi()+semi; activeSemi=semi; if(e) e.classList.add('down');
+async function keyDownSemi(semi,e){ if(window.ZD&&ZD.audio) await ZD.audio.unlock(); else await Engine.ensure();
+  const midi=kbBaseMidi()+semi; activeSemi=semi; if(e) e.classList.add('down');
   if(selectedStep>=0){ const st=pattern[selectedStep]; st.gate=(st.gate==='rest')?'note':st.gate; st.note=midi-patternOct*12; refreshStep(selectedStep); } auditionNote(midi,false); }
 function keyUpSemi(e){ if(e) e.classList.remove('down'); if(activeSemi!==null){ if(Engine.started) Engine.releaseAmp(Engine.ctx.currentTime); activeSemi=null; } }
 function auditionNote(midi,short){ if(!Engine.started){ Engine.ensure().then(()=>auditionNote(midi,short)); return; }
@@ -2659,8 +2875,21 @@ async function resetAll(){
   sessionReady=true;
 })();
 
-function primeAudio(){ Engine.ensure(); window.removeEventListener('pointerdown', primeAudio); }
-window.addEventListener('pointerdown', primeAudio);
+// ---------- audio e iOS (SPEC R5) ----------
+if(window.ZD && ZD.audio){
+  ZD.audio.attach({ getContext:()=>Engine.ctx, ensure:()=>Engine.ensure() });
+  // cualquier gesto destraba: audioSession + <audio> silencioso + resume
+  ZD.audio.bindGesture(window);
+} else {
+  const primeAudio=()=>{ Engine.ensure(); window.removeEventListener('pointerdown', primeAudio); };
+  window.addEventListener('pointerdown', primeAudio);
+}
+// Web MIDI no existe en Safari ni en ningun navegador de iOS: el boton MIDI de
+// este instrumento exporta un archivo, asi que solo lo aclaramos donde no hay.
+(function(){ const sup=ZD.midi.support(), note=$('#midiNote');
+  if(sup.available || !note) return;
+  note.textContent='MIDI en vivo (Web MIDI) no disponible en este navegador: ♪ EXPORTAR MIDI igual descarga un archivo .mid del patrón.';
+  note.hidden=false; })();
 </script>
 <script>
 

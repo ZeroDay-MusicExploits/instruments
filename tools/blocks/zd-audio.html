@@ -41,6 +41,9 @@
       silent.loop = true; silent.preload = 'auto'; silent.volume = 0.0001;
       silent.setAttribute('playsinline', ''); silent.setAttribute('aria-hidden', 'true');
       silent.src = silentWavUri();
+      /* Va al DOM: un elemento suelto no reproduce de forma confiable. */
+      silent.style.cssText = 'position:fixed;width:0;height:0;opacity:0;pointer-events:none';
+      (document.body || document.documentElement).appendChild(silent);
       var pr = silent.play();
       if (pr && pr.catch) pr.catch(function () {});
     } catch (e) { silent = null; }
