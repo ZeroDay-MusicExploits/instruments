@@ -181,6 +181,7 @@
     background:var(--rack); border:1px solid var(--edge); border-left:0; border-radius:0 100px 100px 0;}
   .chip-u .chip-x:hover{border-color:var(--red);}
   .bank-empty{font-family:var(--zd-mono); font-size:11.5px; color:var(--muted); align-self:center;}
+  .wav-result:not(:empty){margin-bottom:14px;}
 
   .kb-wrap{display:flex; flex-direction:column; gap:10px;}
   .kb-top{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
@@ -871,6 +872,561 @@
 })();
 /* /ZD-BLOCK:zd-store */
 </script>
+<script>
+/* ZD-BLOCK:zd-dl v1 */
+/* Descarga de blobs y lectura de archivos. <a download> por defecto; en iOS
+   (y donde el atributo download no alcanza) usa Web Share con archivo.
+   Nombres <slug>-YYYYMMDD-HHmm.<ext>. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.dl) return;
+
+  function isIOS() {
+    var ua = navigator.userAgent || '';
+    return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
+  function isStandalone() {
+    try { if (window.matchMedia('(display-mode: standalone)').matches) return true; } catch (e) {}
+    return navigator.standalone === true;
+  }
+  function canShareFiles(files) {
+    try { return !!(navigator.canShare && navigator.share && navigator.canShare({ files: files })); } catch (e) { return false; }
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function stamp(d) {
+    d = d || new Date();
+    return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes());
+  }
+  function slug(s, max) {
+    var t = String(s == null ? '' : s).trim().toLowerCase();
+    /* NFD + quitar las marcas combinantes: "Acido" no puede salir "a-cido". */
+    if (t.normalize) t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    t = t.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, max || 48);
+    return t || 'patch';
+  }
+  function name(base, ext, d) { return slug(base) + '-' + stamp(d) + '.' + String(ext).replace(/^\./, ''); }
+
+  function anchorSave(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename; a.rel = 'noopener';
+    a.style.position = 'fixed'; a.style.opacity = '0'; a.style.pointerEvents = 'none';
+    (document.body || document.documentElement).appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); if (a.parentNode) a.remove(); }, 1500);
+    return 'download';
+  }
+
+  function mimeOf(blob, filename) {
+    if (blob.type) return blob.type;
+    var m = /\.([a-z0-9]+)$/i.exec(filename || '');
+    var ext = m ? m[1].toLowerCase() : '';
+    if (ext === 'json') return 'application/json';
+    if (ext === 'wav') return 'audio/wav';
+    if (ext === 'mid' || ext === 'midi') return 'audio/midi';
+    return 'application/octet-stream';
+  }
+
+  /* save(blob, filename, opts) -> Promise<'share'|'download'>
+     opts.prefer: 'share' | 'download' | undefined (auto) */
+  function save(blob, filename, opts) {
+    opts = opts || {};
+    var prefer = opts.prefer;
+    var wantShare = prefer === 'share' || (prefer !== 'download' && isIOS());
+    if (!wantShare) return Promise.resolve(anchorSave(blob, filename));
+    var file;
+    try { file = new File([blob], filename, { type: mimeOf(blob, filename) }); }
+    catch (e) { return Promise.resolve(anchorSave(blob, filename)); }
+    if (!canShareFiles([file])) return Promise.resolve(anchorSave(blob, filename));
+    return navigator.share({ files: [file], title: filename })
+      .then(function () { return 'share'; })
+      .catch(function (err) {
+        if (err && err.name === 'AbortError') return 'share';
+        return anchorSave(blob, filename);
+      });
+  }
+
+  /* pick({accept, multiple}) -> Promise<File|File[]|null> */
+  function pick(opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      var inp = document.createElement('input');
+      inp.type = 'file';
+      if (opts.accept) inp.accept = opts.accept;
+      if (opts.multiple) inp.multiple = true;
+      inp.style.position = 'fixed'; inp.style.left = '-9999px'; inp.style.opacity = '0';
+      function done(v) { if (inp.parentNode) inp.remove(); resolve(v); }
+      inp.addEventListener('change', function () {
+        var fs = inp.files;
+        if (!fs || !fs.length) { done(null); return; }
+        done(opts.multiple ? Array.prototype.slice.call(fs) : fs[0]);
+      });
+      inp.addEventListener('cancel', function () { done(null); });
+      (document.body || document.documentElement).appendChild(inp);
+      inp.click();
+    });
+  }
+
+  function readText(file) {
+    if (file.text) return file.text();
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result)); };
+      r.onerror = function () { reject(r.error || new Error('lectura')); };
+      r.readAsText(file);
+    });
+  }
+  function readBuffer(file) {
+    if (file.arrayBuffer) return file.arrayBuffer();
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(r.result); };
+      r.onerror = function () { reject(r.error || new Error('lectura')); };
+      r.readAsArrayBuffer(file);
+    });
+  }
+  function bytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
+  }
+
+  ZD.dl = {
+    save: save, name: name, slug: slug, stamp: stamp, pick: pick,
+    readText: readText, readBuffer: readBuffer, bytes: bytes,
+    isIOS: isIOS, isStandalone: isStandalone, canShareFiles: canShareFiles
+  };
+  ZD.download = function (blob, filename) { return save(blob, filename); };
+})();
+/* /ZD-BLOCK:zd-dl */
+</script>
+<script>
+/* ZD-BLOCK:zd-midi v1 */
+/* Escritor de Standard MIDI File formato 0 y grabador de performance
+   (notas con timestamps, pitch bend, CC). Tambien reporta si Web MIDI
+   existe en este navegador (no existe en ningun navegador de iOS). */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.midi) return;
+
+  var CC = { mod: 1, cutoff: 74, reso: 71, volume: 7, pan: 10 };
+
+  function vlq(arr, n) {
+    n = n < 0 ? 0 : n | 0;
+    var b = [n & 0x7f];
+    n >>= 7;
+    while (n > 0) { b.unshift((n & 0x7f) | 0x80); n >>= 7; }
+    for (var i = 0; i < b.length; i++) arr.push(b[i]);
+  }
+  function ascii(s, max) {
+    var out = '', t = String(s == null ? '' : s);
+    for (var i = 0; i < t.length && out.length < (max || 60); i++) {
+      var c = t.charCodeAt(i);
+      out += (c >= 32 && c < 127) ? t[i] : ' ';
+    }
+    return out;
+  }
+  function clamp7(v) { v = Math.round(v); return v < 0 ? 0 : v > 127 ? 127 : v; }
+
+  var ORDER = { off: 0, cc: 1, bend: 2, on: 3 };
+  /* write({ppq, bpm, trackName, events}) -> Blob audio/midi
+     events: {t:<ticks>, type:'on'|'off'|'cc'|'bend', pitch, vel, cc, val, ch} */
+  function write(cfg) {
+    cfg = cfg || {};
+    var ppq = cfg.ppq || 96;
+    var bpm = Math.max(1, +cfg.bpm || 120);
+    var evs = (cfg.events || []).slice();
+    evs.forEach(function (e, i) { e.__i = i; });
+    evs.sort(function (a, b) {
+      return (a.t - b.t) || ((ORDER[a.type] || 9) - (ORDER[b.type] || 9)) || (a.__i - b.__i);
+    });
+
+    var track = [];
+    var mpq = Math.round(60000000 / bpm);
+    vlq(track, 0); track.push(0xFF, 0x51, 0x03, (mpq >> 16) & 0xff, (mpq >> 8) & 0xff, mpq & 0xff);
+    var nm = ascii(cfg.trackName || 'ZERO DAY');
+    vlq(track, 0); track.push(0xFF, 0x03, nm.length);
+    for (var i = 0; i < nm.length; i++) track.push(nm.charCodeAt(i) & 0x7f);
+
+    var last = 0;
+    for (var j = 0; j < evs.length; j++) {
+      var e = evs[j], ch = (e.ch || 0) & 0x0f, t = Math.max(0, Math.round(e.t));
+      vlq(track, Math.max(0, t - last)); last = t;
+      if (e.type === 'on') track.push(0x90 | ch, clamp7(e.pitch), clamp7(e.vel == null ? 100 : e.vel));
+      else if (e.type === 'off') track.push(0x80 | ch, clamp7(e.pitch), clamp7(e.vel == null ? 0 : e.vel));
+      else if (e.type === 'cc') track.push(0xB0 | ch, clamp7(e.cc), clamp7(e.val));
+      else if (e.type === 'bend') {
+        var v = Math.round(e.val == null ? 8192 : e.val);
+        v = v < 0 ? 0 : v > 16383 ? 16383 : v;
+        track.push(0xE0 | ch, v & 0x7f, (v >> 7) & 0x7f);
+      }
+    }
+    vlq(track, 0); track.push(0xFF, 0x2F, 0x00);
+
+    var header = [0x4D, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 0, 0, 1, (ppq >> 8) & 0xff, ppq & 0xff];
+    var L = track.length;
+    var trkHead = [0x4D, 0x54, 0x72, 0x6B, (L >>> 24) & 0xff, (L >> 16) & 0xff, (L >> 8) & 0xff, L & 0xff];
+    var bytes = new Uint8Array(header.length + trkHead.length + L);
+    bytes.set(header, 0); bytes.set(trkHead, header.length); bytes.set(track, header.length + trkHead.length);
+    return new Blob([bytes], { type: 'audio/midi' });
+  }
+
+  /* semitonos -> pitch bend de 14 bits, rango +-2 semitonos por defecto */
+  function bendValue(semitones, range) {
+    var r = range || 2, v = 8192 + (semitones / r) * 8192;
+    return Math.max(0, Math.min(16383, Math.round(v)));
+  }
+
+  /* recorder({ppq, bpm, trackName, bendRange}) — captura de performance.
+     Los tiempos entran en segundos (p.ej. ctx.currentTime) y se convierten
+     a ticks con el bpm vigente al cerrar. */
+  function recorder(cfg) {
+    cfg = cfg || {};
+    var ppq = cfg.ppq || 96;
+    var bpm = Math.max(1, +cfg.bpm || 120);
+    var bendRange = cfg.bendRange || 2;
+    var t0 = null, raw = [], open = {}, recording = false;
+
+    function at(sec) {
+      if (t0 == null) t0 = sec;
+      return Math.max(0, sec - t0);
+    }
+    function push(ev) { if (recording) raw.push(ev); }
+
+    return {
+      get recording() { return recording; },
+      get events() { return raw.length; },
+      setBpm: function (v) { bpm = Math.max(1, +v || bpm); },
+      start: function (sec) { recording = true; raw = []; open = {}; t0 = (sec == null ? null : sec); return this; },
+      noteOn: function (pitch, vel, sec, ch) {
+        var s = at(sec == null ? 0 : sec), p = clamp7(pitch);
+        if (open[p] != null) push({ k: 'off', s: s, pitch: p, ch: ch || 0 });
+        open[p] = s;
+        push({ k: 'on', s: s, pitch: p, vel: clamp7(vel == null ? 100 : vel), ch: ch || 0 });
+      },
+      noteOff: function (pitch, sec, ch) {
+        var p = clamp7(pitch);
+        if (open[p] == null) return;
+        delete open[p];
+        push({ k: 'off', s: at(sec == null ? 0 : sec), pitch: p, ch: ch || 0 });
+      },
+      cc: function (num, val, sec, ch) { push({ k: 'cc', s: at(sec == null ? 0 : sec), cc: clamp7(num), val: clamp7(val), ch: ch || 0 }); },
+      ccNorm: function (num, norm, sec, ch) { this.cc(num, Math.round(Math.max(0, Math.min(1, norm)) * 127), sec, ch); },
+      bend: function (semitones, sec, ch) { push({ k: 'bend', s: at(sec == null ? 0 : sec), val: bendValue(semitones, bendRange), ch: ch || 0 }); },
+      allOff: function (sec) {
+        var s = at(sec == null ? 0 : sec);
+        for (var p in open) push({ k: 'off', s: s, pitch: +p, ch: 0 });
+        open = {};
+      },
+      stop: function (sec) { this.allOff(sec); recording = false; return this; },
+      duration: function () { return raw.length ? raw[raw.length - 1].s : 0; },
+      blob: function (opts) {
+        opts = opts || {};
+        var useBpm = Math.max(1, +opts.bpm || bpm);
+        var tickPerSec = (useBpm / 60) * ppq;
+        var evs = raw.map(function (e) {
+          return { t: Math.round(e.s * tickPerSec), type: e.k, pitch: e.pitch, vel: e.vel, cc: e.cc, val: e.val, ch: e.ch };
+        });
+        return write({ ppq: ppq, bpm: useBpm, trackName: opts.trackName || cfg.trackName, events: evs });
+      }
+    };
+  }
+
+  /* Web MIDI: no existe en Safari ni en ningun navegador de iOS. */
+  function support() {
+    var ua = navigator.userAgent || '';
+    var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (!('requestMIDIAccess' in navigator)) {
+      return { available: false, ios: ios, reason: ios ? 'MIDI no disponible en este navegador (iOS no tiene Web MIDI).' : 'MIDI no disponible en este navegador.' };
+    }
+    return { available: true, ios: ios, reason: '' };
+  }
+
+  ZD.midi = { write: write, recorder: recorder, support: support, bendValue: bendValue, vlq: vlq, CC: CC };
+})();
+/* /ZD-BLOCK:zd-midi */
+</script>
+<script>
+/* ZD-BLOCK:zd-rec v1 */
+/* Grabacion de la salida master a WAV y tarjeta de resultado.
+   Captura por AudioWorklet (chunks Int16), fallback a MediaStreamDestination
+   + MediaRecorder + decodeAudioData. PCM 16-bit a la frecuencia real del
+   AudioContext. Tope por defecto 10 min. Usa ZD.dl para descargar. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.rec) return;
+
+  var TAP_CODE = [
+    'class ZDRecTap extends AudioWorkletProcessor {',
+    '  constructor(){ super(); this.on=false; this.port.onmessage=(e)=>{ if(e.data&&e.data.cmd==="start") this.on=true; else if(e.data&&e.data.cmd==="stop") this.on=false; }; }',
+    '  process(inputs, outputs){ const inp=inputs[0], out=outputs[0];',
+    '    if(inp && inp.length){ const ch=inp.length, n=inp[0].length;',
+    '      if(this.on){ const buf=new Int16Array(n*ch);',
+    '        for(let i=0;i<n;i++){ for(let c=0;c<ch;c++){ let s=inp[c][i]; s=s<-1?-1:(s>1?1:s); buf[i*ch+c]= s<0 ? s*0x8000 : s*0x7fff; } }',
+    '        this.port.postMessage({ch:ch,n:n,pcm:buf},[buf.buffer]); }',
+    '      if(out && out.length){ for(let c=0;c<out.length;c++) out[c].fill(0); } }',
+    '    return true; }',
+    '}',
+    'registerProcessor("zd-rec-tap", ZDRecTap);'
+  ].join('\n');
+
+  /* ---------- WAV ---------- */
+  function wavHeader(dv, o, channels, sampleRate, frames) {
+    function s(t) { for (var i = 0; i < t.length; i++) dv.setUint8(o++, t.charCodeAt(i)); }
+    function u32(v) { dv.setUint32(o, v, true); o += 4; }
+    function u16(v) { dv.setUint16(o, v, true); o += 2; }
+    var blockAlign = channels * 2, dataLen = frames * blockAlign;
+    s('RIFF'); u32(36 + dataLen); s('WAVE'); s('fmt '); u32(16); u16(1); u16(channels);
+    u32(sampleRate); u32(sampleRate * blockAlign); u16(blockAlign); u16(16); s('data'); u32(dataLen);
+    return o;
+  }
+  /* wavFromInt16(chunks, channels, sampleRate) — chunks ya intercalados */
+  function wavFromInt16(chunks, channels, sampleRate) {
+    var frames = 0, i;
+    for (i = 0; i < chunks.length; i++) frames += chunks[i].length / channels;
+    var ab = new ArrayBuffer(44 + frames * channels * 2), dv = new DataView(ab);
+    wavHeader(dv, 0, channels, sampleRate, frames);
+    var view = new Int16Array(ab, 44);
+    var off = 0;
+    for (i = 0; i < chunks.length; i++) { view.set(chunks[i], off); off += chunks[i].length; }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+  /* wavFromBuffer(audioBuffer) — PCM 16-bit intercalado */
+  function wavFromBuffer(buf) {
+    var ch = buf.numberOfChannels, n = buf.length, sr = buf.sampleRate;
+    var ab = new ArrayBuffer(44 + n * ch * 2), dv = new DataView(ab), o = wavHeader(dv, 0, ch, sr, n);
+    var chans = [], c;
+    for (c = 0; c < ch; c++) chans.push(buf.getChannelData(c));
+    for (var i = 0; i < n; i++) {
+      for (c = 0; c < ch; c++) {
+        var s = chans[c][i]; s = s < -1 ? -1 : s > 1 ? 1 : s;
+        dv.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true); o += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  /* ---------- captura en vivo ---------- */
+  var tapReady = null;
+  function loadTap(ctx) {
+    if (!ctx.audioWorklet) return Promise.resolve(false);
+    if (tapReady) return tapReady;
+    tapReady = (function () {
+      var u = null;
+      try { u = URL.createObjectURL(new Blob([TAP_CODE], { type: 'application/javascript' })); } catch (e) {}
+      var p = u ? ctx.audioWorklet.addModule(u) : Promise.reject(new Error('blob'));
+      return p.then(function () { if (u) URL.revokeObjectURL(u); return true; }, function () {
+        if (u) try { URL.revokeObjectURL(u); } catch (e) {}
+        return ctx.audioWorklet.addModule('data:application/javascript,' + encodeURIComponent(TAP_CODE)).then(function () { return true; }, function () { return false; });
+      });
+    })();
+    return tapReady;
+  }
+
+  /* create({getContext, getSource, channels, maxSec, onProgress, onLimit}) */
+  function create(cfg) {
+    cfg = cfg || {};
+    var channels = cfg.channels || 2;
+    var maxSec = cfg.maxSec || 600;
+    var state = 'idle', chunks = [], frames = 0, sampleRate = 0;
+    var node = null, sink = null, src = null, mode = null;
+    var mrec = null, mdest = null, mparts = [], startedAt = 0, ticker = null;
+
+    function ctx() { return cfg.getContext(); }
+    function source() { return cfg.getSource(); }
+
+    function cleanup() {
+      if (ticker) { clearInterval(ticker); ticker = null; }
+      try { if (node && src) src.disconnect(node); } catch (e) {}
+      try { if (node) node.disconnect(); } catch (e) {}
+      try { if (sink) sink.disconnect(); } catch (e) {}
+      try { if (mdest && src) src.disconnect(mdest); } catch (e) {}
+      node = null; sink = null; src = null; mdest = null; mrec = null;
+    }
+
+    function startTicker() {
+      if (!cfg.onProgress) return;
+      ticker = setInterval(function () { cfg.onProgress(elapsed()); }, 250);
+    }
+    function elapsed() {
+      if (state !== 'rec') return frames && sampleRate ? frames / sampleRate : 0;
+      if (mode === 'worklet') return sampleRate ? frames / sampleRate : 0;
+      return (performance.now() - startedAt) / 1000;
+    }
+
+    function start() {
+      if (state === 'rec') return Promise.resolve(mode);
+      var c = ctx();
+      if (!c) return Promise.reject(new Error('sin AudioContext'));
+      chunks = []; frames = 0; sampleRate = c.sampleRate; mparts = [];
+      src = source();
+      if (!src) return Promise.reject(new Error('sin nodo de origen'));
+      return loadTap(c).then(function (ok) {
+        if (ok) {
+          try {
+            node = new AudioWorkletNode(c, 'zd-rec-tap', {
+              numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [channels],
+              channelCount: channels, channelCountMode: 'explicit', channelInterpretation: 'speakers'
+            });
+          } catch (e) { node = null; }
+        }
+        if (node) {
+          mode = 'worklet';
+          node.port.onmessage = function (ev) {
+            var d = ev.data;
+            if (!d || !d.pcm || state !== 'rec') return;
+            chunks.push(d.pcm); frames += d.n;
+            if (frames / sampleRate >= maxSec) { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); }
+          };
+          sink = c.createGain(); sink.gain.value = 0;
+          src.connect(node); node.connect(sink); sink.connect(c.destination);
+          node.port.postMessage({ cmd: 'start' });
+          state = 'rec'; startedAt = performance.now(); startTicker();
+          return mode;
+        }
+        /* fallback: MediaStreamDestination + MediaRecorder */
+        if (!c.createMediaStreamDestination || typeof MediaRecorder === 'undefined') throw new Error('sin captura disponible');
+        mode = 'mediarecorder';
+        mdest = c.createMediaStreamDestination();
+        src.connect(mdest);
+        mrec = new MediaRecorder(mdest.stream);
+        mrec.ondataavailable = function (e) { if (e.data && e.data.size) mparts.push(e.data); };
+        mrec.start(500);
+        state = 'rec'; startedAt = performance.now(); startTicker();
+        if (maxSec > 0) setTimeout(function () { if (state === 'rec') { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); } }, maxSec * 1000);
+        return mode;
+      });
+    }
+
+    function finish(blob, dur) {
+      var r = { blob: blob, duration: dur, bytes: blob.size, sampleRate: sampleRate, channels: channels, mode: mode };
+      state = 'idle';
+      return r;
+    }
+
+    function stop() {
+      if (state !== 'rec') return Promise.resolve(null);
+      state = 'stopping';
+      if (mode === 'worklet') {
+        try { node.port.postMessage({ cmd: 'stop' }); } catch (e) {}
+        var f = frames, sr = sampleRate, cs = chunks;
+        cleanup(); chunks = [];
+        if (!f) { state = 'idle'; return Promise.resolve(null); }
+        return Promise.resolve(finish(wavFromInt16(cs, channels, sr), f / sr));
+      }
+      return new Promise(function (resolve, reject) {
+        var rec = mrec, c = ctx();
+        rec.onstop = function () {
+          var blob = new Blob(mparts, { type: mparts.length && mparts[0].type ? mparts[0].type : 'audio/webm' });
+          cleanup(); mparts = [];
+          blob.arrayBuffer().then(function (ab) {
+            var dec = (ZD.audio && ZD.audio.decode) ? ZD.audio.decode(c, ab) : c.decodeAudioData(ab);
+            return dec;
+          }).then(function (buf) {
+            resolve(finish(wavFromBuffer(buf), buf.duration));
+          }).catch(function (err) { state = 'idle'; reject(err); });
+        };
+        try { rec.stop(); } catch (e) { cleanup(); state = 'idle'; reject(e); }
+      });
+    }
+
+    return {
+      start: start, stop: stop,
+      get state() { return state; },
+      get mode() { return mode; },
+      elapsed: elapsed,
+      cancel: function () { if (state === 'rec') { try { if (mrec) mrec.stop(); } catch (e) {} cleanup(); chunks = []; mparts = []; state = 'idle'; } }
+    };
+  }
+
+  /* ---------- tarjeta de resultado ---------- */
+  var CSS = [
+    '.zd-reccard{display:flex;flex-direction:column;gap:9px;padding:11px;border-radius:var(--zd-r,4px);',
+    'background:var(--zd-well,#050804);border:1px solid var(--zd-outline,#000);box-shadow:0 0 0 1px var(--zd-line,#2a3f24);',
+    'font-family:var(--zd-mono,monospace);color:var(--zd-ink,#e9ebef)}',
+    '.zd-reccard .zd-rcmeta{font-size:11.5px;color:var(--zd-ink-dim,#a3b699);letter-spacing:.08em}',
+    '.zd-reccard .zd-rcmeta b{color:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '.zd-reccard .zd-rcrow{display:flex;gap:8px;flex-wrap:wrap}',
+    '.zd-reccard button{flex:1 1 auto;min-height:44px;min-width:96px;padding:0 12px;cursor:pointer;',
+    'font:700 12px var(--zd-mono,monospace);letter-spacing:.06em;color:var(--zd-ink,#e9ebef);background:var(--zd-panel-2,#1c2430);',
+    'border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px);',
+    'box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 2px 0 var(--zd-outline,#000);touch-action:manipulation}',
+    '.zd-reccard button.pri{color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '.zd-reccard button:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24)}',
+    '.zd-reccard audio{width:100%;height:36px}'
+  ].join('');
+  var cssDone = false;
+  function ensureCss() {
+    if (cssDone) return;
+    cssDone = true;
+    var st = document.createElement('style'); st.id = 'zd-rec-css'; st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+  }
+  function secs(d) {
+    d = Math.max(0, d || 0);
+    var m = Math.floor(d / 60), s = d - m * 60;
+    return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1);
+  }
+  /* card(mount, {blob, duration, bytes, filename, sampleRate, channels}) */
+  function card(mount, res) {
+    ensureCss();
+    var box = document.createElement('div');
+    box.className = 'zd-reccard';
+    var meta = document.createElement('div');
+    meta.className = 'zd-rcmeta';
+    var b = document.createElement('b');
+    b.textContent = secs(res.duration);
+    meta.appendChild(b);
+    var rest = ' · ' + (ZD.dl ? ZD.dl.bytes(res.bytes || (res.blob && res.blob.size) || 0) : (res.bytes || 0) + ' B');
+    if (res.sampleRate) rest += ' · ' + Math.round(res.sampleRate / 100) / 10 + ' kHz';
+    if (res.channels) rest += ' · ' + (res.channels > 1 ? 'estéreo' : 'mono');
+    meta.appendChild(document.createTextNode(rest));
+    box.appendChild(meta);
+
+    var url = URL.createObjectURL(res.blob);
+    var au = document.createElement('audio');
+    au.controls = true; au.preload = 'metadata'; au.src = url;
+    au.setAttribute('playsinline', '');
+    box.appendChild(au);
+
+    var row = document.createElement('div');
+    row.className = 'zd-rcrow';
+    var dlBtn = document.createElement('button');
+    dlBtn.type = 'button'; dlBtn.className = 'pri';
+    dlBtn.textContent = res.downloadLabel || '⭳ DESCARGAR WAV';
+    dlBtn.addEventListener('click', function () {
+      if (ZD.dl) ZD.dl.save(res.blob, res.filename);
+      else { var a = document.createElement('a'); a.href = url; a.download = res.filename; a.click(); }
+    });
+    row.appendChild(dlBtn);
+    if (res.onDiscard) {
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.textContent = res.discardLabel || 'DESCARTAR';
+      x.addEventListener('click', function () { destroy(); res.onDiscard(); });
+      row.appendChild(x);
+    }
+    box.appendChild(row);
+
+    function destroy() {
+      try { au.pause(); } catch (e) {}
+      URL.revokeObjectURL(url);
+      if (box.parentNode) box.remove();
+    }
+    if (mount) {
+      if (res.replace !== false) while (mount.firstChild) mount.removeChild(mount.firstChild);
+      mount.appendChild(box);
+    }
+    return { el: box, destroy: destroy };
+  }
+
+  ZD.rec = { create: create, card: card, wavFromBuffer: wavFromBuffer, wavFromInt16: wavFromInt16, secs: secs };
+})();
+/* /ZD-BLOCK:zd-rec */
+</script>
 
 <script id="zd-mobile-config">
 /* Config del shell portrait de ACID BASS-303. El bloque zd-mobile no sabe nada
@@ -1390,8 +1946,8 @@ window.ZD_M = {
       </div>
       <button class="btn-io wav" id="expWav">◉ EXPORTAR WAV</button>
       <button class="mini gen" id="bankSave">⊕ GUARDAR EN BANCO</button>
-      <input id="fileInput" type="file" accept=".json,application/json" style="display:none">
     </div>
+    <div id="wavResult" class="wav-result" role="status" aria-live="polite"></div>
     <div class="bank-lbl" id="userBankLbl">BANCO DE USUARIO — se guarda solo en este navegador</div>
     <div class="bank" id="userBank"></div>
     <div class="bank-lbl" id="factoryBankLbl" style="margin-top:14px;">BANCO DE FÁBRICA — patrones de referencia (estilo genérico)</div>
@@ -1761,18 +2317,49 @@ $('#mutBtn').addEventListener('click', ()=>{ pattern=mutatePattern(); selectedSt
 // ============================================================
 //  PATCHES · JSON · MIDI · WAV · BANCO
 // ============================================================
-function download(blob, filename){ const url=URL.createObjectURL(blob); const a=el('a'); a.href=url; a.download=filename;
-  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },120); }
+const APP_ID='acid-bass-303', APP_VERSION=1, APP_SLUG='acid-bass';
+// Toda descarga pasa por ZD.dl: <a download> y, en iOS, Web Share con archivo.
+// El nombre sale del nombre del patch si hay uno, si no del slug del instrumento.
+function dlName(ext){ const nm=($('#patchName').value||'').trim(); return ZD.dl.name(nm||APP_SLUG, ext); }
+function saveBlob(blob, ext){ return ZD.dl.save(blob, dlName(ext)); }
 
 function serializePatch(){ const nm=($('#patchName').value||'').trim()||'acid303-patch';
-  return { hackwave:'acid-bass-303', version:1, name:nm, params:Object.assign({},params), patternOct,
+  return { hackwave:APP_ID, version:APP_VERSION, name:nm, params:Object.assign({},params), patternOct,
     pattern:pattern.map(s=>({gate:s.gate,note:s.note,accent:s.accent,slide:s.slide})) }; }
-function slug(s){ return (s||'patch').replace(/[^\w\-]+/g,'_').slice(0,40); }
-$('#saveJson').addEventListener('click', ()=>{ const p=serializePatch(); download(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}), slug(p.name)+'.json'); });
-$('#loadJson').addEventListener('click', ()=>$('#fileInput').click());
-$('#fileInput').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader();
-  r.onload=()=>{ try{ const o=JSON.parse(r.result); if(!loadPatch(o)) throw 0; }catch(err){ alert('JSON inválido o no es un patch de ACID BASS-303.'); } e.target.value=''; };
-  r.readAsText(f); });
+// Envoltorio de exportacion que pide SPEC R4. El objeto de adentro conserva
+// hackwave/version para que los JSON viejos y los de fabrica sigan abriendo.
+function patchEnvelope(){ return { app:APP_ID, version:APP_VERSION, savedAt:new Date().toISOString(), data:serializePatch() }; }
+function unwrapPatch(obj){
+  if(!obj || typeof obj!=='object') return { ok:false, reason:'El archivo no tiene la forma de un patch.' };
+  if(obj.data && typeof obj.data==='object'){
+    if(obj.app && obj.app!==APP_ID) return { ok:false, reason:'Ese JSON es de otro instrumento ('+String(obj.app).slice(0,40)+'). Abrilo en el instrumento que lo creó.' };
+    if(typeof obj.version==='number' && obj.version>APP_VERSION)
+      return { ok:false, reason:'Ese JSON es de una versión más nueva del instrumento (v'+obj.version+'). Actualizá ACID BASS-303 para abrirlo.' };
+    if(!obj.data.params) return { ok:false, reason:'Al JSON le faltan los parámetros del patch.' };
+    return { ok:true, patch:obj.data };
+  }
+  if(obj.hackwave && obj.hackwave!==APP_ID)
+    return { ok:false, reason:'Ese JSON es de otro instrumento ('+String(obj.hackwave).slice(0,40)+').' };
+  if(obj.params) return { ok:true, patch:obj };
+  return { ok:false, reason:'No parece un patch de ACID BASS-303: no trae parámetros.' };
+}
+$('#saveJson').addEventListener('click', ()=>{
+  const blob=new Blob([JSON.stringify(patchEnvelope(),null,2)],{type:'application/json'});
+  saveBlob(blob,'json').then(how=>ZD.toast(how==='share'?'JSON listo para compartir':'JSON descargado')); });
+$('#loadJson').addEventListener('click', async ()=>{
+  let f=null;
+  try{ f=await ZD.dl.pick({ accept:'.json,application/json' }); }catch(err){ f=null; }
+  if(!f) return;
+  let txt;
+  try{ txt=await ZD.dl.readText(f); }
+  catch(err){ ZD.modal.error('No se pudo leer «'+f.name+'».', {title:'ERROR AL IMPORTAR'}); return; }
+  let obj;
+  try{ obj=JSON.parse(txt); }
+  catch(err){ ZD.modal.error('«'+f.name+'» no es un JSON válido.', {title:'ERROR AL IMPORTAR'}); return; }
+  const r=unwrapPatch(obj);
+  if(!r.ok){ ZD.modal.error(r.reason, {title:'ERROR AL IMPORTAR'}); return; }
+  if(!loadPatch(r.patch)){ ZD.modal.error('El patch no se pudo aplicar.', {title:'ERROR AL IMPORTAR'}); return; }
+  ZD.toast('Patch «'+(r.patch.name||f.name)+'» cargado'); });
 
 function loadPatch(obj){
   if(!obj || typeof obj!=='object' || !obj.params) return false;
@@ -1792,8 +2379,7 @@ function loadPatch(obj){
   return true;
 }
 
-// ---- MIDI (Standard MIDI File, formato 0) ----
-function pushVLQ(arr,n){ const b=[n&0x7f]; n>>=7; while(n>0){ b.unshift((n&0x7f)|0x80); n>>=7; } for(const x of b) arr.push(x); }
+// ---- MIDI (Standard MIDI File, formato 0, por ZD.midi.write) ----
 function buildMIDI(){
   const TPQ=96, tickStep=TPQ/4; // 24 ticks por 1/16
   const notes=[]; let active=null, prevSlide=false;
@@ -1806,20 +2392,16 @@ function buildMIDI(){
     const connect=st.slide || next.gate==='tie'; if(!connect){ active.end=tickStart+Math.round(tickStep*(st.accent?0.6:0.5)); active=null; }
     prevSlide=st.slide; }
   if(active) active.end=STEPS*tickStep;
-  const evs=[];
-  for(const nt of notes){ evs.push({t:nt.start,on:true,pitch:nt.pitch,vel:nt.vel}); evs.push({t:Math.max(nt.end,nt.start+1),on:false,pitch:nt.pitch,vel:0}); }
-  evs.sort((a,b)=> a.t-b.t || (a.on?1:0)-(b.on?1:0)); // note-off antes de note-on al mismo tick
-  const track=[]; const mpq=Math.round(60000000/Seq.bpm);
-  pushVLQ(track,0); track.push(0xFF,0x51,0x03,(mpq>>16)&0xff,(mpq>>8)&0xff,mpq&0xff);
-  const nm='HACKWAVE ACID-303'; pushVLQ(track,0); track.push(0xFF,0x03,nm.length); for(const c of nm) track.push(c.charCodeAt(0)&0x7f);
-  let last=0; for(const e of evs){ pushVLQ(track,e.t-last); last=e.t; track.push(e.on?0x90:0x80, e.pitch&0x7f, e.vel&0x7f); }
-  pushVLQ(track,0); track.push(0xFF,0x2F,0x00);
-  const header=[0x4D,0x54,0x68,0x64,0,0,0,6,0,0,0,1,(TPQ>>8)&0xff,TPQ&0xff];
-  const L=track.length; const trkHead=[0x4D,0x54,0x72,0x6B,(L>>24)&0xff,(L>>16)&0xff,(L>>8)&0xff,L&0xff];
-  const bytes=new Uint8Array(header.length+trkHead.length+L); bytes.set(header,0); bytes.set(trkHead,header.length); bytes.set(track,header.length+trkHead.length);
-  return new Blob([bytes],{type:'audio/midi'});
+  const events=[];
+  // ZD.midi.write ordena por tick y resuelve note-off antes de note-on al mismo tick.
+  for(const nt of notes){ events.push({t:nt.start,type:'on',pitch:nt.pitch,vel:nt.vel});
+                          events.push({t:Math.max(nt.end,nt.start+1),type:'off',pitch:nt.pitch,vel:0}); }
+  return ZD.midi.write({ ppq:TPQ, bpm:Seq.bpm, trackName:MIDI_TRACK_NAME, events });
 }
-$('#expMidi').addEventListener('click', ()=>{ const nm=($('#patchName').value||'').trim(); download(buildMIDI(), slug(nm||'acid303')+'.mid'); });
+const MIDI_TRACK_NAME='HACKWAVE ACID-303';
+$('#expMidi').addEventListener('click', ()=>{
+  try{ saveBlob(buildMIDI(),'mid').then(how=>ZD.toast(how==='share'?'MIDI listo para compartir':'MIDI descargado')); }
+  catch(err){ console.error(err); ZD.modal.error('No se pudo armar el archivo MIDI.', {title:'ERROR AL EXPORTAR'}); } });
 
 // ---- WAV (render offline real del patrón) ----
 async function renderWAV(bars){
@@ -1855,15 +2437,29 @@ function audioBufferToWav(buf){ const ch=buf.numberOfChannels, sr=buf.sampleRate
   const chans=[]; for(let c=0;c<ch;c++) chans.push(buf.getChannelData(c));
   for(let i=0;i<n;i++){ for(let c=0;c<ch;c++){ const s=clamp(chans[c][i],-1,1); dv.setInt16(o, s<0?s*0x8000:s*0x7fff, true); o+=2; } }
   return new Blob([ab],{type:'audio/wav'}); }
-$('#expWav').addEventListener('click', async e=>{ const btn=e.currentTarget, old=btn.textContent; btn.textContent='RENDERIZANDO…'; btn.disabled=true;
-  try{ const nm=($('#patchName').value||'').trim(); const blob=await renderWAV(+$('#barsSel').value); download(blob, slug(nm||'acid303')+'.wav'); }
-  catch(err){ console.error(err); alert('No se pudo renderizar el WAV en este entorno.'); }
+// El render es asincronico, asi que la descarga no puede ir pegada al click:
+// el resultado sale como tarjeta y el boton de descargar vuelve a estar dentro
+// de un gesto del usuario (que es lo que Web Share necesita en iOS).
+const wavResultEl=$('#wavResult');
+let wavCard=null;
+$('#expWav').addEventListener('click', async e=>{ const btn=e.currentTarget, old=btn.textContent;
+  btn.textContent='RENDERIZANDO…'; btn.disabled=true;
+  try{
+    const bars=+$('#barsSel').value;
+    const blob=await renderWAV(bars);
+    const dur=(bars*STEPS*(60/Seq.bpm)/4)+0.7;
+    if(wavCard) wavCard.destroy();
+    wavCard=ZD.rec.card(wavResultEl, { blob, duration:dur, bytes:blob.size, sampleRate:44100, channels:1,
+      filename:dlName('wav'), onDiscard:()=>{ wavCard=null; } });
+  }
+  catch(err){ console.error(err); ZD.modal.error('No se pudo renderizar el WAV en este entorno. Probá con menos compases.', {title:'ERROR AL EXPORTAR'}); }
   btn.textContent=old; btn.disabled=false; });
 
 // banco de fábrica (chips)
 const bankEl=$('#bank');
 FACTORY.forEach(pset=>{ const chip=el('button','chip'); chip.textContent=pset.name;
-  chip.addEventListener('click', ()=>{ Engine.ensure(); loadPatch(JSON.parse(JSON.stringify(pset))); }); bankEl.appendChild(chip); });
+  chip.addEventListener('click', ()=>{ if(window.ZD&&ZD.audio) ZD.audio.unlock(); else Engine.ensure();
+    loadPatch(JSON.parse(JSON.stringify(pset))); }); bankEl.appendChild(chip); });
 
 // ---------- render del secuenciador ----------
 const seqEl=$('#seq');

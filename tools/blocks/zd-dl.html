@@ -26,7 +26,8 @@
   }
   function slug(s, max) {
     var t = String(s == null ? '' : s).trim().toLowerCase();
-    if (t.normalize) t = t.normalize('NFD');
+    /* NFD + quitar las marcas combinantes: "Acido" no puede salir "a-cido". */
+    if (t.normalize) t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     t = t.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, max || 48);
     return t || 'patch';
   }
