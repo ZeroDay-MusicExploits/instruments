@@ -1,0 +1,17 @@
+{
+  "name": "zeroday-musicexploits-instruments",
+  "private": true,
+  "description": "Herramientas de build para el sitio estático de ZERO DAY · MUSIC EXPLOITS (sin dependencias en runtime).",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "make-icons": "node tools/make-icons.mjs",
+    "build-zip": "node tools/build-zip.mjs",
+    "check-zip": "node tools/check-zip.mjs"
+  },
+  "devDependencies": {
+    "pngjs": "7.0.0"
+  }
+}
