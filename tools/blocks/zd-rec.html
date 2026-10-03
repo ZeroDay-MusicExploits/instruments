@@ -1,0 +1,279 @@
+<script>
+/* ZD-BLOCK:zd-rec v1 */
+/* Grabacion de la salida master a WAV y tarjeta de resultado.
+   Captura por AudioWorklet (chunks Int16), fallback a MediaStreamDestination
+   + MediaRecorder + decodeAudioData. PCM 16-bit a la frecuencia real del
+   AudioContext. Tope por defecto 10 min. Usa ZD.dl para descargar. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.rec) return;
+
+  var TAP_CODE = [
+    'class ZDRecTap extends AudioWorkletProcessor {',
+    '  constructor(){ super(); this.on=false; this.port.onmessage=(e)=>{ if(e.data&&e.data.cmd==="start") this.on=true; else if(e.data&&e.data.cmd==="stop") this.on=false; }; }',
+    '  process(inputs, outputs){ const inp=inputs[0], out=outputs[0];',
+    '    if(inp && inp.length){ const ch=inp.length, n=inp[0].length;',
+    '      if(this.on){ const buf=new Int16Array(n*ch);',
+    '        for(let i=0;i<n;i++){ for(let c=0;c<ch;c++){ let s=inp[c][i]; s=s<-1?-1:(s>1?1:s); buf[i*ch+c]= s<0 ? s*0x8000 : s*0x7fff; } }',
+    '        this.port.postMessage({ch:ch,n:n,pcm:buf},[buf.buffer]); }',
+    '      if(out && out.length){ for(let c=0;c<out.length;c++) out[c].fill(0); } }',
+    '    return true; }',
+    '}',
+    'registerProcessor("zd-rec-tap", ZDRecTap);'
+  ].join('\n');
+
+  /* ---------- WAV ---------- */
+  function wavHeader(dv, o, channels, sampleRate, frames) {
+    function s(t) { for (var i = 0; i < t.length; i++) dv.setUint8(o++, t.charCodeAt(i)); }
+    function u32(v) { dv.setUint32(o, v, true); o += 4; }
+    function u16(v) { dv.setUint16(o, v, true); o += 2; }
+    var blockAlign = channels * 2, dataLen = frames * blockAlign;
+    s('RIFF'); u32(36 + dataLen); s('WAVE'); s('fmt '); u32(16); u16(1); u16(channels);
+    u32(sampleRate); u32(sampleRate * blockAlign); u16(blockAlign); u16(16); s('data'); u32(dataLen);
+    return o;
+  }
+  /* wavFromInt16(chunks, channels, sampleRate) — chunks ya intercalados */
+  function wavFromInt16(chunks, channels, sampleRate) {
+    var frames = 0, i;
+    for (i = 0; i < chunks.length; i++) frames += chunks[i].length / channels;
+    var ab = new ArrayBuffer(44 + frames * channels * 2), dv = new DataView(ab);
+    wavHeader(dv, 0, channels, sampleRate, frames);
+    var view = new Int16Array(ab, 44);
+    var off = 0;
+    for (i = 0; i < chunks.length; i++) { view.set(chunks[i], off); off += chunks[i].length; }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+  /* wavFromBuffer(audioBuffer) — PCM 16-bit intercalado */
+  function wavFromBuffer(buf) {
+    var ch = buf.numberOfChannels, n = buf.length, sr = buf.sampleRate;
+    var ab = new ArrayBuffer(44 + n * ch * 2), dv = new DataView(ab), o = wavHeader(dv, 0, ch, sr, n);
+    var chans = [], c;
+    for (c = 0; c < ch; c++) chans.push(buf.getChannelData(c));
+    for (var i = 0; i < n; i++) {
+      for (c = 0; c < ch; c++) {
+        var s = chans[c][i]; s = s < -1 ? -1 : s > 1 ? 1 : s;
+        dv.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true); o += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  /* ---------- captura en vivo ---------- */
+  var tapReady = null;
+  function loadTap(ctx) {
+    if (!ctx.audioWorklet) return Promise.resolve(false);
+    if (tapReady) return tapReady;
+    tapReady = (function () {
+      var u = null;
+      try { u = URL.createObjectURL(new Blob([TAP_CODE], { type: 'application/javascript' })); } catch (e) {}
+      var p = u ? ctx.audioWorklet.addModule(u) : Promise.reject(new Error('blob'));
+      return p.then(function () { if (u) URL.revokeObjectURL(u); return true; }, function () {
+        if (u) try { URL.revokeObjectURL(u); } catch (e) {}
+        return ctx.audioWorklet.addModule('data:application/javascript,' + encodeURIComponent(TAP_CODE)).then(function () { return true; }, function () { return false; });
+      });
+    })();
+    return tapReady;
+  }
+
+  /* create({getContext, getSource, channels, maxSec, onProgress, onLimit}) */
+  function create(cfg) {
+    cfg = cfg || {};
+    var channels = cfg.channels || 2;
+    var maxSec = cfg.maxSec || 600;
+    var state = 'idle', chunks = [], frames = 0, sampleRate = 0;
+    var node = null, sink = null, src = null, mode = null;
+    var mrec = null, mdest = null, mparts = [], startedAt = 0, ticker = null;
+
+    function ctx() { return cfg.getContext(); }
+    function source() { return cfg.getSource(); }
+
+    function cleanup() {
+      if (ticker) { clearInterval(ticker); ticker = null; }
+      try { if (node && src) src.disconnect(node); } catch (e) {}
+      try { if (node) node.disconnect(); } catch (e) {}
+      try { if (sink) sink.disconnect(); } catch (e) {}
+      try { if (mdest && src) src.disconnect(mdest); } catch (e) {}
+      node = null; sink = null; src = null; mdest = null; mrec = null;
+    }
+
+    function startTicker() {
+      if (!cfg.onProgress) return;
+      ticker = setInterval(function () { cfg.onProgress(elapsed()); }, 250);
+    }
+    function elapsed() {
+      if (state !== 'rec') return frames && sampleRate ? frames / sampleRate : 0;
+      if (mode === 'worklet') return sampleRate ? frames / sampleRate : 0;
+      return (performance.now() - startedAt) / 1000;
+    }
+
+    function start() {
+      if (state === 'rec') return Promise.resolve(mode);
+      var c = ctx();
+      if (!c) return Promise.reject(new Error('sin AudioContext'));
+      chunks = []; frames = 0; sampleRate = c.sampleRate; mparts = [];
+      src = source();
+      if (!src) return Promise.reject(new Error('sin nodo de origen'));
+      return loadTap(c).then(function (ok) {
+        if (ok) {
+          try {
+            node = new AudioWorkletNode(c, 'zd-rec-tap', {
+              numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [channels],
+              channelCount: channels, channelCountMode: 'explicit', channelInterpretation: 'speakers'
+            });
+          } catch (e) { node = null; }
+        }
+        if (node) {
+          mode = 'worklet';
+          node.port.onmessage = function (ev) {
+            var d = ev.data;
+            if (!d || !d.pcm || state !== 'rec') return;
+            chunks.push(d.pcm); frames += d.n;
+            if (frames / sampleRate >= maxSec) { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); }
+          };
+          sink = c.createGain(); sink.gain.value = 0;
+          src.connect(node); node.connect(sink); sink.connect(c.destination);
+          node.port.postMessage({ cmd: 'start' });
+          state = 'rec'; startedAt = performance.now(); startTicker();
+          return mode;
+        }
+        /* fallback: MediaStreamDestination + MediaRecorder */
+        if (!c.createMediaStreamDestination || typeof MediaRecorder === 'undefined') throw new Error('sin captura disponible');
+        mode = 'mediarecorder';
+        mdest = c.createMediaStreamDestination();
+        src.connect(mdest);
+        mrec = new MediaRecorder(mdest.stream);
+        mrec.ondataavailable = function (e) { if (e.data && e.data.size) mparts.push(e.data); };
+        mrec.start(500);
+        state = 'rec'; startedAt = performance.now(); startTicker();
+        if (maxSec > 0) setTimeout(function () { if (state === 'rec') { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); } }, maxSec * 1000);
+        return mode;
+      });
+    }
+
+    function finish(blob, dur) {
+      var r = { blob: blob, duration: dur, bytes: blob.size, sampleRate: sampleRate, channels: channels, mode: mode };
+      state = 'idle';
+      return r;
+    }
+
+    function stop() {
+      if (state !== 'rec') return Promise.resolve(null);
+      state = 'stopping';
+      if (mode === 'worklet') {
+        try { node.port.postMessage({ cmd: 'stop' }); } catch (e) {}
+        var f = frames, sr = sampleRate, cs = chunks;
+        cleanup(); chunks = [];
+        if (!f) { state = 'idle'; return Promise.resolve(null); }
+        return Promise.resolve(finish(wavFromInt16(cs, channels, sr), f / sr));
+      }
+      return new Promise(function (resolve, reject) {
+        var rec = mrec, c = ctx();
+        rec.onstop = function () {
+          var blob = new Blob(mparts, { type: mparts.length && mparts[0].type ? mparts[0].type : 'audio/webm' });
+          cleanup(); mparts = [];
+          blob.arrayBuffer().then(function (ab) {
+            var dec = (ZD.audio && ZD.audio.decode) ? ZD.audio.decode(c, ab) : c.decodeAudioData(ab);
+            return dec;
+          }).then(function (buf) {
+            resolve(finish(wavFromBuffer(buf), buf.duration));
+          }).catch(function (err) { state = 'idle'; reject(err); });
+        };
+        try { rec.stop(); } catch (e) { cleanup(); state = 'idle'; reject(e); }
+      });
+    }
+
+    return {
+      start: start, stop: stop,
+      get state() { return state; },
+      get mode() { return mode; },
+      elapsed: elapsed,
+      cancel: function () { if (state === 'rec') { try { if (mrec) mrec.stop(); } catch (e) {} cleanup(); chunks = []; mparts = []; state = 'idle'; } }
+    };
+  }
+
+  /* ---------- tarjeta de resultado ---------- */
+  var CSS = [
+    '.zd-reccard{display:flex;flex-direction:column;gap:9px;padding:11px;border-radius:var(--zd-r,4px);',
+    'background:var(--zd-well,#050804);border:1px solid var(--zd-outline,#000);box-shadow:0 0 0 1px var(--zd-line,#2a3f24);',
+    'font-family:var(--zd-mono,monospace);color:var(--zd-ink,#e9ebef)}',
+    '.zd-reccard .zd-rcmeta{font-size:11.5px;color:var(--zd-ink-dim,#a3b699);letter-spacing:.08em}',
+    '.zd-reccard .zd-rcmeta b{color:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '.zd-reccard .zd-rcrow{display:flex;gap:8px;flex-wrap:wrap}',
+    '.zd-reccard button{flex:1 1 auto;min-height:44px;min-width:96px;padding:0 12px;cursor:pointer;',
+    'font:700 12px var(--zd-mono,monospace);letter-spacing:.06em;color:var(--zd-ink,#e9ebef);background:var(--zd-panel-2,#1c2430);',
+    'border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px);',
+    'box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 2px 0 var(--zd-outline,#000);touch-action:manipulation}',
+    '.zd-reccard button.pri{color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '.zd-reccard button:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24)}',
+    '.zd-reccard audio{width:100%;height:36px}'
+  ].join('');
+  var cssDone = false;
+  function ensureCss() {
+    if (cssDone) return;
+    cssDone = true;
+    var st = document.createElement('style'); st.id = 'zd-rec-css'; st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+  }
+  function secs(d) {
+    d = Math.max(0, d || 0);
+    var m = Math.floor(d / 60), s = d - m * 60;
+    return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1);
+  }
+  /* card(mount, {blob, duration, bytes, filename, sampleRate, channels}) */
+  function card(mount, res) {
+    ensureCss();
+    var box = document.createElement('div');
+    box.className = 'zd-reccard';
+    var meta = document.createElement('div');
+    meta.className = 'zd-rcmeta';
+    var b = document.createElement('b');
+    b.textContent = secs(res.duration);
+    meta.appendChild(b);
+    var rest = ' · ' + (ZD.dl ? ZD.dl.bytes(res.bytes || (res.blob && res.blob.size) || 0) : (res.bytes || 0) + ' B');
+    if (res.sampleRate) rest += ' · ' + Math.round(res.sampleRate / 100) / 10 + ' kHz';
+    if (res.channels) rest += ' · ' + (res.channels > 1 ? 'estéreo' : 'mono');
+    meta.appendChild(document.createTextNode(rest));
+    box.appendChild(meta);
+
+    var url = URL.createObjectURL(res.blob);
+    var au = document.createElement('audio');
+    au.controls = true; au.preload = 'metadata'; au.src = url;
+    au.setAttribute('playsinline', '');
+    box.appendChild(au);
+
+    var row = document.createElement('div');
+    row.className = 'zd-rcrow';
+    var dlBtn = document.createElement('button');
+    dlBtn.type = 'button'; dlBtn.className = 'pri';
+    dlBtn.textContent = res.downloadLabel || '⭳ DESCARGAR WAV';
+    dlBtn.addEventListener('click', function () {
+      if (ZD.dl) ZD.dl.save(res.blob, res.filename);
+      else { var a = document.createElement('a'); a.href = url; a.download = res.filename; a.click(); }
+    });
+    row.appendChild(dlBtn);
+    if (res.onDiscard) {
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.textContent = res.discardLabel || 'DESCARTAR';
+      x.addEventListener('click', function () { destroy(); res.onDiscard(); });
+      row.appendChild(x);
+    }
+    box.appendChild(row);
+
+    function destroy() {
+      try { au.pause(); } catch (e) {}
+      URL.revokeObjectURL(url);
+      if (box.parentNode) box.remove();
+    }
+    if (mount) {
+      if (res.replace !== false) while (mount.firstChild) mount.removeChild(mount.firstChild);
+      mount.appendChild(box);
+    }
+    return { el: box, destroy: destroy };
+  }
+
+  ZD.rec = { create: create, card: card, wavFromBuffer: wavFromBuffer, wavFromInt16: wavFromInt16, secs: secs };
+})();
+/* /ZD-BLOCK:zd-rec */
+</script>

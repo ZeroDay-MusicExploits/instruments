@@ -1,0 +1,190 @@
+<script>
+/* ZD-BLOCK:zd-audio v1 */
+/* Desbloqueo de audio en el gesto, audioSession, manejo de interrupted /
+   suspended, Screen Wake Lock y decodeAudioData con fallback.
+   No crea ni conoce el grafo: el instrumento le pasa getContext/ensure. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.audio) return;
+
+  var cfg = { getContext: null, ensure: null, onResumed: null, label: 'Tocá para reanudar' };
+  var unlocked = false, playing = false, silent = null, overlay = null, wakeLock = null, wakeWanted = false;
+
+  /* ---------- contexto ---------- */
+  function options(extra) {
+    var o = { latencyHint: 'interactive' };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+  function ctx() { try { return cfg.getContext ? cfg.getContext() : null; } catch (e) { return null; } }
+
+  /* ---------- audioSession: que suene con el switch de silencio ---------- */
+  function setSession() {
+    try { if (navigator.audioSession && 'type' in navigator.audioSession) { navigator.audioSession.type = 'playback'; return true; } } catch (e) {}
+    return false;
+  }
+  function silentWavUri() {
+    var sr = 8000, n = sr / 2, bytes = new Uint8Array(44 + n * 2), dv = new DataView(bytes.buffer), o = 0;
+    function s(t) { for (var i = 0; i < t.length; i++) dv.setUint8(o++, t.charCodeAt(i)); }
+    function u32(v) { dv.setUint32(o, v, true); o += 4; }
+    function u16(v) { dv.setUint16(o, v, true); o += 2; }
+    s('RIFF'); u32(36 + n * 2); s('WAVE'); s('fmt '); u32(16); u16(1); u16(1); u32(sr); u32(sr * 2); u16(2); u16(16); s('data'); u32(n * 2);
+    var str = '';
+    for (var i = 0; i < bytes.length; i += 4096) str += String.fromCharCode.apply(null, bytes.subarray(i, i + 4096));
+    return 'data:audio/wav;base64,' + btoa(str);
+  }
+  function startSilentLoop() {
+    if (silent) { var p = silent.play(); if (p && p.catch) p.catch(function () {}); return; }
+    try {
+      silent = document.createElement('audio');
+      silent.loop = true; silent.preload = 'auto'; silent.volume = 0.0001;
+      silent.setAttribute('playsinline', ''); silent.setAttribute('aria-hidden', 'true');
+      silent.src = silentWavUri();
+      var pr = silent.play();
+      if (pr && pr.catch) pr.catch(function () {});
+    } catch (e) { silent = null; }
+  }
+
+  /* ---------- overlay "Toca para reanudar" ---------- */
+  var CSS = [
+    '.zd-resume{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;',
+    'background:rgba(3,5,2,.82);color:var(--zd-ink,#e9ebef);font-family:var(--zd-mono,monospace);text-align:center;padding:24px;',
+    '-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}',
+    '.zd-resume.on{display:flex}',
+    '.zd-resume b{font-size:15px;letter-spacing:.14em}',
+    '.zd-resume span{font-size:12.5px;color:var(--zd-ink-dim,#a3b699);max-width:300px;line-height:1.5}',
+    '.zd-resume i{width:56px;height:56px;border-radius:50%;border:3px solid var(--inst-accent,var(--zd-phosphor,#7fdc5c));',
+    'box-shadow:0 0 22px -6px var(--inst-accent,var(--zd-phosphor,#7fdc5c))}'
+  ].join('');
+  function ensureOverlay() {
+    if (overlay) return overlay;
+    var st = document.createElement('style'); st.id = 'zd-audio-css'; st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+    overlay = document.createElement('div');
+    overlay.className = 'zd-resume';
+    overlay.setAttribute('role', 'button');
+    overlay.tabIndex = 0;
+    overlay.setAttribute('aria-label', cfg.label);
+    var i = document.createElement('i');
+    var b = document.createElement('b'); b.textContent = cfg.label;
+    var sp = document.createElement('span'); sp.textContent = 'El navegador pausó el audio. Un toque lo vuelve a habilitar.';
+    overlay.appendChild(i); overlay.appendChild(b); overlay.appendChild(sp);
+    function go(e) { if (e) e.preventDefault(); unlock().then(function (ok) { if (ok) hideResume(); }); }
+    overlay.addEventListener('pointerup', go);
+    overlay.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') go(e); });
+    (document.body || document.documentElement).appendChild(overlay);
+    return overlay;
+  }
+  function showResume() { ensureOverlay().classList.add('on'); }
+  function hideResume() { if (overlay) overlay.classList.remove('on'); }
+
+  /* ---------- unlock ---------- */
+  function unlock() {
+    setSession();
+    startSilentLoop();
+    var r;
+    try { r = cfg.ensure ? cfg.ensure() : null; } catch (e) { r = null; }
+    var p = (r && typeof r.then === 'function') ? r : Promise.resolve(r);
+    return p.then(function () {
+      var c = ctx();
+      if (!c) return false;
+      if (c.state === 'running') { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} return true; }
+      return c.resume().then(function () {
+        var ok = c.state === 'running';
+        if (ok) { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+        return ok;
+      }, function () { return false; });
+    }, function () { return false; });
+  }
+
+  /* Un gesto cualquiera destraba. Se registra en captura para correr DENTRO
+     del handler del gesto (requisito de iOS) sin pisar los handlers propios. */
+  function bindGesture(target) {
+    var t = target || window;
+    function once(e) {
+      if (e.type === 'keydown' && (e.key === 'Tab' || e.key === 'Escape')) return;
+      unlock();
+    }
+    t.addEventListener('pointerup', once, true);
+    t.addEventListener('click', once, true);
+    t.addEventListener('keydown', once, true);
+    t.addEventListener('touchend', once, true);
+  }
+
+  /* ---------- interrupciones (iOS: llamada, Siri, segundo plano) ---------- */
+  function tryResume() {
+    var c = ctx();
+    if (!c) return;
+    if (c.state === 'running') { hideResume(); return; }
+    /* interrupted es estado propio de Safari; suspended es el estandar. */
+    c.resume().then(function () {
+      if (c.state === 'running') { hideResume(); if (wakeWanted) requestWake(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+      else if (playing) showResume();
+    }, function () { if (playing) showResume(); });
+  }
+  function watchContext(c) {
+    if (!c || c.__zdWatched) return;
+    c.__zdWatched = true;
+    try {
+      c.addEventListener('statechange', function () {
+        if (c.state === 'running') hideResume();
+        else if (playing && (c.state === 'suspended' || c.state === 'interrupted')) showResume();
+      });
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') { tryResume(); if (wakeWanted) requestWake(); }
+  });
+  window.addEventListener('pageshow', function () { tryResume(); });
+  window.addEventListener('focus', function () { tryResume(); });
+
+  /* ---------- Screen Wake Lock ---------- */
+  function requestWake() {
+    if (!('wakeLock' in navigator)) return Promise.resolve(false);
+    if (wakeLock) return Promise.resolve(true);
+    if (document.visibilityState !== 'visible') return Promise.resolve(false);
+    return navigator.wakeLock.request('screen').then(function (s) {
+      wakeLock = s;
+      s.addEventListener('release', function () { wakeLock = null; });
+      return true;
+    }, function () { return false; });
+  }
+  function releaseWake() {
+    var s = wakeLock; wakeLock = null;
+    if (!s) return Promise.resolve(false);
+    return s.release().then(function () { return true; }, function () { return false; });
+  }
+  function setPlaying(on) {
+    playing = !!on;
+    wakeWanted = playing;
+    if (playing) { watchContext(ctx()); requestWake(); }
+    else { releaseWake(); hideResume(); }
+  }
+
+  /* ---------- decodeAudioData con fallback a callbacks ---------- */
+  function decode(c, arrayBuffer) {
+    return new Promise(function (resolve, reject) {
+      var r;
+      try { r = c.decodeAudioData(arrayBuffer, resolve, reject); } catch (e) { reject(e); return; }
+      if (r && typeof r.then === 'function') r.then(resolve, reject);
+    });
+  }
+
+  function attach(o) {
+    for (var k in o) cfg[k] = o[k];
+    watchContext(ctx());
+    return ZD.audio;
+  }
+
+  ZD.audio = {
+    attach: attach, options: options, unlock: unlock, bindGesture: bindGesture,
+    setPlaying: setPlaying, resume: tryResume, decode: decode,
+    requestWake: requestWake, releaseWake: releaseWake,
+    showResume: showResume, hideResume: hideResume, setSession: setSession,
+    get unlocked() { return unlocked; },
+    get hasWakeLock() { return !!wakeLock; }
+  };
+})();
+/* /ZD-BLOCK:zd-audio */
+</script>

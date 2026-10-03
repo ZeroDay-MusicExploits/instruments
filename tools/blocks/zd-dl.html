@@ -1,0 +1,128 @@
+<script>
+/* ZD-BLOCK:zd-dl v1 */
+/* Descarga de blobs y lectura de archivos. <a download> por defecto; en iOS
+   (y donde el atributo download no alcanza) usa Web Share con archivo.
+   Nombres <slug>-YYYYMMDD-HHmm.<ext>. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.dl) return;
+
+  function isIOS() {
+    var ua = navigator.userAgent || '';
+    return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
+  function isStandalone() {
+    try { if (window.matchMedia('(display-mode: standalone)').matches) return true; } catch (e) {}
+    return navigator.standalone === true;
+  }
+  function canShareFiles(files) {
+    try { return !!(navigator.canShare && navigator.share && navigator.canShare({ files: files })); } catch (e) { return false; }
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function stamp(d) {
+    d = d || new Date();
+    return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes());
+  }
+  function slug(s, max) {
+    var t = String(s == null ? '' : s).trim().toLowerCase();
+    if (t.normalize) t = t.normalize('NFD');
+    t = t.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, max || 48);
+    return t || 'patch';
+  }
+  function name(base, ext, d) { return slug(base) + '-' + stamp(d) + '.' + String(ext).replace(/^\./, ''); }
+
+  function anchorSave(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename; a.rel = 'noopener';
+    a.style.position = 'fixed'; a.style.opacity = '0'; a.style.pointerEvents = 'none';
+    (document.body || document.documentElement).appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); if (a.parentNode) a.remove(); }, 1500);
+    return 'download';
+  }
+
+  function mimeOf(blob, filename) {
+    if (blob.type) return blob.type;
+    var m = /\.([a-z0-9]+)$/i.exec(filename || '');
+    var ext = m ? m[1].toLowerCase() : '';
+    if (ext === 'json') return 'application/json';
+    if (ext === 'wav') return 'audio/wav';
+    if (ext === 'mid' || ext === 'midi') return 'audio/midi';
+    return 'application/octet-stream';
+  }
+
+  /* save(blob, filename, opts) -> Promise<'share'|'download'>
+     opts.prefer: 'share' | 'download' | undefined (auto) */
+  function save(blob, filename, opts) {
+    opts = opts || {};
+    var prefer = opts.prefer;
+    var wantShare = prefer === 'share' || (prefer !== 'download' && isIOS());
+    if (!wantShare) return Promise.resolve(anchorSave(blob, filename));
+    var file;
+    try { file = new File([blob], filename, { type: mimeOf(blob, filename) }); }
+    catch (e) { return Promise.resolve(anchorSave(blob, filename)); }
+    if (!canShareFiles([file])) return Promise.resolve(anchorSave(blob, filename));
+    return navigator.share({ files: [file], title: filename })
+      .then(function () { return 'share'; })
+      .catch(function (err) {
+        if (err && err.name === 'AbortError') return 'share';
+        return anchorSave(blob, filename);
+      });
+  }
+
+  /* pick({accept, multiple}) -> Promise<File|File[]|null> */
+  function pick(opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      var inp = document.createElement('input');
+      inp.type = 'file';
+      if (opts.accept) inp.accept = opts.accept;
+      if (opts.multiple) inp.multiple = true;
+      inp.style.position = 'fixed'; inp.style.left = '-9999px'; inp.style.opacity = '0';
+      function done(v) { if (inp.parentNode) inp.remove(); resolve(v); }
+      inp.addEventListener('change', function () {
+        var fs = inp.files;
+        if (!fs || !fs.length) { done(null); return; }
+        done(opts.multiple ? Array.prototype.slice.call(fs) : fs[0]);
+      });
+      inp.addEventListener('cancel', function () { done(null); });
+      (document.body || document.documentElement).appendChild(inp);
+      inp.click();
+    });
+  }
+
+  function readText(file) {
+    if (file.text) return file.text();
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result)); };
+      r.onerror = function () { reject(r.error || new Error('lectura')); };
+      r.readAsText(file);
+    });
+  }
+  function readBuffer(file) {
+    if (file.arrayBuffer) return file.arrayBuffer();
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(r.result); };
+      r.onerror = function () { reject(r.error || new Error('lectura')); };
+      r.readAsArrayBuffer(file);
+    });
+  }
+  function bytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
+  }
+
+  ZD.dl = {
+    save: save, name: name, slug: slug, stamp: stamp, pick: pick,
+    readText: readText, readBuffer: readBuffer, bytes: bytes,
+    isIOS: isIOS, isStandalone: isStandalone, canShareFiles: canShareFiles
+  };
+  ZD.download = function (blob, filename) { return save(blob, filename); };
+})();
+/* /ZD-BLOCK:zd-dl */
+</script>

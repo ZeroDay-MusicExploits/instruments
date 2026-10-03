@@ -1,0 +1,245 @@
+<script>
+/* ZD-BLOCK:zd-ui v1 */
+/* Toasts, modales con Promise y accesibilidad de controles continuos.
+   Reemplaza alert/confirm/prompt. Sin dependencias, sin referencias al
+   instrumento: inyecta su propio CSS y usa los tokens --zd-* del skin. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.ui) return;
+
+  var CSS = [
+    '.zd-toasts{position:fixed;z-index:400;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;',
+    'bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 24px));pointer-events:none;font-family:var(--zd-mono,monospace)}',
+    'html.zd-m .zd-toasts{bottom:calc(72px + env(safe-area-inset-bottom,0px))}',
+    '.zd-toast{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:var(--zd-r,4px);',
+    'background:var(--zd-panel,#14181c);color:var(--zd-ink,#e9ebef);border:2px solid var(--zd-outline,#000);',
+    'box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 4px 0 var(--zd-outline,#000),0 18px 30px -12px #000;',
+    'font-size:12.5px;line-height:1.35;opacity:0;transform:translateY(8px);transition:opacity .16s,transform .16s}',
+    '.zd-toast.in{opacity:1;transform:none}',
+    '.zd-toast .zd-tmsg{flex:1;min-width:0}',
+    '.zd-toast.err{box-shadow:0 0 0 1px var(--zd-alert,#ff5c3a),0 4px 0 var(--zd-outline,#000),0 18px 30px -12px #000}',
+    '.zd-toast button{flex:none;min-height:36px;padding:0 11px;font:700 11.5px var(--zd-mono,monospace);letter-spacing:.06em;',
+    'cursor:pointer;color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));',
+    'border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px);touch-action:manipulation}',
+    '.zd-toast button.zd-tx{background:transparent;color:var(--zd-ink-dim,#a3b699);min-width:36px;padding:0 8px;font-size:13px}',
+    '.zd-scrim{position:fixed;inset:0;z-index:500;background:rgba(3,5,2,.68);display:flex;align-items:center;justify-content:center;',
+    'padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));',
+    'opacity:0;transition:opacity .14s}',
+    '.zd-scrim.in{opacity:1}',
+    '.zd-dlg{width:min(440px,100%);max-height:84dvh;display:flex;flex-direction:column;gap:12px;padding:14px;',
+    'background:var(--zd-panel,#14181c);color:var(--zd-ink,#e9ebef);border:2px solid var(--zd-outline,#000);border-radius:var(--zd-r-lg,8px);',
+    'box-shadow:0 0 0 1px var(--inst-accent,var(--zd-phosphor,#7fdc5c)),0 4px 0 var(--zd-outline,#000),0 26px 44px -10px #000;',
+    'font-family:var(--zd-mono,monospace);transform:translateY(10px);transition:transform .14s}',
+    '.zd-scrim.in .zd-dlg{transform:none}',
+    '.zd-dlg h2{margin:0;font-size:12px;font-weight:800;letter-spacing:.2em;color:var(--zd-ink-dim,#a3b699)}',
+    '.zd-dlg .zd-dbody{font-size:13.5px;line-height:1.5;overflow:auto;overscroll-behavior:contain;white-space:pre-wrap;min-height:0}',
+    '.zd-dlg input[type=text]{width:100%;min-height:44px;padding:0 10px;font:13.5px var(--zd-mono,monospace);',
+    'color:var(--zd-ink,#e9ebef);background:var(--zd-well,#050804);border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px)}',
+    '.zd-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}',
+    '.zd-dact button{min-height:44px;padding:0 15px;font:700 12px var(--zd-mono,monospace);letter-spacing:.06em;cursor:pointer;',
+    'color:var(--zd-ink,#e9ebef);background:var(--zd-panel-2,#1c2430);border:1px solid var(--zd-outline,#000);',
+    'border-radius:var(--zd-r,4px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 2px 0 var(--zd-outline,#000);touch-action:manipulation}',
+    '.zd-dact button.pri{color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
+    '.zd-dact button.dng{box-shadow:0 0 0 1px var(--zd-alert,#ff5c3a),0 2px 0 var(--zd-outline,#000)}',
+    '.zd-dact button:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24)}',
+    '@media (prefers-reduced-motion:reduce){.zd-toast,.zd-scrim,.zd-dlg{transition:none}}'
+  ].join('');
+
+  var styleEl = document.createElement('style');
+  styleEl.id = 'zd-ui-css';
+  styleEl.textContent = CSS;
+  (document.head || document.documentElement).appendChild(styleEl);
+
+  function mk(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function body() { return document.body || document.documentElement; }
+
+  /* ---------- toasts ---------- */
+  var host = null;
+  function toastHost() {
+    if (!host) { host = mk('div', 'zd-toasts'); host.setAttribute('role', 'status'); host.setAttribute('aria-live', 'polite'); }
+    var want = body();
+    if (host.parentNode !== want) want.appendChild(host);
+    return host;
+  }
+  function toast(msg, opts) {
+    opts = opts || {};
+    var box = mk('div', 'zd-toast' + (opts.kind === 'error' ? ' err' : ''));
+    box.appendChild(mk('span', 'zd-tmsg', String(msg == null ? '' : msg)));
+    var done = false, timer = null;
+    function close() {
+      if (done) return; done = true;
+      if (timer) clearTimeout(timer);
+      box.classList.remove('in');
+      setTimeout(function () { if (box.parentNode) box.remove(); }, 200);
+    }
+    if (opts.action && opts.action.label) {
+      var b = mk('button', null, opts.action.label);
+      b.type = 'button';
+      b.addEventListener('click', function () { close(); try { opts.action.onClick(); } catch (e) {} });
+      box.appendChild(b);
+    }
+    if (opts.action2 && opts.action2.label) {
+      var b2 = mk('button', null, opts.action2.label);
+      b2.type = 'button';
+      b2.addEventListener('click', function () { close(); try { opts.action2.onClick(); } catch (e) {} });
+      box.appendChild(b2);
+    }
+    var x = mk('button', 'zd-tx', '✕');
+    x.type = 'button'; x.setAttribute('aria-label', 'Cerrar aviso');
+    x.addEventListener('click', close);
+    box.appendChild(x);
+    toastHost().appendChild(box);
+    requestAnimationFrame(function () { box.classList.add('in'); });
+    var ms = opts.ms == null ? (opts.action ? 9000 : 3600) : opts.ms;
+    if (ms > 0) timer = setTimeout(close, ms);
+    return { close: close, el: box };
+  }
+
+  /* ---------- modales ---------- */
+  var openDlg = null;
+  function dialog(cfg) {
+    cfg = cfg || {};
+    return new Promise(function (resolve) {
+      var prevFocus = document.activeElement;
+      var scrim = mk('div', 'zd-scrim');
+      var dlg = mk('div', 'zd-dlg');
+      dlg.setAttribute('role', 'dialog');
+      dlg.setAttribute('aria-modal', 'true');
+      var h = mk('h2', null, cfg.title || 'AVISO');
+      var hid = 'zd-dlg-t-' + Math.random().toString(36).slice(2, 8);
+      h.id = hid; dlg.setAttribute('aria-labelledby', hid);
+      dlg.appendChild(h);
+      var bodyBox = mk('div', 'zd-dbody');
+      if (cfg.node) bodyBox.appendChild(cfg.node); else bodyBox.textContent = String(cfg.message == null ? '' : cfg.message);
+      dlg.appendChild(bodyBox);
+      var input = null;
+      if (cfg.input) {
+        input = mk('input'); input.type = 'text';
+        input.value = cfg.input.value == null ? '' : String(cfg.input.value);
+        if (cfg.input.placeholder) input.placeholder = cfg.input.placeholder;
+        if (cfg.input.maxlength) input.maxLength = cfg.input.maxlength;
+        input.setAttribute('aria-label', cfg.input.label || cfg.title || 'Valor');
+        dlg.appendChild(input);
+      }
+      var acts = mk('div', 'zd-dact');
+      var list = cfg.actions || [{ label: 'OK', value: true, primary: true }];
+      var cancelVal = cfg.cancelValue === undefined ? null : cfg.cancelValue;
+      function finish(v) {
+        if (openDlg !== state) return;
+        openDlg = null;
+        document.removeEventListener('keydown', onKey, true);
+        scrim.classList.remove('in');
+        setTimeout(function () { if (scrim.parentNode) scrim.remove(); }, 180);
+        try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {}
+        resolve(v);
+      }
+      list.forEach(function (a) {
+        var b = mk('button', (a.primary ? 'pri' : '') + (a.danger ? ' dng' : ''), a.label);
+        b.type = 'button';
+        b.addEventListener('click', function () { finish(a.value === undefined ? true : (typeof a.value === 'function' ? a.value(input) : a.value)); });
+        acts.appendChild(b);
+      });
+      dlg.appendChild(acts);
+      scrim.appendChild(dlg);
+      function onKey(e) {
+        if (openDlg !== state) return;
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(cancelVal); return; }
+        if (e.key === 'Tab') {
+          var f = dlg.querySelectorAll('button,input,[tabindex]:not([tabindex="-1"])');
+          if (!f.length) return;
+          var first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }
+      var state = {};
+      scrim.addEventListener('pointerdown', function (e) { if (e.target === scrim && cfg.dismissable !== false) finish(cancelVal); });
+      if (input) input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          var pri = list.filter(function (a) { return a.primary; })[0] || list[list.length - 1];
+          finish(pri.value === undefined ? true : (typeof pri.value === 'function' ? pri.value(input) : pri.value));
+        }
+      });
+      body().appendChild(scrim);
+      openDlg = state;
+      document.addEventListener('keydown', onKey, true);
+      requestAnimationFrame(function () {
+        scrim.classList.add('in');
+        var target = input || dlg.querySelector('.zd-dact button.pri') || dlg.querySelector('.zd-dact button');
+        if (target) try { target.focus(); } catch (e) {}
+      });
+    });
+  }
+
+  var modal = {
+    open: dialog,
+    alert: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'AVISO', message: message, cancelValue: undefined,
+        actions: [{ label: opts.ok || 'ENTENDIDO', value: undefined, primary: true }] });
+    },
+    error: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'ERROR', message: message, cancelValue: undefined,
+        actions: [{ label: opts.ok || 'CERRAR', value: undefined, primary: true }] });
+    },
+    confirm: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'CONFIRMAR', message: message, cancelValue: false,
+        actions: [{ label: opts.cancel || 'CANCELAR', value: false },
+                  { label: opts.ok || 'SEGUIR', value: true, primary: true, danger: !!opts.danger }] });
+    },
+    prompt: function (message, opts) {
+      opts = opts || {};
+      return dialog({ title: opts.title || 'NOMBRE', message: message, cancelValue: null,
+        input: { value: opts.value, placeholder: opts.placeholder, maxlength: opts.maxlength, label: opts.label },
+        actions: [{ label: opts.cancel || 'CANCELAR', value: null },
+                  { label: opts.ok || 'GUARDAR', value: function (inp) { return inp ? inp.value : ''; }, primary: true }] });
+    }
+  };
+
+  /* ---------- accesibilidad de controles continuos (knobs, pads) ---------- */
+  function a11ySlider(el, cfg) {
+    if (!el || !cfg) return;
+    var min = cfg.min, max = cfg.max, span = max - min;
+    var coarse = cfg.step || span / 50, fine = cfg.fineStep || span / 200, page = cfg.pageStep || span / 10;
+    el.setAttribute('role', 'slider');
+    el.setAttribute('aria-label', cfg.label || '');
+    el.setAttribute('aria-valuemin', String(min));
+    el.setAttribute('aria-valuemax', String(max));
+    if (!el.hasAttribute('tabindex')) el.tabIndex = 0;
+    function refresh(v) {
+      el.setAttribute('aria-valuenow', String(Math.round(v * 1e4) / 1e4));
+      el.setAttribute('aria-valuetext', cfg.format ? cfg.format(v) : String(v));
+    }
+    el.addEventListener('keydown', function (e) {
+      var cur = cfg.get(), d = 0;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') d = e.shiftKey ? fine : coarse;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') d = -(e.shiftKey ? fine : coarse);
+      else if (e.key === 'PageUp') d = page;
+      else if (e.key === 'PageDown') d = -page;
+      else if (e.key === 'Home') { e.preventDefault(); cfg.set(min); refresh(cfg.get()); return; }
+      else if (e.key === 'End') { e.preventDefault(); cfg.set(max); refresh(cfg.get()); return; }
+      else if ((e.key === 'Enter' || e.key === ' ') && cfg.onEnter) { e.preventDefault(); cfg.onEnter(); return; }
+      else return;
+      e.preventDefault();
+      cfg.set(Math.min(max, Math.max(min, cur + d)));
+      refresh(cfg.get());
+    });
+    refresh(cfg.get());
+    return { refresh: refresh };
+  }
+
+  ZD.ui = { toast: toast, modal: modal, a11ySlider: a11ySlider, el: mk };
+  ZD.toast = toast;
+  ZD.modal = modal;
+})();
+/* /ZD-BLOCK:zd-ui */
+</script>

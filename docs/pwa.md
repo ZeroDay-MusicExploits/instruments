@@ -54,6 +54,16 @@ sobra (SPEC R2, "Quitar el manifest armado con `blob:`").
 
 ## 2 · El bloque `zd-pwa`
 
+> **Actualización (v1 final).** El bloque que quedó en los instrumentos ya no
+> lleva `var SLUG` adentro: una línea distinta por archivo rompe la
+> verificación byte a byte de SPEC 3.1.2. El slug sale del
+> `<link rel="manifest">` del `<head>` (el de la sección 1), así que el bloque
+> es idéntico en los 5 sin configuración. La API final y el código tal como
+> quedó están en [`docs/zd-blocks.md`](zd-blocks.md). El borrador de abajo se
+> mantiene porque documenta las condiciones de activación y el contrato con
+> `sw.js`, que no cambiaron.
+
+
 Va antes de `</body>`, **después** de `zd-ui` (usa `ZD.toast`, definido
 ahí). Es el mismo bloque, byte a byte, en los 5 instrumentos — solo
 cambia `SLUG` en la primera línea de configuración.

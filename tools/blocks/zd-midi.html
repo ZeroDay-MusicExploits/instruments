@@ -1,0 +1,147 @@
+<script>
+/* ZD-BLOCK:zd-midi v1 */
+/* Escritor de Standard MIDI File formato 0 y grabador de performance
+   (notas con timestamps, pitch bend, CC). Tambien reporta si Web MIDI
+   existe en este navegador (no existe en ningun navegador de iOS). */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.midi) return;
+
+  var CC = { mod: 1, cutoff: 74, reso: 71, volume: 7, pan: 10 };
+
+  function vlq(arr, n) {
+    n = n < 0 ? 0 : n | 0;
+    var b = [n & 0x7f];
+    n >>= 7;
+    while (n > 0) { b.unshift((n & 0x7f) | 0x80); n >>= 7; }
+    for (var i = 0; i < b.length; i++) arr.push(b[i]);
+  }
+  function ascii(s, max) {
+    var out = '', t = String(s == null ? '' : s);
+    for (var i = 0; i < t.length && out.length < (max || 60); i++) {
+      var c = t.charCodeAt(i);
+      out += (c >= 32 && c < 127) ? t[i] : ' ';
+    }
+    return out;
+  }
+  function clamp7(v) { v = Math.round(v); return v < 0 ? 0 : v > 127 ? 127 : v; }
+
+  var ORDER = { off: 0, cc: 1, bend: 2, on: 3 };
+  /* write({ppq, bpm, trackName, events}) -> Blob audio/midi
+     events: {t:<ticks>, type:'on'|'off'|'cc'|'bend', pitch, vel, cc, val, ch} */
+  function write(cfg) {
+    cfg = cfg || {};
+    var ppq = cfg.ppq || 96;
+    var bpm = Math.max(1, +cfg.bpm || 120);
+    var evs = (cfg.events || []).slice();
+    evs.forEach(function (e, i) { e.__i = i; });
+    evs.sort(function (a, b) {
+      return (a.t - b.t) || ((ORDER[a.type] || 9) - (ORDER[b.type] || 9)) || (a.__i - b.__i);
+    });
+
+    var track = [];
+    var mpq = Math.round(60000000 / bpm);
+    vlq(track, 0); track.push(0xFF, 0x51, 0x03, (mpq >> 16) & 0xff, (mpq >> 8) & 0xff, mpq & 0xff);
+    var nm = ascii(cfg.trackName || 'ZERO DAY');
+    vlq(track, 0); track.push(0xFF, 0x03, nm.length);
+    for (var i = 0; i < nm.length; i++) track.push(nm.charCodeAt(i) & 0x7f);
+
+    var last = 0;
+    for (var j = 0; j < evs.length; j++) {
+      var e = evs[j], ch = (e.ch || 0) & 0x0f, t = Math.max(0, Math.round(e.t));
+      vlq(track, Math.max(0, t - last)); last = t;
+      if (e.type === 'on') track.push(0x90 | ch, clamp7(e.pitch), clamp7(e.vel == null ? 100 : e.vel));
+      else if (e.type === 'off') track.push(0x80 | ch, clamp7(e.pitch), clamp7(e.vel == null ? 0 : e.vel));
+      else if (e.type === 'cc') track.push(0xB0 | ch, clamp7(e.cc), clamp7(e.val));
+      else if (e.type === 'bend') {
+        var v = Math.round(e.val == null ? 8192 : e.val);
+        v = v < 0 ? 0 : v > 16383 ? 16383 : v;
+        track.push(0xE0 | ch, v & 0x7f, (v >> 7) & 0x7f);
+      }
+    }
+    vlq(track, 0); track.push(0xFF, 0x2F, 0x00);
+
+    var header = [0x4D, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 0, 0, 1, (ppq >> 8) & 0xff, ppq & 0xff];
+    var L = track.length;
+    var trkHead = [0x4D, 0x54, 0x72, 0x6B, (L >>> 24) & 0xff, (L >> 16) & 0xff, (L >> 8) & 0xff, L & 0xff];
+    var bytes = new Uint8Array(header.length + trkHead.length + L);
+    bytes.set(header, 0); bytes.set(trkHead, header.length); bytes.set(track, header.length + trkHead.length);
+    return new Blob([bytes], { type: 'audio/midi' });
+  }
+
+  /* semitonos -> pitch bend de 14 bits, rango +-2 semitonos por defecto */
+  function bendValue(semitones, range) {
+    var r = range || 2, v = 8192 + (semitones / r) * 8192;
+    return Math.max(0, Math.min(16383, Math.round(v)));
+  }
+
+  /* recorder({ppq, bpm, trackName, bendRange}) — captura de performance.
+     Los tiempos entran en segundos (p.ej. ctx.currentTime) y se convierten
+     a ticks con el bpm vigente al cerrar. */
+  function recorder(cfg) {
+    cfg = cfg || {};
+    var ppq = cfg.ppq || 96;
+    var bpm = Math.max(1, +cfg.bpm || 120);
+    var bendRange = cfg.bendRange || 2;
+    var t0 = null, raw = [], open = {}, recording = false;
+
+    function at(sec) {
+      if (t0 == null) t0 = sec;
+      return Math.max(0, sec - t0);
+    }
+    function push(ev) { if (recording) raw.push(ev); }
+
+    return {
+      get recording() { return recording; },
+      get events() { return raw.length; },
+      setBpm: function (v) { bpm = Math.max(1, +v || bpm); },
+      start: function (sec) { recording = true; raw = []; open = {}; t0 = (sec == null ? null : sec); return this; },
+      noteOn: function (pitch, vel, sec, ch) {
+        var s = at(sec == null ? 0 : sec), p = clamp7(pitch);
+        if (open[p] != null) push({ k: 'off', s: s, pitch: p, ch: ch || 0 });
+        open[p] = s;
+        push({ k: 'on', s: s, pitch: p, vel: clamp7(vel == null ? 100 : vel), ch: ch || 0 });
+      },
+      noteOff: function (pitch, sec, ch) {
+        var p = clamp7(pitch);
+        if (open[p] == null) return;
+        delete open[p];
+        push({ k: 'off', s: at(sec == null ? 0 : sec), pitch: p, ch: ch || 0 });
+      },
+      cc: function (num, val, sec, ch) { push({ k: 'cc', s: at(sec == null ? 0 : sec), cc: clamp7(num), val: clamp7(val), ch: ch || 0 }); },
+      ccNorm: function (num, norm, sec, ch) { this.cc(num, Math.round(Math.max(0, Math.min(1, norm)) * 127), sec, ch); },
+      bend: function (semitones, sec, ch) { push({ k: 'bend', s: at(sec == null ? 0 : sec), val: bendValue(semitones, bendRange), ch: ch || 0 }); },
+      allOff: function (sec) {
+        var s = at(sec == null ? 0 : sec);
+        for (var p in open) push({ k: 'off', s: s, pitch: +p, ch: 0 });
+        open = {};
+      },
+      stop: function (sec) { this.allOff(sec); recording = false; return this; },
+      duration: function () { return raw.length ? raw[raw.length - 1].s : 0; },
+      blob: function (opts) {
+        opts = opts || {};
+        var useBpm = Math.max(1, +opts.bpm || bpm);
+        var tickPerSec = (useBpm / 60) * ppq;
+        var evs = raw.map(function (e) {
+          return { t: Math.round(e.s * tickPerSec), type: e.k, pitch: e.pitch, vel: e.vel, cc: e.cc, val: e.val, ch: e.ch };
+        });
+        return write({ ppq: ppq, bpm: useBpm, trackName: opts.trackName || cfg.trackName, events: evs });
+      }
+    };
+  }
+
+  /* Web MIDI: no existe en Safari ni en ningun navegador de iOS. */
+  function support() {
+    var ua = navigator.userAgent || '';
+    var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (!('requestMIDIAccess' in navigator)) {
+      return { available: false, ios: ios, reason: ios ? 'MIDI no disponible en este navegador (iOS no tiene Web MIDI).' : 'MIDI no disponible en este navegador.' };
+    }
+    return { available: true, ios: ios, reason: '' };
+  }
+
+  ZD.midi = { write: write, recorder: recorder, support: support, bendValue: bendValue, vlq: vlq, CC: CC };
+})();
+/* /ZD-BLOCK:zd-midi */
+</script>

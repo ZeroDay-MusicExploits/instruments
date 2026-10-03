@@ -1,0 +1,154 @@
+<script>
+/* ZD-BLOCK:zd-store v1 */
+/* Autoguardado de sesion en IndexedDB con fallback a localStorage.
+   Clave zd:<slug>:session, envoltorio {app,version,savedAt,data}.
+   Debounce configurable + flush en visibilitychange(hidden) y pagehide. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.store) return;
+
+  var DB_NAME = 'zd-sessions', DB_VERSION = 1, STORE = 'sessions';
+  var dbPromise = null;
+
+  function idb() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function (resolve, reject) {
+      if (!window.indexedDB) { reject(new Error('sin indexedDB')); return; }
+      var req;
+      try { req = indexedDB.open(DB_NAME, DB_VERSION); } catch (e) { reject(e); return; }
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error || new Error('indexedDB')); };
+      req.onblocked = function () { reject(new Error('indexedDB bloqueada')); };
+    }).catch(function (e) { dbPromise = null; throw e; });
+    return dbPromise;
+  }
+
+  function idbPut(key, value) {
+    return idb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(value, key);
+        tx.oncomplete = function () { resolve(true); };
+        tx.onerror = function () { reject(tx.error || new Error('put')); };
+        tx.onabort = function () { reject(tx.error || new Error('abort')); };
+      });
+    });
+  }
+  function idbGet(key) {
+    return idb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readonly'), rq = tx.objectStore(STORE).get(key);
+        rq.onsuccess = function () { resolve(rq.result == null ? null : rq.result); };
+        rq.onerror = function () { reject(rq.error || new Error('get')); };
+      });
+    });
+  }
+  function idbDel(key) {
+    return idb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).delete(key);
+        tx.oncomplete = function () { resolve(true); };
+        tx.onerror = function () { reject(tx.error || new Error('del')); };
+      });
+    });
+  }
+
+  function lsPut(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+  }
+  function lsGet(key) {
+    try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function lsDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+  function persist() {
+    try {
+      if (navigator.storage && navigator.storage.persist) return navigator.storage.persist().catch(function () { return false; });
+    } catch (e) {}
+    return Promise.resolve(false);
+  }
+
+  /* open({slug, app, version, debounce, getData, migrate, enabled}) */
+  function open(cfg) {
+    cfg = cfg || {};
+    var key = 'zd:' + cfg.slug + ':session';
+    var app = cfg.app || cfg.slug;
+    var version = cfg.version == null ? 1 : cfg.version;
+    var wait = cfg.debounce == null ? 1500 : cfg.debounce;
+    var enabled = cfg.enabled !== false;
+    var timer = null, pending = false, backend = null;
+
+    function envelope(data) {
+      return { app: app, version: version, savedAt: new Date().toISOString(), data: data };
+    }
+    function write(env) {
+      return idbPut(key, env).then(function () { backend = 'idb'; return 'idb'; })
+        .catch(function () { backend = lsPut(key, env) ? 'ls' : null; return backend; });
+    }
+    function saveNow(data) {
+      if (!enabled) return Promise.resolve(null);
+      if (timer) { clearTimeout(timer); timer = null; }
+      pending = false;
+      var d = data === undefined ? (cfg.getData ? cfg.getData() : null) : data;
+      if (d == null) return Promise.resolve(null);
+      return write(envelope(d));
+    }
+    function save(data) {
+      if (!enabled) return;
+      pending = true;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { timer = null; saveNow(data); }, wait);
+    }
+    function flush() { if (pending) saveNow(); }
+    function load() {
+      return idbGet(key).then(function (v) {
+        if (v) return v;
+        var l = lsGet(key);
+        if (l) return l;
+        return cfg.migrate ? cfg.migrate() : null;
+      }).catch(function () {
+        var l = lsGet(key);
+        if (l) return l;
+        try { return cfg.migrate ? cfg.migrate() : null; } catch (e) { return null; }
+      });
+    }
+    function clear() {
+      if (timer) { clearTimeout(timer); timer = null; }
+      pending = false;
+      lsDel(key);
+      return idbDel(key).catch(function () { return true; });
+    }
+    /* Valida el envoltorio: app y version. Devuelve {ok,data,reason}. */
+    function unwrap(env, opts) {
+      opts = opts || {};
+      if (!env || typeof env !== 'object') return { ok: false, reason: 'vacio' };
+      var e = ('data' in env) ? env : { app: app, version: version, data: env };
+      if (e.app && e.app !== app && !opts.anyApp) return { ok: false, reason: 'otra-app', app: e.app };
+      if (typeof e.version === 'number' && e.version > version && !opts.anyVersion) return { ok: false, reason: 'version-nueva', version: e.version };
+      return { ok: true, data: e.data, savedAt: e.savedAt || null, version: e.version };
+    }
+
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('freeze', flush);
+
+    return {
+      key: key, app: app, version: version,
+      save: save, saveNow: saveNow, flush: flush, load: load, clear: clear,
+      envelope: envelope, unwrap: unwrap,
+      get backend() { return backend; },
+      get enabled() { return enabled; },
+      set enabled(v) { enabled = !!v; }
+    };
+  }
+
+  ZD.store = { open: open, persist: persist, dbName: DB_NAME, storeName: STORE };
+})();
+/* /ZD-BLOCK:zd-store */
+</script>
