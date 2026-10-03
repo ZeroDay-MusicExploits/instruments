@@ -34,7 +34,6 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 - [C2 · Sync Master Envelopment](#c2--sync-master-envelopment)
 - [Compatibilidad](#compatibilidad)
 - [Privacidad](#privacidad)
-- [Nombres oficiales de archivo](#nombres-oficiales-de-archivo)
 
 ## Cómo usar cualquiera de los 5
 
@@ -420,16 +419,5 @@ Los instrumentos no envían nada a ningún servidor: todo lo que hacés queda en
 
 ---
 
-## Nombres oficiales de archivo
-
-| Instrumento | Nombre de marca | Archivo |
-|---|---|---|
-| Caja de ritmos | CronBeat-8:08 | `CronBeat-808.html` |
-| Minimoog | MonoMoon'70 | `MonoMoon70.html` |
-| Arpegiador | NEBULARP 2035 | `Nebularp_2035.html` |
-| Dub siren | J4-Sirens Station | `J4-Sirens_Station.html` |
-| Bajo ácido / TB-303 | ACID BASS-303 | `Acid_Bass-303.html` |
-
----
 
 <p align="center"><sub>ZERO DAY · MUSIC EXPLOITS · Argentina 2026</sub></p>
