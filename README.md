@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/logo-badge.png" alt="Zero Day · Music Exploits" width="320">
+  <img src="assets/logo-badge.webp" alt="Zero Day · Music Exploits" width="320">
 </p>
 
 <h1 align="center">ZERO DAY · MUSIC EXPLOITS</h1>
@@ -7,25 +7,36 @@
 <p align="center"><strong>Laboratorio de instrumentos web · 100% client-side · sin backend</strong></p>
 
 <p align="center">
-  <a href="https://zeroday-musicexploits.github.io/instruments/">Sitio web</a> ·
-  <a href="#cómo-usar-cualquiera-de-los-5">Cómo se usa</a> ·
-  <a href="#compatibilidad">Compatibilidad</a>
+  <a href="https://zeroday-musicexploits.github.io/instruments/">zeroday-musicexploits.github.io/instruments</a> ·
+  <a href="#cómo-usar">Cómo usar</a> ·
+  <a href="#compatibilidad">Compatibilidad</a> ·
+  <a href="#licencia">Licencia</a>
 </p>
 
-Zero Day · Music Exploits es una suite de 5 instrumentos musicales que corren enteramente en el navegador — sin servidor, sin cuentas, sin conexión requerida una vez cargados. Cada uno es un archivo HTML autocontenido, pensado para tocarse con teclado de PC, mouse, dedo (tablet/touch) o MIDI, y para funcionar como un laboratorio de sonido completo: se puede tocar, programar, grabar, exportar y guardar todo lo hecho.
+Zero Day · Music Exploits es una suite de 5 instrumentos musicales que corren enteramente en el navegador — sin servidor, sin cuentas, sin conexión requerida una vez cargados. La forma normal de usarlos es la web: **https://zeroday-musicexploits.github.io/instruments/**. Desde ahí se puede tocar cada uno online, instalarlo como app (PWA) o descargar el HTML autocontenido para usarlo local. Cada uno está pensado para tocarse con teclado de PC, mouse, dedo (tablet/touch) o MIDI, y para funcionar como laboratorio de sonido completo: tocar, programar, grabar, exportar y guardar.
 
-Los 5 instrumentos se pueden usar de forma independiente, y también se pueden sincronizar, mezclar y masterizar juntos desde **C2 · Sync Master Envelopment**, la plataforma central del proyecto (cada instrumento se abre ahí como una pestaña, con tempo compartido y encendido/apagado conjunto).
+<p align="center">
+  <img src="docs/screenshots/home.webp" alt="Página de inicio del sitio, con la suite de 5 instrumentos" width="100%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/landing-mobile.webp" alt="Landing de CronBeat-8:08 en mobile" width="260">
+</p>
+
+Los 5 instrumentos se pueden usar de forma independiente, y también se pueden sincronizar, mezclar y masterizar juntos desde **C2 · Sync Master Envelopment**, la plataforma central del proyecto (en desarrollo aparte; cada instrumento se abre ahí como una pestaña, con tempo compartido y encendido/apagado conjunto).
 
 | # | Instrumento | Archivo | Tipo |
 |---|---|---|---|
-| 1 | **CronBeat-8:08** | `CronBeat-808.html` | Caja de ritmos / drum machine |
-| 2 | **MonoMoon'70** | `MonoMoon70.html` | Sintetizador monofónico estilo Minimoog |
-| 3 | **NEBULARP 2035** | `Nebularp_2035.html` | Arpegiador cósmico / generativo |
-| 4 | **J4-Sirens Station** | `J4-Sirens_Station.html` | Dub siren psicodélica |
-| 5 | **ACID BASS-303** | `Acid_Bass-303.html` | Bajo ácido tipo TB-303 |
+| 1 | **CronBeat-8:08** | [`descargables/CronBeat-808.html`](descargables/CronBeat-808.html) | Caja de ritmos / drum machine |
+| 2 | **MonoMoon'70** | [`descargables/MonoMoon70.html`](descargables/MonoMoon70.html) | Sintetizador monofónico estilo Minimoog |
+| 3 | **NEBULARP 2035** | [`descargables/Nebularp_2035.html`](descargables/Nebularp_2035.html) | Arpegiador cósmico / generativo |
+| 4 | **J4-Sirens Station** | [`descargables/J4-Sirens_Station.html`](descargables/J4-Sirens_Station.html) | Dub siren psicodélica |
+| 5 | **ACID BASS-303** | [`descargables/Acid_Bass-303.html`](descargables/Acid_Bass-303.html) | Bajo ácido tipo TB-303 |
 
 ## Índice
 
+- [Cómo usar](#cómo-usar)
+- [Instalación desde la web (PWA)](#instalación-desde-la-web-pwa)
+- [El HTML descargable](#el-html-descargable)
 - [1 · CronBeat-8:08 — Caja de ritmos](#1--cronbeat-808--caja-de-ritmos)
 - [2 · MonoMoon'70 — Sintetizador monofónico](#2--monomoon70--sintetizador-monofónico)
 - [3 · NEBULARP 2035 — Arpegiador cósmico](#3--nebularp-2035--arpegiador-cósmico)
@@ -34,14 +45,25 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 - [C2 · Sync Master Envelopment](#c2--sync-master-envelopment)
 - [Compatibilidad](#compatibilidad)
 - [Privacidad](#privacidad)
+- [Licencia](#licencia)
+- [Soporte](#soporte)
 
-## Cómo usar cualquiera de los 5
+## Cómo usar
 
-1. Abrí el archivo `.html` directamente en el navegador (doble clic, o arrastrarlo a una pestaña). No requiere instalación ni servidor.
-2. La primera interacción (clic, tap o tecla) desbloquea el audio del navegador — vas a ver un aviso tipo "Pulsá para encender" / "Tocá para encender". Es un requisito de los navegadores modernos, no un bug.
-3. Todos los instrumentos son instalables como **PWA** (app web progresiva): el navegador va a ofrecer "Instalar app" para tenerlos como ícono aparte, usables sin conexión.
-4. El trabajo (patrones, patches, presets, arreglos) se **autoguarda en el navegador** (localStorage / IndexedDB, según el instrumento). Si limpiás datos del navegador o cambiás de navegador/dispositivo, se pierde — por eso cada uno tiene export/import a JSON.
-5. Para llevarte el audio afuera: cada uno exporta a **WAV**, y los secuenciados (CronBeat, Acid Bass) también exportan/importan **MIDI**.
+1. **Entrá al sitio**: https://zeroday-musicexploits.github.io/instruments/. Desde "Probalo acá" podés tocar cualquiera de los 5 directo en el navegador, sin descargar nada.
+2. La primera interacción (clic, tap o tecla) desbloquea el audio del navegador — vas a ver un aviso tipo "Pulsá para encender". Es un requisito de los navegadores modernos, no un bug.
+3. Si lo vas a usar seguido, instalalo desde la web como PWA (ver abajo) o descargá el HTML de la landing del instrumento para abrirlo sin conexión.
+4. El trabajo (patrones, patches, presets, arreglos) se guarda según el instrumento — cada landing dice si autoguarda o si el respaldo es manual vía JSON. Para llevarte el audio afuera: cada uno exporta lo que su landing indica (WAV y/o MIDI donde ya está implementado), y todos exportan/importan JSON.
+
+## Instalación desde la web (PWA)
+
+Instalado desde la web, cada instrumento queda como una app aparte, usable sin conexión. Para instalar: abrí el instrumento desde su landing (no el HTML descargado — ver por qué abajo) y usá "Instalar app" si el navegador lo ofrece, o el menú del navegador (en iOS: Compartir → Agregar a inicio).
+
+## El HTML descargable
+
+Cada landing permite verificar tu mail y bajar el HTML de ese instrumento — el mismo archivo autocontenido que corre en la web, también disponible como paquete único (`descargables-zeroday.zip`) con los 5 juntos. Abrís el archivo con doble clic o arrastrándolo a una pestaña: no requiere instalación ni servidor.
+
+**Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.** Un archivo abierto en `file://` no puede registrar service worker ni manifest — los navegadores exigen `https` o `localhost` para eso. Si querés el ícono aparte y uso offline, instalalo desde la web; si solo querés el archivo para vos, bajalo y listo.
 
 ---
 
@@ -113,6 +135,9 @@ El original del sample **nunca se pisa** — todo lo que hacés ahí es reversib
 | `←` `→` | Ajustan el tempo |
 | `Shift` (al tocar un pad) | Golpe con acento |
 
+### Estado real (export / guardado)
+Exporta **WAV · MIDI · JSON**. Es el único de los 5 con **autoguardado automático** (tocar → recargar → mismo estado); los otros 4 respaldan vía exportar/importar JSON manual.
+
 ### Estado del roadmap
 Fases 1 a 5 completas: modo canción, autoguardado, PWA, export JSON/WAV, editor de sample no destructivo, y export/import MIDI de patrones y canciones. Único punto pendiente (opcional): **choke groups** (silenciar un pad al disparar otro, ej. hi-hat abierto/cerrado).
 
@@ -122,7 +147,7 @@ Fases 1 a 5 completas: modo canción, autoguardado, PWA, export JSON/WAV, editor
 
 ## 2 · MonoMoon'70 — Sintetizador monofónico
 
-*"Monophonic Synthetizer"*
+*"Monophonic Synthesizer"*
 
 ### Qué es
 Un sintetizador analógico virtual monofónico estilo Minimoog: banco de osciladores, filtro escalera (ladder) de 24 dB/oct con auto-oscilación, doble envolvente, matriz de modulación, modos de voz (Mono/Unison/Duo), osciloscopio en pantalla y gestión completa de patches.
@@ -137,8 +162,8 @@ Un sintetizador analógico virtual monofónico estilo Minimoog: banco de oscilad
 - **Guardar…** — guarda el patch actual en la biblioteca del navegador.
 - **⭳ JSON / ⭱ JSON** — exportar / importar un patch como archivo.
 - **● Grabar** (con contador `00:00`) — graba lo que tocás y lo deja listo para exportar.
-- **Indicador MIDI** — muestra conexión Web MIDI activa.
-- **Instalar app** — PWA instalable.
+- **Indicador MIDI** — muestra conexión Web MIDI activa (no disponible en Safari/iOS, ver [Compatibilidad](#compatibilidad)).
+- **Instalar app** — PWA instalable (desde la web).
 
 ### Banco de osciladores
 Mezclador de osciladores más **Ruido** (Nivel, tipo Blanco/Rosa).
@@ -182,6 +207,9 @@ Visualización en tiempo real de la forma de onda de salida.
 | Mouse / dedos | Tocar directamente sobre el teclado en pantalla; deslizar = glissando |
 | `Z` / `X` | Bajar / subir octava |
 | `Espacio` | Pánico (corta todas las notas sonando) |
+
+### Estado real (export / guardado)
+Exporta **WAV · JSON**. El respaldo de patches es manual (biblioteca local + export/import JSON); no tiene autoguardado automático del estado en edición todavía.
 
 ### Estado del roadmap
 Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); persistencia de patches (JSON + IndexedDB con biblioteca local), librería de presets clásicos, export WAV, Web MIDI y PWA instalable (F4). Roadmap cerrado.
@@ -250,6 +278,9 @@ Mismo mapeo estilo piano que MonoMoon'70.
 - Con el transporte **detenido**, las teclas suenan como un pad sostenido (para probar sonido).
 - Con el transporte **en marcha**, sostener un acorde hace que el arpegiador lo recorra automáticamente.
 - Con **Latch** activo, el acorde queda sonando solo, manos libres, hasta tocar uno nuevo.
+
+### Estado real (export / guardado)
+Exporta **JSON** (el estado completo del instrumento). WAV y MIDI de performance están planeados pero todavía no implementados — no están listados como disponibles hasta que lo estén de verdad. Sin autoguardado automático todavía.
 
 ### Estado del roadmap
 Se completó el documento de planificación y el prompt de handoff para desarrollo (mismas condiciones que CronBeat-8:08 y MonoMoon'70: 100% client-side).
@@ -320,8 +351,11 @@ Mapeo de 2 octavas.
 - **Drift** extra de tono en modo Drone.
 - Visualizador **CRT / psicodélico**: osciloscopio, Lissajous y mandala, con pantalla completa.
 
+### Estado real (export / guardado)
+Exporta **JSON** (presets). WAV y MIDI de performance están planeados pero todavía no implementados. Hoy el respaldo son slots manuales en `localStorage`; sin autoguardado automático del estado en vivo todavía.
+
 ### Estado del roadmap
-4 fases completas: **F1** motor + 5 modos + filtro resonante + teclado PC/touch básico · **F2** cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · **F3** pad X-Y, visualizador psicodélico y sistema de presets (fábrica + localStorage + export/import JSON) · **F4** ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Entregado como artifact HTML.
+4 fases completas: **F1** motor + 5 modos + filtro resonante + teclado PC/touch básico · **F2** cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · **F3** pad X-Y, visualizador psicodélico y sistema de presets (fábrica + localStorage + export/import JSON) · **F4** ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets.
 
 </details>
 
@@ -383,6 +417,9 @@ El gesto acid clásico: arrastrá con el dedo mientras suena — **X = Cutoff**,
 | `Z` / `X` | Octava del teclado (`−` / `+`) |
 | `Espacio` | Play / Stop |
 
+### Estado real (export / guardado)
+Exporta **WAV · MIDI · JSON**. El respaldo es manual vía exportar/importar JSON; sin autoguardado automático del patrón en edición todavía.
+
 ### Estado del roadmap
 4 fases completas: **F1** motor de síntesis + secuenciador clásico de 16 pasos (note/accent/slide/gate) · **F2** modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · **F3** touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · **F4** patches y banco de fábrica (guardar/cargar JSON, export MIDI y WAV, 8 patrones de fábrica).
 
@@ -396,28 +433,41 @@ Plataforma central de Zero Day · Music Exploits que integra los 5 instrumentos 
 
 ---
 
+**Descarga con verificación de mail.** El formulario valida el formato, detecta errores de tipeo comunes (`gmial.com`), rechaza mails temporales y consulta que el dominio reciba correo (contra `dns.google`). Después "envía" un código de 6 dígitos que vence a los 10 minutos. Una vez verificado, el mail queda recordado en ese navegador (`localStorage`) para descargar desde cualquier landing sin repetir el paso.
 
-
-**Descarga con verificación de mail.** El formulario valida el formato, detecta errores de tipeo comunes (`gmial.com`), rechaza mails temporales y consulta que el dominio reciba correo. Después envía un código de 6 dígitos que vence a los 10 minutos. Una vez verificado, el mail queda recordado en ese navegador para descargar desde cualquier landing.
-
-> **Envío del código.** Sin un servicio de mail conectado, el sitio funciona en modo demo y muestra el código en pantalla. Para enviarlo de verdad hay que definir `window.ZD_SEND_CODE(email, code)` con un servicio como EmailJS, Resend o Brevo. Como la verificación corre en el navegador, para una protección real el código y los archivos deberían servirse desde un backend.
+> **Envío del código.** Hoy el sitio corre en **modo demo**: sin un servicio de mail conectado, el código se muestra en pantalla en vez de enviarse. Para mandarlo de verdad hay que definir `window.ZD_SEND_CODE(email, code)` con un servicio como EmailJS, Resend o Brevo. Como la verificación corre en el navegador, para una protección real el código y los archivos deberían servirse desde un backend.
 
 ---
 
 ## Compatibilidad
 
-- Cualquier navegador moderno con Web Audio: Chrome, Edge, Firefox y Safari, en escritorio y móvil.
-- **Web MIDI** (MonoMoon'70 y entrada MIDI en general) funciona en Chrome y Edge; Safari no lo soporta.
-- En teléfonos, los instrumentos se usan en **horizontal**: cada uno tiene una barra fija con transporte y menús desplegables. En vertical aparece un aviso para girar el teléfono.
-- Los menús del modo móvil usan el selector CSS `:has()` (iOS 15.4+, Chrome 105+).
+Verificado en [MDN](https://developer.mozilla.org/) y [caniuse.com](https://caniuse.com/) — no asumido.
 
----
+| Navegador | Sistema | Audio (Web Audio API) | Web MIDI |
+|---|---|---|---|
+| Chrome / Edge | Windows, macOS, Linux | Sí | Sí |
+| Firefox | Windows, macOS, Linux | Sí | Sí (desde Firefox 108) |
+| Safari | macOS | Sí | No |
+| Chrome | Android | Sí | Sí |
+| Safari | iOS / iPadOS | Sí | No |
+| Cualquier navegador en iOS (Chrome, Firefox…) | iOS / iPadOS | Sí | No |
+
+**Web MIDI no existe en Safari ni en ningún navegador de iOS** (ahí todos corren sobre WebKit, con o sin el nombre Safari puesto): MonoMoon'70 detecta la ausencia de `navigator.requestMIDIAccess` y lo indica en pantalla en vez de fallar en silencio. El resto de la suite (Web Audio API) funciona en los seis.
 
 ## Privacidad
 
-Los instrumentos no envían nada a ningún servidor: todo lo que hacés queda en tu navegador. El sitio pide solo un mail para la descarga y mide visitas de forma agregada con Google Analytics. Detalle completo en [`Privacidad`](https://zeroday-musicexploits.github.io/instruments/privacidad.html).
+Los instrumentos no envían nada a ningún servidor: todo lo que hacés queda en tu navegador. El sitio pide un mail para la descarga (hoy en modo demo, ver arriba) y mide visitas de forma agregada con Google Analytics — nunca en los instrumentos. Detalle completo en [`privacidad.html`](https://zeroday-musicexploits.github.io/instruments/privacidad.html).
+
+## Licencia
+
+[CC BY-NC 4.0](LICENSE) — atribución, no comercial. Ver [`LICENSE`](LICENSE) para el detalle (incluye una nota pendiente de confirmar con el titular del proyecto).
+
+## Soporte
+
+¿Encontraste un bug o te falta algo? [Abrí un issue en el repo](https://github.com/ZeroDay-MusicExploits/instruments/issues).
+
+<!-- TODO: sumar un canal de contacto directo (mail/formulario) cuando el titular defina uno -->
 
 ---
-
 
 <p align="center"><sub>ZERO DAY · MUSIC EXPLOITS · Argentina 2026</sub></p>
