@@ -1,373 +1,314 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>ZERO DAY · MUSIC EXPLOITS — Instrumentos web gratis</title>
+<meta name="description" content="Cinco instrumentos musicales que corren enteramente en el navegador: sin servidor, sin cuentas, sin conexión requerida una vez cargados. Tocá, grabá y exportá gratis.">
+<link rel="canonical" href="https://zeroday-musicexploits.github.io/instruments/">
+
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="assets/site.css">
+<meta name="theme-color" content="#070b06">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ZERO DAY · MUSIC EXPLOITS">
+<meta property="og:title" content="ZERO DAY · MUSIC EXPLOITS — Instrumentos web gratis">
+<meta property="og:description" content="Cinco instrumentos musicales que corren enteramente en el navegador: sin servidor, sin cuentas, sin conexión requerida una vez cargados. Tocá, grabá y exportá gratis.">
+<meta property="og:url" content="https://zeroday-musicexploits.github.io/instruments/">
+<meta property="og:image" content="https://zeroday-musicexploits.github.io/instruments/assets/og/home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_AR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ZERO DAY · MUSIC EXPLOITS — Instrumentos web gratis">
+<meta name="twitter:description" content="Cinco instrumentos musicales que corren enteramente en el navegador: sin servidor, sin cuentas, sin conexión requerida una vez cargados. Tocá, grabá y exportá gratis.">
+<meta name="twitter:image" content="https://zeroday-musicexploits.github.io/instruments/assets/og/home.png">
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNGM11BR5S"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-ZNGM11BR5S');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ZNGM11BR5S');
 </script>
 </head>
 <body>
-<x-dc>
-<helmet>
-<title>ZERO DAY · MUSIC EXPLOITS — Instrumentos web gratis</title>
-<meta name="theme-color" content="#070b06">
-<style>
-html,body{margin:0;background:#070b06;color:#ecebe5;font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;-webkit-font-smoothing:antialiased}
-a{color:#7fdc5c;text-decoration:none}a:hover{color:#b6f59a}
-*{box-sizing:border-box}
-::selection{background:#7fdc5c;color:#070b06}
-input::placeholder{color:#5d7555}
-@keyframes zdblink{50%{opacity:0}}
-</style>
-</helmet>
-
-<div style="min-height:100vh;background:radial-gradient(1200px 600px at 80% -10%,#12220e 0%,transparent 60%),#070b06">
-
-<header style="position:sticky;top:0;z-index:20;background:rgba(7,11,6,.88);backdrop-filter:blur(8px);border-bottom:1px solid #1d2c19">
-  <div style="max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px">
-    <a href="#top" style="display:flex;align-items:center;gap:12px;color:#ecebe5">
-      <img src="src/logo-badge.jpg" alt="Zero Day · Music Exploits" style="height:40px;border-radius:3px;background:#ecebe5;padding:2px">
-      <span style="font-size:13px;font-weight:700;letter-spacing:.14em">ZERO DAY<span style="color:#7fdc5c"> · </span>MUSIC EXPLOITS</span>
+<header class="site-header">
+  <div class="wrap site-header__bar">
+    <a href="index.html" class="site-logo">
+      <img src="src/logo-badge.jpg" alt="Zero Day · Music Exploits">
+      <span class="site-logo__word">ZERO DAY<em> · </em>MUSIC EXPLOITS</span>
     </a>
-    <nav style="margin-left:auto;display:flex;align-items:center;gap:22px;font-size:12px;letter-spacing:.12em;flex-wrap:wrap">
-      <a href="#instrumentos" style="color:#a9b8a2">INSTRUMENTOS</a>
-      <a href="#probar" style="color:#a9b8a2">PROBAR</a>
-      <a href="#como" style="color:#a9b8a2">CÓMO SE USA</a>
-      <a href="#descargar" style="background:#7fdc5c;color:#070b06;font-weight:700;padding:10px 16px;border-radius:3px;box-shadow:0 3px 0 #3e7a2b">DESCARGAR GRATIS</a>
+    <nav class="site-nav" aria-label="Principal">
+      <a href="#instrumentos">INSTRUMENTOS</a>
+      <a href="#probar">PROBAR</a>
+      <a href="#como">CÓMO SE USA</a>
+      <a href="#descargar" class="btn btn--accent btn--sm">DESCARGAR GRATIS</a>
     </nav>
+    <details class="site-menu">
+      <summary aria-label="Abrir menú">☰</summary>
+      <nav class="site-menu__panel" aria-label="Menú">
+        <a href="#instrumentos">INSTRUMENTOS</a>
+      <a href="#probar">PROBAR</a>
+      <a href="#como">CÓMO SE USA</a>
+        
+        <a href="#descargar" class="btn btn--accent btn--sm">DESCARGAR GRATIS</a>
+      </nav>
+    </details>
   </div>
 </header>
-
-<section id="top" style="max-width:1180px;margin:0 auto;padding:96px 24px 80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:56px;align-items:center">
-  <div style="display:flex;flex-direction:column;gap:28px">
-    <span style="font-size:12px;letter-spacing:.2em;color:#7fdc5c;display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;background:#7fdc5c;border-radius:50%;box-shadow:0 0 10px #7fdc5c"></span>Laboratorio de instrumentos web · 100% client-side · sin backend</span>
-    <h1 style="margin:0;font-size:clamp(40px,6vw,76px);line-height:1.02;letter-spacing:-.03em;font-weight:800;text-wrap:balance">Cinco instrumentos que suenan en tu navegador.</h1>
-    <p style="margin:0;font-size:17px;line-height:1.65;color:#a9b8a2;max-width:560px;text-wrap:pretty">Sin servidor, sin cuentas, sin conexión requerida una vez cargados. Cada uno es un archivo HTML autocontenido para tocar con teclado de PC, mouse, dedo o MIDI.</p>
-    <div style="display:flex;gap:14px;flex-wrap:wrap">
-      <a href="#descargar" style="background:#7fdc5c;color:#070b06;font-weight:800;font-size:15px;letter-spacing:.06em;padding:16px 26px;border-radius:3px;box-shadow:0 4px 0 #3e7a2b">DESCARGAR LOS 5 · GRATIS</a>
-      <a href="#probar" style="border:1px solid #2a3f24;color:#ecebe5;font-size:15px;letter-spacing:.06em;padding:15px 24px;border-radius:3px">▶ Probar ahora</a>
-    </div>
-  </div>
-  <div style="display:flex;justify-content:center">
-    <div style="position:relative;padding:18px;border:1px solid #1d2c19;border-radius:6px;background:#0b1209">
-      <img src="src/logo-badge.jpg" alt="" style="display:block;width:min(100%,400px);border-radius:3px;background:#ecebe5;padding:6px;transform:rotate(-2deg);box-shadow:0 0 0 2px #030502,0 10px 0 #030502">
-      <span style="position:absolute;right:-8px;bottom:-14px;background:#070b06;border:1px solid #7fdc5c;color:#7fdc5c;font-size:11px;letter-spacing:.16em;padding:6px 10px;border-radius:2px">ARGENTINA 2026</span>
-    </div>
-  </div>
-</section>
-
-<section id="instrumentos" style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:32px">
-  <div style="display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #1d2c19;padding-bottom:18px">
-    <h2 style="margin:0;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em">La suite</h2>
-    <span style="font-size:12px;letter-spacing:.14em;color:#7c8f75">5 INSTRUMENTOS · EXPORT WAV · PWA INSTALABLE</span>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:18px">
-
-    <a style-hover="background:#111b0f" href="landing-cronbeat.html" style="color:inherit;text-decoration:none;background:#0d150b;border:1px solid #1d2c19;border-top:3px solid oklch(.82 .16 80);border-radius:4px;padding:26px;display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;color:#7c8f75"><span>01</span><span style="color:oklch(.82 .16 80)">DRUM MACHINE</span></div>
-      <h3 style="margin:0;font-size:26px;letter-spacing:-.01em">CronBeat-8:08</h3>
-      <p style="margin:0;font-size:13px;color:oklch(.82 .16 80)">"Machine Drum lab"</p>
-      <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2;text-wrap:pretty">Secuenciador de patrones tocable en vivo, pads con samples propios, editor de sample no destructivo, FX por pista y modo canción.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;font-size:11px;letter-spacing:.08em"><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">WAV</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">MIDI</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">JSON</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">8 PATRONES</span></div>
-    <span style="font-size:12px;letter-spacing:.12em;color:#7fdc5c">MANUAL Y DESCARGA →</span></a>
-
-    <a style-hover="background:#111b0f" href="landing-monomoon.html" style="color:inherit;text-decoration:none;background:#0d150b;border:1px solid #1d2c19;border-top:3px solid #f2a63c;border-radius:4px;padding:26px;display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;color:#7c8f75"><span>02</span><span style="color:#f2a63c">SINTE MONOFÓNICO</span></div>
-      <h3 style="margin:0;font-size:26px;letter-spacing:-.01em">MonoMoon'70</h3>
-      <p style="margin:0;font-size:13px;color:#f2a63c">"Monophonic Synthetizer"</p>
-      <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2;text-wrap:pretty">Analógico virtual estilo Minimoog: filtro escalera de 24 dB/oct con auto-oscilación, doble envolvente, Mono/Unison/Duo y osciloscopio.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;font-size:11px;letter-spacing:.08em"><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">WAV</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">WEB MIDI</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">PRESETS</span></div>
-    <span style="font-size:12px;letter-spacing:.12em;color:#7fdc5c">MANUAL Y DESCARGA →</span></a>
-
-    <a style-hover="background:#111b0f" href="landing-nebularp.html" style="color:inherit;text-decoration:none;background:#0d150b;border:1px solid #1d2c19;border-top:3px solid #9a8cff;border-radius:4px;padding:26px;display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;color:#7c8f75"><span>03</span><span style="color:#9a8cff">ARPEGIADOR</span></div>
-      <h3 style="margin:0;font-size:26px;letter-spacing:-.01em">NEBULARP 2035</h3>
-      <p style="margin:0;font-size:13px;color:#9a8cff">"motor dormido" hasta que tocás un acorde</p>
-      <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2;text-wrap:pretty">Arpegiador ambiental y generativo con voz cósmica en unísono, reverb + delay ping-pong, drone grave y escalas místicas. Latch y ritmo euclidiano.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;font-size:11px;letter-spacing:.08em"><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">MULTITÁCTIL</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">LATCH</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">EUCLID</span></div>
-    <span style="font-size:12px;letter-spacing:.12em;color:#7fdc5c">MANUAL Y DESCARGA →</span></a>
-
-    <a style-hover="background:#111b0f" href="landing-sirens.html" style="color:inherit;text-decoration:none;background:#0d150b;border:1px solid #1d2c19;border-top:3px solid #f06ad8;border-radius:4px;padding:26px;display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;color:#7c8f75"><span>04</span><span style="color:#f06ad8">DUB SIREN</span></div>
-      <h3 style="margin:0;font-size:26px;letter-spacing:-.01em">J4-Sirens Station</h3>
-      <p style="margin:0;font-size:13px;color:#f06ad8">Dub siren web psicodélica</p>
-      <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2;text-wrap:pretty">Motor de sirena con 5 modos, tape echo, reverb spring/plate, phaser dub, pad X-Y y visualizador psicodélico a pantalla completa.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;font-size:11px;letter-spacing:.08em"><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">PAD X-Y</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">11 PRESETS</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">JSON</span></div>
-    <span style="font-size:12px;letter-spacing:.12em;color:#7fdc5c">MANUAL Y DESCARGA →</span></a>
-
-    <a style-hover="background:#111b0f" href="landing-acid.html" style="color:inherit;text-decoration:none;background:#0d150b;border:1px solid #1d2c19;border-top:3px solid #dcef3a;border-radius:4px;padding:26px;display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;color:#7c8f75"><span>05</span><span style="color:#dcef3a">BAJO ÁCIDO</span></div>
-      <h3 style="margin:0;font-size:26px;letter-spacing:-.01em">ACID BASS-303</h3>
-      <p style="margin:0;font-size:13px;color:#dcef3a">"Sub-Zero Edition"</p>
-      <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2;text-wrap:pretty">TB-303 modernizado: 16 pasos con note/accent/slide/gate, filtro resonante con distorsión, generador de patrones por escala y pad X-Y.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;font-size:11px;letter-spacing:.08em"><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">WAV</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">MIDI</span><span style="border:1px solid #2a3f24;padding:4px 8px;border-radius:2px;color:#a9b8a2">8 PATRONES</span></div>
-    <span style="font-size:12px;letter-spacing:.12em;color:#7fdc5c">MANUAL Y DESCARGA →</span></a>
-
-    <article style="background:transparent;border:1px dashed #2a3f24;border-radius:4px;padding:26px;display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;color:#7c8f75"><span>C2</span><span>EN DESARROLLO</span></div>
-      <h3 style="margin:0;font-size:26px;letter-spacing:-.01em;color:#a9b8a2">Sync Master Envelopment</h3>
-      <p style="margin:0;font-size:14px;line-height:1.6;color:#7c8f75;text-wrap:pretty">La plataforma central que integra los 5 instrumentos como pestañas de una misma sesión, con tempo sincronizado y encendido/apagado conjunto, para sincronizar, mezclar y masterizar.</p>
-    </article>
-  </div>
-</section>
-
-<section id="probar" style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:20px">
-  <div style="display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #1d2c19;padding-bottom:18px">
-    <h2 style="margin:0;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em">Probalo acá</h2>
-    <span style="font-size:12px;letter-spacing:.14em;color:#7c8f75">EL PRIMER TOQUE ENCIENDE EL AUDIO</span>
-  </div>
-  <div role="tablist" style="display:flex;gap:8px;flex-wrap:wrap">
-    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
-      <button role="tab" aria-selected="{{ t.active }}" onClick="{{ t.select }}" style="{{ t.style }}">{{ t.name }}</button>
-    </sc-for>
-  </div>
-  <div style="position:relative;border:1px solid #1d2c19;border-radius:4px;overflow:hidden;background:#030502;height:min(72vh,680px)">
-    <sc-if value="{{ previewOn }}" hint-placeholder-val="{{ false }}">
-      <iframe src="{{ previewSrc }}" title="{{ previewName }}" allow="autoplay; midi" style="width:100%;height:100%;border:0;display:block"></iframe>
-    </sc-if>
-    <sc-if value="{{ previewOff }}" hint-placeholder-val="{{ true }}">
-      <button onClick="{{ loadPreview }}" style="position:absolute;inset:0;width:100%;border:0;background:repeating-linear-gradient(0deg,rgba(127,220,92,.04) 0 1px,transparent 1px 3px),#050904;color:#ecebe5;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
-        <span style="width:72px;height:72px;border-radius:50%;border:2px solid #7fdc5c;color:#7fdc5c;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 24px rgba(127,220,92,.35)">▶</span>
-        <span style="font-size:15px;letter-spacing:.1em">Cargar {{ previewName }}</span>
-        <span style="font-size:12px;color:#7c8f75">Se ejecuta completo en tu navegador</span>
-      </button>
-    </sc-if>
-  </div>
-</section>
-
-<section id="como" style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:32px">
-  <div style="border-bottom:1px solid #1d2c19;padding-bottom:18px">
-    <h2 style="margin:0;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em">Cómo se usa</h2>
-  </div>
-  <ol style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:32px">
-    <li style="display:flex;flex-direction:column;gap:10px"><span style="font-size:12px;color:#7fdc5c;letter-spacing:.16em">01 · ABRIR</span><p style="margin:0;font-size:14px;line-height:1.65;color:#a9b8a2;text-wrap:pretty">Abrí el archivo .html directamente en el navegador (doble clic, o arrastrarlo a una pestaña). No requiere instalación ni servidor.</p></li>
-    <li style="display:flex;flex-direction:column;gap:10px"><span style="font-size:12px;color:#7fdc5c;letter-spacing:.16em">02 · ENCENDER</span><p style="margin:0;font-size:14px;line-height:1.65;color:#a9b8a2;text-wrap:pretty">La primera interacción (clic, tap o tecla) desbloquea el audio del navegador. Es un requisito de los navegadores modernos, no un bug.</p></li>
-    <li style="display:flex;flex-direction:column;gap:10px"><span style="font-size:12px;color:#7fdc5c;letter-spacing:.16em">03 · INSTALAR</span><p style="margin:0;font-size:14px;line-height:1.65;color:#a9b8a2;text-wrap:pretty">Todos son instalables como PWA: el navegador va a ofrecer "Instalar app" para tenerlos como ícono aparte, usables sin conexión.</p></li>
-    <li style="display:flex;flex-direction:column;gap:10px"><span style="font-size:12px;color:#7fdc5c;letter-spacing:.16em">04 · GUARDAR Y EXPORTAR</span><p style="margin:0;font-size:14px;line-height:1.65;color:#a9b8a2;text-wrap:pretty">El trabajo se autoguarda en el navegador y se exporta/importa a JSON. El audio sale a WAV; CronBeat y Acid Bass también exportan MIDI.</p></li>
-  </ol>
-</section>
-
-<section id="descargar" style="max-width:1180px;margin:0 auto;padding:40px 24px 100px">
-  <div style="background:#0d150b;border:1px solid #2a3f24;border-radius:6px;padding:clamp(28px,5vw,56px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:48px;box-shadow:0 0 0 1px #030502,0 8px 0 #030502">
-    <div style="display:flex;flex-direction:column;gap:18px">
-      <span style="font-size:12px;letter-spacing:.2em;color:#7fdc5c">DESCARGA GRATUITA</span>
-      <h2 style="margin:0;font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.02em;text-wrap:balance">Los 5 instrumentos, gratis.</h2>
-      <p style="margin:0;font-size:15px;line-height:1.65;color:#a9b8a2;text-wrap:pretty">Ingresá tu mail, te mandamos un código de 6 dígitos y con eso se habilitan las descargas. Sin cuentas ni contraseñas.</p>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#7c8f75;margin-top:6px">
-        <span style="display:flex;gap:10px"><span style="color:#7fdc5c">✓</span>5 archivos HTML autocontenidos</span>
-        <span style="display:flex;gap:10px"><span style="color:#7fdc5c">✓</span>Funcionan sin conexión</span>
-        <span style="display:flex;gap:10px"><span style="color:#7fdc5c">✓</span>Uso libre para tocar, grabar y exportar</span>
+<main class="page" id="top">
+  <section class="wrap hero">
+    <div class="hero__copy">
+      <span class="eyebrow"><span style="width:8px;height:8px;background:var(--zd-green);border-radius:50%;box-shadow:0 0 10px var(--zd-green)"></span>Laboratorio de instrumentos web · 100% client-side · sin backend</span>
+      <h1 class="h1">Cinco instrumentos que suenan en tu navegador.</h1>
+      <p class="lede" style="max-width:560px">Sin servidor, sin cuentas, sin conexión requerida una vez cargados. Cada uno es un archivo HTML autocontenido para tocar con teclado de PC, mouse, dedo o MIDI.</p>
+      <div class="hero__ctas">
+        <a href="#descargar" class="btn btn--accent">DESCARGAR LOS 5 · GRATIS</a>
+        <a href="#probar" class="btn btn--outline">▶ Probar ahora</a>
       </div>
     </div>
-
-    <div style="display:flex;flex-direction:column;gap:18px">
-      <div style="display:flex;gap:6px;font-size:11px;letter-spacing:.14em">
-        <span style="{{ stepStyle1 }}">1 · MAIL</span>
-        <span style="{{ stepStyle2 }}">2 · CÓDIGO</span>
-        <span style="{{ stepStyle3 }}">3 · DESCARGA</span>
+    <div class="hero__art">
+      <div class="hero__art-card">
+        <img src="src/logo-badge.jpg" alt="">
+        <span class="hero__badge">ARGENTINA 2026</span>
       </div>
+    </div>
+  </section>
 
-      <sc-if value="{{ isEmail }}" hint-placeholder-val="{{ true }}">
-        <form onSubmit="{{ submitEmail }}" novalidate="" style="display:flex;flex-direction:column;gap:14px">
-          <label for="zd-mail" style="font-size:13px;color:#a9b8a2">Tu mail</label>
-          <input id="zd-mail" type="email" autocomplete="email" inputMode="email" placeholder="vos@ejemplo.com" value="{{ email }}" onInput="{{ onEmail }}" style="background:#070b06;border:1px solid #2a3f24;border-radius:3px;color:#ecebe5;font:inherit;font-size:17px;padding:16px;outline-color:#7fdc5c;min-height:54px">
-          <label style="display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:#7c8f75;cursor:pointer">
-            <input type="checkbox" checked="{{ news }}" onChange="{{ onNews }}" style="accent-color:#7fdc5c;width:18px;height:18px;margin:0;flex:none">
-            Avisarme cuando salga C2 · Sync Master Envelopment
-          </label>
-          <a href="privacidad.html" style="font-size:12px;color:#7c8f75">Cómo usamos tu mail →</a>
-          <button type="submit" disabled="{{ busy }}" style="background:#7fdc5c;color:#070b06;border:0;border-radius:3px;font:inherit;font-weight:800;font-size:15px;letter-spacing:.06em;padding:16px;min-height:54px;cursor:pointer;box-shadow:0 4px 0 #3e7a2b">{{ emailBtn }}</button>
-        </form>
-      </sc-if>
+  <section class="wrap block" id="instrumentos">
+    <div class="section-head">
+      <h2 class="h2">La suite</h2>
+      <span class="label">5 INSTRUMENTOS · EXPORT WAV/MIDI/JSON · WEB</span>
+    </div>
+    <div class="cards-grid">
+    <a class="card" href="landing-cronbeat.html" style="--accent:oklch(.82 .16 80)">
+      <div class="card__top"><span>01</span><span>CAJA DE RITMOS</span></div>
+      <h3>CronBeat-8:08</h3>
+      <p class="card__tag">&quot;Machine Drum lab&quot;</p>
+      <p class="card__desc">Una caja de ritmos completa: secuenciador de patrones tocable en vivo, banco de pads con samples propios, editor de sample no destructivo, cadena de efectos por pista, modo canción y exportación a WAV/MIDI.</p>
+      <div class="card__chips"><span class="chip">WAV</span><span class="chip">MIDI</span><span class="chip">JSON</span><span class="chip">8 PATRONES</span></div>
+      <span class="card__go">MANUAL Y DESCARGA →</span>
+    </a>
+    <a class="card" href="landing-monomoon.html" style="--accent:#f2a63c">
+      <div class="card__top"><span>02</span><span>SINTETIZADOR MONOFÓNICO</span></div>
+      <h3>MonoMoon&#39;70</h3>
+      <p class="card__tag">&quot;Monophonic Synthesizer&quot;</p>
+      <p class="card__desc">Un sintetizador analógico virtual monofónico estilo Minimoog: banco de osciladores, filtro escalera (ladder) de 24 dB/oct con auto-oscilación, doble envolvente, matriz de modulación, modos de voz (Mono/Unison/Duo), osciloscopio en pantalla y gestión completa de patches..</p>
+      <div class="card__chips"><span class="chip">WAV</span><span class="chip">JSON</span></div>
+      <span class="card__go">MANUAL Y DESCARGA →</span>
+    </a>
+    <a class="card" href="landing-nebularp.html" style="--accent:#9a8cff">
+      <div class="card__top"><span>03</span><span>ARPEGIADOR CÓSMICO</span></div>
+      <h3>NEBULARP 2035</h3>
+      <p class="card__tag">&quot;motor dormido&quot; hasta que tocás un acorde</p>
+      <p class="card__desc">Un arpegiador ambiental y generativo: sostenés (o dejás en Latch) un acorde y el instrumento lo recorre solo, con una voz cósmica en unísono, espacio (reverb + delay ping-pong), modulación (chorus + auto-paneo) y una capa de drone grave.</p>
+      <div class="card__chips"><span class="chip">JSON</span></div>
+      <span class="card__go">MANUAL Y DESCARGA →</span>
+    </a>
+    <a class="card" href="landing-sirens.html" style="--accent:#f06ad8">
+      <div class="card__top"><span>04</span><span>DUB SIREN</span></div>
+      <h3>J4-Sirens Station</h3>
+      <p class="card__tag">Dub siren web psicodélica</p>
+      <p class="card__desc">Una sirena dub completa: motor de síntesis con varios modos, cadena de efectos dub (tape echo, reverb spring/plate, phaser), un pad X-Y para performance en vivo, visualizador psicodélico en pantalla completa, y banco de presets con export/import JSON..</p>
+      <div class="card__chips"><span class="chip">JSON</span></div>
+      <span class="card__go">MANUAL Y DESCARGA →</span>
+    </a>
+    <a class="card" href="landing-acid.html" style="--accent:#dcef3a">
+      <div class="card__top"><span>05</span><span>BAJO ÁCIDO</span></div>
+      <h3>ACID BASS-303</h3>
+      <p class="card__tag">&quot;Sub-Zero Edition&quot;</p>
+      <p class="card__desc">Un bajo ácido tipo TB-303 modernizado: secuenciador clásico de 16 pasos con note/accent/slide/gate, filtro resonante con distorsión, generador de patrones por escala, pad X-Y de performance en vivo, y patches con export a JSON/MIDI/WAV..</p>
+      <div class="card__chips"><span class="chip">WAV</span><span class="chip">MIDI</span><span class="chip">JSON</span><span class="chip">8 PATRONES</span></div>
+      <span class="card__go">MANUAL Y DESCARGA →</span>
+    </a>
+      <article class="card card--soon">
+        <div class="card__top"><span>C2</span><span>EN DESARROLLO</span></div>
+        <h3>Sync Master Envelopment</h3>
+        <p>La plataforma central que integra los 5 instrumentos como pestañas de una misma sesión, con tempo sincronizado y encendido/apagado conjunto, para sincronizar, mezclar y masterizar.</p>
+      </article>
+    </div>
+  </section>
 
-      <sc-if value="{{ isCode }}" hint-placeholder-val="{{ false }}">
-        <form onSubmit="{{ submitCode }}" style="display:flex;flex-direction:column;gap:14px">
-          <p style="margin:0;font-size:14px;line-height:1.6;color:#a9b8a2">Mandamos un código a <strong style="color:#ecebe5">{{ email }}</strong>. Vence en 10 minutos.</p>
-          <label for="zd-code" style="font-size:13px;color:#a9b8a2">Código de verificación</label>
-          <input id="zd-code" autocomplete="one-time-code" inputMode="numeric" maxLength="6" placeholder="······" value="{{ code }}" onInput="{{ onCode }}" style="background:#070b06;border:1px solid #2a3f24;border-radius:3px;color:#7fdc5c;font:inherit;font-size:30px;letter-spacing:.5em;text-align:center;padding:14px;outline-color:#7fdc5c;min-height:64px">
-          <button type="submit" style="background:#7fdc5c;color:#070b06;border:0;border-radius:3px;font:inherit;font-weight:800;font-size:15px;letter-spacing:.06em;padding:16px;min-height:54px;cursor:pointer;box-shadow:0 4px 0 #3e7a2b">VERIFICAR</button>
-          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px">
-            <button type="button" onClick="{{ changeEmail }}" style="background:none;border:0;color:#a9b8a2;font:inherit;padding:10px 0;cursor:pointer;min-height:44px">← Cambiar mail</button>
-            <button type="button" onClick="{{ resend }}" disabled="{{ resendDisabled }}" style="background:none;border:0;color:#7fdc5c;font:inherit;padding:10px 0;cursor:pointer;min-height:44px">{{ resendLabel }}</button>
-          </div>
-          <sc-if value="{{ demoCode }}" hint-placeholder-val="{{ false }}">
-            <div style="border:1px dashed #3e7a2b;border-radius:3px;padding:12px 14px;font-size:12px;line-height:1.5;color:#a9b8a2;display:flex;flex-direction:column;gap:4px">
-              <span style="color:#7c8f75;letter-spacing:.12em">MODO DEMO · SIN SERVIDOR DE MAIL</span>
-              <span>El mail que llegaría dice: <strong style="color:#7fdc5c;letter-spacing:.2em">{{ demoCode }}</strong></span>
-            </div>
-          </sc-if>
-        </form>
-      </sc-if>
+  <section class="wrap block" id="probar">
+    <div class="section-head">
+      <h2 class="h2">Probalo acá</h2>
+      <span class="label">EL PRIMER TOQUE ENCIENDE EL AUDIO</span>
+    </div>
+    <div class="preview-tabs-wrap" data-preview-tabs role="tablist" aria-label="Elegir instrumento para probar">
+    <input type="radio" name="previewTab" id="tab-cronbeat" class="tab-cronbeat" checked>
+    <label for="tab-cronbeat" style="--tab-accent:oklch(.82 .16 80)">CronBeat-8:08</label>
+    <input type="radio" name="previewTab" id="tab-monomoon" class="tab-monomoon">
+    <label for="tab-monomoon" style="--tab-accent:#f2a63c">MonoMoon&#39;70</label>
+    <input type="radio" name="previewTab" id="tab-nebularp" class="tab-nebularp">
+    <label for="tab-nebularp" style="--tab-accent:#9a8cff">NEBULARP 2035</label>
+    <input type="radio" name="previewTab" id="tab-sirens" class="tab-sirens">
+    <label for="tab-sirens" style="--tab-accent:#f06ad8">J4-Sirens Station</label>
+    <input type="radio" name="previewTab" id="tab-acid" class="tab-acid">
+    <label for="tab-acid" style="--tab-accent:#dcef3a">ACID BASS-303</label>
+    <div class="preview-pane" data-pane="cronbeat" style="--accent:oklch(.82 .16 80);--accent-dark:oklch(.55 .12 70)">
+      <div class="preview">
+  <div class="preview__mobile">
+    <a class="btn btn--accent" href="./descargables/CronBeat-808.html" target="_blank" rel="noopener">Abrir en pantalla completa ↗</a>
+    <p>Se ejecuta completo en tu navegador. En pantallas grandes (≥1024px) se puede probar acá mismo, en un iframe.</p>
+  </div>
+  <div class="preview__frame" data-preview-frame data-src="./descargables/CronBeat-808.html" data-name="CronBeat-8:08" hidden>
+    <button class="preview__overlay" type="button" data-preview-load>
+      <span class="preview__play">▶</span>
+      <span style="font-size:14px;letter-spacing:.08em">Cargar CronBeat-8:08</span>
+      <span class="preview__hint">Clic para interactuar — el primer toque enciende el audio</span>
+    </button>
+  </div>
+  <noscript><p style="padding:16px;margin:0;font-size:12.5px;color:var(--zd-dim)"><a href="./descargables/CronBeat-808.html" target="_blank" rel="noopener">Abrir CronBeat-8:08 en una pestaña nueva →</a></p></noscript>
+</div>
+    </div>
+    <div class="preview-pane" data-pane="monomoon" style="--accent:#f2a63c;--accent-dark:#8a5a17">
+      <div class="preview">
+  <div class="preview__mobile">
+    <a class="btn btn--accent" href="./descargables/MonoMoon70.html" target="_blank" rel="noopener">Abrir en pantalla completa ↗</a>
+    <p>Se ejecuta completo en tu navegador. En pantallas grandes (≥1024px) se puede probar acá mismo, en un iframe.</p>
+  </div>
+  <div class="preview__frame" data-preview-frame data-src="./descargables/MonoMoon70.html" data-name="MonoMoon&#39;70" hidden>
+    <button class="preview__overlay" type="button" data-preview-load>
+      <span class="preview__play">▶</span>
+      <span style="font-size:14px;letter-spacing:.08em">Cargar MonoMoon&#39;70</span>
+      <span class="preview__hint">Clic para interactuar — el primer toque enciende el audio</span>
+    </button>
+  </div>
+  <noscript><p style="padding:16px;margin:0;font-size:12.5px;color:var(--zd-dim)"><a href="./descargables/MonoMoon70.html" target="_blank" rel="noopener">Abrir MonoMoon&#39;70 en una pestaña nueva →</a></p></noscript>
+</div>
+    </div>
+    <div class="preview-pane" data-pane="nebularp" style="--accent:#9a8cff;--accent-dark:#4f43a8">
+      <div class="preview">
+  <div class="preview__mobile">
+    <a class="btn btn--accent" href="./descargables/Nebularp_2035.html" target="_blank" rel="noopener">Abrir en pantalla completa ↗</a>
+    <p>Se ejecuta completo en tu navegador. En pantallas grandes (≥1024px) se puede probar acá mismo, en un iframe.</p>
+  </div>
+  <div class="preview__frame" data-preview-frame data-src="./descargables/Nebularp_2035.html" data-name="NEBULARP 2035" hidden>
+    <button class="preview__overlay" type="button" data-preview-load>
+      <span class="preview__play">▶</span>
+      <span style="font-size:14px;letter-spacing:.08em">Cargar NEBULARP 2035</span>
+      <span class="preview__hint">Clic para interactuar — el primer toque enciende el audio</span>
+    </button>
+  </div>
+  <noscript><p style="padding:16px;margin:0;font-size:12.5px;color:var(--zd-dim)"><a href="./descargables/Nebularp_2035.html" target="_blank" rel="noopener">Abrir NEBULARP 2035 en una pestaña nueva →</a></p></noscript>
+</div>
+    </div>
+    <div class="preview-pane" data-pane="sirens" style="--accent:#f06ad8;--accent-dark:#8f2f7f">
+      <div class="preview">
+  <div class="preview__mobile">
+    <a class="btn btn--accent" href="./descargables/J4-Sirens_Station.html" target="_blank" rel="noopener">Abrir en pantalla completa ↗</a>
+    <p>Se ejecuta completo en tu navegador. En pantallas grandes (≥1024px) se puede probar acá mismo, en un iframe.</p>
+  </div>
+  <div class="preview__frame" data-preview-frame data-src="./descargables/J4-Sirens_Station.html" data-name="J4-Sirens Station" hidden>
+    <button class="preview__overlay" type="button" data-preview-load>
+      <span class="preview__play">▶</span>
+      <span style="font-size:14px;letter-spacing:.08em">Cargar J4-Sirens Station</span>
+      <span class="preview__hint">Clic para interactuar — el primer toque enciende el audio</span>
+    </button>
+  </div>
+  <noscript><p style="padding:16px;margin:0;font-size:12.5px;color:var(--zd-dim)"><a href="./descargables/J4-Sirens_Station.html" target="_blank" rel="noopener">Abrir J4-Sirens Station en una pestaña nueva →</a></p></noscript>
+</div>
+    </div>
+    <div class="preview-pane" data-pane="acid" style="--accent:#dcef3a;--accent-dark:#7c8a12">
+      <div class="preview">
+  <div class="preview__mobile">
+    <a class="btn btn--accent" href="./descargables/Acid_Bass-303.html" target="_blank" rel="noopener">Abrir en pantalla completa ↗</a>
+    <p>Se ejecuta completo en tu navegador. En pantallas grandes (≥1024px) se puede probar acá mismo, en un iframe.</p>
+  </div>
+  <div class="preview__frame" data-preview-frame data-src="./descargables/Acid_Bass-303.html" data-name="ACID BASS-303" hidden>
+    <button class="preview__overlay" type="button" data-preview-load>
+      <span class="preview__play">▶</span>
+      <span style="font-size:14px;letter-spacing:.08em">Cargar ACID BASS-303</span>
+      <span class="preview__hint">Clic para interactuar — el primer toque enciende el audio</span>
+    </button>
+  </div>
+  <noscript><p style="padding:16px;margin:0;font-size:12.5px;color:var(--zd-dim)"><a href="./descargables/Acid_Bass-303.html" target="_blank" rel="noopener">Abrir ACID BASS-303 en una pestaña nueva →</a></p></noscript>
+</div>
+    </div>
+  </div>
+  </section>
 
-      <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <p style="margin:0;font-size:14px;color:#a9b8a2">Verificado: <strong style="color:#7fdc5c">{{ email }}</strong></p>
-          <button type="button" onClick="{{ downloadAll }}" style="background:#7fdc5c;color:#070b06;border:0;border-radius:3px;font:inherit;font-weight:800;font-size:15px;letter-spacing:.06em;padding:16px;min-height:54px;cursor:pointer;box-shadow:0 4px 0 #3e7a2b">⭳ DESCARGAR LOS 5</button>
-          <div style="display:flex;flex-direction:column;border:1px solid #1d2c19;border-radius:3px">
-            <sc-for list="{{ files }}" as="f" hint-placeholder-count="5">
-              <a href="{{ f.file }}" download="{{ f.file }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:52px;border-bottom:1px solid #1d2c19;color:#ecebe5;font-size:14px">
-                <span style="{{ f.dot }}"></span>
-                <span style="flex:1">{{ f.name }}</span>
-                <span style="font-size:11px;color:#7c8f75">{{ f.file }}</span>
-                <span style="color:#7fdc5c">⭳</span>
-              </a>
-            </sc-for>
-          </div>
-          <button type="button" onClick="{{ reset }}" style="align-self:flex-start;background:none;border:0;color:#7c8f75;font:inherit;font-size:12px;padding:10px 0;cursor:pointer;min-height:44px">Usar otro mail</button>
+  <section class="wrap block" id="como">
+    <div class="section-head" style="margin-bottom:28px"><h2 class="h2">Cómo se usa</h2></div>
+    <ol class="how-grid">
+      <li><span class="step-label">01 · ABRIR</span><p>Abrí el archivo .html directamente en el navegador (doble clic, o arrastrarlo a una pestaña). No requiere instalación ni servidor.</p></li>
+      <li><span class="step-label">02 · ENCENDER</span><p>La primera interacción (clic, tap o tecla) desbloquea el audio del navegador. Es un requisito de los navegadores modernos, no un bug.</p></li>
+      <li><span class="step-label">03 · INSTALAR</span><p>Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.</p></li>
+      <li><span class="step-label">04 · GUARDAR Y EXPORTAR</span><p>El trabajo se autoguarda en el navegador y se exporta/importa a JSON. Cada instrumento muestra en su manual qué formatos exporta hoy.</p></li>
+    </ol>
+  </section>
+
+  <section class="wrap block" id="descargar">
+    <div class="dl-box">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <span class="eyebrow">DESCARGA GRATUITA</span>
+        <h2 class="h2" style="font-size:clamp(28px,4vw,46px)">Los 5 instrumentos, gratis.</h2>
+        <p class="lede">Ingresá tu mail, te mandamos un código de 6 dígitos y con eso se habilitan las descargas. Sin cuentas ni contraseñas.</p>
+        <div class="dl-box__points">
+          <span>5 archivos HTML autocontenidos (ZIP)</span>
+          <span>Funcionan sin conexión</span>
+          <span>Uso libre para tocar, grabar y exportar</span>
         </div>
-      </sc-if>
-
-      <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
-        <p role="alert" style="margin:0;font-size:13px;line-height:1.5;color:#ff5c3a;border-left:0;display:flex;gap:8px"><span>✕</span><span>{{ error }}</span></p>
-      </sc-if>
-      <sc-if value="{{ info }}" hint-placeholder-val="{{ false }}">
-        <p style="margin:0;font-size:12px;line-height:1.5;color:#7c8f75">{{ info }}</p>
-      </sc-if>
-    </div>
+      </div>
+      <div class="gate-step" data-mail-gate data-mode="all">
+  <div class="steps" data-gate-steps>
+    <span class="step step--current" data-step-indicator="email">1 · MAIL</span>
+    <span class="step" data-step-indicator="code">2 · CÓDIGO</span>
+    <span class="step" data-step-indicator="done">3 · DESCARGA</span>
   </div>
-</section>
 
-<footer style="border-top:1px solid #1d2c19">
-  <div style="max-width:1180px;margin:0 auto;padding:28px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:12px;letter-spacing:.12em;color:#7c8f75">
-    <img src="src/logo-badge.jpg" alt="" style="height:28px;border-radius:2px;background:#ecebe5;padding:2px">
+  <form class="gate-form" data-gate-panel="email" novalidate>
+    <label class="field-label" for="zd-all-mail">Tu mail</label>
+    <input class="text-input" id="zd-all-mail" type="email" autocomplete="email" inputmode="email" placeholder="vos@ejemplo.com" name="email" required>
+    <label class="check-row">
+      <input type="checkbox" name="news" checked>
+      Avisarme cuando salga C2 · Sync Master Envelopment
+    </label>
+    <a href="privacidad.html" style="font-size:12px;color:var(--zd-dim)">Cómo usamos tu mail →</a>
+    <button type="submit" class="btn btn--accent" data-gate-submit-email>ENVIARME EL CÓDIGO</button>
+    <p class="gate-error" data-gate-error hidden></p>
+    <p class="gate-info" data-gate-info hidden></p>
+    <noscript><p class="gate-info">Este paso necesita JavaScript habilitado. Mientras tanto, abrí el instrumento desde "Probalo acá".</p></noscript>
+  </form>
+
+  <form class="gate-form" data-gate-panel="code" hidden novalidate>
+    <p style="margin:0;font-size:14px;line-height:1.6;color:var(--zd-muted)">Mandamos un código a <strong data-gate-email-echo></strong>. Vence en 10 minutos.</p>
+    <label class="field-label" for="zd-all-code">Código de verificación</label>
+    <input class="code-input" id="zd-all-code" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="······" name="code">
+    <button type="submit" class="btn btn--accent" data-gate-submit-code>VERIFICAR</button>
+    <div class="gate-row">
+      <button type="button" class="btn-link" data-gate-change-email>← Cambiar mail</button>
+      <button type="button" class="btn-link btn-link--accent" data-gate-resend>Reenviar código</button>
+    </div>
+    <div class="demo-note" data-gate-demo hidden>
+      <strong>MODO DEMO · SIN SERVIDOR DE MAIL</strong>
+      <span>El mail que llegaría dice: <strong data-gate-demo-code></strong></span>
+    </div>
+    <p class="gate-error" data-gate-error hidden></p>
+    <p class="gate-info" data-gate-info hidden></p>
+  </form>
+
+  <div class="gate-step" data-gate-panel="done" hidden>
+    <p style="margin:0;font-size:14px;color:var(--zd-muted)">Verificado: <strong data-gate-email-echo></strong></p>
+    <a class="btn btn--accent btn--block" href="descargables-zeroday.zip" download="descargables-zeroday.zip" data-gate-download>⭳ DESCARGAR LOS 5 (ZIP)</a>
+    
+    <button type="button" class="btn-link" data-gate-reset>Usar otro mail</button>
+  </div>
+</div>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <img src="src/logo-badge.jpg" alt="">
     <span>ZERO DAY · MUSIC EXPLOITS - Argentina 2026</span>
-    <a href="privacidad.html" style="margin-left:auto;color:#7c8f75">PRIVACIDAD</a>
+    
+    <a href="privacidad.html" class="push">PRIVACIDAD</a>
   </div>
 </footer>
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;demoMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Verificación&quot;}}">
-const INST = [
-  { name: 'CronBeat-8:08', file: './descargables/CronBeat-808.html', c: 'oklch(.82 .16 80)' },
-  { name: "MonoMoon'70", file: './descargables/MonoMoon70.html', c: '#f2a63c' },
-  { name: 'NEBULARP 2035', file: './descargables/Nebularp_2035.html', c: '#9a8cff' },
-  { name: 'J4-Sirens Station', file: './descargables/J4-Sirens_Station.html', c: '#f06ad8' },
-  { name: 'ACID BASS-303', file: './descargables/Acid_Bass-303.html', c: '#dcef3a' }
-];
-const DISPOSABLE = ['mailinator.com','guerrillamail.com','10minutemail.com','tempmail.com','temp-mail.org','yopmail.com','trashmail.com','sharklasers.com','getnada.com','dispostable.com','maildrop.cc','throwawaymail.com','fakeinbox.com','emailondeck.com','mohmal.com'];
-const TYPOS = { 'gmial.com':'gmail.com','gmal.com':'gmail.com','gmail.co':'gmail.com','gnail.com':'gmail.com','hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','outlok.com':'outlook.com','yahooo.com':'yahoo.com','yaho.com':'yahoo.com' };
-const RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/;
-
-class Component extends DCLogic {
-  state = { step: 'email', email: '', code: '', news: true, busy: false, error: '', info: '', sel: 0, preview: false, cooldown: 0, attempts: 0 };
-
-  componentDidMount() {
-    try {
-      const v = JSON.parse(localStorage.getItem('zd-web-verified') || 'null');
-      if (v && v.email) this.setState({ step: 'done', email: v.email });
-    } catch (e) {}
-  }
-  componentWillUnmount() { clearInterval(this.timer); }
-
-  async hasMx(domain) {
-    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4000);
-    try {
-      const r = await fetch('https://dns.google/re-designsolve?name=' + encodeURIComponent(domain) + '&type=MX', { signal: ctl.signal });
-      const j = await r.json();
-      if (j.Status === 3) return false;
-      return !!(j.Answer && j.Answer.length) || null;
-    } catch (e) { return null; } finally { clearTimeout(t); }
-  }
-
-  async sendCode(email) {
-    const code = String(Math.floor(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)));
-    this.pending = { code, exp: Date.now() + 10 * 60 * 1000 };
-    let sent = false;
-    if (typeof window.ZD_SEND_CODE === 'function') {
-      try { await window.ZD_SEND_CODE(email, code); sent = true; } catch (e) { throw new Error('No pudimos enviar el mail. Probá de nuevo en un momento.'); }
-    }
-    this.demo = sent ? '' : code;
-    this.startCooldown();
-  }
-
-  startCooldown() {
-    clearInterval(this.timer);
-    this.setState({ cooldown: 30 });
-    this.timer = setInterval(() => this.setState(s => {
-      if (s.cooldown <= 1) { clearInterval(this.timer); return { cooldown: 0 }; }
-      return { cooldown: s.cooldown - 1 };
-    }), 1000);
-  }
-
-  submitEmail = async (e) => {
-    e.preventDefault();
-    const email = this.state.email.trim().toLowerCase();
-    const domain = email.split('@')[1] || '';
-    if (!RE.test(email)) return this.setState({ error: 'Ese mail no tiene un formato válido.', info: '' });
-    if (TYPOS[domain]) return this.setState({ error: '¿Quisiste decir ' + email.split('@')[0] + '@' + TYPOS[domain] + '?', info: '' });
-    if (DISPOSABLE.includes(domain)) return this.setState({ error: 'No aceptamos mails temporales. Usá uno propio.', info: '' });
-    this.setState({ busy: true, error: '', info: '' });
-    const mx = await this.hasMx(domain);
-    if (mx === false) return this.setState({ busy: false, error: 'El dominio ' + domain + ' no recibe mails.' });
-    try { await this.sendCode(email); } catch (err) { return this.setState({ busy: false, error: err.message }); }
-    this.setState({ busy: false, step: 'code', email, code: '', attempts: 0, info: mx === null ? 'No pudimos chequear el dominio; el código confirma que el mail es tuyo.' : '' });
-  };
-
-  submitCode = (e) => {
-    e.preventDefault();
-    const p = this.pending, code = this.state.code.trim();
-    if (!p) return this.setState({ error: 'Pedí un código nuevo.' });
-    if (Date.now() > p.exp) return this.setState({ error: 'El código venció. Pedí uno nuevo.' });
-    if (this.state.attempts >= 5) return this.setState({ error: 'Demasiados intentos. Pedí un código nuevo.' });
-    if (code !== p.code) return this.setState(s => ({ attempts: s.attempts + 1, error: 'Código incorrecto. Te quedan ' + (4 - s.attempts) + ' intentos.' }));
-    this.pending = null; this.demo = '';
-    try { localStorage.setItem('zd-web-verified', JSON.stringify({ email: this.state.email, news: this.state.news, at: new Date().toISOString() })); } catch (e2) {}
-    this.setState({ step: 'done', error: '', info: '' });
-  };
-
-  resend = async () => {
-    if (this.state.cooldown) return;
-    try { await this.sendCode(this.state.email); this.setState({ code: '', attempts: 0, error: '', info: 'Te mandamos un código nuevo.' }); }
-    catch (err) { this.setState({ error: err.message }); }
-  };
-
-  downloadAll = () => {
-    INST.forEach((it, i) => setTimeout(() => {
-      const a = document.createElement('a'); a.href = it.file; a.download = it.file;
-      document.body.appendChild(a); a.click(); a.remove();
-    }, i * 400));
-  };
-
-  renderVals() {
-    const s = this.state, demoMode = this.props.demoMode ?? true;
-    const idx = { email: 1, code: 2, done: 3 }[s.step];
-    const stepStyle = (n) => Object.assign({ padding: '6px 10px', borderRadius: 2 }, n === idx ? { background: '#7fdc5c', color: '#070b06', fontWeight: 700, border: '1px solid #7fdc5c' } : n < idx ? { color: '#7fdc5c', border: '1px solid #3e7a2b' } : { color: '#5d7555', border: '1px solid #1d2c19' });
-    const cur = INST[s.sel];
-    return {
-      tabs: INST.map((it, i) => ({
-        name: it.name, active: i === s.sel,
-        select: () => this.setState({ sel: i }),
-        style: Object.assign({ font: 'inherit', fontSize: 13, letterSpacing: '.04em', padding: '12px 16px', minHeight: 44, borderRadius: 3, cursor: 'pointer' }, i === s.sel ? { background: it.c, color: '#070b06', border: '1px solid ' + it.c, fontWeight: 700 } : { background: 'transparent', color: '#a9b8a2', border: '1px solid #2a3f24' })
-      })),
-      previewOn: s.preview, previewOff: !s.preview, previewSrc: cur.file, previewName: cur.name,
-      loadPreview: () => this.setState({ preview: true }),
-      stepStyle1: stepStyle(1), stepStyle2: stepStyle(2), stepStyle3: stepStyle(3),
-      isEmail: s.step === 'email', isCode: s.step === 'code', isDone: s.step === 'done',
-      email: s.email, code: s.code, news: s.news, busy: s.busy,
-      emailBtn: s.busy ? 'VERIFICANDO…' : 'ENVIARME EL CÓDIGO',
-      onEmail: (e) => this.setState({ email: e.target.value, error: '' }),
-      onNews: (e) => this.setState({ news: e.target.checked }),
-      onCode: (e) => this.setState({ code: e.target.value.replace(/\D/g, '').slice(0, 6), error: '' }),
-      submitEmail: this.submitEmail, submitCode: this.submitCode, resend: this.resend,
-      resendDisabled: s.cooldown > 0,
-      resendLabel: s.cooldown > 0 ? 'Reenviar en ' + s.cooldown + 's' : 'Reenviar código',
-      changeEmail: () => { this.pending = null; this.setState({ step: 'email', code: '', error: '', info: '' }); },
-      demoCode: demoMode && s.step === 'code' ? this.demo : '',
-      error: s.error, info: s.info,
-      files: INST.map(it => ({ ...it, dot: { width: 10, height: 10, borderRadius: '50%', flex: 'none', background: it.c } })),
-      downloadAll: this.downloadAll,
-      reset: () => { try { localStorage.removeItem('zd-web-verified'); } catch (e) {} this.setState({ step: 'email', email: '', code: '', error: '', info: '' }); }
-    };
-  }
-}
-</script>
+<script defer src="assets/site.js"></script>
 </body>
 </html>
