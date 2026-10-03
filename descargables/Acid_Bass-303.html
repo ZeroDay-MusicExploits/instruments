@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ACID BASS-303</title>
 <meta name="description" content="Bajo ácido tipo TB-303 en el navegador: secuenciador de 16 pasos con accent y slide, filtro resonante con distorsión y export a JSON, MIDI y WAV.">
+<!-- Version web: la usa zd-pwa para el aviso de file:// (SPEC 3.2 / docs/pwa.md). -->
+<link rel="canonical" href="https://zeroday-musicexploits.github.io/instruments/descargables/Acid_Bass-303.html">
 <!-- PWA: el manifest y los iconos los sirve el sitio. En file:// o dentro de
      un iframe el bloque zd-pwa no registra nada (SPEC 3.2). -->
 <link rel="manifest" href="../manifests/acid-bass.webmanifest">
@@ -2032,17 +2034,22 @@ window.ZD_M = {
 /* /ZD-BLOCK:zd-mobile */
 </script>
 <script>
-/* ZD-BLOCK:zd-pwa v1 */
-/* Registro del service worker unico, toast de "nueva version" y boton
-   Instalar. Sin configuracion: el manifest sale del <link rel=manifest> del
-   head, asi que el bloque es identico en los 5. Inerte y silencioso en
-   file:// y dentro de un iframe (SPEC 3.2). */
+/* ZD-BLOCK:zd-pwa v2 */
+/* Instalacion de la PWA: banner propio al abrir (independiente del menu y
+   del shell), boton en el header en escritorio, hint de iOS, aviso de
+   navegador embebido (Instagram/Facebook/TikTok) y aviso de archivo local.
+   Sin configuracion: el nombre sale de document.title o
+   apple-mobile-web-app-title, el manifest del <link rel=manifest> del head
+   y, para file://, de <link rel=canonical> si existe. Inerte y silencioso
+   dentro de un iframe (SPEC 3.2); en file:// no hace pedidos de red ni
+   registra el service worker (SPEC 3.2 / R2). */
 (function () {
   'use strict';
   var ZD = window.ZD || (window.ZD = {});
   if (ZD.pwa) return;
 
   function isHttp() { return location.protocol === 'http:' || location.protocol === 'https:'; }
+  function isFile() { return location.protocol === 'file:'; }
   function isTopWindow() { try { return window.top === window; } catch (e) { return false; } }
   function isStandalone() {
     try { if (window.matchMedia('(display-mode: standalone)').matches) return true; } catch (e) {}
@@ -2052,83 +2059,346 @@ window.ZD_M = {
     var ua = navigator.userAgent || '';
     return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
   }
+  function isEmbedded() {
+    return /FBAN|FBAV|Instagram|Line\/|MicroMessenger|TikTok|BytedanceWebview|Twitter/i.test(navigator.userAgent || '');
+  }
 
-  var deferredPrompt = null;
+  /* Dentro de un iframe (como lo sirve el sitio): cero DOM, cero listeners,
+     cero console.error. Corta antes de tocar nada mas. */
+  if (!isTopWindow()) {
+    ZD.pwa = { install: function () {}, refresh: function () {}, active: false, registered: false, manifest: null, isStandalone: isStandalone };
+    return;
+  }
+
+  var DISMISS_MS = 14 * 24 * 60 * 60 * 1000;
+  var DISMISS_KEY = 'zd:pwa:dismissed';
+  var LOCAL_KEY = 'zd:pwa:dismissed-local';
+
+  function dismissed(key) {
+    try {
+      var ts = parseInt(localStorage.getItem(key), 10);
+      return !!ts && (Date.now() - ts) < DISMISS_MS;
+    } catch (e) { return false; }
+  }
+  function dismiss(key) { try { localStorage.setItem(key, String(Date.now())); } catch (e) {} }
+
+  function instrumentName() {
+    var m = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    var n = (m && m.content) || document.title || '';
+    return n.trim() || 'esta app';
+  }
+  function canonicalHref() {
+    var l = document.querySelector('link[rel="canonical"]');
+    return l ? l.href : '';
+  }
+
+  var deferredPrompt = null, installed = false, cssInjected = false;
+  var bannerEl = null, bannerVariant = null, topIconEl = null, desktopBtnEl = null;
   var state = { active: false, registered: false, manifest: null };
 
-  /* El boton puede no existir todavia (lo crea el shell): se resuelve cada vez. */
-  function installBtn() { return document.getElementById('zd-install-btn'); }
-  function canInstall() { return !!deferredPrompt || (isIOS() && !isStandalone()); }
-  function updateInstallButton() {
-    var b = installBtn();
+  function installMenuBtn() { return document.getElementById('zd-install-btn'); }
+
+  function variant() {
+    if (isFile() || isStandalone()) return null;
+    if (isEmbedded()) return 'embedded';
+    if (deferredPrompt) return 'install';
+    if (isIOS()) return 'ios';
+    return null;
+  }
+  function canInstall() { return !!variant(); }
+
+  function updateMenuItem() {
+    var b = installMenuBtn();
     if (!b) return;
-    b.hidden = !isHttp() || !isTopWindow() || isStandalone() || !canInstall();
+    if (isFile()) { b.hidden = !canonicalHref(); return; }
+    b.hidden = isStandalone() || !canInstall();
+  }
+  function updateTopIcon() {
+    if (!ZD.mobile || !ZD.mobile.active || !canInstall()) { removeTopIcon(); return; }
+    mountTopIcon();
+  }
+  function updateDesktopBtn() {
+    if ((ZD.mobile && ZD.mobile.active) || isStandalone() || !deferredPrompt) { removeDesktopBtn(); return; }
+    mountDesktopBtn();
+  }
+  function refreshAll() { updateMenuItem(); updateTopIcon(); updateDesktopBtn(); }
+
+  function removeTopIcon() { if (topIconEl && topIconEl.parentNode) topIconEl.parentNode.removeChild(topIconEl); topIconEl = null; }
+  function mountTopIcon() {
+    if (topIconEl) return;
+    var top = document.getElementById('zd-top'), menuBtn = document.getElementById('zd-tmenu');
+    if (!top || !menuBtn) return;
+    injectCss();
+    topIconEl = document.createElement('button');
+    topIconEl.type = 'button'; topIconEl.id = 'zd-pwa-topbtn'; topIconEl.className = 'zd-pwa-topicon';
+    topIconEl.setAttribute('aria-label', 'Instalar app');
+    topIconEl.textContent = '↓';
+    topIconEl.addEventListener('click', doInstall);
+    top.insertBefore(topIconEl, menuBtn);
+  }
+
+  function removeDesktopBtn() { if (desktopBtnEl && desktopBtnEl.parentNode) desktopBtnEl.parentNode.removeChild(desktopBtnEl); desktopBtnEl = null; }
+  function mountDesktopBtn() {
+    if (desktopBtnEl) return;
+    injectCss();
+    desktopBtnEl = document.createElement('button');
+    desktopBtnEl.type = 'button'; desktopBtnEl.id = 'zd-pwa-desktop-btn'; desktopBtnEl.className = 'zd-pwa-desktop-btn';
+    desktopBtnEl.setAttribute('aria-label', 'Instalar aplicación');
+    desktopBtnEl.textContent = '↓ Instalar';
+    desktopBtnEl.addEventListener('click', doInstall);
+    document.body.appendChild(desktopBtnEl);
+  }
+
+  function shareIcon() {
+    var span = document.createElement('span');
+    span.className = 'zd-pwa-ico'; span.setAttribute('aria-hidden', 'true');
+    /* SVG estatica y fija (sin datos externos): no entra en el auditado de
+       innerHTML con datos de usuario/JSON/nombre de archivo (SPEC R6). */
+    span.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+    return span;
+  }
+
+  function buildBanner(v) {
+    var wrap = document.createElement('div');
+    wrap.id = 'zd-pwa-banner'; wrap.className = 'zd-pwa-banner';
+    wrap.setAttribute('role', 'region');
+    wrap.setAttribute('aria-label', 'Instalar aplicación');
+
+    var row = document.createElement('div'); row.className = 'zd-pwa-row';
+    var msg = document.createElement('div'); msg.className = 'zd-pwa-msg';
+    if (v === 'embedded') {
+      msg.textContent = 'Abrí este link en Safari o Chrome para instalar.';
+    } else {
+      msg.appendChild(document.createTextNode('Instalá '));
+      var strong = document.createElement('b'); strong.textContent = instrumentName(); msg.appendChild(strong);
+      msg.appendChild(document.createTextNode(' como app'));
+    }
+    row.appendChild(msg);
+
+    var actions = document.createElement('div'); actions.className = 'zd-pwa-actions';
+    if (v === 'install') {
+      var go = document.createElement('button');
+      go.type = 'button'; go.className = 'zd-pwa-go'; go.textContent = '↓ Instalar';
+      go.addEventListener('click', doInstall);
+      actions.appendChild(go);
+    }
+    var later = document.createElement('button');
+    later.type = 'button'; later.className = 'zd-pwa-later'; later.textContent = 'Ahora no';
+    later.setAttribute('aria-label', 'Ahora no — no volver a mostrar por 14 días');
+    later.addEventListener('click', function () { dismiss(DISMISS_KEY); removeBanner(); });
+    actions.appendChild(later);
+    row.appendChild(actions);
+    wrap.appendChild(row);
+
+    if (v === 'ios') {
+      var hint = document.createElement('div'); hint.className = 'zd-pwa-hint';
+      hint.appendChild(shareIcon());
+      hint.appendChild(document.createTextNode(' Compartir → Agregar a inicio'));
+      wrap.appendChild(hint);
+    }
+    return wrap;
+  }
+
+  function mount(node) {
+    injectCss();
+    if (ZD.mobile && ZD.mobile.active) {
+      var stage = ZD.mobile.stage();
+      if (stage) { node.classList.add('zd-pwa-in-stage'); stage.insertBefore(node, stage.firstChild); return; }
+    }
+    node.classList.add('zd-pwa-fixed');
+    document.body.appendChild(node);
+  }
+
+  function removeBanner() {
+    if (!bannerEl) return;
+    var hadFocus = bannerEl.contains(document.activeElement);
+    if (bannerEl.parentNode) bannerEl.parentNode.removeChild(bannerEl);
+    bannerEl = null; bannerVariant = null;
+    if (hadFocus) { try { document.body.focus(); } catch (e) {} }
+  }
+  function showBanner(v, force) {
+    if (!v || bannerEl) return;
+    if (!force && dismissed(DISMISS_KEY)) return;
+    bannerEl = buildBanner(v);
+    bannerVariant = v;
+    mount(bannerEl);
+  }
+  function maybeShowBanner() {
+    if (installed || isStandalone() || bannerEl) return;
+    if (ZD.mobile && ZD.mobile.openTab) return;
+    var v = variant();
+    if (!v) return;
+    /* Escritorio sin shell + beforeinstallprompt: alcanza con el boton del
+       header (SPEC 2b), el banner completo es para el shell movil. */
+    if (v === 'install' && !(ZD.mobile && ZD.mobile.active)) return;
+    showBanner(v, false);
+  }
+
+  function onInstalled() {
+    installed = true;
+    removeBanner();
+    refreshAll();
+    if (ZD.toast) ZD.toast('App instalada');
+  }
+
+  function doInstall() {
+    var v = variant();
+    if (v === 'install' && deferredPrompt) {
+      var p = deferredPrompt;
+      p.prompt();
+      var done = p.userChoice || Promise.resolve({ outcome: 'dismissed' });
+      done.then(function (res) { if (res && res.outcome === 'accepted') onInstalled(); }).catch(function () {});
+      (done.finally ? done.finally.bind(done) : done.then.bind(done))(function () {
+        deferredPrompt = null; refreshAll();
+      });
+      return;
+    }
+    if (v === 'ios' || v === 'embedded') { showBanner(v, true); return; }
+    if (ZD.toast) ZD.toast('Usá el menú del navegador para instalar esta app');
+  }
+
+  function buildLocalNotice(href) {
+    var bar = document.createElement('div');
+    bar.id = 'zd-pwa-local'; bar.className = 'zd-pwa-local';
+    bar.setAttribute('role', 'note');
+    var msg = document.createElement('span'); msg.className = 'zd-pwa-local-msg';
+    msg.textContent = 'Estás usando el archivo local. Para instalarlo como app, abrí la versión web.';
+    var open = document.createElement('a');
+    open.className = 'zd-pwa-local-open'; open.href = href; open.rel = 'noopener'; open.textContent = 'Abrir web';
+    var close = document.createElement('button');
+    close.type = 'button'; close.className = 'zd-pwa-local-x'; close.setAttribute('aria-label', 'Cerrar aviso');
+    close.textContent = '✕';
+    close.addEventListener('click', function () { dismiss(LOCAL_KEY); if (bar.parentNode) bar.parentNode.removeChild(bar); });
+    bar.append(msg, open, close);
+    return bar;
   }
 
   function showUpdateToast() {
     if (ZD.toast) ZD.toast('Nueva versión disponible', { ms: 0, action: { label: 'Recargar', onClick: function () { location.reload(); } } });
   }
-
-  function doInstall() {
-    if (deferredPrompt) {
-      var p = deferredPrompt;
-      deferredPrompt = null;
-      p.prompt();
-      var done = p.userChoice || Promise.resolve();
-      (done.finally ? done.finally.bind(done) : done.then.bind(done))(function () { updateInstallButton(); });
-      return;
-    }
-    if (isIOS() && ZD.toast) ZD.toast('Para instalar: Compartir → Agregar a inicio', { ms: 7000 });
-    else if (ZD.toast) ZD.toast('Usá el menú del navegador para instalar esta app');
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    var link = document.querySelector('link[rel~="manifest"]');
+    var href = link ? link.getAttribute('href') : '';
+    if (!href) return;
+    state.active = true; state.manifest = href;
+    /* Un 'zd-sw-updated' solo es una actualizacion real si ya habia un SW
+       controlando la pagina (si no, es el primer install). */
+    var hadController = !!navigator.serviceWorker.controller;
+    var swUrl = new URL('../sw.js', location.href).href;
+    var swScope = new URL('../', location.href).href;
+    fetch(href, { method: 'HEAD' }).then(function (res) {
+      if (!res.ok) return null;
+      return navigator.serviceWorker.register(swUrl, { scope: swScope });
+    }).then(function (reg) {
+      if (!reg) return;
+      state.registered = true;
+      navigator.serviceWorker.addEventListener('message', function (ev) {
+        if (ev.data && ev.data.type === 'zd-sw-updated' && hadController) showUpdateToast();
+      });
+    }).catch(function () { /* sin red o manifest caido: silencioso */ });
   }
 
-  window.addEventListener('beforeinstallprompt', function (e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    updateInstallButton();
-  });
-  window.addEventListener('appinstalled', function () { deferredPrompt = null; updateInstallButton(); });
   document.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('#zd-install-btn') : null;
-    if (b) { e.preventDefault(); doInstall(); }
+    if (!b) return;
+    e.preventDefault();
+    if (isFile()) { var href = canonicalHref(); if (href) location.href = href; return; }
+    doInstall();
   });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateInstallButton);
-  else updateInstallButton();
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    if (isFile()) return;
+    e.preventDefault();
+    deferredPrompt = e;
+    refreshAll();
+    maybeShowBanner();
+  });
+  window.addEventListener('appinstalled', onInstalled);
+
+  function wireShellToggle() {
+    if (!ZD.mobile || !ZD.mobile.mq) return;
+    try {
+      var mq = window.matchMedia(ZD.mobile.mq);
+      var onChange = function () {
+        refreshAll();
+        if (bannerEl) { var v = bannerVariant; removeBanner(); showBanner(v, true); }
+      };
+      if (mq.addEventListener) mq.addEventListener('change', onChange);
+      else if (mq.addListener) mq.addListener(onChange);
+    } catch (e) {}
+  }
+
+  function init() {
+    updateMenuItem();
+    if (isFile()) {
+      var href = canonicalHref();
+      if (href && !dismissed(LOCAL_KEY)) mount(buildLocalNotice(href));
+      return;
+    }
+    if (!isHttp()) return;
+    refreshAll();
+    maybeShowBanner();
+    wireShellToggle();
+    registerServiceWorker();
+  }
 
   ZD.pwa = {
     install: doInstall,
-    refresh: updateInstallButton,
+    refresh: refreshAll,
     get active() { return state.active; },
     get registered() { return state.registered; },
     get manifest() { return state.manifest; },
     isStandalone: isStandalone
   };
 
-  /* file:// o dentro de un iframe: no se registra nada y no se loguea nada. */
-  if (!isHttp() || !isTopWindow()) return;
-  if (!('serviceWorker' in navigator)) return;
-  var link = document.querySelector('link[rel~="manifest"]');
-  var href = link ? link.getAttribute('href') : '';
-  if (!href) return;
-  state.active = true;
-  state.manifest = href;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 
-  /* Un 'zd-sw-updated' solo es una actualizacion real si ya habia un SW
-     controlando la pagina (si no, es el primer install). */
-  var hadController = !!navigator.serviceWorker.controller;
-  var swUrl = new URL('../sw.js', location.href).href;
-  var swScope = new URL('../', location.href).href;
-
-  fetch(href, { method: 'HEAD' }).then(function (res) {
-    if (!res.ok) return null;
-    return navigator.serviceWorker.register(swUrl, { scope: swScope });
-  }).then(function (reg) {
-    if (!reg) return;
-    state.registered = true;
-    navigator.serviceWorker.addEventListener('message', function (ev) {
-      if (ev.data && ev.data.type === 'zd-sw-updated' && hadController) showUpdateToast();
-    });
-  }).catch(function () { /* sin red o manifest caido: silencioso */ });
+  function injectCss() {
+    if (cssInjected) return;
+    cssInjected = true;
+    var CSS = [
+      '.zd-pwa-banner,.zd-pwa-local{font-family:var(--zd-mono,monospace);color:var(--zd-ink,#e9ebef);',
+      'background:var(--zd-panel,#111b0f);border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,6px);',
+      'box-shadow:0 0 0 1px var(--zd-line,#2a3f24);}',
+      '.zd-pwa-banner{padding:9px 10px;font-size:12.5px;line-height:1.4;}',
+      '.zd-pwa-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}',
+      '.zd-pwa-msg{flex:1 1 auto;min-width:140px;}',
+      '.zd-pwa-msg b{color:var(--inst-accent,var(--zd-phosphor,#7fdc5c));}',
+      '.zd-pwa-actions{display:flex;gap:6px;flex:none;margin-left:auto;}',
+      '.zd-pwa-go,.zd-pwa-later{min-height:36px;padding:0 12px;font:700 11.5px var(--zd-mono,monospace);',
+      'letter-spacing:.04em;cursor:pointer;border-radius:var(--zd-r,4px);touch-action:manipulation;white-space:nowrap;}',
+      '.zd-pwa-go{color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));border:1px solid var(--zd-outline,#000);}',
+      '.zd-pwa-later{color:var(--zd-ink-dim,#a3b699);background:transparent;border:1px solid var(--zd-line,#2a3f24);}',
+      '.zd-pwa-hint{display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:7px;',
+      'border-top:1px solid var(--zd-line,#2a3f24);font-size:11.5px;color:var(--zd-ink-dim,#a3b699);}',
+      '.zd-pwa-ico{display:inline-flex;flex:none;}',
+      '.zd-pwa-local{display:flex;align-items:center;gap:8px;padding:7px 8px 7px 10px;font-size:11.5px;}',
+      '.zd-pwa-local-msg{flex:1;min-width:0;}',
+      '.zd-pwa-local-open{flex:none;color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));',
+      'text-decoration:none;font:700 11px var(--zd-mono,monospace);padding:7px 10px;border-radius:var(--zd-r,4px);touch-action:manipulation;}',
+      '.zd-pwa-local-x{flex:none;width:30px;height:30px;color:var(--zd-ink-dim,#a3b699);background:transparent;',
+      'border:0;cursor:pointer;font-size:13px;touch-action:manipulation;}',
+      '.zd-pwa-banner.zd-pwa-in-stage,.zd-pwa-local.zd-pwa-in-stage{flex:none;}',
+      '.zd-pwa-fixed{position:fixed;left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);',
+      'top:env(safe-area-inset-top,0px);z-index:2000;margin:8px;}',
+      '.zd-pwa-topicon{flex:none;width:40px;height:40px;cursor:pointer;font:700 15px var(--zd-mono,monospace);',
+      'color:var(--zd-void,#070b06);background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));border:1px solid var(--zd-outline,#000);',
+      'border-radius:var(--zd-r,4px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24);touch-action:manipulation;margin-right:2px;}',
+      '.zd-pwa-topicon:active{transform:translateY(1px);}',
+      '.zd-pwa-desktop-btn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);',
+      'right:calc(env(safe-area-inset-right,0px) + 14px);z-index:2000;min-height:38px;padding:0 14px;',
+      'font:700 12px var(--zd-mono,monospace);letter-spacing:.04em;color:var(--zd-void,#070b06);',
+      'background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));border:1px solid var(--zd-outline,#000);',
+      'border-radius:var(--zd-r,4px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 6px 16px -6px #000;cursor:pointer;}',
+      '.zd-pwa-desktop-btn:active{transform:translateY(1px);}'
+    ].join('');
+    var st = document.createElement('style');
+    st.id = 'zd-pwa-css';
+    st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+  }
 })();
 /* /ZD-BLOCK:zd-pwa */
 </script>
