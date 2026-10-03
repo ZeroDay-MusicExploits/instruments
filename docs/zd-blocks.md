@@ -285,7 +285,7 @@ window.ZD_M = {
   menuTitle: 'MENÚ',
   menu: [
     { label: '← Sitio', href: '../index.html' },
-    { label: '⭳ Instalar app', id: 'zd-install-btn', hidden: true },
+    { label: '↓ Instalar app', id: 'zd-install-btn', hidden: true },
     { label: 'Empezar de cero', onClick() {} }
   ],
   menuNotes: ['Texto chico al pie del menú.'],
@@ -362,6 +362,14 @@ de instalar.
 El toast "Nueva versión · Recargar" sale cuando el SW manda
 `{type:'zd-sw-updated'}` **y** ya había un controller (no en el primer
 install).
+
+
+### Glifos
+
+Los bloques y la config usan solo glifos que estén en el bloque Arrows y en
+Geometric Shapes (`↓ ↑ ← → ● ▶ ◀ ✕ ⋯`). `⭳` y `⭱` (U+2B73 / U+2B71, Arrows
+Supplement-B) **no** sirven: casi ninguna fuente los trae y salen como un
+cuadrado vacío.
 
 ---
 
