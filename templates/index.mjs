@@ -106,7 +106,8 @@ export function buildIndexPage(data) {
   </section>
 </main>
 ${renderFooter()}
-<script defer src="assets/site.js"></script>`;
+<script defer src="assets/site.js"></script>
+<script defer src="assets/mail-gate.js"></script>`;
 
   return renderDoc({ head, body });
 }

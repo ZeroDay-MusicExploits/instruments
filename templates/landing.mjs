@@ -215,7 +215,8 @@ export function buildLandingPage(data, slug) {
   ${renderOthers(order, instruments, slug)}
 </main>
 ${renderFooter()}
-<script defer src="assets/site.js"></script>`;
+<script defer src="assets/site.js"></script>
+<script defer src="assets/mail-gate.js"></script>`;
 
   return renderDoc({ head, body });
 }

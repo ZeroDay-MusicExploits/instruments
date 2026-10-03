@@ -257,6 +257,7 @@ kbd { font: inherit; font-size: 12.5px; min-width: 30px; height: 30px; padding: 
 .step--current { background: var(--accent); color: #070b06; font-weight: 700; border-color: var(--accent); }
 .step--done { color: var(--accent); border-color: var(--accent-dark); }
 .gate-form { display: flex; flex-direction: column; gap: 14px; }
+.gate-form[hidden], .gate-step[hidden] { display: none; }
 .field-label { font-size: 13px; color: var(--zd-muted); }
 .text-input {
   background: var(--zd-bg); border: 1px solid var(--zd-line2); border-radius: 3px; color: var(--zd-ink);
@@ -276,9 +277,9 @@ kbd { font: inherit; font-size: 12.5px; min-width: 30px; height: 30px; padding: 
 .dl-list a:last-child { border-bottom: 0; }
 .dl-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--dot, var(--zd-green)); }
 .gate-step { display: flex; flex-direction: column; gap: 14px; }
-[data-gate-step] { display: none; }
-[data-gate-step].is-active { display: flex; flex-direction: column; gap: 14px; }
-[data-gate-panel="code"], [data-gate-panel="done"] { display: none; }
+/* La visibilidad de cada paso la maneja mail-gate.js con el atributo `hidden`
+   (no hace falta pisarlo con display:none acá: sería más específico que el
+   atributo y dejaría los paneles invisibles aunque JS saque `hidden`). */
 
 /* ---------- compat table / faq ---------- */
 .table-wrap { overflow-x: auto; border: 1px solid var(--zd-line); border-radius: 4px; }
