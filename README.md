@@ -1,6 +1,17 @@
-# ZERO DAY · MUSIC EXPLOITS
+<p align="center">
+  <img src="src/logo-badge.png" alt="Zero Day · Music Exploits" width="320">
+</p>
 
-**Laboratorio de instrumentos web · 100% client-side · sin backend**
+<h1 align="center">ZERO DAY · MUSIC EXPLOITS</h1>
+
+<p align="center"><strong>Laboratorio de instrumentos web · 100% client-side · sin backend</strong></p>
+
+<p align="center">
+  <a href="index.html">Sitio web</a> ·
+  <a href="#cómo-usar-cualquiera-de-los-5">Cómo se usa</a> ·
+  <a href="#estructura-del-repositorio">Estructura</a> ·
+  <a href="#compatibilidad">Compatibilidad</a>
+</p>
 
 Zero Day · Music Exploits es una suite de 5 instrumentos musicales que corren enteramente en el navegador — sin servidor, sin cuentas, sin conexión requerida una vez cargados. Cada uno es un archivo HTML autocontenido, pensado para tocarse con teclado de PC, mouse, dedo (tablet/touch) o MIDI, y para funcionar como un laboratorio de sonido completo: se puede tocar, programar, grabar, exportar y guardar todo lo hecho.
 
@@ -13,6 +24,20 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 | 3 | **NEBULARP 2035** | `Nebularp_2035.html` | Arpegiador cósmico / generativo |
 | 4 | **J4-Sirens Station** | `J4-Sirens_Station.html` | Dub siren psicodélica |
 | 5 | **ACID BASS-303** | `Acid_Bass-303.html` | Bajo ácido tipo TB-303 |
+
+## Índice
+
+- [1 · CronBeat-8:08 — Caja de ritmos](#1--cronbeat-808--caja-de-ritmos)
+- [2 · MonoMoon'70 — Sintetizador monofónico](#2--monomoon70--sintetizador-monofónico)
+- [3 · NEBULARP 2035 — Arpegiador cósmico](#3--nebularp-2035--arpegiador-cósmico)
+- [4 · J4-Sirens Station — Dub siren](#4--j4-sirens-station--dub-siren)
+- [5 · ACID BASS-303 — Bajo ácido](#5--acid-bass-303--bajo-ácido)
+- [C2 · Sync Master Envelopment](#c2--sync-master-envelopment)
+- [Sitio web](#sitio-web)
+- [Estructura del repositorio](#estructura-del-repositorio)
+- [Compatibilidad](#compatibilidad)
+- [Privacidad](#privacidad)
+- [Nombres oficiales de archivo](#nombres-oficiales-de-archivo)
 
 ## Cómo usar cualquiera de los 5
 
@@ -30,6 +55,9 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 
 ### Qué es
 Una caja de ritmos completa: secuenciador de patrones tocable en vivo, banco de pads con samples propios, editor de sample no destructivo, cadena de efectos por pista, modo canción y exportación a WAV/MIDI. Pensada para sonar bien desde el primer patrón y funcionar como laboratorio de sonido a la vez.
+
+<details>
+<summary><strong>Manual de usuario completo</strong></summary>
 
 ### Pestañas principales
 - **Secuenciador** — programación de patrones.
@@ -92,6 +120,8 @@ El original del sample **nunca se pisa** — todo lo que hacés ahí es reversib
 ### Estado del roadmap
 Fases 1 a 5 completas: modo canción, autoguardado, PWA, export JSON/WAV, editor de sample no destructivo, y export/import MIDI de patrones y canciones. Único punto pendiente (opcional): **choke groups** (silenciar un pad al disparar otro, ej. hi-hat abierto/cerrado).
 
+</details>
+
 ---
 
 ## 2 · MonoMoon'70 — Sintetizador monofónico
@@ -100,6 +130,9 @@ Fases 1 a 5 completas: modo canción, autoguardado, PWA, export JSON/WAV, editor
 
 ### Qué es
 Un sintetizador analógico virtual monofónico estilo Minimoog: banco de osciladores, filtro escalera (ladder) de 24 dB/oct con auto-oscilación, doble envolvente, matriz de modulación, modos de voz (Mono/Unison/Duo), osciloscopio en pantalla y gestión completa de patches.
+
+<details>
+<summary><strong>Manual de usuario completo</strong></summary>
 
 ### Encendido y cabecera
 - **Pulsá para encender** — desbloquea el audio al primer toque.
@@ -157,6 +190,8 @@ Visualización en tiempo real de la forma de onda de salida.
 ### Estado del roadmap
 Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); persistencia de patches (JSON + IndexedDB con biblioteca local), librería de presets clásicos, export WAV, Web MIDI y PWA instalable (F4). Roadmap cerrado.
 
+</details>
+
 ---
 
 ## 3 · NEBULARP 2035 — Arpegiador cósmico
@@ -165,6 +200,9 @@ Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glis
 
 ### Qué es
 Un arpegiador ambiental y generativo: sostenés (o dejás en Latch) un acorde y el instrumento lo recorre solo, con una voz cósmica en unísono, espacio (reverb + delay ping-pong), modulación (chorus + auto-paneo) y una capa de drone grave. Todo cuantizado a una escala mística elegida.
+
+<details>
+<summary><strong>Manual de usuario completo</strong></summary>
 
 ### Arranque
 - Estado inicial: **"motor dormido — tocá un acorde"**.
@@ -220,6 +258,8 @@ Mismo mapeo estilo piano que MonoMoon'70.
 ### Estado del roadmap
 Se completó el documento de planificación y el prompt de handoff para desarrollo (mismas condiciones que CronBeat-8:08 y MonoMoon'70: 100% client-side).
 
+</details>
+
 ---
 
 ## 4 · J4-Sirens Station — Dub siren
@@ -228,6 +268,9 @@ Se completó el documento de planificación y el prompt de handoff para desarrol
 
 ### Qué es
 Una sirena dub completa: motor de síntesis con varios modos, cadena de efectos dub (tape echo, reverb spring/plate, phaser), un pad X-Y para performance en vivo, visualizador psicodélico en pantalla completa, y banco de presets con export/import JSON.
+
+<details>
+<summary><strong>Manual de usuario completo</strong></summary>
 
 ### Encendido
 **Tocá para encender** — activa el audio; subí un poco el volumen del sistema al empezar.
@@ -284,6 +327,8 @@ Mapeo de 2 octavas.
 ### Estado del roadmap
 4 fases completas: **F1** motor + 5 modos + filtro resonante + teclado PC/touch básico · **F2** cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · **F3** pad X-Y, visualizador psicodélico y sistema de presets (fábrica + localStorage + export/import JSON) · **F4** ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Entregado como artifact HTML.
 
+</details>
+
 ---
 
 ## 5 · ACID BASS-303 — Bajo ácido
@@ -292,6 +337,9 @@ Mapeo de 2 octavas.
 
 ### Qué es
 Un bajo ácido tipo TB-303 modernizado: secuenciador clásico de 16 pasos con note/accent/slide/gate, filtro resonante con distorsión, generador de patrones por escala, pad X-Y de performance en vivo, y patches con export a JSON/MIDI/WAV.
+
+<details>
+<summary><strong>Manual de usuario completo</strong></summary>
 
 ### Encendido y transporte
 - **▶ PLAY** — arranca el secuenciador.
@@ -342,11 +390,66 @@ El gesto acid clásico: arrastrá con el dedo mientras suena — **X = Cutoff**,
 ### Estado del roadmap
 4 fases completas: **F1** motor de síntesis + secuenciador clásico de 16 pasos (note/accent/slide/gate) · **F2** modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · **F3** touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · **F4** patches y banco de fábrica (guardar/cargar JSON, export MIDI y WAV, 8 patrones de fábrica).
 
+</details>
+
 ---
 
 ## C2 · Sync Master Envelopment
 
-Plataforma central de Zero Day ·  Music Exploits que integra los 5 instrumentos de arriba como pestañas dentro de una misma sesión, con **tempo sincronizado** y **encendido/apagado conjunto**, pensada para sincronizar, mezclar y masterizar lo que cada instrumento produce. Es un proyecto propio, en desarrollo aparte — este README cubre el manual de usuario de los 5 instrumentos individuales.
+Plataforma central de Zero Day · Music Exploits que integra los 5 instrumentos de arriba como pestañas dentro de una misma sesión, con **tempo sincronizado** y **encendido/apagado conjunto**, pensada para sincronizar, mezclar y masterizar lo que cada instrumento produce. Es un proyecto propio, en desarrollo aparte — este README cubre el manual de usuario de los 5 instrumentos individuales.
+
+---
+
+## Sitio web
+
+El sitio de promoción y descarga gratuita también es 100% estático: se puede publicar tal cual en GitHub Pages, Netlify o cualquier hosting de archivos.
+
+| Página | Archivo | Contenido |
+|---|---|---|
+| Inicio | `index.html` | Presentación de la suite, prueba en vivo de los 5 instrumentos y descarga con verificación de mail |
+| Landing por instrumento | `landing-cronbeat.html` · `landing-monomoon.html` · `landing-nebularp.html` · `landing-sirens.html` · `landing-acid.html` | Descripción, prueba en vivo, manual de usuario, atajos de teclado y descarga individual |
+| Privacidad | `privacidad.html` | Qué datos se piden y cómo se usan |
+| Error | `404.html` | Página no encontrada, con accesos a los 5 instrumentos |
+
+Las 5 landings comparten una sola plantilla, `ZD-Instrumento.dc.html`: los textos del manual de cada instrumento se editan ahí.
+
+**Descarga con verificación de mail.** El formulario valida el formato, detecta errores de tipeo comunes (`gmial.com`), rechaza mails temporales y consulta que el dominio reciba correo. Después envía un código de 6 dígitos que vence a los 10 minutos. Una vez verificado, el mail queda recordado en ese navegador para descargar desde cualquier landing.
+
+> **Envío del código.** Sin un servicio de mail conectado, el sitio funciona en modo demo y muestra el código en pantalla. Para enviarlo de verdad hay que definir `window.ZD_SEND_CODE(email, code)` con un servicio como EmailJS, Resend o Brevo. Como la verificación corre en el navegador, para una protección real el código y los archivos deberían servirse desde un backend.
+
+---
+
+## Estructura del repositorio
+
+```
+├── index.html                  Sitio: inicio
+├── landing-*.html              Sitio: una landing por instrumento (5)
+├── ZD-Instrumento.dc.html      Plantilla compartida de las landings
+├── privacidad.html             Sitio: privacidad
+├── 404.html                    Sitio: página no encontrada
+├── support.js                  Runtime de las páginas del sitio
+├── CronBeat-808.html           Instrumentos (autocontenidos)
+├── MonoMoon70.html
+├── Nebularp_2035.html
+├── J4-Sirens_Station.html
+├── Acid_Bass-303.html
+└── src/                        Logo y estilos compartidos
+```
+
+---
+
+## Compatibilidad
+
+- Cualquier navegador moderno con Web Audio: Chrome, Edge, Firefox y Safari, en escritorio y móvil.
+- **Web MIDI** (MonoMoon'70 y entrada MIDI en general) funciona en Chrome y Edge; Safari no lo soporta.
+- En teléfonos, los instrumentos se usan en **horizontal**: cada uno tiene una barra fija con transporte y menús desplegables. En vertical aparece un aviso para girar el teléfono.
+- Los menús del modo móvil usan el selector CSS `:has()` (iOS 15.4+, Chrome 105+).
+
+---
+
+## Privacidad
+
+Los instrumentos no envían nada a ningún servidor: todo lo que hacés queda en tu navegador. El sitio pide solo un mail para la descarga y mide visitas de forma agregada con Google Analytics. Detalle completo en [`privacidad.html`](privacidad.html).
 
 ---
 
@@ -362,4 +465,4 @@ Plataforma central de Zero Day ·  Music Exploits que integra los 5 instrumentos
 
 ---
 
-*ZERO DAY · MUSIC EXPLOITS · Argentina 2026*
+<p align="center"><sub>ZERO DAY · MUSIC EXPLOITS · Argentina 2026</sub></p>
