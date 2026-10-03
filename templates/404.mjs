@@ -28,7 +28,7 @@ export function build404Page(data) {
   const body = `<header class="site-header">
   <div class="wrap site-header__bar">
     <a href="index.html" class="site-logo">
-      <img src="src/logo-badge.jpg" alt="Zero Day · Music Exploits">
+      <img src="assets/logo-badge.webp" alt="Zero Day · Music Exploits" width="404" height="314">
       <span class="site-logo__word">ZERO DAY<em> · </em>MUSIC EXPLOITS</span>
     </a>
   </div>

@@ -50,7 +50,7 @@ export function buildIndexPage(data) {
     </div>
     <div class="hero__art">
       <div class="hero__art-card">
-        <img src="src/logo-badge.jpg" alt="">
+        <img src="assets/logo-badge.webp" alt="" width="404" height="314">
         <span class="hero__badge">ARGENTINA 2026</span>
       </div>
     </div>

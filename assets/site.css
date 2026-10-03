@@ -123,7 +123,7 @@ section.block { padding: 36px 0 64px; }
 .hero__ctas { display: flex; gap: 12px; flex-wrap: wrap; }
 .hero__art { display: flex; justify-content: center; overflow: hidden; padding-right: 2px; }
 .hero__art-card { position: relative; padding: 16px; border: 1px solid var(--zd-line); border-radius: 6px; background: var(--zd-panel); }
-.hero__art-card img { width: min(100%, 380px); border-radius: 3px; background: #ecebe5; padding: 6px; }
+.hero__art-card img { width: min(100%, 380px); height: auto; border-radius: 3px; background: #ecebe5; padding: 6px; }
 .hero__badge { position: absolute; right: -6px; bottom: -12px; background: var(--zd-bg); border: 1px solid var(--zd-green); color: var(--zd-green); font-size: 12px; letter-spacing: .14em; padding: 5px 9px; border-radius: 2px; }
 
 /* instrument landing hero spec table */
@@ -299,7 +299,7 @@ table.compat td.no { color: var(--zd-dim); }
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--zd-line); margin-top: auto; }
 .site-footer .wrap { padding-top: 24px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 12px; letter-spacing: .1em; color: var(--zd-dim); }
-.site-footer img { height: 24px; border-radius: 2px; background: #ecebe5; padding: 2px; }
+.site-footer img { height: 24px; width: auto; border-radius: 2px; background: #ecebe5; padding: 2px; }
 .site-footer a { color: var(--zd-dim); }
 .site-footer a.push { margin-left: auto; }
 

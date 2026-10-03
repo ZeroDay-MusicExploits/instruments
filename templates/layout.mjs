@@ -51,7 +51,7 @@ export function renderHeader({ site, ctaHref = '#descargar', ctaLabel = 'DESCARG
   return `<header class="site-header">
   <div class="wrap site-header__bar">
     <a href="index.html" class="site-logo">
-      <img src="src/logo-badge.jpg" alt="Zero Day · Music Exploits">
+      <img src="assets/logo-badge.webp" alt="Zero Day · Music Exploits" width="404" height="314">
       <span class="site-logo__word">ZERO DAY<em> · </em>MUSIC EXPLOITS</span>
     </a>
     <nav class="site-nav" aria-label="Principal">
@@ -73,7 +73,7 @@ export function renderHeader({ site, ctaHref = '#descargar', ctaLabel = 'DESCARG
 export function renderFooter({ extraLink = '' } = {}) {
   return `<footer class="site-footer">
   <div class="wrap">
-    <img src="src/logo-badge.jpg" alt="">
+    <img src="assets/logo-badge.webp" alt="" width="404" height="314">
     <span>ZERO DAY · MUSIC EXPLOITS - Argentina 2026</span>
     ${extraLink}
     <a href="privacidad.html" class="push">PRIVACIDAD</a>
