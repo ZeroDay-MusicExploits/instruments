@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ACID BASS-303</title>
+<meta name="description" content="Bajo ácido tipo TB-303 en el navegador: secuenciador de 16 pasos con accent y slide, filtro resonante con distorsión y export a JSON, MIDI y WAV.">
+<!-- PWA: el manifest y los iconos los sirve el sitio. En file:// o dentro de
+     un iframe el bloque zd-pwa no registra nada (SPEC 3.2). -->
+<link rel="manifest" href="../manifests/acid-bass.webmanifest">
+<link rel="apple-touch-icon" href="../icons/acid-bass-apple-touch-180.png">
+<meta name="theme-color" content="#dcef3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Acid Bass">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style>
   :root{
     --bg:#0d0e11; --rack:#15171c; --panel:#1c1f26; --panel-2:#22262e;
@@ -1654,10 +1664,12 @@ window.ZD_M = {
   menuTitle: 'MENÚ',
   menu: [
     { label: '← Sitio', href: '../index.html' },
+    { label: '⭳ Instalar app', id: 'zd-install-btn', hidden: true },
     { label: '⟲ Empezar de cero', onClick(){ if (typeof resetAll === 'function') resetAll(); } }
   ],
   menuNotes: [
-    'La sesión se guarda sola en este navegador. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá el JSON como backup.'
+    'La sesión se guarda sola en este navegador. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá el JSON como backup.',
+    'Se instala desde la web. Un HTML abierto con doble clic (file://) funciona igual, pero el navegador no deja instalarlo.'
   ]
 };
 </script>
@@ -2018,6 +2030,107 @@ window.ZD_M = {
   else init();
 })();
 /* /ZD-BLOCK:zd-mobile */
+</script>
+<script>
+/* ZD-BLOCK:zd-pwa v1 */
+/* Registro del service worker unico, toast de "nueva version" y boton
+   Instalar. Sin configuracion: el manifest sale del <link rel=manifest> del
+   head, asi que el bloque es identico en los 5. Inerte y silencioso en
+   file:// y dentro de un iframe (SPEC 3.2). */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.pwa) return;
+
+  function isHttp() { return location.protocol === 'http:' || location.protocol === 'https:'; }
+  function isTopWindow() { try { return window.top === window; } catch (e) { return false; } }
+  function isStandalone() {
+    try { if (window.matchMedia('(display-mode: standalone)').matches) return true; } catch (e) {}
+    return navigator.standalone === true;
+  }
+  function isIOS() {
+    var ua = navigator.userAgent || '';
+    return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
+
+  var deferredPrompt = null;
+  var state = { active: false, registered: false, manifest: null };
+
+  /* El boton puede no existir todavia (lo crea el shell): se resuelve cada vez. */
+  function installBtn() { return document.getElementById('zd-install-btn'); }
+  function canInstall() { return !!deferredPrompt || (isIOS() && !isStandalone()); }
+  function updateInstallButton() {
+    var b = installBtn();
+    if (!b) return;
+    b.hidden = !isHttp() || !isTopWindow() || isStandalone() || !canInstall();
+  }
+
+  function showUpdateToast() {
+    if (ZD.toast) ZD.toast('Nueva versión disponible', { ms: 0, action: { label: 'Recargar', onClick: function () { location.reload(); } } });
+  }
+
+  function doInstall() {
+    if (deferredPrompt) {
+      var p = deferredPrompt;
+      deferredPrompt = null;
+      p.prompt();
+      var done = p.userChoice || Promise.resolve();
+      (done.finally ? done.finally.bind(done) : done.then.bind(done))(function () { updateInstallButton(); });
+      return;
+    }
+    if (isIOS() && ZD.toast) ZD.toast('Para instalar: Compartir → Agregar a inicio', { ms: 7000 });
+    else if (ZD.toast) ZD.toast('Usá el menú del navegador para instalar esta app');
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    updateInstallButton();
+  });
+  window.addEventListener('appinstalled', function () { deferredPrompt = null; updateInstallButton(); });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('#zd-install-btn') : null;
+    if (b) { e.preventDefault(); doInstall(); }
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateInstallButton);
+  else updateInstallButton();
+
+  ZD.pwa = {
+    install: doInstall,
+    refresh: updateInstallButton,
+    get active() { return state.active; },
+    get registered() { return state.registered; },
+    get manifest() { return state.manifest; },
+    isStandalone: isStandalone
+  };
+
+  /* file:// o dentro de un iframe: no se registra nada y no se loguea nada. */
+  if (!isHttp() || !isTopWindow()) return;
+  if (!('serviceWorker' in navigator)) return;
+  var link = document.querySelector('link[rel~="manifest"]');
+  var href = link ? link.getAttribute('href') : '';
+  if (!href) return;
+  state.active = true;
+  state.manifest = href;
+
+  /* Un 'zd-sw-updated' solo es una actualizacion real si ya habia un SW
+     controlando la pagina (si no, es el primer install). */
+  var hadController = !!navigator.serviceWorker.controller;
+  var swUrl = new URL('../sw.js', location.href).href;
+  var swScope = new URL('../', location.href).href;
+
+  fetch(href, { method: 'HEAD' }).then(function (res) {
+    if (!res.ok) return null;
+    return navigator.serviceWorker.register(swUrl, { scope: swScope });
+  }).then(function (reg) {
+    if (!reg) return;
+    state.registered = true;
+    navigator.serviceWorker.addEventListener('message', function (ev) {
+      if (ev.data && ev.data.type === 'zd-sw-updated' && hadController) showUpdateToast();
+    });
+  }).catch(function () { /* sin red o manifest caido: silencioso */ });
+})();
+/* /ZD-BLOCK:zd-pwa */
 </script>
 
 
