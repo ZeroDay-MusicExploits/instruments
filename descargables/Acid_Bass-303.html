@@ -175,6 +175,12 @@
   .chip{padding:9px 14px; font-size:12px; border:1px solid var(--edge); border-radius:100px; background:var(--rack); color:var(--silver); cursor:pointer;}
   .chip:hover{border-color:var(--orange); color:var(--orange);}
   .chip:active{transform:translateY(1px);}
+  .chip-u{display:inline-flex;}
+  .chip-u .chip{min-height:44px; border-radius:100px 0 0 100px;}
+  .chip-u .chip-x{min-height:44px; min-width:44px; padding:0; font-size:14px; color:var(--red);
+    background:var(--rack); border:1px solid var(--edge); border-left:0; border-radius:0 100px 100px 0;}
+  .chip-u .chip-x:hover{border-color:var(--red);}
+  .bank-empty{font-family:var(--zd-mono); font-size:11.5px; color:var(--muted); align-self:center;}
 
   .kb-wrap{display:flex; flex-direction:column; gap:10px;}
   .kb-top{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
@@ -711,6 +717,160 @@
 })();
 /* /ZD-BLOCK:zd-ui */
 </script>
+<script>
+/* ZD-BLOCK:zd-store v1 */
+/* Autoguardado de sesion en IndexedDB con fallback a localStorage.
+   Clave zd:<slug>:session, envoltorio {app,version,savedAt,data}.
+   Debounce configurable + flush en visibilitychange(hidden) y pagehide. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.store) return;
+
+  var DB_NAME = 'zd-sessions', DB_VERSION = 1, STORE = 'sessions';
+  var dbPromise = null;
+
+  function idb() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function (resolve, reject) {
+      if (!window.indexedDB) { reject(new Error('sin indexedDB')); return; }
+      var req;
+      try { req = indexedDB.open(DB_NAME, DB_VERSION); } catch (e) { reject(e); return; }
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error || new Error('indexedDB')); };
+      req.onblocked = function () { reject(new Error('indexedDB bloqueada')); };
+    }).catch(function (e) { dbPromise = null; throw e; });
+    return dbPromise;
+  }
+
+  function idbPut(key, value) {
+    return idb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(value, key);
+        tx.oncomplete = function () { resolve(true); };
+        tx.onerror = function () { reject(tx.error || new Error('put')); };
+        tx.onabort = function () { reject(tx.error || new Error('abort')); };
+      });
+    });
+  }
+  function idbGet(key) {
+    return idb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readonly'), rq = tx.objectStore(STORE).get(key);
+        rq.onsuccess = function () { resolve(rq.result == null ? null : rq.result); };
+        rq.onerror = function () { reject(rq.error || new Error('get')); };
+      });
+    });
+  }
+  function idbDel(key) {
+    return idb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).delete(key);
+        tx.oncomplete = function () { resolve(true); };
+        tx.onerror = function () { reject(tx.error || new Error('del')); };
+      });
+    });
+  }
+
+  function lsPut(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+  }
+  function lsGet(key) {
+    try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function lsDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+  function persist() {
+    try {
+      if (navigator.storage && navigator.storage.persist) return navigator.storage.persist().catch(function () { return false; });
+    } catch (e) {}
+    return Promise.resolve(false);
+  }
+
+  /* open({slug, app, version, debounce, getData, migrate, enabled}) */
+  function open(cfg) {
+    cfg = cfg || {};
+    var key = 'zd:' + cfg.slug + ':session';
+    var app = cfg.app || cfg.slug;
+    var version = cfg.version == null ? 1 : cfg.version;
+    var wait = cfg.debounce == null ? 1500 : cfg.debounce;
+    var enabled = cfg.enabled !== false;
+    var timer = null, pending = false, backend = null;
+
+    function envelope(data) {
+      return { app: app, version: version, savedAt: new Date().toISOString(), data: data };
+    }
+    function write(env) {
+      return idbPut(key, env).then(function () { backend = 'idb'; return 'idb'; })
+        .catch(function () { backend = lsPut(key, env) ? 'ls' : null; return backend; });
+    }
+    function saveNow(data) {
+      if (!enabled) return Promise.resolve(null);
+      if (timer) { clearTimeout(timer); timer = null; }
+      pending = false;
+      var d = data === undefined ? (cfg.getData ? cfg.getData() : null) : data;
+      if (d == null) return Promise.resolve(null);
+      return write(envelope(d));
+    }
+    function save(data) {
+      if (!enabled) return;
+      pending = true;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { timer = null; saveNow(data); }, wait);
+    }
+    function flush() { if (pending) saveNow(); }
+    function load() {
+      return idbGet(key).then(function (v) {
+        if (v) return v;
+        var l = lsGet(key);
+        if (l) return l;
+        return cfg.migrate ? cfg.migrate() : null;
+      }).catch(function () {
+        var l = lsGet(key);
+        if (l) return l;
+        try { return cfg.migrate ? cfg.migrate() : null; } catch (e) { return null; }
+      });
+    }
+    function clear() {
+      if (timer) { clearTimeout(timer); timer = null; }
+      pending = false;
+      lsDel(key);
+      return idbDel(key).catch(function () { return true; });
+    }
+    /* Valida el envoltorio: app y version. Devuelve {ok,data,reason}. */
+    function unwrap(env, opts) {
+      opts = opts || {};
+      if (!env || typeof env !== 'object') return { ok: false, reason: 'vacio' };
+      var e = ('data' in env) ? env : { app: app, version: version, data: env };
+      if (e.app && e.app !== app && !opts.anyApp) return { ok: false, reason: 'otra-app', app: e.app };
+      if (typeof e.version === 'number' && e.version > version && !opts.anyVersion) return { ok: false, reason: 'version-nueva', version: e.version };
+      return { ok: true, data: e.data, savedAt: e.savedAt || null, version: e.version };
+    }
+
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('freeze', flush);
+
+    return {
+      key: key, app: app, version: version,
+      save: save, saveNow: saveNow, flush: flush, load: load, clear: clear,
+      envelope: envelope, unwrap: unwrap,
+      get backend() { return backend; },
+      get enabled() { return enabled; },
+      set enabled(v) { enabled = !!v; }
+    };
+  }
+
+  ZD.store = { open: open, persist: persist, dbName: DB_NAME, storeName: STORE };
+})();
+/* /ZD-BLOCK:zd-store */
+</script>
 
 <script id="zd-mobile-config">
 /* Config del shell portrait de ACID BASS-303. El bloque zd-mobile no sabe nada
@@ -729,13 +889,17 @@ window.ZD_M = {
     { id:'filt', label:'FILTRO', title:'FILTRO RESONANTE', peek:true,
       nodes:['#filtPanel', '#filterStatus'] },
     { id:'pat',  label:'PATRÓN', title:'GENERADOR · BANCO DE FÁBRICA',
-      nodes:['.gen-row', '.bank-lbl', '#bank'] },
+      nodes:['.gen-row', '#factoryBankLbl', '#bank'] },
     { id:'exp',  label:'EXPORT', title:'PATCHES · EXPORT',
       nodes:['#ioPanel'] }
   ],
   menuTitle: 'MENÚ',
   menu: [
-    { label: '← Sitio', href: '../index.html' }
+    { label: '← Sitio', href: '../index.html' },
+    { label: '⟲ Empezar de cero', onClick(){ if (typeof resetAll === 'function') resetAll(); } }
+  ],
+  menuNotes: [
+    'La sesión se guarda sola en este navegador. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá el JSON como backup.'
   ]
 };
 </script>
@@ -1225,9 +1389,12 @@ window.ZD_M = {
         <select id="barsSel"><option value="1">1 compás</option><option value="2" selected>2 compases</option><option value="4">4 compases</option></select>
       </div>
       <button class="btn-io wav" id="expWav">◉ EXPORTAR WAV</button>
+      <button class="mini gen" id="bankSave">⊕ GUARDAR EN BANCO</button>
       <input id="fileInput" type="file" accept=".json,application/json" style="display:none">
     </div>
-    <div class="bank-lbl">BANCO DE FÁBRICA — patrones de referencia (estilo genérico)</div>
+    <div class="bank-lbl" id="userBankLbl">BANCO DE USUARIO — se guarda solo en este navegador</div>
+    <div class="bank" id="userBank"></div>
+    <div class="bank-lbl" id="factoryBankLbl" style="margin-top:14px;">BANCO DE FÁBRICA — patrones de referencia (estilo genérico)</div>
     <div class="bank" id="bank"></div>
   </section>
 
@@ -1483,8 +1650,13 @@ const CTRL={
   volume: {min:0,max:1,def:0.75, apply:v=>Engine.setVolume(v), fmt:v=>Math.round(v*100)+'%'}
 };
 for(const k in CTRL) CTRL[k].widgets=[];
+// Autoguardado: Session arranca en null y markDirty no hace nada hasta que
+// la sesion termino de restaurar (var, no const, para que setParam lo pueda
+// llamar durante el arranque sin caer en la zona muerta temporal).
+var Session=null, sessionReady=false;
+function markDirty(){ if(Session && sessionReady) Session.save(); }
 function setParam(key,val){ const c=CTRL[key]; if(c.step) val=Math.round(val/c.step)*c.step; val=clamp(val,c.min,c.max);
-  params[key]=val; if(c.apply) c.apply(val); for(const w of c.widgets) w.update(val); }
+  params[key]=val; if(c.apply) c.apply(val); for(const w of c.widgets) w.update(val); markDirty(); }
 
 function makeKnob(mount,key,label,opt){ opt=opt||{}; const c=CTRL[key];
   const wrap=el('div','knob-wrap'+(opt.accent?' accent':'')); const lab=el('div','knob-label'); lab.textContent=label;
@@ -1547,7 +1719,7 @@ xypad.addEventListener('pointerup',padEnd); xypad.addEventListener('pointercance
 // sliders swing / density
 function bindSlider(id,key,valId,fmt,after){ const inp=$('#'+id), out=$('#'+valId);
   const fill=()=>{ const mn=+inp.min,mx=+inp.max; inp.style.setProperty('--fill',(((+inp.value-mn)/(mx-mn))*100)+'%'); };
-  const upd=()=>{ params[key]=parseFloat(inp.value); fill(); out.textContent=fmt(params[key]); if(after) after(); };
+  const upd=()=>{ params[key]=parseFloat(inp.value); fill(); out.textContent=fmt(params[key]); if(after) after(); markDirty(); };
   inp.addEventListener('input',upd); upd(); return { set(v){ inp.value=v; upd(); } }; }
 const swingCtl=bindSlider('swing','swing','v_swing', v=>Math.round((v/0.66)*100)+'%', ()=>{ Seq.swing=params.swing; });
 const densCtl=bindSlider('density','density','v_density', v=>Math.round(v*100)+'%');
@@ -1558,9 +1730,9 @@ function setFilterStatus(type){ const e=$('#filterStatus'), t=$('#filterStatusTx
   if(type==='worklet'){ e.classList.add('ok'); t.textContent='MOTOR worklet · polyBLEP + SVF'; } else { e.classList.add('fb'); t.textContent='MOTOR nativo · fallback'; } }
 
 // selectores reusables
-function setWaveUI(w){ params.wave=w; $$('#waveSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.wave===w)); Engine.setWave(w); }
-function setSubOctUI(o){ params.subOct=o; $$('#subOctSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.so===o)); Engine.setSub(params.sub,o); }
-function setModeUI(m){ params.fmode=m; $$('#modeSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.mode===m)); Engine.setMode(m); if(!Seq.playing) Engine.setBaseCutoffNow(); }
+function setWaveUI(w){ params.wave=w; $$('#waveSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.wave===w)); Engine.setWave(w); markDirty(); }
+function setSubOctUI(o){ params.subOct=o; $$('#subOctSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.so===o)); Engine.setSub(params.sub,o); markDirty(); }
+function setModeUI(m){ params.fmode=m; $$('#modeSeg button').forEach(x=>x.classList.toggle('sel',+x.dataset.mode===m)); Engine.setMode(m); if(!Seq.playing) Engine.setBaseCutoffNow(); markDirty(); }
 $('#waveSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setWaveUI(+b.dataset.wave); });
 $('#subOctSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setSubOctUI(+b.dataset.so); });
 $('#modeSeg').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setModeUI(+b.dataset.mode); });
@@ -1582,9 +1754,9 @@ $('#tapBtn').addEventListener('click', e=>{ const now=performance.now(); if(taps
   e.currentTarget.classList.add('tap-flash'); setTimeout(()=>e.currentTarget.classList.remove('tap-flash'),90); });
 
 // generador
-$('#scaleSel').addEventListener('change', e=>{ params.scale=e.target.value; });
-$('#randBtn').addEventListener('click', ()=>{ pattern=generateAcid(); selectedStep=-1; renderSeq(); });
-$('#mutBtn').addEventListener('click', ()=>{ pattern=mutatePattern(); selectedStep=-1; renderSeq(); });
+$('#scaleSel').addEventListener('change', e=>{ params.scale=e.target.value; markDirty(); });
+$('#randBtn').addEventListener('click', ()=>{ pattern=generateAcid(); selectedStep=-1; renderSeq(); markDirty(); });
+$('#mutBtn').addEventListener('click', ()=>{ pattern=mutatePattern(); selectedStep=-1; renderSeq(); markDirty(); });
 
 // ============================================================
 //  PATCHES · JSON · MIDI · WAV · BANCO
@@ -1616,6 +1788,7 @@ function loadPatch(obj){
   if(Array.isArray(obj.pattern)){ const np=obj.pattern.slice(0,16).map(s=>makeStep(s)); while(np.length<16) np.push(makeStep()); pattern=np; }
   if(obj.name) $('#patchName').value=obj.name;
   selectedStep=-1; renderSeq(); if(Engine.started) Engine.setBaseCutoffNow();
+  markDirty();
   return true;
 }
 
@@ -1717,7 +1890,7 @@ function refreshStep(i){ const st=pattern[i], col=seqEl.querySelector('.step[dat
   col.querySelector('.note').textContent=stepLabel(i);
   col.querySelector('.a').classList.toggle('on-a',st.accent); col.querySelector('.s').classList.toggle('on-s',st.slide);
   const g=col.querySelector('.gatebtn'); g.className='g gatebtn gate-'+st.gate; g.textContent=st.gate==='note'?'●':st.gate==='tie'?'‿':'·';
-  if(i===selectedStep) renderStepEdit(); }
+  if(i===selectedStep) renderStepEdit(); markDirty(); }
 function selectStep(i){ selectedStep=(selectedStep===i)?-1:i; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===selectedStep));
   renderStepEdit(); if(selectedStep>=0) previewStep(selectedStep); }
 function previewStep(i){ const st=pattern[i]; if(st.gate!=='rest') auditionNote(patNote(i),true); }
@@ -1766,10 +1939,10 @@ $('#seSlide').addEventListener('click',()=>{ if(selectedStep<0) return; const st
 $('#seGate').addEventListener('click',()=>{ if(selectedStep<0) return; const st=pattern[selectedStep];
   st.gate=st.gate==='note'?'tie':st.gate==='tie'?'rest':'note'; refreshStep(selectedStep); });
 
-$('#octUp').addEventListener('click',()=>{ patternOct=clamp(patternOct+1,-3,3); $('#octVal').textContent=patternOct; renderSeq(); });
-$('#octDown').addEventListener('click',()=>{ patternOct=clamp(patternOct-1,-3,3); $('#octVal').textContent=patternOct; renderSeq(); });
-$('#initBtn').addEventListener('click',()=>{ pattern=initPattern(); selectedStep=-1; renderSeq(); });
-$('#clearBtn').addEventListener('click',()=>{ pattern=Array.from({length:STEPS},()=>makeStep()); selectedStep=-1; renderSeq(); });
+$('#octUp').addEventListener('click',()=>{ patternOct=clamp(patternOct+1,-3,3); $('#octVal').textContent=patternOct; renderSeq(); markDirty(); });
+$('#octDown').addEventListener('click',()=>{ patternOct=clamp(patternOct-1,-3,3); $('#octVal').textContent=patternOct; renderSeq(); markDirty(); });
+$('#initBtn').addEventListener('click',()=>{ pattern=initPattern(); selectedStep=-1; renderSeq(); markDirty(); });
+$('#clearBtn').addEventListener('click',()=>{ pattern=Array.from({length:STEPS},()=>makeStep()); selectedStep=-1; renderSeq(); markDirty(); });
 renderSeq();
 
 function drawLoop(){ if(Seq.playing && Engine.ctx){ const now=Engine.ctx.currentTime; while(Seq.drawQueue.length && Seq.drawQueue[0].time<=now) setPlayingStep(Seq.drawQueue.shift().step); } drawScope(); requestAnimationFrame(drawLoop); }
@@ -1798,8 +1971,8 @@ function buildKeyboard(){ const kb=$('#keyboard'); kb.innerHTML=''; const whites
     e.addEventListener('pointerup',()=>keyUpSemi(e)); e.addEventListener('pointercancel',()=>keyUpSemi(e)); e.addEventListener('pointerleave',ev=>{ if(ev.buttons) keyUpSemi(e); }); }); }
 buildKeyboard();
 function kbBaseMidi(){ return 12*(kbOct+1); }
-$('#kbOctUp').addEventListener('click',()=>{ kbOct=clamp(kbOct+1,0,6); $('#kbOctVal').textContent=kbOct; });
-$('#kbOctDown').addEventListener('click',()=>{ kbOct=clamp(kbOct-1,0,6); $('#kbOctVal').textContent=kbOct; });
+$('#kbOctUp').addEventListener('click',()=>{ kbOct=clamp(kbOct+1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); });
+$('#kbOctDown').addEventListener('click',()=>{ kbOct=clamp(kbOct-1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); });
 let activeSemi=null;
 async function keyDownSemi(semi,e){ await Engine.ensure(); const midi=kbBaseMidi()+semi; activeSemi=semi; if(e) e.classList.add('down');
   if(selectedStep>=0){ const st=pattern[selectedStep]; st.gate=(st.gate==='rest')?'note':st.gate; st.note=midi-patternOct*12; refreshStep(selectedStep); } auditionNote(midi,false); }
@@ -1809,11 +1982,87 @@ function auditionNote(midi,short){ if(!Engine.started){ Engine.ensure().then(()=
 const pcDown=new Set();
 window.addEventListener('keydown', e=>{ if(e.repeat) return; const k=e.key.toLowerCase();
   if(k===' '){ if(document.activeElement && document.activeElement.tagName==='INPUT') return; e.preventDefault(); togglePlay(); return; }
-  if(k==='z'){ kbOct=clamp(kbOct-1,0,6); $('#kbOctVal').textContent=kbOct; return; }
-  if(k==='x'){ kbOct=clamp(kbOct+1,0,6); $('#kbOctVal').textContent=kbOct; return; }
+  if(k==='z'){ kbOct=clamp(kbOct-1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); return; }
+  if(k==='x'){ kbOct=clamp(kbOct+1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); return; }
   if(k in KB_KEYMAP && !pcDown.has(k)){ pcDown.add(k); const semi=KB_KEYMAP[k]; keyDownSemi(semi, $('#keyboard').querySelector('.key[data-semi="'+semi+'"]')); } });
 window.addEventListener('keyup', e=>{ const k=e.key.toLowerCase();
   if(k in KB_KEYMAP && pcDown.has(k)){ pcDown.delete(k); const semi=KB_KEYMAP[k]; const e2=$('#keyboard').querySelector('.key[data-semi="'+semi+'"]'); if(e2) e2.classList.remove('down'); if(pcDown.size===0) keyUpSemi(null); } });
+
+// ============================================================
+//  BANCO DE USUARIO + AUTOGUARDADO DE SESION (SPEC R3)
+// ============================================================
+let userBank=[];
+const userBankEl=$('#userBank');
+function renderUserBank(){ userBankEl.innerHTML='';
+  if(!userBank.length){ const e=el('span','bank-empty');
+    e.textContent='Todavía no guardaste ninguno. Poné un nombre y tocá GUARDAR EN BANCO.';
+    userBankEl.appendChild(e); return; }
+  userBank.forEach((p,i)=>{ const wrap=el('span','chip-u');
+    const load=el('button','chip'); load.type='button'; load.textContent=p.name||'(sin nombre)';
+    load.addEventListener('click',()=>{ if(window.ZD&&ZD.audio) ZD.audio.unlock(); else Engine.ensure();
+      loadPatch(JSON.parse(JSON.stringify(p))); });
+    const del=el('button','chip-x'); del.type='button'; del.textContent='✕';
+    del.setAttribute('aria-label','Borrar el patch '+(p.name||'sin nombre'));
+    del.addEventListener('click',()=>{ ZD.modal.confirm('Se borra «'+(p.name||'sin nombre')+'» del banco de usuario.',
+      { title:'BORRAR PATCH', ok:'BORRAR', cancel:'CANCELAR', danger:true })
+      .then(ok=>{ if(!ok) return; userBank.splice(i,1); renderUserBank(); markDirty();
+        ZD.toast('Patch borrado del banco'); }); });
+    wrap.append(load,del); userBankEl.appendChild(wrap); }); }
+$('#bankSave').addEventListener('click', ()=>{ const p=serializePatch();
+  const i=userBank.findIndex(x=>x.name===p.name);
+  if(i>=0) userBank[i]=p; else userBank.push(p);
+  if(userBank.length>64) userBank=userBank.slice(-64);
+  renderUserBank(); markDirty();
+  ZD.toast(i>=0 ? 'Patch «'+p.name+'» actualizado' : 'Patch «'+p.name+'» guardado en el banco'); });
+$('#patchName').addEventListener('input', markDirty);
+renderUserBank();
+
+function snapshotSession(){ return { patch:serializePatch(), kbOct, selectedStep, bank:userBank }; }
+function restoreSession(d){ if(!d || typeof d!=='object') return false;
+  if(Array.isArray(d.bank)){ userBank=d.bank.filter(p=>p&&typeof p==='object'&&p.params).slice(0,64); renderUserBank(); }
+  if(d.patch) loadPatch(d.patch);
+  if(typeof d.kbOct==='number'){ kbOct=clamp(Math.round(d.kbOct),0,6); $('#kbOctVal').textContent=kbOct; }
+  if(typeof d.selectedStep==='number' && d.selectedStep>=0 && d.selectedStep<STEPS){
+    selectedStep=d.selectedStep; $$('.step').forEach(c=>c.classList.toggle('selected',+c.dataset.i===selectedStep)); renderStepEdit(); }
+  return true; }
+
+async function resetAll(){
+  const ok = await ZD.modal.confirm('Se borran el patrón, los parámetros y el banco de usuario guardados en este navegador. No se puede deshacer.',
+    { title:'EMPEZAR DE CERO', ok:'BORRAR TODO', cancel:'CANCELAR', danger:true });
+  if(!ok) return;
+  sessionReady=false;
+  if(Session) await Session.clear();
+  pattern=initPattern(); patternOct=0; selectedStep=-1; userBank=[];
+  for(const k in CTRL) setParam(k, CTRL[k].def);
+  setWaveUI(0); setSubOctUI(-1); setModeUI(0);
+  swingCtl.set(0); densCtl.set(0.7);
+  params.scale='menor'; $('#scaleSel').value='menor';
+  $('#patchName').value=''; kbOct=2; $('#kbOctVal').textContent=kbOct; $('#octVal').textContent=patternOct;
+  renderUserBank(); renderSeq();
+  // No volvemos a guardar: la sesion queda vacia hasta el proximo cambio, asi
+  // la siguiente carga arranca limpia y sin el toast de "sesion restaurada".
+  sessionReady=true;
+  ZD.toast('Listo: todo de cero');
+}
+
+// Restaura sin arrancar el audio: loadPatch y los setters del Engine estan
+// todos guardados contra "todavia no hay grafo".
+(async function initSession(){
+  // Con el hub C2 el dueno del estado es el host (setState): no restauramos
+  // ni guardamos para no pelearnos con el. Ver docs/zd-blocks.md.
+  if(HOST){ sessionReady=false; return; }
+  if(!(window.ZD && ZD.store)){ sessionReady=true; return; }
+  Session = ZD.store.open({ slug:'acid-bass', app:'acid-bass-303', version:1, debounce:1500, getData:snapshotSession });
+  ZD.store.persist();
+  let env=null;
+  try{ env=await Session.load(); }catch(e){ env=null; }
+  const r = env ? Session.unwrap(env) : null;
+  if(r && r.ok && r.data && restoreSession(r.data)){
+    ZD.toast('Sesión restaurada', { ms:9000, action:{ label:'Empezar de cero', onClick:resetAll } });
+  }
+  sessionReady=true;
+})();
+
 function primeAudio(){ Engine.ensure(); window.removeEventListener('pointerdown', primeAudio); }
 window.addEventListener('pointerdown', primeAudio);
 </script>
