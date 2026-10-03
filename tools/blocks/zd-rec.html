@@ -246,7 +246,7 @@
     row.className = 'zd-rcrow';
     var dlBtn = document.createElement('button');
     dlBtn.type = 'button'; dlBtn.className = 'pri';
-    dlBtn.textContent = res.downloadLabel || '⭳ DESCARGAR WAV';
+    dlBtn.textContent = res.downloadLabel || '↓ DESCARGAR WAV';
     dlBtn.addEventListener('click', function () {
       if (ZD.dl) ZD.dl.save(res.blob, res.filename);
       else { var a = document.createElement('a'); a.href = url; a.download = res.filename; a.click(); }

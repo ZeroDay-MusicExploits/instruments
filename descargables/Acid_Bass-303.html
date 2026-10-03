@@ -1608,7 +1608,7 @@
     row.className = 'zd-rcrow';
     var dlBtn = document.createElement('button');
     dlBtn.type = 'button'; dlBtn.className = 'pri';
-    dlBtn.textContent = res.downloadLabel || '⭳ DESCARGAR WAV';
+    dlBtn.textContent = res.downloadLabel || '↓ DESCARGAR WAV';
     dlBtn.addEventListener('click', function () {
       if (ZD.dl) ZD.dl.save(res.blob, res.filename);
       else { var a = document.createElement('a'); a.href = url; a.download = res.filename; a.click(); }
@@ -1664,7 +1664,7 @@ window.ZD_M = {
   menuTitle: 'MENÚ',
   menu: [
     { label: '← Sitio', href: '../index.html' },
-    { label: '⭳ Instalar app', id: 'zd-install-btn', hidden: true },
+    { label: '↓ Instalar app', id: 'zd-install-btn', hidden: true },
     { label: '⟲ Empezar de cero', onClick(){ if (typeof resetAll === 'function') resetAll(); } }
   ],
   menuNotes: [
@@ -2254,8 +2254,8 @@ window.ZD_M = {
     <p class="ptitle io">PATCHES · BANCO · EXPORT</p>
     <div class="act-row">
       <input id="patchName" class="patch-name" type="text" placeholder="nombre del patch" maxlength="40" aria-label="Nombre del patch">
-      <button class="btn-io json" id="saveJson">⭳ GUARDAR JSON</button>
-      <button class="btn-io json" id="loadJson">⭱ CARGAR JSON</button>
+      <button class="btn-io json" id="saveJson">↓ GUARDAR JSON</button>
+      <button class="btn-io json" id="loadJson">↑ CARGAR JSON</button>
       <button class="btn-io midi" id="expMidi">♪ EXPORTAR MIDI</button>
       <div class="oct-ctrl"><span>WAV</span>
         <select id="barsSel" aria-label="Compases a renderizar en el WAV"><option value="1">1 compás</option><option value="2" selected>2 compases</option><option value="4">4 compases</option></select>
