@@ -205,7 +205,7 @@ export function buildLandingPage(data, slug) {
         <div class="dl-box__points">
           <span>${esc(I.downloadName)}</span>
           <span>Un solo archivo HTML, funciona sin conexión</span>
-          <span>Instalá desde la web (PWA) o bajá el HTML para usarlo local</span>
+          <span>Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.</span>
         </div>
       </div>
       ${renderGateForm({ idPrefix: `zd-${slug}`, mode: 'single', file: I.file, downloadName: I.downloadName, name: I.name })}
