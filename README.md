@@ -415,7 +415,7 @@ Plataforma central de Zero Day · Music Exploits que integra los 5 instrumentos 
 
 ## Privacidad
 
-Los instrumentos no envían nada a ningún servidor: todo lo que hacés queda en tu navegador. El sitio pide solo un mail para la descarga y mide visitas de forma agregada con Google Analytics. Detalle completo en [`privacidad.html`](privacidad.html).
+Los instrumentos no envían nada a ningún servidor: todo lo que hacés queda en tu navegador. El sitio pide solo un mail para la descarga y mide visitas de forma agregada con Google Analytics. Detalle completo en [`Privacidad`](https://zeroday-musicexploits.github.io/instruments/privacidad.html).
 
 ---
 
