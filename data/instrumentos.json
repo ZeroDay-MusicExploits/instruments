@@ -163,8 +163,8 @@
       "keys": [["A W S E D F T G Y H U J K", "Notas (mapeo tipo piano)"], ["Z / X", "Octava del teclado (− / +)"], ["Espacio", "Play / Stop"]],
       "roadmap": "4 fases completas: F1 motor de síntesis + secuenciador clásico de 16 pasos (note/accent/slide/gate) · F2 modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · F3 touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · F4 patches y banco de fábrica (guardar/cargar JSON, export MIDI y WAV, 8 patrones de fábrica).",
       "exporta": ["WAV", "MIDI", "JSON"],
-      "guarda": false,
-      "app": false
+      "guarda": true,
+      "app": true
     }
   }
 }
