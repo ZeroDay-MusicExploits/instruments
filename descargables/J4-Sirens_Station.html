@@ -195,6 +195,9 @@ body::after{
 .takehelp{font-size:14px;line-height:1.5;color:var(--zd-ink-dim);margin:0 0 10px}
 .takehelp b{color:var(--cream)}
 #recResult:empty{display:none}
+.clip-led{font:800 11px var(--zd-mono);letter-spacing:.12em;padding:6px 9px;border-radius:var(--zd-r);
+  color:#fff;background:var(--led-red);box-shadow:0 0 14px -2px var(--led-red);white-space:nowrap}
+.clip-led[hidden]{display:none}
 #recResult{margin-bottom:10px}
 /* el LED de on/off de cada efecto mide 14 px: el area de toque llega a 44 */
 .fxdot{position:relative}
@@ -260,6 +263,8 @@ body::after{
   background:linear-gradient(#3a1d13,#26130c);border:1px solid #5a3122;border-radius:8px;padding:8px 14px;
   box-shadow:0 2px 0 #180b07}
 .minibtn:active{transform:translateY(1px)}
+.minibtn[aria-pressed="true"]{color:var(--zd-void);background:var(--brass)}
+.vizmsg{margin:8px 0 0}
 .panel.expanded{position:fixed;inset:0;z-index:80;margin:0;border-radius:0;display:flex;flex-direction:column;padding:12px}
 .panel.expanded::before{display:none}
 .panel.expanded .scopewrap{flex:1}
@@ -1733,7 +1738,7 @@ window.ZD_M={name:'J4 Sirens Station', title:'<b>J4</b> SIRENS',
   ]};
 Object.assign(window.ZD_M, {
   titleParts: ['J4 ', 'SIRENS'],
-  transport: ['#recBtn'],
+  transport: ['#clipLed', '#recBtn'],
   keep: ['#xypad', '#perfDeck'],
   tabs: [
     { id:'sir', label:'SIRENA',  title:'MODO · OSCILADOR · FILTRO', peek:true,
@@ -2544,6 +2549,7 @@ Object.assign(window.ZD_M, {
       <span class="t"><b>J4</b> SIRENS <i>·Station</i><span class="zd-cur"></span></span></div>
     </div>
     <div class="hdr-tr">
+      <span id="clipLed" class="clip-led" role="status" hidden>CLIP</span>
       <button type="button" class="recbtn" id="recBtn" aria-pressed="false" aria-label="Grabar (audio WAV y MIDI de la performance)"><span class="rdot" aria-hidden="true">●</span> <span class="rlab">REC</span></button>
     </div>
     <div class="plate">
@@ -2561,8 +2567,11 @@ Object.assign(window.ZD_M, {
     </div>
     <div class="vizctl">
       <div class="seg" id="vizSeg"></div>
-      <button class="minibtn" id="vizExpandBtn">AMPLIAR</button>
+      <button class="minibtn" id="vizOnBtn" type="button" aria-pressed="true">VISUAL ON</button>
+      <button class="minibtn" id="lowLoadBtn" type="button" aria-pressed="false">BAJA CARGA</button>
+      <button class="minibtn" id="vizExpandBtn" type="button">AMPLIAR</button>
     </div>
+    <p class="muted vizmsg" id="vizNote" hidden></p>
   </section>
 
   <!-- MODOS -->
@@ -2863,9 +2872,12 @@ function periodic(type){
 }
 let WAVE={};
 
+/* opciones del AudioContext propio (sin hub): latencyHint 'interactive' y la
+   frecuencia que elija el sistema (iOS alterna 44,1 y 48 kHz: no se asume) */
+function ctxOptions(){ return (window.ZD&&ZD.audio) ? ZD.audio.options() : { latencyHint:'interactive' }; }
 async function initAudio(){
   if(ctx) return;
-  ctx = HOST ? HOST.ctx : new (window.AudioContext||window.webkitAudioContext)();
+  ctx = HOST ? HOST.ctx : new (window.AudioContext||window.webkitAudioContext)(ctxOptions());
   if(ctx.state==='suspended') await ctx.resume();
 
   master = ctx.createGain(); master.gain.value = P.vol;
@@ -3210,7 +3222,7 @@ function buildFXUI(){
 function fxDot(id,get,set){ const d=document.getElementById(id); if(!d)return;
   const upd=()=>d.classList.toggle('on',!!get());
   d.addEventListener('click',()=>{set(!get());upd();markDirty();}); upd(); UIREFRESH.push(upd); }
-function markThrow(i,on){ const b=window.__throws&&window.__throws[i]; if(b&&b.ref)b.ref.classList.toggle('on',on); }
+function markThrow(i,on){ const b=window.__throws&&window.__throws[i]; if(b&&b.ref)b.ref.classList.toggle('on',on); syncPlaying(); }
 function buildThrows(){
   const row=document.getElementById('throwRow'); if(!row)return;
   const defs=[
@@ -3225,8 +3237,8 @@ function buildThrows(){
     b.append(el('span','tt',d.t), el('span','kk','['+d.k+']'));
     const ptrs=new Set();
     const on=e=>{ e.preventDefault(); try{ b.setPointerCapture(e.pointerId); }catch(_){}
-      ptrs.add(e.pointerId); if(ptrs.size===1){ b.classList.add('on'); d.set(true); } };
-    const off=e=>{ if(!ptrs.delete(e.pointerId) || ptrs.size) return; b.classList.remove('on'); d.set(false); };
+      ptrs.add(e.pointerId); if(ptrs.size===1){ b.classList.add('on'); d.set(true); syncPlaying(); } };
+    const off=e=>{ if(!ptrs.delete(e.pointerId) || ptrs.size) return; b.classList.remove('on'); d.set(false); syncPlaying(); };
     b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off);
     b.addEventListener('pointercancel',off); b.addEventListener('lostpointercapture',off);
     d.ref=b; row.appendChild(b);
@@ -3464,7 +3476,7 @@ function renderSlots(){
    rango se recorta. CC74 = X del pad y CC71 = Y del pad. Tempo fijo de 120:
    los tiempos son los reales en segundos. */
 const MIDI_BPM=120, MIDI_BEND=24, MIDI_TRACK='J4-Sirens Station';
-let recorder=null, recState='idle', take=null, takeCard=null, recTick=null;
+let recorder=null, recState='idle', take=null, takeCard=null;
 let midiRec=null, midiNote=null, midiNotes=0, midiTimer=null, lastBend=null, lastCC={}, tapHz=null, tapCents=null, tapBuf=null;
 function fmtRec(s){ s=Math.max(0,Math.floor(s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
 function renderRec(sec){
@@ -3650,6 +3662,19 @@ let vizMode='scope', vizExpand=false;
 function buildVizUI(){
   buildSeg('vizSeg',[{v:'scope',label:'SCOPE'},{v:'liss',label:'LISSAJOUS'},{v:'mandala',label:'MANDALA'}],()=>vizMode,v=>{vizMode=v;});
   const b=document.getElementById('vizExpandBtn'); if(b)b.addEventListener('click',toggleExpand);
+  const on=document.getElementById('vizOnBtn'); if(on) on.addEventListener('click',()=>setVizPrefs(!vizOn,lowLoad));
+  const lo=document.getElementById('lowLoadBtn'); if(lo) lo.addEventListener('click',()=>setVizPrefs(vizOn,!lowLoad));
+  renderVizCtl();
+}
+/* preferencias del dispositivo: van en la sesion, no en el JSON */
+function setVizPrefs(on, light){ vizOn=!!on; lowLoad=!!light; scopeStatic=false; renderVizCtl(); markDirty(); }
+function renderVizCtl(){
+  const on=document.getElementById('vizOnBtn'), lo=document.getElementById('lowLoadBtn'), n=document.getElementById('vizNote');
+  if(on){ on.setAttribute('aria-pressed',vizOn?'true':'false'); on.textContent=vizOn?'VISUAL ON':'VISUAL OFF'; }
+  if(lo) lo.setAttribute('aria-pressed',lowLoad?'true':'false');
+  if(n){ const rm=reduceMotion.matches;
+    n.hidden=!(rm||!vizOn);
+    n.textContent=rm?'Movimiento reducido (ajuste del sistema): el visualizador queda quieto.':'Visualizador apagado: el LED de CLIP sigue midiendo.'; }
 }
 function toggleExpand(){
   vizExpand=!vizExpand;
@@ -3685,7 +3710,7 @@ function noteOff(id){
   afterVoice();
 }
 /* despues de cada cambio de la voz (no toca el audio): boton SIREN y MIDI de la toma */
-function afterVoice(){ renderSiren(); midiVoice(); }
+function afterVoice(){ renderSiren(); midiVoice(); syncPlaying(); }
 function glideTo(midi){
   const t=ctx.currentTime, g=Math.max(0.001,P.glide/1000);
   if(P.mode==='noise'){
@@ -3725,23 +3750,40 @@ function filterGate(on){
 }
 const clampHz=v=>Math.max(30,Math.min(12000,v));
 
-/* ---------------------------------------------------------- osciloscopio --*/
-let scopeCanvas, sctx, hue=0;
+/* ---------------------------------------------------------- osciloscopio --
+   Un solo rAF. Cada cuadro lee el analizador (es barato) para el LED de clip;
+   el dibujo es aparte y opcional (SPEC R5): no se dibuja con el visualizador
+   apagado, con el canvas fuera de la vista (sheet cerrado, o .wrap oculta en
+   el shell) ni con prefers-reduced-motion, que deja una linea fija. Modo baja
+   carga: ~20 fps, sin glow ni estelas, mandala de 5 brazos. El modo completo
+   dibuja exactamente lo de antes. */
+let scopeCanvas, sctx, hue=0, vizOn=true, lowLoad=false, scopeFrames=0, scopeVisible=true, scopeStatic=false;
+const reduceMotion=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)'):{ matches:false };
+if(reduceMotion.addEventListener) reduceMotion.addEventListener('change',()=>{ scopeStatic=false; renderVizCtl(); });
 function runScope(){
   scopeCanvas=document.getElementById('scope'); sctx=scopeCanvas.getContext('2d');
   const draw=()=>{
     requestAnimationFrame(draw);
     if(!analyser)return;
-    const W=scopeCanvas.width, H=scopeCanvas.height;
     analyser.getFloatTimeDomainData(scopeData);
-    // persistencia de fósforo (trails) en vez de limpiar
+    checkClip();
+    if((scopeFrames++ % 15)===0) scopeVisible=!!scopeCanvas.offsetParent;
+    if(!scopeVisible) return;
+    const hz=(curNote!=null)?Math.round(mtof(curNote)):null;
+    const eHz=document.getElementById('scopeHz'); if(eHz) eHz.textContent = voiceActive&&hz? hz+' Hz' : '— Hz';
+    const W=scopeCanvas.width, H=scopeCanvas.height;
+    if(!vizOn || reduceMotion.matches){ drawIdle(W,H); return; }
+    scopeStatic=false;
+    const light=lowLoad;
+    if(light && (scopeFrames % 3)) return;
+    // persistencia de fósforo (trails) en vez de limpiar; en baja carga se limpia entero
     sctx.globalCompositeOperation='source-over';
-    sctx.fillStyle='rgba(7,16,14,0.30)'; sctx.fillRect(0,0,W,H);
+    sctx.fillStyle=light?'rgb(7,16,14)':'rgba(7,16,14,0.30)'; sctx.fillRect(0,0,W,H);
     let peak=0; for(let i=0;i<scopeData.length;i+=16){const a=Math.abs(scopeData[i]);if(a>peak)peak=a;}
     hue=(hue+0.6+peak*4)%360;
     const c1='hsl('+hue+',95%,62%)', c2='hsl('+((hue+140)%360)+',95%,60%)';
-    sctx.globalCompositeOperation='lighter';
-    sctx.lineWidth=Math.max(1.6,W/520); sctx.shadowBlur=16;
+    sctx.globalCompositeOperation=light?'source-over':'lighter';
+    sctx.lineWidth=Math.max(1.6,W/520); sctx.shadowBlur=light?0:16;
     const N=scopeData.length;
     if(vizMode==='scope'){
       const grad=sctx.createLinearGradient(0,0,W,0); grad.addColorStop(0,c1); grad.addColorStop(1,c2);
@@ -3755,26 +3797,44 @@ function runScope(){
       for(let i=0;i<N-off;i+=2){ const x=W/2+scopeData[i]*W*0.42, y=H/2+scopeData[i+off]*H*0.46; i?sctx.lineTo(x,y):sctx.moveTo(x,y); }
       sctx.stroke();
     } else { // mandala kaleidoscópico
-      const cx=W/2,cy=H/2,R=Math.min(W,H)*0.42, seg=10;
+      const cx=W/2,cy=H/2,R=Math.min(W,H)*0.42, seg=light?5:10, step=light?8:4;
       for(let s=0;s<seg;s++){
         sctx.save(); sctx.translate(cx,cy); sctx.rotate(s/seg*Math.PI*2);
-        sctx.strokeStyle='hsl('+((hue+s*36)%360)+',95%,60%)'; sctx.shadowColor=sctx.strokeStyle;
+        sctx.strokeStyle='hsl('+((hue+s*360/seg)%360)+',95%,60%)'; sctx.shadowColor=sctx.strokeStyle;
         sctx.beginPath();
-        for(let i=0;i<N;i+=4){ const a=i/N*Math.PI, r=R*(0.32+Math.abs(scopeData[i])*0.95);
+        for(let i=0;i<N;i+=step){ const a=i/N*Math.PI, r=R*(0.32+Math.abs(scopeData[i])*0.95);
           const x=Math.cos(a)*r, y=Math.sin(a)*r; i?sctx.lineTo(x,y):sctx.moveTo(x,y); }
         sctx.stroke(); sctx.restore();
       }
     }
     sctx.shadowBlur=0; sctx.globalCompositeOperation='source-over';
-    const hz=(curNote!=null)?Math.round(mtof(curNote)):null;
-    const eHz=document.getElementById('scopeHz'); if(eHz) eHz.textContent = voiceActive&&hz? hz+' Hz' : '— Hz';
   };
   draw();
 }
+/* visualizador apagado o movimiento reducido: una linea fija, dibujada una vez */
+function drawIdle(W,H){
+  if(scopeStatic) return; scopeStatic=true;
+  sctx.globalCompositeOperation='source-over'; sctx.shadowBlur=0;
+  sctx.fillStyle='rgb(7,16,14)'; sctx.fillRect(0,0,W,H);
+  sctx.strokeStyle='rgba(127,220,92,.35)'; sctx.lineWidth=Math.max(1,W/700);
+  sctx.beginPath(); sctx.moveTo(0,H/2); sctx.lineTo(W,H/2); sctx.stroke();
+}
 function sizeScope(){
   const c=document.getElementById('scope'); if(!c)return; const r=c.getBoundingClientRect();
+  if(!r.width||!r.height) return;   // oculto (sheet cerrado): se mide al mostrarse
   const dpr=Math.min(2,window.devicePixelRatio||1);
-  c.width=Math.max(1,Math.round(r.width*dpr)); c.height=Math.max(1,Math.round(r.height*dpr));
+  const w=Math.max(1,Math.round(r.width*dpr)), h=Math.max(1,Math.round(r.height*dpr));
+  if(c.width!==w||c.height!==h){ c.width=w; c.height=h; scopeStatic=false; }   // reasignar realoca el buffer: solo si cambia
+}
+/* Indicador de clip (SPEC R5): solo mide lo que ya leyo el visualizador, a la
+   salida del compresor. No hay limitador nuevo: eso cambiaria el sonido. */
+let clipUntil=0, clipOn=false;
+function checkClip(){
+  let peak=0; for(let i=0;i<scopeData.length;i++){ const a=Math.abs(scopeData[i]); if(a>peak) peak=a; }
+  const now=performance.now();
+  if(peak>=0.98) clipUntil=now+700;              // |muestra| >= ~0,98 de escala completa
+  const on=now<clipUntil;
+  if(on!==clipOn){ clipOn=on; const l=document.getElementById('clipLed'); if(l) l.hidden=!on; }
 }
 
 /* ============================================================ construir UI */
@@ -4072,9 +4132,11 @@ var Session=null, sessionReady=false;
 function markDirty(){ if(Session && sessionReady) Session.save(); }
 const VIZ_MODES=['scope','liss','mandala'];
 function snapshotSession(){ return { patch:currentPatch(), pad:{ x:padX, y:padY }, viz:{ mode:vizMode }, perf:{ latch:latchMode } }; }
-function restoreSession(d){
+function restoreSession(d, opts){
   if(!d||typeof d!=='object') return false;
   let ok=false;
+  // visualizador encendido / baja carga: preferencia del dispositivo, solo desde el autoguardado
+  if(opts&&opts.prefs&&d.prefs&&typeof d.prefs==='object') setVizPrefs(d.prefs.vizOn!==false, d.prefs.lowLoad===true);
   if(d.patch && applyPatch(d.patch)) ok=true;
   if(d.pad && typeof d.pad==='object'){
     if(PAD_KEYS.indexOf(d.pad.x)>=0){ setPadAxis('x',d.pad.x); ok=true; }
@@ -4091,7 +4153,8 @@ async function resetAll(){
   if(!ok) return;
   sessionReady=false;
   if(Session) await Session.clear();
-  applyPatch(DEFAULT_PATCH); setPadAxis('x','cutoff'); setPadAxis('y','reso'); vizMode='scope'; setLatch(false); refreshUI();
+  applyPatch(DEFAULT_PATCH); setPadAxis('x','cutoff'); setPadAxis('y','reso'); vizMode='scope'; setLatch(false);
+  setVizPrefs(true,false); refreshUI();
   // No se vuelve a guardar: la sesion queda vacia hasta el proximo cambio, asi
   // la siguiente carga arranca limpia y sin el toast de "sesion restaurada".
   sessionReady=true;
@@ -4107,24 +4170,59 @@ const DEFAULT_PATCH=currentPatch();   // el sonido de fabrica, antes de restaura
   // guarda para no pelearse con el (docs/zd-blocks.md). Los slots si andan.
   if(HOST){ sessionReady=false; return; }
   if(!(window.ZD && ZD.store)){ sessionReady=true; return; }
-  Session=ZD.store.open({ slug:APP_SLUG, app:APP_ID, version:APP_VERSION, debounce:1500, getData:snapshotSession });
+  Session=ZD.store.open({ slug:APP_SLUG, app:APP_ID, version:APP_VERSION, debounce:1500,
+    getData:()=>Object.assign(snapshotSession(), { prefs:{ vizOn, lowLoad } }) });
   ZD.store.persist();
   let env=null;
   try{ env=await Session.load(); }catch(e){ env=null; }
   const r=env?Session.unwrap(env):null;
-  if(r && r.ok && r.data && restoreSession(r.data))
+  if(r && r.ok && r.data && restoreSession(r.data,{ prefs:true }))
     ZD.toast('Sesión restaurada',{ ms:9000, action:{ label:'Empezar de cero', onClick:resetAll } });
   sessionReady=true;
 })();
 
+/* ---- encendido y audio en iOS (SPEC R5) ----
+   El overlay sigue siendo la puerta del audio (la sesion se restaura sin
+   arrancarlo). Destraba en click/pointerup/keydown, que si cuentan como gesto
+   en iOS (pointerdown no), por ZD.audio.unlock(): audioSession 'playback',
+   <audio> silencioso y resume() dentro del gesto. Apenas se toca deja de
+   interceptar toques, aunque resume() tarde. boot() es idempotente: lo
+   llaman el overlay, zd-audio (ensure) y el adaptador C2. */
 const power=document.getElementById('power');
-async function boot(){
-  power.style.opacity='0'; power.style.transition='opacity .4s';
-  await initAudio();
-  setTimeout(()=>power.remove(),420);
+let booting=null;
+function boot(){
+  if(!booting){
+    power.style.opacity='0'; power.style.transition='opacity .4s'; power.style.pointerEvents='none';
+    booting=initAudio().then(()=>{ setTimeout(()=>{ if(power.parentNode) power.remove(); },420); });
+  }
+  return booting;
 }
-power.addEventListener('pointerdown',boot,{once:true});
-window.addEventListener('keydown',function kb(e){ if(!ctx){ boot(); } }, {once:true});
+function powerOn(){ if(!HOST && window.ZD && ZD.audio) ZD.audio.unlock(); else boot(); }
+power.setAttribute('role','button'); power.tabIndex=0;
+power.setAttribute('aria-label','Encender el audio');
+power.addEventListener('click',powerOn);
+if(!HOST && window.ZD && ZD.audio){
+  // Con el hub C2 el contexto es del host: zd-audio solo fuera del hub.
+  ZD.audio.attach({ getContext:()=>ctx, ensure:()=>boot(), label:'Tocá para reanudar' });
+  ZD.audio.bindGesture(window);     // cualquier gesto destraba, en captura y dentro del gesto
+} else {
+  window.addEventListener('keydown',function kb(e){ if(!ctx){ boot(); } }, {once:true});
+}
+
+/* "Sonando" para zd-audio: wake lock y overlay "Tocá para reanudar" mientras
+   haya voz, REC o un momentaneo apretado, y 15 s mas por las colas del eco y
+   la reverb. Fuera de eso la pantalla se puede apagar. */
+let playingOn=false, idleTimer=null;
+function soundBusy(){ return voiceActive || recState==='rec' || throwOn || fbInfOn || killOn; }
+function syncPlaying(){
+  if(HOST || !(window.ZD && ZD.audio) || !ctx) return;
+  if(soundBusy()){
+    if(idleTimer){ clearTimeout(idleTimer); idleTimer=null; }
+    if(!playingOn){ playingOn=true; ZD.audio.setPlaying(true); }
+  } else if(playingOn && !idleTimer){
+    idleTimer=setTimeout(()=>{ idleTimer=null; if(!soundBusy()){ playingOn=false; ZD.audio.setPlaying(false); } },15000);
+  }
+}
 </script>
 <script>
 
