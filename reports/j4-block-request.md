@@ -69,3 +69,30 @@ cualquiera de las dos mitades; con la primera, el workaround se puede sacar.
 
 Afecta a quien use `ZD.rec.create` con captura en vivo: hoy J4 y Nebularp
 (SPEC R4, "REC posta"). Acid usa solo `ZD.rec.card`.
+
+## 2 · `zd-ui` v1 (menor): `ZD.modal.prompt` no selecciona el valor inicial
+
+**Qué pasa.** El modal enfoca el `<input>` en el cuadro siguiente pero no
+selecciona el texto. En J4 el long-press (o Enter) sobre una perilla abre
+`ZD.modal.prompt` con el valor actual, por ejemplo `1400`. Si el usuario tipea
+`2500`, el input queda en `14002500` y el valor se va al máximo.
+
+**Reproducción** (en el piloto, Chromium):
+
+```js
+ZD.modal.prompt('x', { value: '1400' }).then(console.log);
+// 300 ms después: foco en el INPUT, selectionStart = selectionEnd = 4
+// tipear 2500 + Enter → "14002500"
+```
+
+En una perilla de J4 sin el workaround, ese número se acota al máximo
+(CUTOFF queda en 12000 Hz en vez de 2500).
+
+**Workaround en J4.** Después de abrir el prompt, un doble
+`requestAnimationFrame` selecciona el input (`.zd-dlg input`). Con eso,
+tipear reemplaza el valor (verificado: 1400 → 2500).
+
+**Arreglo propuesto.** En `dialog()`, cuando el foco va al input, llamar
+también a `input.select()`. Es una línea y no cambia la API. Lo aprovecha
+cualquier instrumento que use el prompt para valores numéricos (Acid usa el
+mismo patrón en sus knobs).
