@@ -505,7 +505,19 @@ otros 4 instrumentos salen como "pendiente" hasta que su sesión C los integre.
 node tools/tests/run.mjs            # todo
 node tools/tests/zd-midi-order.test.mjs     # Node puro
 node tools/tests/zd-mobile-cycle.test.mjs   # necesita Playwright + Chromium
+node tools/tests/acid-verify.test.mjs       # idem
 ```
+
+- `zd-midi-order` · el orden de eventos a igual tick en `write()` y en
+  `recorder()`, y el MIDI del patrón de Acid parseado como SMF.
+- `zd-mobile-cycle` · el ciclo salir/entrar del shell en los tres pares de
+  viewport, el cableado de eventos, el foco, el scroll y el banner de `zd-pwa`.
+- `acid-verify` · la verificación completa del piloto, la que hay que volver a
+  pasar después de tocar un bloque: viewports 360×640 / 390×844 / 768×1024 /
+  844×390 / 1440×900, autoguardado, export JSON+MIDI+WAV (con ida y vuelta del
+  JSON), audio con suspend/resume, banner de instalación (que no tape PLAY ni el
+  pad XY), rotación de tablet 1180×820 ↔ 820×1180 **con el instrumento sonando**,
+  `file://`, iframe y registro del service worker sobre http.
 
 `zd-mobile-cycle` levanta un servidor estático propio, abre
 `descargables/Acid_Bass-303.html` con `has_touch`/`is_mobile` y alterna el
