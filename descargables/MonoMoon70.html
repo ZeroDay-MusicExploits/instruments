@@ -3913,11 +3913,16 @@ function onMIDI(e){ const d=e.data, cmd=d[0]&0xf0;
 function initMIDI(){ const dot=document.getElementById('midiDot'), txt=document.getElementById('midiTxt');
   if(HOST){ if(dot) dot.classList.add('on'); if(txt) txt.textContent='MIDI ← C2'; return; }   // embebido: el MIDI llega reenviado por el hub
   const sup=ZD.midi.support(); if(!sup.available){ txt.textContent='MIDI no disponible en este navegador'; txt.title=sup.reason; return; }
-  navigator.requestMIDIAccess().then(acc=>{
-    const attach=()=>{ let c=0; acc.inputs.forEach(inp=>{ inp.onmidimessage=onMIDI; c++; });
-      dot.classList.toggle('on', c>0); txt.textContent = c>0?('MIDI '+c):'MIDI —'; };
-    attach(); acc.onstatechange=attach;
-  }).catch(()=>{ txt.textContent='MIDI bloqueado'; txt.title='El navegador no dio permiso para usar MIDI.'; });
+  /* requestMIDIAccess() puede abrir el pedido de permiso: recién con un gesto
+     (este botón), no al cargar la página. */
+  const btn=document.createElement('button'); btn.type='button'; btn.id='midiBtn'; btn.textContent='Conectar MIDI';
+  btn.title='Usar un controlador MIDI conectado (el navegador pide permiso)'; txt.after(btn);
+  btn.addEventListener('click', ()=>{ btn.disabled=true;
+    navigator.requestMIDIAccess().then(acc=>{ btn.remove();
+      const attach=()=>{ let c=0; acc.inputs.forEach(inp=>{ inp.onmidimessage=onMIDI; c++; });
+        dot.classList.toggle('on', c>0); txt.textContent = c>0?('MIDI '+c):'MIDI —'; };
+      attach(); acc.onstatechange=attach;
+    }).catch(()=>{ btn.disabled=false; txt.textContent='MIDI bloqueado'; txt.title='El navegador no dio permiso para usar MIDI.'; }); });
 }
 
 /* --- barra de herramientas --- */
