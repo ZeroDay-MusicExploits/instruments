@@ -196,6 +196,11 @@ test('MonoMoon · R2 · el banner no tapa REC, macros ni teclado; prompt() una v
       await page.click('.zd-pwa-banner .zd-pwa-go'); await page.waitForTimeout(200);
       const again = await page.$('.zd-pwa-banner .zd-pwa-go'); if (again) { await again.click(); await page.waitForTimeout(200); }
       assert.equal(await page.evaluate(() => window.__prompts), 1, 'prompt() una sola vez');
+      // BIP rechaza el diálogo nativo: desde zd-pwa v3 eso cuenta como "Ahora no"
+      // (era el punto 2 de reports/monomoon-block-request.md)
+      assert.equal(await rect(page, '.zd-pwa-banner'), null, 'rechazado: el banner se va (zd-pwa v3)');
+      assert.ok(await page.evaluate(() => localStorage.getItem('zd:pwa:dismissed')), 'rechazado: guarda zd:pwa:dismissed');
+      await page.evaluate(() => localStorage.removeItem('zd:pwa:dismissed'));
       await page.evaluate(BIP); await page.waitForTimeout(250);
       await page.click('.zd-pwa-banner .zd-pwa-later'); await page.waitForTimeout(150);
       await page.reload(); await page.waitForTimeout(300); await page.evaluate(BIP); await page.waitForTimeout(250);

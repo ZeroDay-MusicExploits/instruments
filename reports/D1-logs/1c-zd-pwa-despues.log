@@ -1,0 +1,52 @@
+TAP version 13
+  360×640 (shell) · rechazado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=ahora installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v3 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+ok 1 - zd-pwa v3 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 1597.472552
+  type: 'test'
+  ...
+  360×640 (shell) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 1
+# Subtest: zd-pwa v3 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+ok 2 - zd-pwa v3 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 904.026842
+  type: 'test'
+  ...
+  360×640 (shell) · appinstalled → prompts=0 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v3 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+ok 3 - zd-pwa v3 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 549.915078
+  type: 'test'
+  ...
+  1440×900 (escritorio) · rechazado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=ahora installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+ok 4 - zd-pwa v3 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 1161.283863
+  type: 'test'
+  ...
+  1440×900 (escritorio) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 1
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+ok 5 - zd-pwa v3 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 900.624236
+  type: 'test'
+  ...
+  1440×900 (escritorio) · appinstalled → prompts=0 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+ok 6 - zd-pwa v3 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 545.095689
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5680.687391

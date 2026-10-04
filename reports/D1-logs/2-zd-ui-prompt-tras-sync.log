@@ -1,0 +1,52 @@
+TAP version 13
+  al enfocar: selección [0, 4] de "1400" · tipear 2500 + Enter → "2500"
+# Subtest: zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+ok 1 - zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+  ---
+  duration_ms: 890.635554
+  type: 'test'
+  ...
+  Acid_Bass-303.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: Acid_Bass-303.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 2 - Acid_Bass-303.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 738.690198
+  type: 'test'
+  ...
+  CronBeat-808.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: CronBeat-808.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 3 - CronBeat-808.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 771.06524
+  type: 'test'
+  ...
+  J4-Sirens_Station.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: J4-Sirens_Station.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 4 - J4-Sirens_Station.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 746.540167
+  type: 'test'
+  ...
+  MonoMoon70.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: MonoMoon70.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 5 - MonoMoon70.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 722.107308
+  type: 'test'
+  ...
+  Nebularp_2035.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: Nebularp_2035.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 6 - Nebularp_2035.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 773.345092
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4674.500164

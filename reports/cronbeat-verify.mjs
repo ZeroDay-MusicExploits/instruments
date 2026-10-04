@@ -263,18 +263,21 @@ test('CronBeat · Instalar llama a prompt() una sola vez; "Ahora no" dura 14 dí
     await page.waitForTimeout(300);
     const acc = await page.evaluate(() => ({ prompts: window.__prompts, banner: !!document.querySelector('.zd-pwa-banner') }));
     assert.deepEqual(acc, { prompts: 1, banner: false }, 'Instalar aceptado: prompt() ×1 y sin banner');
-    // rechazado: el banner queda (ver reports/cronbeat-block-request.md, punto 3)
-    // y un segundo clic NO vuelve a llamar a prompt() sobre el evento usado
+    // rechazado: desde zd-pwa v3 cuenta como "Ahora no" (era el punto 3 de
+    // reports/cronbeat-block-request.md): el banner se va, se guarda
+    // zd:pwa:dismissed y no queda ningún botón para un segundo prompt()
     await page.reload(); await page.waitForTimeout(300);
     await fakeBIP(page, 'dismissed');
     await page.waitForTimeout(150);
     await page.click('.zd-pwa-banner >> text=/Instalar/');
     await page.waitForTimeout(300);
-    await page.click('.zd-pwa-banner >> text=/Instalar/');
-    await page.waitForTimeout(300);
-    assert.equal(await page.evaluate(() => window.__prompts), 1, 'el mismo beforeinstallprompt no se puede usar dos veces');
+    const dis = await page.evaluate(() => ({ prompts: window.__prompts, banner: !!document.querySelector('.zd-pwa-banner'), key: localStorage.getItem('zd:pwa:dismissed') }));
+    assert.equal(dis.prompts, 1, 'el mismo beforeinstallprompt no se puede usar dos veces');
+    assert.equal(dis.banner, false, 'rechazado: el banner se va (zd-pwa v3)');
+    assert.ok(dis.key && Math.abs(Date.now() - Number(dis.key)) < 60000, 'rechazado: guarda zd:pwa:dismissed, como "Ahora no"');
 
     // "Ahora no": no vuelve en la próxima carga
+    await page.evaluate(() => localStorage.removeItem('zd:pwa:dismissed'));
     await page.reload(); await page.waitForTimeout(300);
     await fakeBIP(page);
     await page.waitForTimeout(150);
@@ -294,7 +297,7 @@ test('CronBeat · Instalar llama a prompt() una sola vez; "Ahora no" dura 14 dí
     await fakeBIP(page);
     await page.waitForTimeout(200);
     assert.equal(await page.evaluate(() => !!document.querySelector('.zd-pwa-banner')), true, 'pasados 14 días el banner vuelve');
-    console.log('  Instalar → prompt() ×1 (aceptado: sin banner; rechazado: 2º clic sin prompt) · "Ahora no" → no vuelve; menú sigue; a los 15 días vuelve');
+    console.log('  Instalar → prompt() ×1 (aceptado: sin banner; rechazado: sin banner y zd:pwa:dismissed, zd-pwa v3) · "Ahora no" → no vuelve; menú sigue; a los 15 días vuelve');
     assert.deepEqual(errors, []);
   } finally { await ctx.close(); }
 });

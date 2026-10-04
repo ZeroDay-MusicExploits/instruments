@@ -1,0 +1,17 @@
+TAP version 13
+  8 rotaciones sonando · ctx 0.72→3.57 s · voces 64 · notas en la órbita G4,C5,E5,G5,C4,E4 · latch [C4 E4 G4]
+# Subtest: Nebularp · rotación de tablet 1180×820 ↔ 820×1180 con el arpegio sonando
+ok 1 - Nebularp · rotación de tablet 1180×820 ↔ 820×1180 con el arpegio sonando
+  ---
+  duration_ms: 4459.791852
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4487.353943

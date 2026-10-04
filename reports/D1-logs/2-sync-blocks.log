@@ -1,0 +1,19 @@
+sync-blocks · 5 archivo(s) en descargables/ · 8 bloque(s)
+  Acid_Bass-303.html         actualizado
+    repegado: zd-pwa v2→v3, zd-rec v1→v2, zd-audio v1→v2, zd-ui v1→v2
+    idéntico: zd-mobile, zd-midi, zd-dl, zd-store
+  CronBeat-808.html          actualizado
+    repegado: zd-pwa v2→v3, zd-rec v1→v2, zd-audio v1→v2, zd-ui v1→v2
+    idéntico: zd-mobile, zd-midi, zd-dl, zd-store
+  J4-Sirens_Station.html     actualizado
+    repegado: zd-pwa v2→v3, zd-rec v1→v2, zd-audio v1→v2, zd-ui v1→v2
+    idéntico: zd-mobile, zd-midi, zd-dl, zd-store
+  MonoMoon70.html            actualizado
+    repegado: zd-pwa v2→v3, zd-rec v1→v2, zd-audio v1→v2, zd-ui v1→v2
+    idéntico: zd-mobile, zd-midi, zd-dl, zd-store
+  Nebularp_2035.html         actualizado
+    repegado: zd-pwa v2→v3, zd-rec v1→v2, zd-audio v1→v2, zd-ui v1→v2
+    idéntico: zd-mobile, zd-midi, zd-dl, zd-store
+
+20 bloque(s) ya idénticos · 5 archivo(s) escritos · 0 pendiente(s)
+Ahora: node tools/check-blocks.mjs

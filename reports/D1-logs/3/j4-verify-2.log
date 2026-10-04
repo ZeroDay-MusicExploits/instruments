@@ -1,0 +1,139 @@
+TAP version 13
+  360×640 (mínimo) · shell · pad 346×384 (60 % del alto) · SIREN 268×83 · throws 45/45/45 px · barra ≥44
+# Subtest: J4 · 360×640 (mínimo) · layout
+ok 1 - J4 · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 1662.292699
+  type: 'test'
+  ...
+  390×844 · shell · pad 376×508 (60 % del alto) · SIREN 298×149 · throws 59/59/59 px · barra ≥44
+# Subtest: J4 · 390×844 · layout
+ok 2 - J4 · 390×844 · layout
+  ---
+  duration_ms: 1214.032264
+  type: 'test'
+  ...
+  430×932 · shell · pad 416×596 (64 % del alto) · SIREN 338×148 · throws 60/60/60 px · barra ≥44
+# Subtest: J4 · 430×932 · layout
+ok 3 - J4 · 430×932 · layout
+  ---
+  duration_ms: 1227.328749
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · pad 754×688 (67 % del alto) · SIREN 676×148 · throws 60/60/60 px · barra ≥44
+# Subtest: J4 · 768×1024 (iPad vertical) · layout
+ok 4 - J4 · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 1270.273127
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · pad 486×274 (70 % del alto) · SIREN 177×220 · throws 87/87/87 px · barra ≥44
+# Subtest: J4 · 844×390 (landscape) · layout
+ok 5 - J4 · 844×390 (landscape) · layout
+  ---
+  duration_ms: 1212.528002
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell · pad 554×343 · sin scroll horizontal
+# Subtest: J4 · 1440×900 (escritorio) · layout
+ok 6 - J4 · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 1019.243694
+  type: 'test'
+  ...
+  360×640 · banner 82 px, no tapa REC/pad/SIREN/LATCH/throws · prompt() 1 vez
+  390×844 · banner 82 px, no tapa REC/pad/SIREN/LATCH/throws · prompt() 1 vez
+  "Ahora no" → sin banner tras recargar (ícono ↓ sí) · con la marca de hace 15 días vuelve
+# Subtest: J4 · banner de instalación: no tapa REC, el pad ni SIREN; prompt() una vez; "Ahora no" 14 días
+ok 7 - J4 · banner de instalación: no tapa REC, el pad ni SIREN; prompt() una vez; "Ahora no" 14 días
+  ---
+  duration_ms: 3494.559488
+  type: 'test'
+  ...
+  standalone · sin banner, sin ↓, ítem del menú oculto
+# Subtest: J4 · standalone: sin banner, sin ícono ↓ ni ítem de instalar
+ok 8 - J4 · standalone: sin banner, sin ícono ↓ ni ítem de instalar
+  ---
+  duration_ms: 608.192019
+  type: 'test'
+  ...
+  migración 1 slot (1 dañado descartado) · {"cutoff":181,"etime":0.351,"mode":"alarm","padX":"rate","latch":true,"viz":"mandala","ph":true} vuelve igual y sin AudioContext
+# Subtest: J4 · autoguardado: tocar → recargar → mismo estado, sin arrancar el audio; slots migrados
+ok 9 - J4 · autoguardado: tocar → recargar → mismo estado, sin arrancar el audio; slots migrados
+  ---
+  duration_ms: 2480.279159
+  type: 'test'
+  ...
+  j4-sirens-20261004-1322.json (ida y vuelta, patch viejo, error en modal) · j4-sirens-20261004-1322.wav 319532 B 44100 Hz · j4-sirens-20261004-1322.mid 3 notas, 42 bends, glide -7.0→-0.9
+# Subtest: J4 · export JSON / MIDI / WAV
+ok 10 - J4 · export JSON / MIDI / WAV
+  ---
+  duration_ms: 4724.748008
+  type: 'test'
+  ...
+  latencyHint interactive · running → suspended → resume() → running · visibilitychange → running
+# Subtest: J4 · audio: el primer toque enciende, suspend y resume, latencyHint
+ok 11 - J4 · audio: el primer toque enciende, suspend y resume, latencyHint
+  ---
+  duration_ms: 1966.157998
+  type: 'test'
+  ...
+  8 rotaciones con la sirena latcheada · ctx.currentTime 0.53 → 2.39 · sin cortes
+# Subtest: J4 · rotación de tablet 1180×820 ↔ 820×1180 con la sirena sonando
+ok 12 - J4 · rotación de tablet 1180×820 ↔ 820×1180 con la sirena sonando
+  ---
+  duration_ms: 2864.200934
+  type: 'test'
+  ...
+  SIREN + pad: cutoff 57 → 923 con la sirena sonando · soltar el pad no la corta
+# Subtest: J4 · pad XY y SIREN con dos dedos a la vez
+ok 13 - J4 · pad XY y SIREN con dos dedos a la vez
+  ---
+  duration_ms: 1179.437255
+  type: 'test'
+  ...
+  1180×820 sin shell: swipe → scrollY 385
+  768×1024: el sheet scrollea (scrollTop 109) · el pad toma el gesto sin scrollear
+# Subtest: J4 · scroll táctil: la página sin shell y el sheet en 768×1024; el pad no arrastra nada
+ok 14 - J4 · scroll táctil: la página sin shell y el sheet en 768×1024; el pad no arrastra nada
+  ---
+  duration_ms: 5317.916255
+  type: 'test'
+  ...
+  file:// · aviso local con [Abrir web] → https://zeroday-musicexploits.github.io/instruments/descargables/J4-Sirens_Station.html · sin banner · 0 pedidos de red · audio running
+# Subtest: J4 · file://: sin service worker, sin manifest, solo el aviso del archivo local
+ok 15 - J4 · file://: sin service worker, sin manifest, solo el aviso del archivo local
+  ---
+  duration_ms: 773.111268
+  type: 'test'
+  ...
+  SW http://127.0.0.1:40803/sw.js scope http://127.0.0.1:40803/ · theme-color #f06ad8 · instalable (0 errores)
+# Subtest: J4 · hosted: service worker registrado e instalable
+ok 16 - J4 · hosted: service worker registrado e instalable
+  ---
+  duration_ms: 368.75689
+  type: 'test'
+  ...
+  iframe · ZD.pwa inerte (0 banner, 0 CSS) · sin hub C2 → HOST null · 0 errores
+# Subtest: J4 · iframe: zd-pwa inerte, sin banner, sin errores
+ok 17 - J4 · iframe: zd-pwa inerte, sin banner, sin errores
+  ---
+  duration_ms: 802.921812
+  type: 'test'
+  ...
+  hub C2 · registrado {"v":1,"id":"j4test","name":"J4 Sirens"} · mismo AudioContext · eco 0.6 s · título "J4 Sirens · C2" · sin autoguardado
+# Subtest: J4 · hub C2 falso: el adaptador registra, arranca sin gesto y no autoguarda
+ok 18 - J4 · hub C2 falso: el adaptador registra, arranca sin gesto y no autoguarda
+  ---
+  duration_ms: 656.726194
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 32867.190589

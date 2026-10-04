@@ -1,0 +1,78 @@
+TAP version 13
+
+  descargables/MonoMoon70.html · ZD_M "MonoMoon'70" · zd-mobile v4 · 4 ciclos
+  keep=[macroPanel, xyPanel, kbPanel] transport=[recBox, clipLed]
+  tab osc (OSC) = [oscSection, mixSection]
+  tab filt (FILTRO) = [filtSection, fenvSection]
+  tab mod (MOD) = [modSection, ctlSection]
+  tab voz (VOZ) = [voiceSection, ampSection, scopeSection]
+  tab pat (PATCHES) = [ioPanel, kbHint, credits]
+  ciclo 1 · 1180×820 · shell=false · #zd-stage=[] · placeholders=0
+  ciclo 1 · 820×1180 · shell=true · #zd-stage=[macroPanel, xyPanel, kbPanel] · placeholders=17
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/MonoMoon70.html · 4 ciclos · tablet 1180×820 (sin shell) ↔ 820×1180 (shell)
+ok 1 - zd-mobile v4 · descargables/MonoMoon70.html · 4 ciclos · tablet 1180×820 (sin shell) ↔ 820×1180 (shell)
+  ---
+  duration_ms: 1201.634055
+  type: 'test'
+  ...
+  ciclo 1 · 1440×900 · shell=false · #zd-stage=[] · placeholders=0
+  ciclo 1 · 390×844 · shell=true · #zd-stage=[macroPanel, xyPanel, kbPanel] · placeholders=17
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/MonoMoon70.html · 4 ciclos · escritorio 1440×900 (sin shell) ↔ teléfono 390×844 (shell)
+ok 2 - zd-mobile v4 · descargables/MonoMoon70.html · 4 ciclos · escritorio 1440×900 (sin shell) ↔ teléfono 390×844 (shell)
+  ---
+  duration_ms: 626.35769
+  type: 'test'
+  ...
+  ciclo 1 · 844×390 · shell=true · #zd-stage=[macroPanel, xyPanel, kbPanel] · placeholders=17
+  ciclo 1 · 390×844 · shell=true · #zd-stage=[macroPanel, xyPanel, kbPanel] · placeholders=17
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/MonoMoon70.html · 4 ciclos · teléfono 844×390 ↔ 390×844 (shell en los dos: rotar no re-mueve nada)
+ok 3 - zd-mobile v4 · descargables/MonoMoon70.html · 4 ciclos · teléfono 844×390 ↔ 390×844 (shell en los dos: rotar no re-mueve nada)
+  ---
+  duration_ms: 418.833774
+  type: 'test'
+  ...
+  listener sobre macroPanel, enganchado antes del ciclo: 1 click(s) después de volver a entrar
+# Subtest: zd-mobile v4 · descargables/MonoMoon70.html · el cableado de eventos sigue vivo después de volver a entrar
+ok 4 - zd-mobile v4 · descargables/MonoMoon70.html · el cableado de eventos sigue vivo después de volver a entrar
+  ---
+  duration_ms: 371.68617
+  type: 'test'
+  ...
+  foco sobre div#macroPanel.section (macroPanel)
+  foco foco → foco → foco · scrollY 320 → (reflow: 320) → 0 en el shell → 320 al salir
+# Subtest: zd-mobile v4 · descargables/MonoMoon70.html · el foco y el scroll sobreviven el ciclo
+ok 5 - zd-mobile v4 · descargables/MonoMoon70.html · el foco y el scroll sobreviven el ciclo
+  ---
+  duration_ms: 391.524367
+  type: 'test'
+  ...
+  antes del ciclo: #zd-stage=[zd-pwa, macroPanel, xyPanel, kbPanel]
+  después de 3 ciclos: #zd-stage=[zd-pwa, macroPanel, xyPanel, kbPanel]
+# Subtest: zd-mobile v4 · descargables/MonoMoon70.html · el banner de zd-pwa sigue siendo el primer hijo de \#zd-stage
+ok 6 - zd-mobile v4 · descargables/MonoMoon70.html · el banner de zd-pwa sigue siendo el primer hijo de \#zd-stage
+  ---
+  duration_ms: 536.450108
+  type: 'test'
+  ...
+  820×1180 · btnRec 61×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  390×844 · btnRec 61×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  844×390 · btnRec 61×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  390×844 · btnRec 61×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+# Subtest: zd-mobile v4 · descargables/MonoMoon70.html · los controles de la barra superior miden ≥44 px (SPEC R1)
+ok 7 - zd-mobile v4 · descargables/MonoMoon70.html · los controles de la barra superior miden ≥44 px (SPEC R1)
+  ---
+  duration_ms: 748.564659
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4318.814265

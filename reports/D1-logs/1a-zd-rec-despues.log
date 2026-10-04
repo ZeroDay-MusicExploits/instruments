@@ -1,0 +1,52 @@
+TAP version 13
+  worklet: onLimit ×1 {"max":1,"state":"rec","res":{"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"}} · stop() después del tope → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"} · 2º stop() → null
+# Subtest: zd-rec v2 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+ok 1 - zd-rec v2 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1741.213742
+  type: 'test'
+  ...
+  worklet: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"} · stop() después → null
+# Subtest: zd-rec v2 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+ok 2 - zd-rec v2 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1154.05545
+  type: 'test'
+  ...
+  mediarecorder: onLimit ×1 {"max":1,"state":"rec","res":{"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"}} · stop() después del tope → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"} · 2º stop() → null
+# Subtest: zd-rec v2 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+ok 3 - zd-rec v2 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1342.369371
+  type: 'test'
+  ...
+  mediarecorder: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"} · stop() después → null
+# Subtest: zd-rec v2 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+ok 4 - zd-rec v2 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1173.868398
+  type: 'test'
+  ...
+  normal 0.41 s · después del tope + start(): 0.3 s · cancel() suelta la toma del tope
+# Subtest: zd-rec v2 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+ok 5 - zd-rec v2 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+  ---
+  duration_ms: 2762.10835
+  type: 'test'
+  ...
+  a los 0,75 s de la 2ª toma: state=rec, onLimit ×0 · cerrada por su propio tope: {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"}
+# Subtest: zd-rec v2 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+ok 6 - zd-rec v2 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+  ---
+  duration_ms: 1562.665914
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9759.565969

@@ -1,0 +1,245 @@
+TAP version 13
+  360×640 (shell) · rechazado → prompts=1 banner=true topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v2 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+not ok 1 - zd-pwa v2 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 1132.336832
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-pwa-choice.test.mjs:101:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    rechazado: sin banner ni botones que ya no instalan, y zd:pwa:dismissed guardado
+    + actual - expected
+    
+      {
+    +   banner: true,
+    -   banner: false,
+        desktopBtn: false,
+    +   dismissed: null,
+    -   dismissed: 'ahora',
+        menuItem: false,
+        otherToasts: [],
+        prompts: 1,
+        topIcon: false
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    prompts: 1
+    banner: false
+    topIcon: false
+    desktopBtn: false
+    menuItem: false
+    dismissed: 'ahora'
+    otherToasts:
+  actual:
+    prompts: 1
+    banner: true
+    topIcon: false
+    desktopBtn: false
+    menuItem: false
+    dismissed: ~
+    otherToasts:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-pwa-choice.test.mjs:113:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+  360×640 (shell) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 2
+# Subtest: zd-pwa v2 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+not ok 2 - zd-pwa v2 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 918.871993
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-pwa-choice.test.mjs:129:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    userChoice accepted + appinstalled: un solo toast "App instalada"
+    
+    2 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-pwa-choice.test.mjs:143:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  360×640 (shell) · appinstalled → prompts=0 banner=false topIcon=true desktopBtn=false menuItem=true dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v2 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+not ok 3 - zd-pwa v2 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 547.568227
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-pwa-choice.test.mjs:148:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        banner: false,
+        desktopBtn: false,
+        dismissed: null,
+        installedToasts: 1,
+    +   menuItem: true,
+    -   menuItem: false,
+        prompts: 0,
+    +   topIcon: true
+    -   topIcon: false
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    prompts: 0
+    banner: false
+    topIcon: false
+    desktopBtn: false
+    menuItem: false
+    dismissed: ~
+    installedToasts: 1
+  actual:
+    prompts: 0
+    banner: false
+    topIcon: true
+    desktopBtn: false
+    menuItem: true
+    dismissed: ~
+    installedToasts: 1
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-pwa-choice.test.mjs:156:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  1440×900 (escritorio) · rechazado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v2 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+not ok 4 - zd-pwa v2 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 692.833329
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-pwa-choice.test.mjs:101:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    rechazado: sin banner ni botones que ya no instalan, y zd:pwa:dismissed guardado
+    + actual - expected
+    
+      {
+        banner: false,
+        desktopBtn: false,
+    +   dismissed: null,
+    -   dismissed: 'ahora',
+        menuItem: false,
+        otherToasts: [],
+        prompts: 1,
+        topIcon: false
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    prompts: 1
+    banner: false
+    topIcon: false
+    desktopBtn: false
+    menuItem: false
+    dismissed: 'ahora'
+    otherToasts:
+  actual:
+    prompts: 1
+    banner: false
+    topIcon: false
+    desktopBtn: false
+    menuItem: false
+    dismissed: ~
+    otherToasts:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-pwa-choice.test.mjs:113:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  1440×900 (escritorio) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 2
+# Subtest: zd-pwa v2 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+not ok 5 - zd-pwa v2 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 901.319635
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-pwa-choice.test.mjs:129:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    userChoice accepted + appinstalled: un solo toast "App instalada"
+    
+    2 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-pwa-choice.test.mjs:143:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  1440×900 (escritorio) · appinstalled → prompts=0 banner=false topIcon=false desktopBtn=true menuItem=false dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v2 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+not ok 6 - zd-pwa v2 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 547.74384
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-pwa-choice.test.mjs:148:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        banner: false,
+    +   desktopBtn: true,
+    -   desktopBtn: false,
+        dismissed: null,
+        installedToasts: 1,
+        menuItem: false,
+        prompts: 0,
+        topIcon: false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    prompts: 0
+    banner: false
+    topIcon: false
+    desktopBtn: false
+    menuItem: false
+    dismissed: ~
+    installedToasts: 1
+  actual:
+    prompts: 0
+    banner: false
+    topIcon: false
+    desktopBtn: true
+    menuItem: false
+    dismissed: ~
+    installedToasts: 1
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-pwa-choice.test.mjs:156:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 0
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4765.022275

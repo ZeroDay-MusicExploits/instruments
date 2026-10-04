@@ -1,0 +1,232 @@
+TAP version 13
+  al enfocar: selección [0, 4] de "1400" · tipear 2500 + Enter → "2500"
+# Subtest: zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+ok 1 - zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+  ---
+  duration_ms: 907.701977
+  type: 'test'
+  ...
+  Acid_Bass-303.html: selección [4, 4] · tipear 2500 + Enter → "14002500"
+# Subtest: Acid_Bass-303.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+not ok 2 - Acid_Bass-303.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 485.159722
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        sel: [
+    -     0,
+          4,
+    +     4,
+          '1400'
+        ],
+    +   value: '14002500'
+    -   value: '2500'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    sel:
+      0: 0
+      1: 4
+      2: '1400'
+    value: '2500'
+  actual:
+    sel:
+      0: 4
+      1: 4
+      2: '1400'
+    value: '14002500'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  CronBeat-808.html: selección [4, 4] · tipear 2500 + Enter → "14002500"
+# Subtest: CronBeat-808.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+not ok 3 - CronBeat-808.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 490.386982
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        sel: [
+    -     0,
+          4,
+    +     4,
+          '1400'
+        ],
+    +   value: '14002500'
+    -   value: '2500'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    sel:
+      0: 0
+      1: 4
+      2: '1400'
+    value: '2500'
+  actual:
+    sel:
+      0: 4
+      1: 4
+      2: '1400'
+    value: '14002500'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  J4-Sirens_Station.html: selección [4, 4] · tipear 2500 + Enter → "14002500"
+# Subtest: J4-Sirens_Station.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+not ok 4 - J4-Sirens_Station.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 491.213595
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        sel: [
+    -     0,
+          4,
+    +     4,
+          '1400'
+        ],
+    +   value: '14002500'
+    -   value: '2500'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    sel:
+      0: 0
+      1: 4
+      2: '1400'
+    value: '2500'
+  actual:
+    sel:
+      0: 4
+      1: 4
+      2: '1400'
+    value: '14002500'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  MonoMoon70.html: selección [4, 4] · tipear 2500 + Enter → "14002500"
+# Subtest: MonoMoon70.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+not ok 5 - MonoMoon70.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 477.252713
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        sel: [
+    -     0,
+          4,
+    +     4,
+          '1400'
+        ],
+    +   value: '14002500'
+    -   value: '2500'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    sel:
+      0: 0
+      1: 4
+      2: '1400'
+    value: '2500'
+  actual:
+    sel:
+      0: 4
+      1: 4
+      2: '1400'
+    value: '14002500'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  Nebularp_2035.html: selección [4, 4] · tipear 2500 + Enter → "14002500"
+# Subtest: Nebularp_2035.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+not ok 6 - Nebularp_2035.html (zd-ui v1) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 504.018474
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        sel: [
+    -     0,
+          4,
+    +     4,
+          '1400'
+        ],
+    +   value: '14002500'
+    -   value: '2500'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    sel:
+      0: 0
+      1: 4
+      2: '1400'
+    value: '2500'
+  actual:
+    sel:
+      0: 4
+      1: 4
+      2: '1400'
+    value: '14002500'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 1
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3387.32255

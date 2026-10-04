@@ -1,0 +1,119 @@
+TAP version 13
+  antes: n=0 (null) · primerDestrabe: n=2 (running) · seisClicsCorriendo: n=14 (running) · dosTeclas: n=17 (running) · gestoDesdeSuspended: n=19 (running) · seisClicsMas: n=31 (running) · resumeDesdeSuspended: n=32 (running)
+# Subtest: zd-audio v1 · onResumed solo en la transición a 'running', no en cada gesto
+not ok 1 - zd-audio v1 · onResumed solo en la transición a 'running', no en cada gesto
+  ---
+  duration_ms: 2848.52796
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-audio-resumed.test.mjs:66:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    onResumed: 1 en el primer destrabe, +0 con el contexto ya corriendo, +1 por cada vuelta desde suspended
+    + actual - expected
+    
+      {
+        antes: 0,
+    +   dosTeclas: 17,
+    +   gestoDesdeSuspended: 19,
+    +   primerDestrabe: 2,
+    +   resumeDesdeSuspended: 32,
+    +   seisClicsCorriendo: 14,
+    +   seisClicsMas: 31
+    -   dosTeclas: 1,
+    -   gestoDesdeSuspended: 2,
+    -   primerDestrabe: 1,
+    -   resumeDesdeSuspended: 3,
+    -   seisClicsCorriendo: 1,
+    -   seisClicsMas: 2
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    antes: 0
+    primerDestrabe: 1
+    seisClicsCorriendo: 1
+    dosTeclas: 1
+    gestoDesdeSuspended: 2
+    seisClicsMas: 2
+    resumeDesdeSuspended: 3
+  actual:
+    antes: 0
+    primerDestrabe: 2
+    seisClicsCorriendo: 14
+    dosTeclas: 17
+    gestoDesdeSuspended: 19
+    seisClicsMas: 31
+    resumeDesdeSuspended: 32
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-audio-resumed.test.mjs:91:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+  antes: ctx=null · sample a 48000 Hz · primer gesto: ctx running a 44100 Hz, sample re-decodificado a 44100 Hz (buffer 44100 Hz), onResumed ×2 · 6 clics más: onResumed ×14
+# Subtest: descargables/CronBeat-808.html (zd-audio v1) · el primer destrabe re-decodifica los samples restaurados, y los clics siguientes no llaman a onResumed
+not ok 2 - descargables/CronBeat-808.html (zd-audio v1) · el primer destrabe re-decodifica los samples restaurados, y los clics siguientes no llaman a onResumed
+  ---
+  duration_ms: 1894.385317
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-audio-resumed.test.mjs:123:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    el primer destrabe llama una vez a resyncSamples y el sample queda a la frecuencia real; los clics siguientes no la vuelven a llamar
+    + actual - expected
+    ... Skipped lines
+    
+      {
+        antes: [
+          null,
+          48000
+        ],
+    ...
+          44100,
+    +     2
+    -     1
+        ],
+    +   seisClicsMas: 14
+    -   seisClicsMas: 1
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    antes:
+      0: ~
+      1: 48000
+    primero:
+      0: 'running'
+      1: 44100
+      2: 44100
+      3: 44100
+      4: 1
+    seisClicsMas: 1
+  actual:
+    antes:
+      0: ~
+      1: 48000
+    primero:
+      0: 'running'
+      1: 44100
+      2: 44100
+      3: 44100
+      4: 2
+    seisClicsMas: 14
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-audio-resumed.test.mjs:148:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4765.829003

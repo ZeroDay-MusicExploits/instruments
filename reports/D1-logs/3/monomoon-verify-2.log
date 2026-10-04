@@ -1,0 +1,180 @@
+TAP version 13
+  360×640 (mínimo): shell=true · blancas 37×82 · ruedas 30×156 · pad 332×176 · macro 40×40
+# Subtest: MonoMoon · R1 · 360×640 (mínimo)
+ok 1 - MonoMoon · R1 · 360×640 (mínimo)
+  ---
+  duration_ms: 1553.875806
+  type: 'test'
+  ...
+  390×844: shell=true · blancas 41×127 · ruedas 30×245 · pad 362×291 · macro 40×40
+# Subtest: MonoMoon · R1 · 390×844
+ok 2 - MonoMoon · R1 · 390×844
+  ---
+  duration_ms: 1093.564438
+  type: 'test'
+  ...
+  430×932: shell=true · blancas 47×137 · ruedas 30×265 · pad 402×359 · macro 40×40
+# Subtest: MonoMoon · R1 · 430×932
+ok 3 - MonoMoon · R1 · 430×932
+  ---
+  duration_ms: 1084.94823
+  type: 'test'
+  ...
+  768×1024 (iPad vertical): shell=true · blancas 47×228 · ruedas 30×216 · pad 740×494 · macro 46×46
+# Subtest: MonoMoon · R1 · 768×1024 (iPad vertical)
+ok 4 - MonoMoon · R1 · 768×1024 (iPad vertical)
+  ---
+  duration_ms: 1081.360425
+  type: 'test'
+  ...
+  844×390 (landscape): shell=true · blancas 53×110 · ruedas 30×98 · pad 316×77 · macro 36×36
+# Subtest: MonoMoon · R1 · 844×390 (landscape)
+ok 5 - MonoMoon · R1 · 844×390 (landscape)
+  ---
+  duration_ms: 1083.057447
+  type: 'test'
+  ...
+  1440×900 (escritorio): shell=false · blancas 70×128 · ruedas 30×120 · pad 438×118 · macro 44×44
+# Subtest: MonoMoon · R1 · 1440×900 (escritorio)
+ok 6 - MonoMoon · R1 · 1440×900 (escritorio)
+  ---
+  duration_ms: 1104.143898
+  type: 'test'
+  ...
+  glissando C4→E4→C5 · 2 dedos · pitch vuelve al centro · macro ↔ sección · doble tap · long-press "1.5k"
+# Subtest: MonoMoon · R1 · toque: glissando entre filas, multitáctil, ruedas, macros, doble tap, long-press
+ok 7 - MonoMoon · R1 · toque: glissando entre filas, multitáctil, ruedas, macros, doble tap, long-press
+  ---
+  duration_ms: 3452.821845
+  type: 'test'
+  ...
+# Subtest: MonoMoon · R2 · el banner no tapa REC, macros ni teclado; prompt() una vez; "Ahora no" 14 días
+not ok 8 - MonoMoon · R2 · el banner no tapa REC, macros ni teclado; prompt() una vez; "Ahora no" 14 días
+  ---
+  duration_ms: 31842.074424
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/reports/monomoon-verify.mjs:182:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    page.click: Timeout 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.zd-pwa-banner .zd-pwa-later')[22m
+    
+  code: 'ERR_TEST_FAILURE'
+  name: 'TimeoutError'
+  stack: |-
+    TestContext.<anonymous> (/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/reports/monomoon-verify.mjs:200:18)
+  ...
+  9 cambios → recargar → idéntico · 0 AudioContext · 1.2k / duo / C5 / 45ms
+# Subtest: MonoMoon · R3 · tocar → recargar → mismo estado, sin arrancar el audio
+ok 9 - MonoMoon · R3 · tocar → recargar → mismo estado, sin arrancar el audio
+  ---
+  duration_ms: 4196.996704
+  type: 'test'
+  ...
+  3 registros viejos (1 roto) → 2 patches en zd:monomoon-lib:session · DB vieja intacta · una sola vez
+# Subtest: MonoMoon · R3 · migración de "hackwave-minimoog" sin perder patches (la vieja queda intacta)
+ok 10 - MonoMoon · R3 · migración de "hackwave-minimoog" sin perder patches (la vieja queda intacta)
+  ---
+  duration_ms: 3323.59092
+  type: 'test'
+  ...
+# Subtest: MonoMoon · R3 · sin IndexedDB guarda en localStorage
+ok 11 - MonoMoon · R3 · sin IndexedDB guarda en localStorage
+  ---
+  duration_ms: 2751.254037
+  type: 'test'
+  ...
+  monomoon-20261004-1325.json · ida y vuelta · 4 rechazos en modal · patch 'hackwave-minimoog' acotado
+# Subtest: MonoMoon · R4 · JSON de estado completo: ida y vuelta, rechazos y patch viejo
+ok 12 - MonoMoon · R4 · JSON de estado completo: ida y vuelta, rechazos y patch viejo
+  ---
+  duration_ms: 4111.139338
+  type: 'test'
+  ...
+  WAV monomoon-20261004-1325.wav · PCM16 estéreo 44100 Hz · 2.43 s · pico 0.36
+  MIDI monomoon-20261004-1325.mid · 9 notas · {"tempo":1,"trackName":1,"cc1":7,"cc74":10,"cc71":10,"bend":15,"on":9,"off":9,"eot":1} · 0 defectos
+# Subtest: MonoMoon · R4 · REC: WAV + MIDI de performance de la misma toma
+ok 13 - MonoMoon · R4 · REC: WAV + MIDI de performance de la misma toma
+  ---
+  duration_ms: 4160.577658
+  type: 'test'
+  ...
+  tope (1 s en la prueba): tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · aviso en un toast
+# Subtest: MonoMoon · R4 · REC: al llegar al tope la toma no se pierde
+ok 14 - MonoMoon · R4 · REC: al llegar al tope la toma no se pierde
+  ---
+  duration_ms: 2980.26464
+  type: 'test'
+  ...
+  1 contexto interactive · running · suspend→overlay→toque→running · visibilitychange · CLIP con pulso angosto 32' a vol 100
+# Subtest: MonoMoon · R5 · audio: destrabar dentro del gesto, suspend → overlay → reanudar, CLIP
+ok 15 - MonoMoon · R5 · audio: destrabar dentro del gesto, suspend → overlay → reanudar, CLIP
+  ---
+  duration_ms: 5975.123879
+  type: 'test'
+  ...
+  8 rotaciones con Do4 sonando · ctx.currentTime 0.63 → 2.43
+# Subtest: MonoMoon · rotación de tablet 1180×820 ↔ 820×1180 con una nota sonando
+ok 16 - MonoMoon · rotación de tablet 1180×820 ↔ 820×1180 con una nota sonando
+  ---
+  duration_ms: 2907.735478
+  type: 'test'
+  ...
+  0 diálogos nativos · 35 sliders con nombre único · switches · teclas con aria-pressed
+# Subtest: MonoMoon · R6 · cero diálogos nativos, sliders con nombre y teclado
+ok 17 - MonoMoon · R6 · cero diálogos nativos, sliders con nombre y teclado
+  ---
+  duration_ms: 979.363803
+  type: 'test'
+  ...
+  file:// · aviso local → canonical · 0 pedidos de red · 0 errores
+# Subtest: MonoMoon · file://: sin SW, sin pedidos de red, solo el aviso local
+ok 18 - MonoMoon · file://: sin SW, sin pedidos de red, solo el aviso local
+  ---
+  duration_ms: 520.378102
+  type: 'test'
+  ...
+  SW registrado · ../manifests/monomoon.webmanifest · theme-color #f2a63c · "MonoMoon"
+# Subtest: MonoMoon · hosted: SW registrado, manifest estático y theme-color del manifest
+ok 19 - MonoMoon · hosted: SW registrado, manifest estático y theme-color del manifest
+  ---
+  duration_ms: 1628.101573
+  type: 'test'
+  ...
+  iframe · zd-pwa inerte · shell activo · audio running · 0 errores
+# Subtest: MonoMoon · iframe: zd-pwa inerte, shell activo y el audio arranca
+ok 20 - MonoMoon · iframe: zd-pwa inerte, shell activo y el audio arranca
+  ---
+  duration_ms: 1587.954102
+  type: 'test'
+  ...
+  registro slotA · ctx del host · 'MIDI ← C2' · midiMessage toca · stop suelta · sin sesión, con biblioteca · probe {"factory":true,"ctorGain":true,"worklet":"blob"}
+  8bef265..HEAD: 0 líneas quitadas con HOST/zeroday_sync/registerInstrument/C2_*; 3 agregadas (solo lecturas de HOST)
+# Subtest: MonoMoon · C2: con un hub falso registra, toca por MIDI, para y no autoguarda el patch
+ok 21 - MonoMoon · C2: con un hub falso registra, toca por MIDI, para y no autoguarda el patch
+  ---
+  duration_ms: 1792.356146
+  type: 'test'
+  ...
+# Subtest: MonoMoon · el adaptador C2 no cambió (git diff filtrado)
+ok 22 - MonoMoon · el adaptador C2 no cambió (git diff filtrado)
+  ---
+  duration_ms: 10.724966
+  type: 'test'
+  ...
+# Subtest: MonoMoon · bloques idénticos (check-blocks)
+ok 23 - MonoMoon · bloques idénticos (check-blocks)
+  ---
+  duration_ms: 49.174675
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 22
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 79299.50493

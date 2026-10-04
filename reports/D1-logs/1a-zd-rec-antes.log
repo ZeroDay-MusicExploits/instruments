@@ -1,0 +1,244 @@
+TAP version 13
+  worklet: onLimit ×1 {"max":1,"state":"rec"} · stop() después del tope → null · 2º stop() → null
+# Subtest: zd-rec v1 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+not ok 1 - zd-rec v1 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1741.786531
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:82:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    al llegar al tope la toma tiene que llegar a onLimit y al próximo stop()
+    + actual - expected
+    
+      {
+        onLimitCalls: 1,
+        onLimitMax: 1,
+    +   onLimitResult: false,
+    +   sameObject: false,
+    -   onLimitResult: true,
+    -   sameObject: true,
+        secondStop: null,
+        stateBeforeStop: 'idle',
+    +   stopAfterLimit: null
+    -   stopAfterLimit: 'toma'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    onLimitCalls: 1
+    onLimitMax: 1
+    onLimitResult: true
+    stateBeforeStop: 'idle'
+    stopAfterLimit: 'toma'
+    sameObject: true
+    secondStop: ~
+  actual:
+    onLimitCalls: 1
+    onLimitMax: 1
+    onLimitResult: false
+    stateBeforeStop: 'idle'
+    stopAfterLimit: ~
+    sameObject: false
+    secondStop: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:107:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+  worklet: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"} · stop() después → null
+# Subtest: zd-rec v1 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+not ok 2 - zd-rec v1 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1156.21703
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:118:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    el stop() de adentro de onLimit se queda con la toma, y es la misma que recibe onLimit
+    + actual - expected
+    
+      {
+        onLimitCalls: 1,
+    +   onLimitResult: false,
+    +   sameObject: false,
+    -   onLimitResult: true,
+    -   sameObject: true,
+        stateAfter: 'idle',
+        stateInOnLimit: 'rec',
+        stopAfter: null,
+        stopInOnLimit: 'toma'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    onLimitCalls: 1
+    stateInOnLimit: 'rec'
+    stopInOnLimit: 'toma'
+    onLimitResult: true
+    sameObject: true
+    stateAfter: 'idle'
+    stopAfter: ~
+  actual:
+    onLimitCalls: 1
+    stateInOnLimit: 'rec'
+    stopInOnLimit: 'toma'
+    onLimitResult: false
+    sameObject: false
+    stateAfter: 'idle'
+    stopAfter: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:147:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  mediarecorder: onLimit ×1 {"max":1,"state":"rec"} · stop() después del tope → null · 2º stop() → null
+# Subtest: zd-rec v1 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+not ok 3 - zd-rec v1 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1329.910171
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:82:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    al llegar al tope la toma tiene que llegar a onLimit y al próximo stop()
+    + actual - expected
+    
+      {
+        onLimitCalls: 1,
+        onLimitMax: 1,
+    +   onLimitResult: false,
+    +   sameObject: false,
+    -   onLimitResult: true,
+    -   sameObject: true,
+        secondStop: null,
+        stateBeforeStop: 'idle',
+    +   stopAfterLimit: null
+    -   stopAfterLimit: 'toma'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    onLimitCalls: 1
+    onLimitMax: 1
+    onLimitResult: true
+    stateBeforeStop: 'idle'
+    stopAfterLimit: 'toma'
+    sameObject: true
+    secondStop: ~
+  actual:
+    onLimitCalls: 1
+    onLimitMax: 1
+    onLimitResult: false
+    stateBeforeStop: 'idle'
+    stopAfterLimit: ~
+    sameObject: false
+    secondStop: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:107:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  mediarecorder: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"} · stop() después → null
+# Subtest: zd-rec v1 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+not ok 4 - zd-rec v1 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1176.032
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:118:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    el stop() de adentro de onLimit se queda con la toma, y es la misma que recibe onLimit
+    + actual - expected
+    
+      {
+        onLimitCalls: 1,
+    +   onLimitResult: false,
+    +   sameObject: false,
+    -   onLimitResult: true,
+    -   sameObject: true,
+        stateAfter: 'idle',
+        stateInOnLimit: 'rec',
+        stopAfter: null,
+        stopInOnLimit: 'toma'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    onLimitCalls: 1
+    stateInOnLimit: 'rec'
+    stopInOnLimit: 'toma'
+    onLimitResult: true
+    sameObject: true
+    stateAfter: 'idle'
+    stopAfter: ~
+  actual:
+    onLimitCalls: 1
+    stateInOnLimit: 'rec'
+    stopInOnLimit: 'toma'
+    onLimitResult: false
+    sameObject: false
+    stateAfter: 'idle'
+    stopAfter: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:147:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  normal 0.41 s · después del tope + start(): 0.3 s · cancel() suelta la toma del tope
+# Subtest: zd-rec v1 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+ok 5 - zd-rec v1 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+  ---
+  duration_ms: 2799.178403
+  type: 'test'
+  ...
+  a los 0,75 s de la 2ª toma: state=idle, onLimit ×1 · cerrada por su propio tope: null
+# Subtest: zd-rec v1 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+not ok 6 - zd-rec v1 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+  ---
+  duration_ms: 1300.325325
+  type: 'test'
+  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:184:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    la 2ª toma no puede cortarse con el temporizador de la 1ª
+    + actual - expected
+    
+      {
+    +   limits: 1,
+    +   state: 'idle'
+    -   limits: 0,
+    -   state: 'rec'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    state: 'rec'
+    limits: 0
+  actual:
+    state: 'idle'
+    limits: 1
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:200:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 1
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9527.69964

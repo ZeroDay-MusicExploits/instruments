@@ -1,0 +1,544 @@
+
+────────────────────────────────────────────────────────────────────────
+▶ acid-verify.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (mínimo) · shell · tabs=5 · PLAY 44px · pad 217px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 360×640 (mínimo) · layout
+ok 1 - Acid · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 812.722201
+  type: 'test'
+  ...
+  390×844 · shell · tabs=5 · PLAY 44px · pad 421px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 390×844 · layout
+ok 2 - Acid · 390×844 · layout
+  ---
+  duration_ms: 360.126476
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · tabs=5 · PLAY 44px · pad 586px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 768×1024 (iPad vertical) · layout
+ok 3 - Acid · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 368.817946
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · tabs=5 · PLAY 44px · pad 120px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 844×390 (landscape) · layout
+ok 4 - Acid · 844×390 (landscape) · layout
+  ---
+  duration_ms: 366.03909
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell · sin scroll horizontal
+# Subtest: Acid · 1440×900 (escritorio) · layout
+ok 5 - Acid · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 369.820281
+  type: 'test'
+  ...
+  360×640 · banner 82px, no tapa PLAY/tempo/pad, "Ahora no" lo descarta
+  390×844 · banner 82px, no tapa PLAY/tempo/pad, "Ahora no" lo descarta
+# Subtest: Acid · el banner de instalación no tapa PLAY ni el pad XY (360×640 y 390×844)
+ok 6 - Acid · el banner de instalación no tapa PLAY ni el pad XY (360×640 y 390×844)
+  ---
+  duration_ms: 1371.339587
+  type: 'test'
+  ...
+  guardado {"gate0":"tie","note1":55,"kbOct":4} → restaurado {"gate0":"tie","note1":55,"kbOct":4} (+ toast)
+# Subtest: Acid · autoguardado: tocar → recargar → mismo estado
+ok 7 - Acid · autoguardado: tocar → recargar → mismo estado
+  ---
+  duration_ms: 2423.651972
+  type: 'test'
+  ...
+  acid-bass-20261004-1317.json 2379B (ida y vuelta ok) · acid-bass-20261004-1317.mid 163B (13 notas, sin defectos) · acid-bass-20261004-1317.wav 224616B
+# Subtest: Acid · export JSON / MIDI / WAV
+ok 8 - Acid · export JSON / MIDI / WAV
+  ---
+  duration_ms: 5305.472775
+  type: 'test'
+  ...
+  44100 Hz · running → suspended → resume() → running · visibilitychange → running
+# Subtest: Acid · audio: destrabar, sonar, suspend y resume
+ok 9 - Acid · audio: destrabar, sonar, suspend y resume
+  ---
+  duration_ms: 2695.693403
+  type: 'test'
+  ...
+  8 rotaciones sonando · ctx.currentTime 0.53 → 2.35 · pasos vistos 7,9,11,13,15,1,3,5
+# Subtest: Acid · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+ok 10 - Acid · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+  ---
+  duration_ms: 2730.793324
+  type: 'test'
+  ...
+  file:// · SW no registrado · aviso local con [Abrir web] → https://zeroday-musicexploits.github.io/instruments/descargables/Acid_Bass-303.html · 0 pedidos de red
+# Subtest: Acid · file://: sin service worker, sin manifest, con el aviso del archivo local
+ok 11 - Acid · file://: sin service worker, sin manifest, con el aviso del archivo local
+  ---
+  duration_ms: 515.661805
+  type: 'test'
+  ...
+  hosted · SW http://127.0.0.1:37521/sw.js con scope http://127.0.0.1:37521/ · manifest ../manifests/acid-bass.webmanifest
+# Subtest: Acid · hosted: el service worker se registra y zd-pwa queda activo
+ok 12 - Acid · hosted: el service worker se registra y zd-pwa queda activo
+  ---
+  duration_ms: 368.194436
+  type: 'test'
+  ...
+  iframe · ZD.pwa inerte (active=false, 0 banner, 0 CSS) · shell=false · 0 errores
+# Subtest: Acid · iframe: zd-pwa inerte, sin banner y sin errores
+ok 13 - Acid · iframe: zd-pwa inerte, sin banner y sin errores
+  ---
+  duration_ms: 643.098855
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18356.519411
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-audio-resumed.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  antes: n=0 (null) · primerDestrabe: n=1 (running) · seisClicsCorriendo: n=1 (running) · dosTeclas: n=1 (running) · gestoDesdeSuspended: n=2 (running) · seisClicsMas: n=2 (running) · resumeDesdeSuspended: n=3 (running)
+# Subtest: zd-audio v2 · onResumed solo en la transición a 'running', no en cada gesto
+ok 1 - zd-audio v2 · onResumed solo en la transición a 'running', no en cada gesto
+  ---
+  duration_ms: 2861.967521
+  type: 'test'
+  ...
+  antes: ctx=null · sample a 48000 Hz · primer gesto: ctx running a 44100 Hz, sample re-decodificado a 44100 Hz (buffer 44100 Hz), onResumed ×1 · 6 clics más: onResumed ×1
+# Subtest: descargables/CronBeat-808.html (zd-audio v2) · el primer destrabe re-decodifica los samples restaurados, y los clics siguientes no llaman a onResumed
+ok 2 - descargables/CronBeat-808.html (zd-audio v2) · el primer destrabe re-decodifica los samples restaurados, y los clics siguientes no llaman a onResumed
+  ---
+  duration_ms: 1877.664541
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4764.247251
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-midi-order.test.mjs
+────────────────────────────────────────────────────────────────────────
+
+caso del reporte
+ppq=96 bpm=120.00 track="repro" eventos=7
+  orden (tick:evento): 0:on60 48:off60 48:on60 96:off60
+  notas=2 [60 0→48 (48)] [60 48→96 (48)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+orden a igual tick (24): off → cc → bend → on
+
+acorde repetido en el tick 48: off60 off64 off67 on67 on60 on64
+
+recorder: notas repetidas
+ppq=96 bpm=120.00 track="repetidas" eventos=11
+  orden (tick:evento): 0:on60 48:off60 48:on60 96:off60 96:on60 144:off60 144:on60 192:off60
+  notas=4 [60 0→48 (48)] [60 48→96 (48)] [60 96→144 (48)] [60 144→192 (48)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0 ~ 0"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=7
+  orden (tick:evento): 0:on33 48:off33 48:on33 60:off33
+  notas=2 [33 0→48 (48)] [33 48→60 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0a 0s 12 ~ 0a . 7s 12a 0 0s 3 . 12a 10s 7 0"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=29
+  orden (tick:evento): 0:on33 14:off33 24:on33 48:on45 49:off33 96:off45 96:on33 110:off33 144:on40 168:on45 169:off40 182:off45 192:on33 204:off33 216:on33 240:on36 241:off33 252:off36 288:on45 302:off45 312:on43 336:on40 337:off43 348:off40 360:on33 372:off33
+  notas=13 [33 0→14 (14)] [33 24→49 (25)] [45 48→96 (48)] [33 96→110 (14)] [40 144→169 (25)] [45 168→182 (14)] [33 192→204 (12)] [33 216→241 (25)] [36 240→252 (12)] [45 288→302 (14)] [43 312→337 (25)] [40 336→348 (12)] [33 360→372 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0 ~ 0 ~ 0 ~ 0 ~ 0 ~ 0 ~ 0 ~ 0 ~"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=19
+  orden (tick:evento): 0:on33 48:off33 48:on33 96:off33 96:on33 144:off33 144:on33 192:off33 192:on33 240:off33 240:on33 288:off33 288:on33 336:off33 336:on33 384:off33
+  notas=8 [33 0→48 (48)] [33 48→96 (48)] [33 96→144 (48)] [33 144→192 (48)] [33 192→240 (48)] [33 240→288 (48)] [33 288→336 (48)] [33 336→384 (48)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0s 0 0s 0 0s 0 0s 0"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=19
+  orden (tick:evento): 0:on33 24:off33 24:on33 36:off33 48:on33 72:off33 72:on33 84:off33 96:on33 120:off33 120:on33 132:off33 144:on33 168:off33 168:on33 180:off33
+  notas=8 [33 0→24 (24)] [33 24→36 (12)] [33 48→72 (24)] [33 72→84 (12)] [33 96→120 (24)] [33 120→132 (12)] [33 144→168 (24)] [33 168→180 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "12 ~ ~ 12 . 12 12 12"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=13
+  orden (tick:evento): 0:on45 72:off45 72:on45 84:off45 120:on45 132:off45 144:on45 156:off45 168:on45 180:off45
+  notas=5 [45 0→72 (72)] [45 72→84 (12)] [45 120→132 (12)] [45 144→156 (12)] [45 168→180 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+TAP version 13
+# Subtest: zd-midi v2 · caso del reporte: off y on de la misma altura en el tick 48
+ok 1 - zd-midi v2 · caso del reporte: off y on de la misma altura en el tick 48
+  ---
+  duration_ms: 2.865848
+  type: 'test'
+  ...
+# Subtest: zd-midi v2 · todos los tipos a igual tick: off → cc → bend → on
+ok 2 - zd-midi v2 · todos los tipos a igual tick: off → cc → bend → on
+  ---
+  duration_ms: 0.632543
+  type: 'test'
+  ...
+# Subtest: zd-midi v2 · note-off estable por altura a igual tick
+ok 3 - zd-midi v2 · note-off estable por altura a igual tick
+  ---
+  duration_ms: 0.569804
+  type: 'test'
+  ...
+# Subtest: zd-midi v2 · recorder(): nota repetida que cae en el mismo tick
+ok 4 - zd-midi v2 · recorder(): nota repetida que cae en el mismo tick
+  ---
+  duration_ms: 0.76825
+  type: 'test'
+  ...
+# Subtest: Acid Bass-303 · patrón "0 ~ 0": nota ligada que termina donde arranca otra igual
+ok 5 - Acid Bass-303 · patrón "0 ~ 0": nota ligada que termina donde arranca otra igual
+  ---
+  duration_ms: 0.900905
+  type: 'test'
+  ...
+# Subtest: Acid Bass-303 · patrón de fábrica y otros con alturas repetidas
+ok 6 - Acid Bass-303 · patrón de fábrica y otros con alturas repetidas
+  ---
+  duration_ms: 2.204644
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15.884507
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-mobile-cycle.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+
+  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v4 · 4 ciclos
+  keep=[seqPanel, stepEditPanel, perfPanel] transport=[playBtn, .tempo-box, clipLed]
+  tab seq (SEQ) = [tempoKnob, tapBtn, scope, .seq-top, kbPanel]
+  tab snd (SONIDO) = [oscPanel, distPanel]
+  tab filt (FILTRO) = [filtPanel, filterStatus]
+  tab pat (PATRÓN) = [.gen-row, factoryBankLbl, bank]
+  tab exp (EXPORT) = [ioPanel]
+  ciclo 1 · 1180×820 · shell=false · #zd-stage=[] · placeholders=0
+  ciclo 1 · 820×1180 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · tablet 1180×820 (sin shell) ↔ 820×1180 (shell)
+ok 1 - zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · tablet 1180×820 (sin shell) ↔ 820×1180 (shell)
+  ---
+  duration_ms: 1118.804309
+  type: 'test'
+  ...
+  ciclo 1 · 1440×900 · shell=false · #zd-stage=[] · placeholders=0
+  ciclo 1 · 390×844 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · escritorio 1440×900 (sin shell) ↔ teléfono 390×844 (shell)
+ok 2 - zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · escritorio 1440×900 (sin shell) ↔ teléfono 390×844 (shell)
+  ---
+  duration_ms: 550.157276
+  type: 'test'
+  ...
+  ciclo 1 · 844×390 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  ciclo 1 · 390×844 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · teléfono 844×390 ↔ 390×844 (shell en los dos: rotar no re-mueve nada)
+ok 3 - zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · teléfono 844×390 ↔ 390×844 (shell en los dos: rotar no re-mueve nada)
+  ---
+  duration_ms: 398.795716
+  type: 'test'
+  ...
+  listener sobre seqPanel, enganchado antes del ciclo: 1 click(s) después de volver a entrar
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · el cableado de eventos sigue vivo después de volver a entrar
+ok 4 - zd-mobile v4 · descargables/Acid_Bass-303.html · el cableado de eventos sigue vivo después de volver a entrar
+  ---
+  duration_ms: 279.018973
+  type: 'test'
+  ...
+  foco sobre section#seqPanel.panel (seqPanel)
+  foco foco → foco → foco · scrollY 320 → (reflow: 417) → 0 en el shell → 417 al salir
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · el foco y el scroll sobreviven el ciclo
+ok 5 - zd-mobile v4 · descargables/Acid_Bass-303.html · el foco y el scroll sobreviven el ciclo
+  ---
+  duration_ms: 305.774575
+  type: 'test'
+  ...
+  antes del ciclo: #zd-stage=[zd-pwa, seqPanel, stepEditPanel, perfPanel]
+  después de 3 ciclos: #zd-stage=[zd-pwa, seqPanel, stepEditPanel, perfPanel]
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · el banner de zd-pwa sigue siendo el primer hijo de \#zd-stage
+ok 6 - zd-mobile v4 · descargables/Acid_Bass-303.html · el banner de zd-pwa sigue siendo el primer hijo de \#zd-stage
+  ---
+  duration_ms: 465.515645
+  type: 'test'
+  ...
+  820×1180 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  390×844 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  844×390 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  390×844 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · los controles de la barra superior miden ≥44 px (SPEC R1)
+ok 7 - zd-mobile v4 · descargables/Acid_Bass-303.html · los controles de la barra superior miden ≥44 px (SPEC R1)
+  ---
+  duration_ms: 665.744863
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3806.687704
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-pwa-choice.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (shell) · rechazado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=ahora installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v3 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+ok 1 - zd-pwa v3 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 1612.602744
+  type: 'test'
+  ...
+  360×640 (shell) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 1
+# Subtest: zd-pwa v3 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+ok 2 - zd-pwa v3 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 909.582804
+  type: 'test'
+  ...
+  360×640 (shell) · appinstalled → prompts=0 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v3 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+ok 3 - zd-pwa v3 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 554.162617
+  type: 'test'
+  ...
+  1440×900 (escritorio) · rechazado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=ahora installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+ok 4 - zd-pwa v3 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 1157.333289
+  type: 'test'
+  ...
+  1440×900 (escritorio) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 1
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+ok 5 - zd-pwa v3 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 900.498627
+  type: 'test'
+  ...
+  1440×900 (escritorio) · appinstalled → prompts=0 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+ok 6 - zd-pwa v3 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 544.779263
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5702.429892
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-rec-instruments.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  Nebularp · worklet: tope → botón "●REC" (aria-pressed=false) · recorder idle/worklet · tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cerró sola.","Toma lista · 0:01.0 · 172.5 KB"]
+  Nebularp · worklet: 2ª toma a mano → "0:00.5 · 80.0 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: Nebularp (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 1 - Nebularp (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3130.604268
+  type: 'test'
+  ...
+  Nebularp · mediarecorder: tope → botón "●REC" (aria-pressed=false) · recorder idle/mediarecorder · tarjeta "0:01.0 · 165.4 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cerró sola.","Toma lista · 0:01.0 · 165.4 KB"]
+  Nebularp · mediarecorder: 2ª toma a mano → "0:00.4 · 72.4 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: Nebularp (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 2 - Nebularp (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 2760.282571
+  type: 'test'
+  ...
+  J4 · worklet: tope → botón "● REC" (aria-pressed=false) · recorder idle/worklet · tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · avisos ["La toma llegó al tope de 10 minutos y se cerró sola.","Toma lista · 0:01.0"]
+  J4 · worklet: 2ª toma a mano → "0:00.5 · 78.0 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: J4 (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 3 - J4 (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3235.331711
+  type: 'test'
+  ...
+  J4 · mediarecorder: tope → botón "● REC" (aria-pressed=false) · recorder idle/mediarecorder · tarjeta "0:01.0 · 165.4 KB · 44.1 kHz · estéreo" · avisos ["La toma llegó al tope de 10 minutos y se cerró sola.","Toma lista · 0:01.0"]
+  J4 · mediarecorder: 2ª toma a mano → "0:00.4 · 72.4 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: J4 (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 4 - J4 (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3228.109816
+  type: 'test'
+  ...
+  MonoMoon · worklet: tope → botón "● REC" (aria-pressed=false) · recorder idle/worklet · tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cortó ahí.","Toma lista: 0:01.0 · WAV y MIDI en PATCHES"]
+  MonoMoon · worklet: 2ª toma a mano → "0:00.4 · 76.0 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: MonoMoon (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 5 - MonoMoon (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3272.800507
+  type: 'test'
+  ...
+  MonoMoon · mediarecorder: tope → botón "● REC" (aria-pressed=false) · recorder idle/mediarecorder · tarjeta "0:01.0 · 165.4 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cortó ahí.","Toma lista: 0:01.0 · WAV y MIDI en PATCHES"]
+  MonoMoon · mediarecorder: 2ª toma a mano → "0:00.4 · 72.4 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: MonoMoon (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 6 - MonoMoon (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3278.604236
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18933.084528
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-rec-limit.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  worklet: onLimit ×1 {"max":1,"state":"rec","res":{"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"}} · stop() después del tope → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"} · 2º stop() → null
+# Subtest: zd-rec v2 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+ok 1 - zd-rec v2 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1767.103409
+  type: 'test'
+  ...
+  worklet: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"} · stop() después → null
+# Subtest: zd-rec v2 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+ok 2 - zd-rec v2 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1156.57987
+  type: 'test'
+  ...
+  mediarecorder: onLimit ×1 {"max":1,"state":"rec","res":{"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"}} · stop() después del tope → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"} · 2º stop() → null
+# Subtest: zd-rec v2 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+ok 3 - zd-rec v2 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1323.067107
+  type: 'test'
+  ...
+  mediarecorder: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"} · stop() después → null
+# Subtest: zd-rec v2 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+ok 4 - zd-rec v2 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1171.32906
+  type: 'test'
+  ...
+  normal 0.41 s · después del tope + start(): 0.31 s · cancel() suelta la toma del tope
+# Subtest: zd-rec v2 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+ok 5 - zd-rec v2 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+  ---
+  duration_ms: 2800.53707
+  type: 'test'
+  ...
+  a los 0,75 s de la 2ª toma: state=rec, onLimit ×0 · cerrada por su propio tope: {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"}
+# Subtest: zd-rec v2 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+ok 6 - zd-rec v2 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+  ---
+  duration_ms: 1564.87673
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9806.912877
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-ui-prompt.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  al enfocar: selección [0, 4] de "1400" · tipear 2500 + Enter → "2500"
+# Subtest: zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+ok 1 - zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+  ---
+  duration_ms: 903.647055
+  type: 'test'
+  ...
+  Acid_Bass-303.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: Acid_Bass-303.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 2 - Acid_Bass-303.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 767.856682
+  type: 'test'
+  ...
+  CronBeat-808.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: CronBeat-808.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 3 - CronBeat-808.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 781.440533
+  type: 'test'
+  ...
+  J4-Sirens_Station.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: J4-Sirens_Station.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 4 - J4-Sirens_Station.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 744.280644
+  type: 'test'
+  ...
+  MonoMoon70.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: MonoMoon70.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 5 - MonoMoon70.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 730.951073
+  type: 'test'
+  ...
+  Nebularp_2035.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: Nebularp_2035.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 6 - Nebularp_2035.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 764.62781
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4721.830945
+
+OK: 8 archivos de test en verde
