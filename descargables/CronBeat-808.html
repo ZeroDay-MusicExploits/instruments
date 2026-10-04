@@ -142,6 +142,7 @@
   .util{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
   .seqacts{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
   .fnote{flex:1 1 100%; margin:0; font-size:12px; line-height:1.45; color:var(--ink-dim)}
+  .wavres{flex:1 1 100%; max-width:440px} .wavres:empty{display:none}
   .filegrp{display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding-left:12px; margin-left:2px; border-left:2px solid var(--zd-line-soft)}
   .btn{ height:40px; padding:0 14px; border-radius:var(--zd-r); cursor:pointer; background:var(--zd-panel-2); color:var(--ink-dim);
     border:1px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm), var(--zd-inset);
@@ -2580,6 +2581,7 @@ window.ZD_M = {
           <select class="bars" id="bars" title="Compases a exportar"><option value="1">×1</option><option value="2" selected>×2</option><option value="4">×4</option><option value="8">×8</option></select>
           <button class="btn accent" id="saveWav" title="Exportar el patrón a WAV">Exportar WAV</button>
           <p class="fnote" id="midiNote" hidden></p>
+          <div class="wavres" id="wavResult" aria-live="polite"></div>
         </div>
       </div>
     </header>
@@ -2729,8 +2731,6 @@ window.ZD_M = {
     </div>
   </div>
 
-  <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.ogg" hidden>
-  <input type="file" id="jsonInput" accept="application/json,.json,.mid,.midi,audio/midi" hidden>
   <div class="toast" id="toast"></div>
 
 <script>
@@ -3345,10 +3345,7 @@ function flashVoice(t){ const p=rows[t].pad; p.classList.add('flash'); const bp=
 /* =========================================================================
    SAMPLES
    ========================================================================= */
-const fileInput = document.getElementById('fileInput');
-let pendingTrack = -1;
-function openFilePicker(t){ pendingTrack=t; fileInput.value=''; fileInput.click(); }
-fileInput.addEventListener('change', ()=>{ if(fileInput.files[0] && pendingTrack>=0) loadSampleFile(pendingTrack, fileInput.files[0]); });
+function openFilePicker(t){ ZD.dl.pick({ accept:'audio/*,.wav,.mp3,.ogg' }).then(f=>{ if(f) loadSampleFile(t, f); }, ()=>{}); }
 const decodedAt = KIT.map(()=>0);   // frecuencia a la que se decodificó cada sample
 let offDecoder = null;
 function decoder(){
@@ -3559,7 +3556,7 @@ function parseMIDI(bytes){
 }
 function importMIDI(bytes){
   ensureAudio();
-  const {div, notes}=parseMIDI(bytes); if(!notes.length){ toast('El MIDI no tiene notas legibles.'); return; }
+  const {div, notes}=parseMIDI(bytes); if(!notes.length){ ZD.modal.error('El MIDI no tiene notas que CronBeat pueda leer.', {title:'ERROR AL IMPORTAR'}); return; }
   const st=div/4;
   for(let pi=0;pi<N_PATTERNS;pi++) for(let t=0;t<N_TRACKS;t++) patterns[pi][t].fill(0);
   let maxBar=0;
@@ -3570,14 +3567,12 @@ function importMIDI(bytes){
   renderAll(); updatePatBar(); renderSong();
   toast('MIDI importado: '+(maxBar+1)+' compás(es) en patrones A'+(maxBar>0?('–'+PAT_LABELS[maxBar]):'')+'.');
 }
-async function saveMidiBytes(bytes, baseName){
-  try{ const dl=(window.claude && window.claude.use)? await window.claude.use('downloads'):null;
-    if(dl){ const zip=zipStore([{name:baseName+'.mid', bytes}]); await dl.save({filename:baseName+'.zip', data:zip}); toast('MIDI guardado (dentro de .zip).'); return; } }
-  catch(e){ const c=e&&e.code; if(c==='declined'||c==='rate_limited') return; }
-  const blob=new Blob([bytes],{type:'audio/midi'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=baseName+'.mid'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); toast('MIDI guardado.');
+function saveMidiBytes(bytes, what){
+  return saveBlob(new Blob([bytes],{type:'audio/midi'}), dlName(what,'mid'), 'MIDI')
+    .catch(err=>{ console.error(err); ZD.modal.error('No se pudo guardar el archivo MIDI.', {title:'ERROR AL EXPORTAR'}); });
 }
-Eg('saveMidi').addEventListener('click', ()=>{ ensureAudio(); const loops=+Eg('bars').value||1; const seq=[]; for(let i=0;i<loops;i++) seq.push(patterns[activePattern]); saveMidiBytes(gridsToMIDI(seq, tempo), 'patron-'+PAT_LABELS[activePattern]); });
-Eg('songMidi').addEventListener('click', ()=>{ ensureAudio(); if(!song.length){ toast('La canción está vacía.'); return; } saveMidiBytes(gridsToMIDI(songGrids(), tempo), 'cancion'); });
+Eg('saveMidi').addEventListener('click', ()=>{ const loops=+Eg('bars').value||1; const seq=[]; for(let i=0;i<loops;i++) seq.push(patterns[activePattern]); saveMidiBytes(gridsToMIDI(seq, tempo), 'patron-'+PAT_LABELS[activePattern].toLowerCase()); });
+Eg('songMidi').addEventListener('click', ()=>{ if(!song.length){ toast('La canción está vacía.'); return; } saveMidiBytes(gridsToMIDI(songGrids(), tempo), 'cancion'); });
 
 /* =========================================================================
    VISTAS
@@ -3706,6 +3701,14 @@ window.addEventListener('keyup', e=> heldKeys.delete(e.key.toLowerCase()));
 /* =========================================================================
    EXPORT / IMPORT  (JSON + WAV)
    ========================================================================= */
+/* Formato del proyecto: el envoltorio {app, version, savedAt, data} (SPEC R4)
+   lo comparten el JSON exportado y el autoguardado. data es buildProject() y
+   conserva app:'caja-de-ritmos' para que los JSON anteriores sigan abriendo. */
+const APP_ID='cronbeat-808', APP_VERSION=4, APP_SLUG='cronbeat';
+/* Toda descarga pasa por ZD.dl: <a download> y, en iOS, Web Share con archivo.
+   Nombre <slug>-[qué]-YYYYMMDD-HHmm.<ext> (p. ej. cronbeat-patron-a-…mid). */
+function dlName(what, ext){ return ZD.dl.name(what ? APP_SLUG+'-'+what : APP_SLUG, ext); }
+function saveBlob(blob, name, label){ return ZD.dl.save(blob, name).then(how=>{ toast(how==='share' ? label+' listo para compartir' : label+' descargado'); return how; }); }
 function bytesToB64(u8){ let s=''; const chunk=0x8000; for(let i=0;i<u8.length;i+=chunk){ s+=String.fromCharCode.apply(null, u8.subarray(i,i+chunk)); } return btoa(s); }
 function b64ToBytes(b64){ const bin=atob(b64); const u8=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i]=bin.charCodeAt(i); return u8; }
 
@@ -3752,34 +3755,32 @@ function loadProject(obj, silent, noAudio){
   if(!silent) toast('Proyecto cargado.');
 }
 
-async function offerDownload(filename, data, fallbackBlob){
-  try{
-    const dl = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null;
-    if(dl){ await dl.save({filename, data}); return true; }
-  }catch(e){ const code=e&&e.code; if(code==='declined'||code==='rate_limited') return false; /* otros → fallback */ }
-  const blob = fallbackBlob || (data instanceof Blob ? data : new Blob([data]));
-  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename;
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); return true;
+function projectEnvelope(){ return { app:APP_ID, version:APP_VERSION, savedAt:new Date().toISOString(), data:buildProject() }; }
+function saveJSON(){
+  let blob;
+  try{ blob=new Blob([JSON.stringify(projectEnvelope())],{type:'application/json'}); }
+  catch(err){ console.error(err); ZD.modal.error('No se pudo armar el JSON del proyecto.', {title:'ERROR AL EXPORTAR'}); return; }
+  saveBlob(blob, dlName('','json'), 'JSON').catch(err=>{ console.error(err); ZD.modal.error('No se pudo guardar el JSON.', {title:'ERROR AL EXPORTAR'}); });
 }
-async function saveJSON(){
-  const json = JSON.stringify(buildProject());
-  const ok = await offerDownload('caja-de-ritmos.json', json, new Blob([json],{type:'application/json'}));
-  if(ok) toast('JSON guardado.');
-}
+/* El render offline tarda: en iOS el gesto ya venció cuando termina y Web Share
+   lo rechaza. Por eso el resultado sale en una tarjeta (zd-rec) con su propio
+   botón de descarga; fuera de iOS además se descarga directo, como antes. */
+let wavCard=null, wavBusy=false;
 async function saveWAV(){
+  if(wavBusy) return; wavBusy=true; const btn=Eg('saveWav'); btn.disabled=true;
   toast('Renderizando WAV…');
-  const bars = +document.getElementById('bars').value || 2;
-  const wav = await renderWAV(bars);                       // Uint8Array
-  // La capability de descargas no admite .wav → si está disponible, va en .zip
-  let usedCap=false;
   try{
-    const dl = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null;
-    if(dl){ usedCap=true; const zip=zipStore([{name:'caja-de-ritmos.wav', bytes:wav}]);
-      await dl.save({filename:'caja-de-ritmos.zip', data:zip}); toast('WAV guardado (dentro de .zip).'); return; }
-  }catch(e){ const code=e&&e.code; if(code==='declined'||code==='rate_limited'){ return; } /* otros → fallback */ }
-  if(!usedCap){ const blob=new Blob([wav],{type:'audio/wav'});
-    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='caja-de-ritmos.wav';
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); toast('WAV guardado.'); }
+    const bars=+Eg('bars').value || 2;
+    const wav=await renderWAV(bars);                       // Uint8Array PCM 16-bit estéreo
+    const sr=ctx.sampleRate, blob=new Blob([wav],{type:'audio/wav'});
+    const name=dlName('patron-'+PAT_LABELS[activePattern].toLowerCase(),'wav');
+    if(wavCard) wavCard.destroy();
+    wavCard=ZD.rec.card(Eg('wavResult'), { blob, duration:(wav.length-44)/(4*sr), bytes:blob.size, sampleRate:sr, channels:2,
+      filename:name, downloadLabel:'↓ DESCARGAR WAV', discardLabel:'DESCARTAR', onDiscard:()=>{ wavCard=null; } });
+    if(!ZD.dl.isIOS()){ await ZD.dl.save(blob, name); toast('WAV descargado'); }
+    else toast('WAV listo: tocá ↓ DESCARGAR WAV');
+  }catch(err){ console.error(err); ZD.modal.error('No se pudo renderizar el WAV en este navegador. Probá con menos compases.', {title:'ERROR AL EXPORTAR'}); }
+  finally{ wavBusy=false; btn.disabled=false; }
 }
 async function renderWAV(bars){
   ensureAudio();
@@ -3808,40 +3809,38 @@ function encodeWAV(audioBuffer){
   let off=44; for(let i=0;i<len;i++){ for(let c=0;c<numCh;c++){ let s=Math.max(-1,Math.min(1,ch[c][i])); view.setInt16(off, s<0? s*0x8000 : s*0x7FFF, true); off+=2; } }
   return new Uint8Array(buffer);
 }
-const CRC_TABLE=(()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[n]=c>>>0; } return t; })();
-function crc32(u8){ let c=0xFFFFFFFF; for(let i=0;i<u8.length;i++) c=CRC_TABLE[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
-function zipStore(files){
-  const enc=new TextEncoder(); const parts=[], central=[]; let offset=0;
-  files.forEach(f=>{
-    const nameBytes=enc.encode(f.name), crc=crc32(f.bytes), size=f.bytes.length;
-    const lh=new DataView(new ArrayBuffer(30));
-    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0,true); lh.setUint16(8,0,true);
-    lh.setUint16(10,0,true); lh.setUint16(12,0,true); lh.setUint32(14,crc,true); lh.setUint32(18,size,true); lh.setUint32(22,size,true);
-    lh.setUint16(26,nameBytes.length,true); lh.setUint16(28,0,true);
-    parts.push(new Uint8Array(lh.buffer)); parts.push(nameBytes); parts.push(f.bytes);
-    const ch=new DataView(new ArrayBuffer(46));
-    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0,true); ch.setUint16(10,0,true);
-    ch.setUint16(12,0,true); ch.setUint16(14,0,true); ch.setUint32(16,crc,true); ch.setUint32(20,size,true); ch.setUint32(24,size,true);
-    ch.setUint16(28,nameBytes.length,true); ch.setUint16(30,0,true); ch.setUint16(32,0,true); ch.setUint16(34,0,true); ch.setUint16(36,0,true);
-    ch.setUint32(38,0,true); ch.setUint32(42,offset,true);
-    central.push({header:new Uint8Array(ch.buffer), name:nameBytes}); offset += 30+nameBytes.length+size;
-  });
-  const cdStart=offset; let cdSize=0; const cdParts=[];
-  central.forEach(c=>{ cdParts.push(c.header); cdParts.push(c.name); cdSize+=c.header.length+c.name.length; });
-  const end=new DataView(new ArrayBuffer(22));
-  end.setUint32(0,0x06054b50,true); end.setUint16(4,0,true); end.setUint16(6,0,true);
-  end.setUint16(8,files.length,true); end.setUint16(10,files.length,true); end.setUint32(12,cdSize,true); end.setUint32(16,cdStart,true); end.setUint16(20,0,true);
-  const all=[...parts,...cdParts,new Uint8Array(end.buffer)]; let total=0; all.forEach(a=>total+=a.length);
-  const out=new Uint8Array(total); let p=0; all.forEach(a=>{ out.set(a,p); p+=a.length; }); return out;
+document.getElementById('saveJson').addEventListener('click', saveJSON);
+document.getElementById('saveWav').addEventListener('click', saveWAV);
+/* Importar: JSON (envoltorio {app, version, savedAt, data} o el proyecto suelto
+   de versiones anteriores) o MIDI. Todo error sale en un modal (SPEC R4/R6). */
+function unwrapProject(obj){
+  if(!obj || typeof obj!=='object') return { ok:false, reason:'El archivo no tiene la forma de un proyecto de CronBeat.' };
+  if(obj.data && typeof obj.data==='object' && !Array.isArray(obj.patterns)){
+    if(obj.app!==APP_ID) return { ok:false, reason:'Ese JSON es de otro instrumento ('+String(obj.app||'sin nombre').slice(0,40)+'). Abrilo en el instrumento que lo creó.' };
+    if(typeof obj.version==='number' && obj.version>APP_VERSION) return { ok:false, reason:'Ese JSON es de una versión más nueva de CronBeat (v'+obj.version+'). Actualizá la página para abrirlo.' };
+    obj=obj.data;
+  }
+  if(obj.app!=='caja-de-ritmos') return { ok:false, reason:'No parece un proyecto de CronBeat: le falta la marca del formato.' };
+  if(typeof obj.version==='number' && obj.version>APP_VERSION) return { ok:false, reason:'Ese proyecto es de una versión más nueva de CronBeat (v'+obj.version+'). Actualizá la página para abrirlo.' };
+  if(!Array.isArray(obj.patterns) && !Array.isArray(obj.tracks)) return { ok:false, reason:'Al proyecto le faltan los patrones y las pistas.' };
+  return { ok:true, project:obj };
 }
-
-document.getElementById('saveJson').addEventListener('click', ()=>{ ensureAudio(); saveJSON(); });
-document.getElementById('saveWav').addEventListener('click', ()=>{ ensureAudio(); saveWAV(); });
-const jsonInput=document.getElementById('jsonInput');
-document.getElementById('openJson').addEventListener('click', ()=>{ jsonInput.value=''; jsonInput.click(); });
-jsonInput.addEventListener('change', ()=>{ const f=jsonInput.files[0]; if(!f) return; const r=new FileReader();
-  if(/\.midi?$/i.test(f.name)){ r.onload=()=>{ try{ importMIDI(new Uint8Array(r.result)); }catch(e){ toast('No pude leer el MIDI.'); } }; r.readAsArrayBuffer(f); }
-  else { r.onload=()=>{ try{ loadProject(JSON.parse(r.result)); }catch(e){ toast('No pude leer el archivo.'); } }; r.readAsText(f); } });
+document.getElementById('openJson').addEventListener('click', async ()=>{
+  let f=null;
+  try{ f=await ZD.dl.pick({ accept:'.json,application/json,.mid,.midi,audio/midi' }); }catch(err){ f=null; }
+  if(!f) return;
+  const fail=(msg)=> ZD.modal.error(msg, {title:'ERROR AL IMPORTAR'});
+  if(/\.midi?$/i.test(f.name)){
+    let buf; try{ buf=await ZD.dl.readBuffer(f); }catch(err){ fail('No se pudo leer «'+f.name+'».'); return; }
+    try{ importMIDI(new Uint8Array(buf)); markDirty(); }catch(err){ console.error(err); fail('«'+f.name+'» no es un archivo MIDI que CronBeat pueda leer.'); }
+    return;
+  }
+  let txt; try{ txt=await ZD.dl.readText(f); }catch(err){ fail('No se pudo leer «'+f.name+'».'); return; }
+  let obj; try{ obj=JSON.parse(txt); }catch(err){ fail('«'+f.name+'» no es un JSON válido.'); return; }
+  const r=unwrapProject(obj);
+  if(!r.ok){ fail(r.reason); return; }
+  try{ loadProject(r.project); markDirty(); }catch(err){ console.error(err); fail('El proyecto no se pudo aplicar.'); }
+});
 
 /* =========================================================================
    TOAST
@@ -3862,7 +3861,6 @@ function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); cle
    host (setState) y varias cajas en el rig pisarían la misma clave. Ver
    docs/zd-blocks.md (zd-store).
    ========================================================================= */
-const APP_ID='cronbeat-808', APP_VERSION=4, APP_SLUG='cronbeat';
 const OLD_DB='caja-ritmos-db', OLD_STORE='projects', OLD_KEY='autosave';
 /* Abre la DB anterior sin crearla: si no existía, se aborta la creación. */
 function oldDbOpen(){ return new Promise(res=>{ let r; try{ r=indexedDB.open(OLD_DB); }catch(e){ return res(null); }
