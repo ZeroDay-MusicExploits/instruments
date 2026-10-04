@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CronBeat-8:08</title>
+<meta name="description" content="CronBeat-8:08: caja de ritmos en el navegador con 16 pads, secuenciador de 16 pasos con patrones A–H, modo canción, FX, editor de samples y export a JSON, MIDI y WAV.">
 <!-- Version web: la usa zd-pwa para el aviso de file:// (SPEC 3.2 / docs/pwa.md). -->
 <link rel="canonical" href="https://zeroday-musicexploits.github.io/instruments/descargables/CronBeat-808.html">
 <!-- PWA: el manifest y los iconos los sirve el sitio. En file:// o dentro de
@@ -2615,7 +2616,7 @@ window.ZD_M = {
     <section class="view" id="padsView">
       <div class="pads" id="pads"></div>
       <div class="padmix" id="padMix" role="group" aria-label="Mezcla por pad"></div>
-      <div class="pads-hint" id="padsHint">Tocá con mouse, touch o teclado. Con <b>REC</b> activo y sonando, tus golpes se graban en el patrón.</div>
+      <div class="pads-hint" id="padsHint">Tocá con mouse, touch o teclado. Con <b>REC</b> activo y sonando, tus golpes se graban en el patrón. En el teléfono, tocar un pad elige su pista: sus 16 pasos quedan arriba de los pads.</div>
     </section>
 
     <section class="view" id="fxView">
@@ -2671,7 +2672,7 @@ window.ZD_M = {
         <div class="spacer"></div>
         <button class="btn accent" id="edLoad" title="Cargar un sample a este pad">Cargar sample…</button>
       </div>
-      <div class="ed-empty" id="edEmpty">Cargá un sample en algún pad (desde el secuenciador o desde Pads en vivo) y seleccionalo acá para editarlo. El original nunca se pisa: todo lo que hacés es reversible.</div>
+      <div class="ed-empty" id="edEmpty">Cargá un sample en algún pad (botón ↑ del secuenciador, de Pads en vivo o de la pestaña PADS en el teléfono) y elegilo acá para editarlo. El original nunca se pisa: todo lo que hacés es reversible.</div>
       <div class="ed-body" id="edBody">
         <div class="ed-wave-wrap"><canvas id="edWave" class="ed-wave" role="img" aria-label="Forma de onda: arrastrá para mover el inicio y el fin (también con los sliders Inicio y Fin)"></canvas></div>
         <div class="ed-controls">
@@ -2709,7 +2710,7 @@ window.ZD_M = {
       <div class="song-list" id="songList"></div>
       <div class="song-empty" id="songEmpty">La canción está vacía. Agregá bloques con <b>+ Bloque</b>: cada uno reproduce un patrón (A–H) durante los compases que elijas, en orden.</div>
       <div class="song-foot">
-        <span>El autoguardado conserva todo en este navegador (patrones, FX, samples, arreglo).</span>
+        <span>El autoguardado conserva todo en este navegador (patrones, FX, samples, arreglo). Safari puede vaciarlo tras ~7 días sin uso si no instalaste la app: guardá el JSON como backup.</span>
         <button class="btn warn" id="resetAll" title="Borrar el proyecto guardado y volver a cero">Reiniciar proyecto</button>
       </div>
     </section>
@@ -3505,7 +3506,7 @@ function bindEditor(){
   if(!edPadSel) return;
   edPadSel.addEventListener('change', ()=> selectEditorPad(+edPadSel.value));
   Eg('edPreview').addEventListener('click', ()=>{ if(edPadIdx<0) return; ensureAudio(); trigger(AA, eng, edPadIdx, ctx.currentTime, VEL_ON); flashVoice(edPadIdx); });
-  Eg('edLoad').addEventListener('click', ()=>{ if(edPadIdx>=0) openFilePicker(edPadIdx); else toast('Cargá un sample desde el secuenciador o los pads y elegilo acá.'); });
+  Eg('edLoad').addEventListener('click', ()=>{ if(edPadIdx>=0) openFilePicker(edPadIdx); else toast('Primero cargá un sample en un pad (botón ↑) y elegilo acá.'); });
   Eg('edRevert').addEventListener('click', ()=>{ if(edPadIdx<0) return; sampleEdit[edPadIdx]=defaultEdit(); syncEditorControls(edPadIdx); drawWave(edPadIdx); applyEdit(); });
   const liveTrim=(prop,id,out)=>{ Eg(id).addEventListener('input', ()=>{ if(edPadIdx<0) return; const v=Eg(id).value/1000; sampleEdit[edPadIdx][prop]=v; Eg(out).textContent=Math.round(v*100)+'%'; drawWave(edPadIdx); }); Eg(id).addEventListener('change', applyEdit); };
   liveTrim('start','edStart','edStartOut'); liveTrim('end','edEnd','edEndOut');
@@ -3760,7 +3761,7 @@ function buildProject(){
   };
 }
 function loadProject(obj, silent, noAudio){
-  if(!obj || obj.app!=='caja-de-ritmos'){ toast('Ese archivo no es un proyecto de la caja de ritmos.'); return; }
+  if(!obj || obj.app!=='caja-de-ritmos'){ toast('Ese archivo no es un proyecto de CronBeat.'); return; }
   if(!noAudio) ensureAudio();
   tempo = obj.tempo ?? tempo; swing = obj.swing ?? swing; masterVol = obj.master ?? masterVol;
   if(obj.fx){ Object.assign(reverb, obj.fx.reverb||{}); Object.assign(delay, obj.fx.delay||{}); Object.assign(phaser, obj.fx.phaser||{}); Object.assign(drive, obj.fx.drive||{}); }
