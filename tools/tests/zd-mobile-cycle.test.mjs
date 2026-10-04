@@ -132,13 +132,43 @@ const PROBE = `(() => {
       outline(document.getElementById('zd-tabs')), outline(document.getElementById('zd-sheet')),
       outline(document.querySelector('.wrap'))].join('\\n'),
     focus: document.activeElement
-      ? (document.activeElement.getAttribute && document.activeElement.getAttribute('data-zd-test')) ||
+      ? (document.activeElement.getAttribute && (document.activeElement.hasAttribute('data-zd-focus') ? 'foco' : document.activeElement.getAttribute('data-zd-test'))) ||
         document.activeElement.id || document.activeElement.tagName
       : null,
     scrollY: Math.round(window.scrollY),
     clicks: window.__zdClicks || 0,
   };
 })()`;
+
+/* ¿Cada candidato a recibir el foco tiene caja? Un nodo sin caja
+   (display:contents, o dentro de un sheet cerrado) no puede recibir foco. Se
+   mide con el shell adentro y afuera, porque el foco se pone afuera y se
+   verifica adentro. */
+const BOXES_PROBE = `(() => {
+  const out = {};
+  document.querySelectorAll('[data-zd-cand]').forEach((e) => {
+    out[e.getAttribute('data-zd-cand')] = e.getClientRects().length > 0;
+  });
+  return out;
+})()`;
+
+/* Marca los candidatos en orden: primero los nodos de ZD_M.keep (en el orden de
+   la config, no el del documento) y después los descendientes focusables de
+   keep[0], que es a lo que se cae si ningún keep tiene caja. */
+const MARK_CANDS = `((n) => {
+  const out = [];
+  const push = (e, keep) => {
+    if (!e || e.hasAttribute('data-zd-cand')) return;
+    e.setAttribute('data-zd-cand', String(out.length));
+    out.push({ i: out.length, keep: keep,
+      desc: e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') +
+        (typeof e.className === 'string' && e.className.trim() ? '.' + e.className.trim().split(/\\s+/)[0] : '') });
+  };
+  for (let i = 0; i < n; i++) push(document.querySelector('[data-zd-test="keep' + i + '"]'), i);
+  const host = document.querySelector('[data-zd-test="keep0"]');
+  if (host) host.querySelectorAll('button,input,select,a[href],[tabindex]').forEach((e) => push(e, null));
+  return out;
+})`;
 
 /* SPEC R1: todo control de la barra superior, ≥44 px en el eje corto. Recorre el
    DOM, no una lista de selectores, así que vale para cualquier instrumento. */
@@ -203,6 +233,22 @@ async function openInstrument(viewport) {
   return { ctx, page, errors };
 }
 
+/* Espera a que el shell quede en el estado pedido y a que hayan corrido los
+   listeners que vienen después. Reemplaza a dormir un número fijo de ms: con
+   varios contextos de Chromium abiertos los 90 ms alcanzaban justo y el test se
+   ponía flaky (fallaba un caso distinto en cada corrida). Los dos rAF cubren el
+   `fire()` del bloque, que despacha el resize en el frame siguiente, y el
+   re-montaje del banner que hace zd-pwa en su propio listener de la media query. */
+async function settle(page, shell) {
+  await page.waitForFunction((want) => !!(window.ZD && ZD.mobile && ZD.mobile.active) === want, shell, { timeout: 10000 });
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+/* Igual, para el banner de zd-pwa: se arma al recibir beforeinstallprompt. */
+async function settleBanner(page) {
+  await page.waitForFunction(() => !!document.querySelector('.zd-pwa-banner, .zd-pwa-local, #zd-pwa-topbtn'), null, { timeout: 10000 });
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+
 const keepTags = () => Object.fromEntries(CFG.keep.map((_, i) => [`keep${i}`, `tag${i}`]));
 const keepInWrap = (v) => Object.fromEntries(CFG.keep.map((_, i) => [`keep${i}`, v]));
 
@@ -244,7 +290,7 @@ for (const pair of PAIRS) {
         for (const key of ['a', 'b']) {
           const v = pair[key];
           await page.setViewportSize({ width: v.width, height: v.height });
-          await page.waitForTimeout(90);
+          await settle(page, v.shell);
           const s = await page.evaluate(PROBE);
           seen[key].push(s);
           const where = `ciclo ${i} · ${v.width}×${v.height}`;
@@ -276,9 +322,9 @@ test(`zd-mobile v${VERSION} · ${FILE} · el cableado de eventos sigue vivo desp
       document.querySelector('[data-zd-test="keep0"]').addEventListener('click', () => { window.__zdClicks++; });
     });
     await page.setViewportSize(DESKTOP_VIEWPORT);   // sale
-    await page.waitForTimeout(90);
+    await settle(page, false);
     await page.setViewportSize(SHELL_VIEWPORT);     // vuelve a entrar
-    await page.waitForTimeout(120);
+    await settle(page, true);
 
     const inside = await page.evaluate(PROBE);
     assertShellOn(inside, 'después de volver a entrar');
@@ -290,33 +336,58 @@ test(`zd-mobile v${VERSION} · ${FILE} · el cableado de eventos sigue vivo desp
 });
 
 test(`zd-mobile v${VERSION} · ${FILE} · el foco y el scroll sobreviven el ciclo`, async () => {
-  const { ctx, page } = await openInstrument(DESKTOP_VIEWPORT);
+  // Arranca con el shell activo para medir las cajas ahí: a quién enfocar no se
+  // puede decidir mirando solo el escritorio. En Nebularp keep[0] es `.hero`,
+  // que afuera del shell es display:flex y adentro display:contents, o sea sin
+  // caja — y un nodo sin caja no recibe foco. Elegirlo haría fallar el test por
+  // el skin del instrumento y no por el bloque. El blanco tiene que tener caja
+  // en los DOS estados: el foco se pone afuera y se verifica adentro.
+  const { ctx, page } = await openInstrument(SHELL_VIEWPORT);
   try {
+    const cands = await page.evaluate(`${MARK_CANDS}(${CFG.keep.length})`);
+    assert.ok(cands.length, `${FILE}: no hay a quién enfocar (ni nodos de keep ni descendientes focusables)`);
+    const boxesIn = await page.evaluate(BOXES_PROBE);
+    await page.setViewportSize(DESKTOP_VIEWPORT);
+    await settle(page, false);
+    const boxesOut = await page.evaluate(BOXES_PROBE);
+
+    const ok = (c) => boxesIn[c.i] && boxesOut[c.i];
+    const target = cands.find(ok);
+    const descartados = cands.slice(0, target ? cands.indexOf(target) : cands.length)
+      .map((c) => `${c.desc}${boxesIn[c.i] ? '' : ' (sin caja en el shell)'}${boxesOut[c.i] ? '' : ' (sin caja afuera)'}`);
+    assert.ok(target, `${FILE}: ningún nodo de ZD_M.keep ni descendiente focusable de keep[0] tiene caja en los dos estados — descartados: ${descartados.join(', ')}`);
+
+    await page.evaluate((i) => {
+      const el = document.querySelector(`[data-zd-cand="${i}"]`);
+      el.setAttribute('data-zd-focus', '1');
+      // los paneles son <section>/<div>: no son focusables de fábrica
+      if (!el.hasAttribute('tabindex') && !/^(button|input|select|textarea|a)$/.test(el.tagName.toLowerCase())) el.setAttribute('tabindex', '-1');
+    }, target.i);
+
+    const deDonde = target.keep === null ? `descendiente de ${CFG.keep[0]}` : CFG.keep[target.keep];
+    if (descartados.length) console.log(`  descartados: ${descartados.join(' · ')}`);
+    console.log(`  foco sobre ${target.desc} (${deDonde})`);
+
     // El scroll se registra evento por evento junto al estado del shell: al
     // angostar el viewport el navegador reflowea ANTES de que corra el listener
     // de la media query y su scroll anchoring ya mueve la página, así que lo que
     // el shell puede devolver es la última posición que tenía la página justo
     // antes de entrar, no la que pidió el test.
-    // Se enfoca el propio nodo de keep0 (con tabindex=-1), no un descendiente:
-    // es el nodo que el shell mueve, y además no se lo lleva puesto un re-render
-    // del instrumento (en Acid, renderSeq() rehace los botones de los pasos).
-    const focusId = await page.evaluate(() => {
-      const host = document.querySelector('[data-zd-test="keep0"]');
-      host.setAttribute('tabindex', '-1');
-      host.focus();
+    await page.evaluate(() => {
+      document.querySelector('[data-zd-focus]').focus();
       window.__scrollLog = [];
       addEventListener('scroll', () => window.__scrollLog.push({ y: Math.round(window.scrollY), active: !!(window.ZD && ZD.mobile && ZD.mobile.active) }), true);
       window.scrollTo(0, 320);
-      return host.tagName.toLowerCase() + (host.id ? '#' + host.id : '');
     });
+
     const before = await page.evaluate(PROBE);
-    assert.equal(before.focus, 'keep0', `el foco tiene que arrancar en ${focusId}`);
+    assert.equal(before.focus, 'foco', `el foco tiene que arrancar en ${target.desc}`);
     assert.ok(before.scrollY > 0, 'la página tiene que estar scrolleada antes de entrar');
 
     await page.setViewportSize(SHELL_VIEWPORT);
-    await page.waitForTimeout(120);
+    await settle(page, true);
     const inside = await page.evaluate(PROBE);
-    assert.equal(inside.focus, 'keep0', 'el foco tiene que sobrevivir el movimiento de nodos al entrar');
+    assert.equal(inside.focus, 'foco', `el foco tiene que sobrevivir el movimiento de nodos al entrar (${target.desc})`);
     assert.equal(inside.scrollY, 0, 'dentro del shell el body es overflow:hidden y el scroll queda en 0');
     const preEnter = await page.evaluate(() => {
       const off = window.__scrollLog.filter((r) => !r.active);
@@ -325,10 +396,10 @@ test(`zd-mobile v${VERSION} · ${FILE} · el foco y el scroll sobreviven el cicl
     assert.ok(preEnter > 0, 'tiene que haber una posición de scroll anterior a entrar al shell');
 
     await page.setViewportSize(DESKTOP_VIEWPORT);
-    await page.waitForTimeout(140);
+    await settle(page, false);
     const back = await page.evaluate(PROBE);
-    console.log(`  foco en ${focusId}: ${before.focus} → ${inside.focus} → ${back.focus} · scrollY ${before.scrollY} → (reflow: ${preEnter}) → ${inside.scrollY} en el shell → ${back.scrollY} al salir`);
-    assert.equal(back.focus, 'keep0', 'el foco tiene que volver al mismo nodo al salir del shell');
+    console.log(`  foco ${before.focus} → ${inside.focus} → ${back.focus} · scrollY ${before.scrollY} → (reflow: ${preEnter}) → ${inside.scrollY} en el shell → ${back.scrollY} al salir`);
+    assert.equal(back.focus, 'foco', `el foco tiene que volver al mismo nodo al salir del shell (${target.desc})`);
     assert.equal(back.scrollY, preEnter, 'el scroll tiene que volver a donde estaba justo antes de entrar al shell');
   } finally { await ctx.close(); }
 });
@@ -338,16 +409,17 @@ test(`zd-mobile v${VERSION} · ${FILE} · el banner de zd-pwa sigue siendo el pr
   try {
     // beforeinstallprompt sintético: alcanza para que zd-pwa arme el banner
     await page.evaluate(() => window.dispatchEvent(new Event('beforeinstallprompt')));
-    await page.waitForTimeout(90);
+    await settleBanner(page);
     let s = await page.evaluate(PROBE);
     assert.equal(s.stageFirst, 'zd-pwa', `el banner tiene que ser el primer hijo de #zd-stage, no ${s.stageFirst}`);
     console.log(`  antes del ciclo: #zd-stage=[${s.stageChildren.join(', ')}]`);
 
     for (let i = 1; i <= 3; i++) {
       await page.setViewportSize(DESKTOP_VIEWPORT);
-      await page.waitForTimeout(90);
+      await settle(page, false);
       await page.setViewportSize(SHELL_VIEWPORT);
-      await page.waitForTimeout(110);
+      await settle(page, true);
+      await page.waitForFunction(() => { const st = document.getElementById('zd-stage'); return !!(st && st.firstElementChild && (st.firstElementChild.className || '').indexOf('zd-pwa-') !== -1); }, null, { timeout: 10000 }).catch(() => {});
       s = await page.evaluate(PROBE);
       assert.equal(s.stageFirst, 'zd-pwa', `ciclo ${i}: el banner tiene que seguir siendo el primer hijo de #zd-stage, no ${s.stageFirst}`);
       assert.deepEqual(s.stageChildren.filter((x) => x !== 'zd-pwa'), CFG.keep, `ciclo ${i}: el stage perdió los paneles`);
@@ -363,7 +435,7 @@ test(`zd-mobile v${VERSION} · ${FILE} · los controles de la barra superior mid
     try {
       // con el ícono de instalar presente: es otro control de la barra
       await page.evaluate(() => window.dispatchEvent(new Event('beforeinstallprompt')));
-      await page.waitForTimeout(120);
+      await settleBanner(page);
       const controls = await page.evaluate(TOPBAR_PROBE);
       assert.ok(controls && controls.length, `${v.width}×${v.height}: no encontré controles en #zd-top`);
       const small = controls.filter((c) => Math.min(c.w, c.h) < 44);
