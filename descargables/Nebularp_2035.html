@@ -2511,6 +2511,14 @@ window.ZD_M = {
       <p class="hint">Cómo se recorren las notas que sostenés.</p>
 
       <div class="field">
+        <span class="flabel">Autoplay generativo</span>
+        <div class="tglrow">
+          <button class="tgl" id="autoTgl" type="button" aria-pressed="false"><span class="led" aria-hidden="true"></span>Autoplay</button>
+          <span class="hint" style="margin:0" id="autoReadout">Toca solo: acordes de la escala que cambian cada 2 compases.</span>
+        </div>
+      </div>
+
+      <div class="field">
         <span class="flabel">Patrón</span>
         <div class="seg" id="patternSeg"></div>
       </div>
@@ -2974,6 +2982,7 @@ window.ZD_M = {
   const delArp = m => { if (heldSet.delete(m)){ const i = heldOrder.indexOf(m); if (i>=0) heldOrder.splice(i,1); } };
 
   function noteOn(midi){
+    if (autoOn) setAuto(false);
     const already = physCount.has(midi);
     physCount.set(midi, (physCount.get(midi) || 0) + 1);
     if (already) return;                 // otra tecla ya dispara esta misma nota (colisión de escala)
@@ -3086,6 +3095,7 @@ window.ZD_M = {
   const recent = [];
   let gridT = null, gridDur = 0;      // último paso de grilla programado
   function takeGrid(t){
+    autoStep();
     gridT = t; gridDur = stepDuration();
     if (take && take.t0 == null && t >= take.startAt - 0.0005) take.t0 = t;
   }
@@ -3502,6 +3512,7 @@ window.ZD_M = {
     statusEl.classList.toggle("live", state.playing);
     statusText.textContent = state.playing ? "orbitando" : "motor listo";
     syncAudioActivity();
+    if (!state.playing && autoOn) setAuto(false);
   }
   playBtn.addEventListener("click", () => { unlockAudio(); toggleTransport(); });
   $("octUp").addEventListener("click", () => shiftOctave(1));
@@ -4056,6 +4067,54 @@ window.ZD_M = {
     note.textContent = "MIDI en vivo (Web MIDI) no disponible en este navegador: el MIDI de cada toma igual se descarga como archivo .mid.";
     note.hidden = false;
   })();
+
+  /* ===================================================================
+     EXTRA · AUTOPLAY GENERATIVO (Anexo 3.4)
+     Arma acordes con los grados de la escala elegida (paseo aleatorio por
+     los grados, tríadas o cuatriadas apiladas de a terceras) y los cambia
+     cada 2 compases, contados en pasos de grilla del scheduler. No se guarda
+     en la sesión: restaurarlo obligaría a arrancar el audio.
+  =================================================================== */
+  const AUTO_BARS = 2, AUTO_MOVES = [0, 1, 2, 3, -1, -2];
+  const autoTgl = $("autoTgl"), autoReadout = $("autoReadout");
+  const AUTO_HINT = autoReadout.textContent;
+  var autoOn = false;                 // var: noteOn/updateTransportUI lo leen antes de esta línea
+  let autoSteps = 0, autoDeg = 0;
+  function autoChord(move){
+    const degs = (SCALES[state.scale] && SCALES[state.scale].degs) || [0, 2, 3, 5, 7, 8, 10];   // cromática: menor natural
+    const n = degs.length;
+    if (move) autoDeg = (autoDeg + AUTO_MOVES[(Math.random() * AUTO_MOVES.length) | 0] + n) % n;
+    const size = Math.random() < 0.5 ? 3 : 4;
+    const base = 12 * (state.baseOctave + 1) + state.root, out = [];
+    for (let i = 0; i < size; i++){ const k = autoDeg + i * 2; out.push(clamp(base + degs[k % n] + 12 * Math.floor(k / n), 0, 127)); }
+    return out;
+  }
+  function autoApply(notes){
+    heldSet.clear(); heldOrder.length = 0; notes.forEach(addArp);
+    rebuildSequence(); renderHeld(); refreshKeys(); drawOrbit();
+    autoReadout.textContent = notes.map(noteName).join(" · ");
+  }
+  function autoStep(){
+    if (!autoOn) return;
+    const stepsPerBar = Math.max(1, Math.round(4 / SUBDIVS[state.subdiv]));
+    if (++autoSteps >= stepsPerBar * AUTO_BARS){ autoSteps = 0; autoApply(autoChord(true)); }
+  }
+  function setAuto(on){
+    autoOn = !!on; autoSteps = 0;
+    autoTgl.classList.toggle("on", autoOn);
+    autoTgl.setAttribute("aria-pressed", String(autoOn));
+    if (autoOn){
+      autoDeg = 0; autoApply(autoChord(false));          // arranca en la tónica
+      if (!state.playing){ unlockAudio(); startTransport(); }
+    } else {
+      autoReadout.textContent = AUTO_HINT;
+      if (!state.latch){                                  // sin latch, el acorde generado se suelta
+        heldSet.clear(); heldOrder.length = 0; physOrder.forEach(addArp);
+        rebuildSequence(); renderHeld(); refreshKeys(); drawOrbit();
+      }
+    }
+  }
+  autoTgl.addEventListener("click", () => setAuto(!autoOn));
 
   /* ===================================================================
      AUDIO E iOS (SPEC R5) + VISUALIZADOR LIVIANO
