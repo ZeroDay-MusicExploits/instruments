@@ -6,7 +6,8 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 1. Sin backend, sin frameworks en runtime, sin build obligatorio para **usar** los instrumentos. Cada instrumento sigue siendo **un HTML autocontenido**.
 2. **No** extraer skin/shell a un módulo compartido. Lo compartido se maneja como **bloques copiados idénticos** (3.3), delimitados con `/* ZD-BLOCK:<nombre> v<n> */ … /* /ZD-BLOCK:<nombre> */` y verificados con `tools/check-blocks.mjs`.
-3. **No romper C2**: no tocar los bloques "adaptador C2", `window.HOST` ni el canal `zeroday_sync`. `window.ZD_M` se mantiene como nombre del objeto de configuración del shell: se le pueden **agregar** claves (v2), pero no se renombra ni se quita ninguna existente. Si una tarea afecta el adaptador C2, parar y avisar.
+3. **No romper C2**: no tocar los bloques "adaptador C2", `window.HOST` ni el canal `zeroday_sync`. `window.ZD_M` se mantiene como nombre del objeto de configuración del shell y **no se renombra**. Las claves de la config del shell v1 (`title`, `slots`, `place`, `menus`) ya no las lee nadie (`zd-mobile` v4 lee solo `name`, `titleParts`, `logo`, `logoAlt`, `transport`, `keep`, `tabs`, `menuTitle`, `menu`, `menuNotes`, `onEnter`, `onExit`) y se pueden borrar; de ahora en más **solo se agregan claves nuevas** y no se quita ninguna que lea un bloque `ZD` o el hub C2. Si una tarea afecta el adaptador C2, parar y avisar.
+   - *Pendiente (anotado por D, sin resolver):* J4-Sirens Station todavía conserva las claves v1 (`J4-Sirens_Station.html`, literal de `window.ZD_M` + `Object.assign` con las v2); Acid, CronBeat, MonoMoon y Nebularp ya las sacaron. No hay `reports/E1.md` ni commits de E1 que las limpien, y `descargables/` no se toca desde la sesión D. Antes de borrarlas en J4, confirmar con quien mantiene el hub C2 (fuera de este repo) que no lee `iframe.contentWindow.ZD_M`. Ver `reports/D1-barrido.md`, f.
 4. No reescribir motores de audio ni cambiar el sonido.
 5. Nombres de archivo y **URLs actuales no cambian**: `index.html`, `landing-*.html`, `privacidad.html`, `404.html`, `descargables/<Instrumento>.html`.
 6. URLs **siempre relativas** o con `<base>` (GitHub Pages sirve bajo `/instruments/`).
@@ -20,7 +21,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 - Fuente de verdad: `descargables/<Instrumento>.html`. Es el archivo que se sirve en la web (iframe y "abrir en pantalla completa"), el que se descarga y el que va al ZIP.
 - **GA nunca va en los instrumentos.** Sí va en las páginas del sitio.
 - **Instalable solo desde la web.** Un HTML abierto en `file://` no puede registrar service worker ni manifest (los navegadores exigen https o localhost). La copy del sitio y del README tiene que decirlo: "Instalá desde la web, o bajá el HTML para usarlo local".
-- El bloque `zd-pwa` (v2) solo registra el service worker si `location.protocol` es `http:`/`https:`, la página **no** está en un iframe (`window.top === window`) y el manifest responde OK (`HEAD`). **En un iframe**: inerte y sin errores en consola. **En `file://`**: sin SW, sin manifest y sin pedidos de red; solo muestra un aviso discreto y descartable ("Estás usando el archivo local. Para instalarlo como app, abrí la versión web") con un botón que abre el `<link rel="canonical">`.
+- El bloque `zd-pwa` (v3) solo registra el service worker si `location.protocol` es `http:`/`https:`, la página **no** está en un iframe (`window.top === window`) y el manifest responde OK (`HEAD`). **En un iframe**: inerte y sin errores en consola. **En `file://`**: sin SW, sin manifest y sin pedidos de red; solo muestra un aviso discreto y descartable ("Estás usando el archivo local. Para instalarlo como app, abrí la versión web") con un botón que abre el `<link rel="canonical">`.
 - El ZIP se genera con `tools/build-zip.mjs` desde `descargables/` (no se edita a mano). `tools/check-zip.mjs` falla si el ZIP no coincide byte a byte con la carpeta.
 
 ### 3.3 Requisitos
@@ -43,14 +44,14 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 - `manifests/<slug>.webmanifest` **estático** por instrumento. Ojo: las URLs del manifest son relativas **al manifest**, así que `start_url: "../descargables/<Archivo>.html"` y `scope: "../"`. Además `name`, `short_name`, `id`, `display: "standalone"`, `orientation: "any"`, colores e íconos.
 - Íconos PNG por instrumento (color de acento) en `icons/`: 192, 512, 512 maskable y `apple-touch-icon` 180.
-- **Un único `sw.js` en la raíz** (scope `/instruments/`): precache versionado (`zd-v2`) de los 5 instrumentos + manifests + íconos; *stale-while-revalidate* para HTML; al haber versión nueva, `postMessage` → toast "Nueva versión · Recargar". No precachear el ZIP.
+- **Un único `sw.js` en la raíz** (scope `/instruments/`): precache versionado (`zd-v<n>`; hoy `zd-v3`) de los 5 instrumentos + manifests + íconos; *stale-while-revalidate* para HTML; al haber versión nueva, `postMessage` → toast "Nueva versión · Recargar". No precachear el ZIP.
 - El instrumento lo registra con `register('../sw.js', { scope: '../' })` desde `zd-pwa` (ver 3.2 para las condiciones).
 - Quitar el manifest armado con `blob:` en CronBeat y MonoMoon.
 - Botón **Instalar** unificado: `beforeinstallprompt` donde exista; en iOS, hint "Compartir → Agregar a inicio". Oculto si ya corre en `display-mode: standalone` o dentro de un iframe.
 - `apple-mobile-web-app-capable` y `apple-mobile-web-app-title` (marca, ver R7).
 - El `<meta name="theme-color">` de cada HTML coincide con el `theme_color` de su manifest. El `SLUG` de `zd-pwa` sale del `<link rel="manifest">`.
 - Cada HTML lleva `<link rel="canonical" href="https://zeroday-musicexploits.github.io/instruments/descargables/<Archivo>.html">` (URL absoluta): `zd-pwa` lo usa para el aviso del archivo local.
-- **Oferta de instalación (`zd-pwa` v2)**: banner descartable dentro de `#zd-stage` al abrir (no puede tapar PLAY, el transporte ni la superficie principal), ícono "↓" en la barra superior, botón en el header en escritorio sin shell, hint de iOS (Safari, Chrome y Firefox) con ícono de Compartir, y aviso "abrí este link en Safari o Chrome" en navegadores embebidos (Instagram, Facebook, TikTok…). "Ahora no" guarda 14 días en `localStorage`. Ver `docs/pwa.md`.
+- **Oferta de instalación (`zd-pwa` v3)**: banner descartable dentro de `#zd-stage` al abrir (no puede tapar PLAY, el transporte ni la superficie principal), ícono "↓" en la barra superior, botón en el header en escritorio sin shell, hint de iOS (Safari, Chrome y Firefox) con ícono de Compartir, y aviso "abrí este link en Safari o Chrome" en navegadores embebidos (Instagram, Facebook, TikTok…). "Ahora no" guarda 14 días en `localStorage`. Ver `docs/pwa.md`.
 - Probar: instalar, abrir offline (modo avión), actualizar versión.
 
 #### R3 · Autoguardado (fundamental)
@@ -112,7 +113,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 ### 3.4 Anexo por instrumento
 
-**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v4 (shell portrait), `zd-audio`, `zd-store`, `zd-ui`, `zd-rec`, `zd-dl`, `zd-midi` v2, `zd-pwa` v2. Versiones y changelog: `docs/zd-blocks.md`.
+**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v4 (shell portrait), `zd-audio` v2, `zd-store` v1, `zd-ui` v2, `zd-rec` v2, `zd-dl` v1, `zd-midi` v2, `zd-pwa` v3. Versiones y changelog: `docs/zd-blocks.md`.
 
 **ACID BASS-303** (piloto)
 - Portrait: steps 2×8 arriba; editor del paso (nota / accent / slide / gate) debajo; pad XY cutoff/resonance siempre visible; tabs [Seq | Sonido | Filtro | Patrón | Export].
