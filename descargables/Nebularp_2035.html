@@ -378,6 +378,28 @@
   .pkey .kbhint{color:#2a3a24}
   .pkey.black .kbhint{color:var(--zd-phosphor)}
   .note{color:var(--zd-ink-faint); border-top:1px solid var(--zd-line-soft); padding-top:16px}
+
+  /* ---- REC y panel Sesión (R4) ---- */
+  .recbtn{appearance:none; cursor:pointer; font-family:var(--zd-mono); font-weight:800; font-size:12px; letter-spacing:.1em;
+    min-height:44px; padding:0 14px; display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    color:var(--zd-ink); background:var(--zd-panel-2); border:1px solid var(--zd-outline); border-radius:var(--zd-r);
+    box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm), var(--zd-inset); touch-action:manipulation; font-variant-numeric:tabular-nums}
+  .recbtn .rdot{color:var(--zd-alert); font-size:13px; line-height:1}
+  .recbtn:hover{background:var(--zd-panel-3)}
+  .recbtn:active{transform:translateY(2px); box-shadow:0 0 0 1px var(--zd-line)}
+  .recbtn.on{color:#12130f; background:var(--zd-alert); box-shadow:0 0 0 1px var(--zd-alert), var(--zd-hard-sm), 0 0 18px -4px var(--zd-alert)}
+  .recbtn.on .rdot{color:#12130f}
+  .recbtn:disabled{opacity:.55; cursor:default}
+  .footer #ioPanel{grid-column:1 / -1}
+  .iorow{display:flex; flex-wrap:wrap; gap:8px}
+  .iobtn{appearance:none; cursor:pointer; min-height:44px; padding:0 14px; font:700 12px var(--zd-mono); letter-spacing:.06em;
+    color:var(--zd-ink); background:var(--zd-panel-2); border:1px solid var(--zd-outline); border-radius:var(--zd-r);
+    box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm); touch-action:manipulation}
+  .iobtn:hover{background:var(--zd-panel-3)}
+  .iobtn:active{transform:translateY(2px); box-shadow:0 0 0 1px var(--zd-line)}
+  .iobtn:disabled{opacity:.55; cursor:default}
+  .io-note{margin:0; font-size:12px; line-height:1.5; color:var(--zd-ink-faint)}
+  .rec-result{display:flex; flex-direction:column; gap:8px}
   @media (max-width:560px){ .zd-logo{height:48px} }
 </style>
 <style id="zd-mobile-skin">
@@ -447,6 +469,7 @@
   /* ---- barra superior: transporte compacto ---- */
   html.zd-m #zd-top .play{min-height:40px; padding:0 12px; font-size:12px; letter-spacing:.06em; gap:7px;
     box-shadow:0 0 0 1px var(--edge-glow), var(--zd-hard-sm);}
+  html.zd-m #zd-top .recbtn{min-height:40px; padding:0 10px; box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm);}
   @media (max-width:560px){ html.zd-m #zd-top .zd-ttitle{display:none;} }
   /* a <430px el botón queda en el glifo; el texto sigue para lectores de pantalla */
   @media (max-width:429px){
@@ -2431,6 +2454,7 @@ window.ZD_M = {
       <button class="play" id="play" aria-pressed="false">
         <span class="glyph" id="playGlyph"></span><span id="playLabel">Iniciar</span>
       </button>
+      <button class="recbtn" id="recBtn" type="button" aria-pressed="false" aria-label="Grabar (WAV y MIDI)"><span class="rdot" aria-hidden="true">●</span><span id="recLabel">REC</span></button>
       <div class="knob" data-knob="bpm"></div>
       <button class="tap" id="tap">tap tempo</button>
       <button class="latch" id="latch" aria-pressed="false"><span class="led"></span>Latch</button>
@@ -2550,6 +2574,24 @@ window.ZD_M = {
         </span>
       </div>
       <div class="legend-line"><b>Play / Stop</b> &nbsp;<kbd>Espacio</kbd></div>
+    </div>
+
+    <div class="panel" id="ioPanel">
+      <h2><span class="bead" style="background:var(--magenta);box-shadow:0 0 10px var(--magenta)"></span>Sesión</h2>
+      <p class="hint">● REC graba lo que suena (WAV) y las notas que toca el arpegiador (MIDI), hasta 10 minutos. La sesión se guarda sola en este navegador.</p>
+      <div class="field">
+        <span class="flabel">Última toma</span>
+        <div id="recResult" class="rec-result" role="status" aria-live="polite"><p class="io-note" id="recEmpty">Todavía no grabaste nada. Tocá ● REC, tocá y después ■.</p></div>
+      </div>
+      <div class="field">
+        <span class="flabel">Sesión completa (JSON)</span>
+        <div class="iorow">
+          <button class="iobtn" id="saveJson" type="button">↓ Guardar JSON</button>
+          <button class="iobtn" id="loadJson" type="button">↑ Abrir JSON</button>
+          <button class="iobtn" id="resetBtn" type="button">Empezar de cero</button>
+        </div>
+      </div>
+      <p class="io-note" id="midiNote" hidden></p>
     </div>
 
   </section>
@@ -2897,6 +2939,7 @@ window.ZD_M = {
     if (!state.playing){                 // feedback directo del pad
       resumeAudio();
       sustainedVoices.set(midi, spawnVoice(midi, ctx.currentTime + 0.01, null));
+      takePadOn(midi, ctx.currentTime + 0.01);
     }
   }
   function noteOff(midi){
@@ -2908,10 +2951,10 @@ window.ZD_M = {
     if (!state.latch){ delArp(midi); rebuildSequence(); renderHeld(); drawOrbit(); }
     refreshKeys();
     const h = sustainedVoices.get(midi);
-    if (h){ h.release(ctx.currentTime); sustainedVoices.delete(midi); }
+    if (h){ h.release(ctx.currentTime); sustainedVoices.delete(midi); takePadOff(midi, ctx.currentTime); }
   }
   function releaseAllSustained(){
-    sustainedVoices.forEach(h => h && h.release(ctx.currentTime));
+    sustainedVoices.forEach((h, m) => { if (h) h.release(ctx.currentTime); takePadOff(m, ctx.currentTime); });
     sustainedVoices.clear();
   }
   function setLatch(on){
@@ -2987,7 +3030,37 @@ window.ZD_M = {
   let euclidPat = euclid(state.euclidK, state.euclidN);
   const rebuildEuclid = () => { euclidPat = euclid(state.euclidK, state.euclidN); };
 
+  /* ---- captura MIDI de la toma (R4, zd-midi) ----
+     El scheduler va ~100 ms adelante: lo programado se guarda un segundo en
+     `recent` para que una toma que arranca en el medio no pierda el primer
+     paso. La toma se ancla al primer paso de la grilla (sin swing) para que
+     el .mid caiga en la grilla del DAW con el tempo de la toma. */
+  let take = null;                    // { startAt, t0, bpm, notes:[{p,v,on,off}], open:Map }
+  const recent = [];
+  let gridT = null, gridDur = 0;      // último paso de grilla programado
+  function takeGrid(t){
+    gridT = t; gridDur = stepDuration();
+    if (take && take.t0 == null && t >= take.startAt - 0.0005) take.t0 = t;
+  }
+  function noteScheduled(p, on, off){
+    const n = { p, v:100, on, off };
+    if (take){ if (take.t0 == null) take.t0 = on; take.notes.push(n); return; }
+    recent.push(n);
+    while (recent.length && recent[0].on < on - 1) recent.shift();
+  }
+  function takePadOn(m, t){
+    if (!take) return;
+    if (take.t0 == null) take.t0 = t;
+    take.open.set(m, { p:m, v:100, on:t, off:null });
+  }
+  function takePadOff(m, t){
+    if (!take) return;
+    const n = take.open.get(m); if (!n) return;
+    n.off = t; take.notes.push(n); take.open.delete(m);
+  }
+
   function scheduleStep(t){
+    takeGrid(t);
     if (heldSet.size === 0){ uiQueue.push({ time:t, index:stepIndex, count:0 }); stepIndex++; return; }
 
     // ritmos euclidianos: sólo suenan los pasos del patrón
@@ -3025,7 +3098,7 @@ window.ZD_M = {
     const gateT = clamp(state.gate, 0.05, 1.5) * sub;
     for (let rp = 0; rp < reps; rp++){
       const rt = pt + rp * sub;
-      for (const midi of notes) spawnVoice(midi, rt, rt + gateT * 0.96);
+      for (const midi of notes){ spawnVoice(midi, rt, rt + gateT * 0.96); noteScheduled(midi, rt, rt + gateT * 0.96); }
     }
 
     uiQueue.push({ time:pt, index:stepIndex, count:notes.length });
@@ -3695,7 +3768,7 @@ window.ZD_M = {
   }
 
   // Acciones del menú del shell (la config vive fuera de este IIFE).
-  const ACTIONS = { reset:() => resetAll() };
+  const ACTIONS = { reset:() => resetAll(), "export-json":() => exportJSON(), "import-json":() => importJSON() };
   document.addEventListener("nebularp:action", (e) => { const f = ACTIONS[e.detail]; if (f) f(); });
 
   (async function initSession(){
@@ -3711,6 +3784,170 @@ window.ZD_M = {
       ZD.toast("Sesión restaurada", { ms:9000, action:{ label:"Empezar de cero", onClick:resetAll } });
     }
     sessionReady = true;
+  })();
+
+  /* ===================================================================
+     EXPORTAR (SPEC R4): JSON completo · MIDI de la toma · REC posta -> WAV
+     Toda descarga pasa por ZD.dl (en iOS, Web Share con archivo). Todo texto
+     que viene de un archivo o de su nombre va por textContent (ZD.modal/toast).
+  =================================================================== */
+  const MIDI_TRACK = "ZERO DAY NEBULARP 2035";
+  const ioErr = (msg, title) => ZD.modal.error(msg, { title: title || "ERROR AL IMPORTAR" });
+
+  function exportJSON(){
+    const env = { app:APP_ID, version:APP_VERSION, savedAt:new Date().toISOString(), data:snapshot() };
+    const blob = new Blob([JSON.stringify(env, null, 2)], { type:"application/json" });
+    ZD.dl.save(blob, ZD.dl.name(APP_SLUG, "json"))
+      .then(how => ZD.toast(how === "share" ? "JSON listo para compartir" : "JSON descargado"));
+  }
+  // Valida el envoltorio {app, version, savedAt, data} antes de tocar nada.
+  function checkEnvelope(obj){
+    if (!obj || typeof obj !== "object" || Array.isArray(obj))
+      return { ok:false, reason:"El archivo no tiene la forma de una sesión de NEBULARP 2035." };
+    if (!("app" in obj) || !("data" in obj))
+      return { ok:false, reason:"Al JSON le falta el envoltorio {app, version, savedAt, data}: no parece exportado desde NEBULARP 2035." };
+    if (obj.app !== APP_ID)
+      return { ok:false, reason:"Ese JSON es de otro instrumento (" + String(obj.app).slice(0, 40) + "). Abrilo en el instrumento que lo creó." };
+    if (typeof obj.version !== "number" || !isFinite(obj.version))
+      return { ok:false, reason:"El JSON no dice de qué versión de NEBULARP 2035 es." };
+    if (obj.version > APP_VERSION)
+      return { ok:false, reason:"Ese JSON es de una versión más nueva de NEBULARP 2035 (v" + obj.version + "). Actualizá el instrumento para abrirlo." };
+    if (!obj.data || typeof obj.data !== "object" || !obj.data.state || typeof obj.data.state !== "object")
+      return { ok:false, reason:"Al JSON le faltan los parámetros de la sesión." };
+    return { ok:true, data:obj.data };
+  }
+  async function importJSON(){
+    let f = null;
+    try { f = await ZD.dl.pick({ accept:".json,application/json" }); } catch(e){ f = null; }
+    if (!f) return;
+    const name = String(f.name || "el archivo").slice(0, 80);
+    if (f.size > 512 * 1024){ ioErr("«" + name + "» es demasiado grande para ser una sesión de NEBULARP 2035."); return; }
+    let txt, obj;
+    try { txt = await ZD.dl.readText(f); } catch(e){ ioErr("No se pudo leer «" + name + "»."); return; }
+    try { obj = JSON.parse(txt); } catch(e){ ioErr("«" + name + "» no es un JSON válido."); return; }
+    const r = checkEnvelope(obj);
+    if (!r.ok){ ioErr(r.reason); return; }
+    if (!applyState(r.data)){ ioErr("«" + name + "» no trae ningún parámetro reconocible de NEBULARP 2035."); return; }
+    markDirty();
+    ZD.toast("Sesión «" + name + "» cargada");
+  }
+
+  // ---- toma: cierre y MIDI ----
+  function endTake(S){
+    if (!take) return null;
+    const tk = take; take = null;
+    tk.open.forEach(n => { n.off = S; tk.notes.push(n); });
+    const t0 = tk.t0 == null ? tk.startAt : tk.t0;
+    const notes = tk.notes.filter(n => n.on < S)
+      .map(n => ({ p:n.p, v:n.v, on:Math.max(n.on, t0), off:Math.min(Math.max(n.off, n.on), S) }))
+      .sort((a, b) => a.on - b.on);
+    // Una nota por altura a la vez: con gate > 100 % o ratchet, la anterior se
+    // corta 1,5 ticks antes de que entre la nueva. Así el note-off nunca cae en
+    // el mismo tick que el note-on siguiente (ZD.midi.write v1 los ordena al
+    // revés en ese caso; ver reports/nebularp-block-request.md).
+    const gap = 1.5 * 60 / (tk.bpm * 96);
+    const last = new Map();
+    for (const n of notes){ const prev = last.get(n.p); if (prev && prev.off > n.on - gap) prev.off = n.on - gap; last.set(n.p, n); }
+    return { t0, bpm:tk.bpm, dur:Math.max(0, S - t0), notes:notes.filter(n => n.off - n.on >= gap / 3) };
+  }
+  function takeMidiBlob(tk){
+    const rec = ZD.midi.recorder({ ppq:96, bpm:tk.bpm, trackName:MIDI_TRACK });
+    rec.start(tk.t0);
+    const ev = [];
+    tk.notes.forEach(n => { ev.push({ t:n.on, on:true, n }); ev.push({ t:n.off, on:false, n }); });
+    ev.sort((a, b) => (a.t - b.t) || (a.on - b.on));        // a igual tiempo, off antes que on
+    ev.forEach(e => e.on ? rec.noteOn(e.n.p, e.n.v, e.t) : rec.noteOff(e.n.p, e.t));
+    rec.stop(tk.t0 + tk.dur);
+    return rec.blob({ bpm:tk.bpm, trackName:MIDI_TRACK });
+  }
+
+  // ---- REC posta (zd-rec): captura la salida master tal cual se escucha ----
+  const recBtn = $("recBtn"), recLabel = $("recLabel"), recResult = $("recResult");
+  let recOn = false, recBusy = false, recCard = null;
+  const recorder = (window.ZD && ZD.rec) ? ZD.rec.create({
+    getContext: () => ctx,
+    getSource:  () => masterGain,
+    channels: 2, maxSec: 600,
+    onProgress: sec => { if (recOn) recLabel.textContent = ZD.rec.secs(sec).replace(/\.\d$/, ""); },
+    onLimit: () => { ZD.toast("Llegaste al tope de 10 minutos: la toma se cerró sola."); stopRec(); }
+  }) : null;
+
+  function updateRecUI(){
+    recBtn.classList.toggle("on", recOn);
+    recBtn.setAttribute("aria-pressed", String(recOn));
+    recBtn.setAttribute("aria-label", recOn ? "Detener la grabación" : "Grabar (WAV y MIDI)");
+    recBtn.querySelector(".rdot").textContent = recOn ? "■" : "●";
+    if (!recOn) recLabel.textContent = "REC";
+  }
+  async function startRec(){
+    if (recBusy || recOn || !recorder) return;
+    recBusy = true; recBtn.disabled = true;
+    try {
+      resumeAudio();
+      await recorder.start();
+      take = { startAt:ctx.currentTime, t0:null, bpm:state.bpm, notes:[], open:new Map() };
+      const T = take.startAt;
+      if (state.playing && gridT != null && gridDur > 0) take.t0 = gridT - Math.floor((gridT - T) / gridDur) * gridDur;
+      for (const n of recent) if (n.on >= T) take.notes.push(Object.assign({}, n));
+      sustainedVoices.forEach((h, m) => take.open.set(m, { p:m, v:100, on:T, off:null }));
+      if (take.t0 == null && take.open.size) take.t0 = T;
+      recOn = true; recLabel.textContent = "0:00";
+    } catch(e){
+      take = null;
+      ZD.modal.error("Este navegador no dejó grabar la salida de audio.", { title:"ERROR AL GRABAR" });
+    }
+    recBusy = false; recBtn.disabled = false; updateRecUI();
+  }
+  async function stopRec(){
+    if (!recOn || recBusy) return;
+    recBusy = true; recOn = false; recBtn.disabled = true; updateRecUI();
+    const tk = endTake(ctx.currentTime);
+    let res = null, failed = false;
+    try { res = await recorder.stop(); } catch(e){ failed = true; }
+    recBusy = false; recBtn.disabled = false;
+    if (failed) ZD.modal.error("No se pudo armar el WAV de esta toma. El MIDI, si hubo notas, sigue disponible.", { title:"ERROR AL GRABAR" });
+    showTake(res, tk);
+  }
+  function showTake(res, tk){
+    if (recCard){ recCard.destroy(); recCard = null; }
+    while (recResult.firstChild) recResult.removeChild(recResult.firstChild);
+    if (res && res.blob){
+      recCard = ZD.rec.card(recResult, { blob:res.blob, duration:res.duration, bytes:res.bytes,
+        sampleRate:res.sampleRate, channels:res.channels, filename:ZD.dl.name(APP_SLUG, "wav"),
+        onDiscard: () => { recCard = null; while (recResult.firstChild) recResult.removeChild(recResult.firstChild); } });
+    }
+    const n = tk ? tk.notes.length : 0;
+    const row = document.createElement("div"); row.className = "iorow";
+    const mb = document.createElement("button");
+    mb.type = "button"; mb.className = "iobtn";
+    mb.textContent = n ? "↓ Descargar MIDI (" + n + " nota" + (n === 1 ? "" : "s") + ")" : "MIDI: la toma no tiene notas";
+    mb.disabled = !n;
+    if (n) mb.addEventListener("click", () => {
+      try { ZD.dl.save(takeMidiBlob(tk), ZD.dl.name(APP_SLUG, "mid")).then(how => ZD.toast(how === "share" ? "MIDI listo para compartir" : "MIDI descargado")); }
+      catch(e){ ZD.modal.error("No se pudo armar el archivo MIDI.", { title:"ERROR AL EXPORTAR" }); }
+    });
+    row.appendChild(mb);
+    if (recCard) recCard.el.appendChild(row); else recResult.appendChild(row);
+    if (res && res.blob) ZD.toast("Toma lista · " + ZD.rec.secs(res.duration) + " · " + ZD.dl.bytes(res.bytes));
+    // mostrar el resultado: en el shell abre la pestaña que tiene el panel Sesión
+    if (window.ZD && ZD.mobile && ZD.mobile.active) ZD.mobile.open("kb");
+    else recResult.scrollIntoView({ block:"nearest", behavior:reduceMotion ? "auto" : "smooth" });
+  }
+  recBtn.addEventListener("click", () => { recOn ? stopRec() : startRec(); });
+  if (!recorder){ recBtn.disabled = true; recBtn.title = "Grabar no está disponible en este navegador"; }
+
+  $("saveJson").addEventListener("click", exportJSON);
+  $("loadJson").addEventListener("click", importJSON);
+  $("resetBtn").addEventListener("click", resetAll);
+
+  // Web MIDI no existe en Safari ni en ningún navegador de iOS: este instrumento
+  // no lo usa (el .mid es un archivo), pero lo aclaramos donde falta.
+  (function(){
+    if (!(window.ZD && ZD.midi)) return;
+    const sup = ZD.midi.support(), note = $("midiNote");
+    if (sup.available || !note) return;
+    note.textContent = "MIDI en vivo (Web MIDI) no disponible en este navegador: el MIDI de cada toma igual se descarga como archivo .mid.";
+    note.hidden = false;
   })();
 
   /* ===================================================================
