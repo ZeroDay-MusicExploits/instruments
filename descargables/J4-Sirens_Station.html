@@ -3596,8 +3596,8 @@ function renderRec(sec){
 function getRecorder(){
   if(!recorder) recorder=ZD.rec.create({ getContext:()=>ctx, getSource:()=>analyser, channels:2, maxSec:600,
     onProgress:s=>renderRec(s),
-    // zd-rec descarta el resultado del stop() que hace al llegar al tope: el
-    // stop() de aca corre antes y se queda con la toma (reports/j4-block-request.md)
+    // al llegar al tope, zd-rec (v2) corta la captura y llama aca con state todavia en
+    // 'rec': stopRec() pide la toma con stop() y la muestra (ver docs/zd-blocks.md)
     onLimit:()=>{ stopRec(); ZD.toast('La toma llegó al tope de 10 minutos y se cerró sola.',{ ms:9000 }); } });
   return recorder;
 }

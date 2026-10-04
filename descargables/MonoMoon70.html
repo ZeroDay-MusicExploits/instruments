@@ -3815,8 +3815,8 @@ function recUI(on){ const b=document.getElementById('btnRec'); b.classList.toggl
 async function startTake(){
   wavRec=ZD.rec.create({ getContext:()=>engine.ctx, getSource:()=>engine.analyser, channels:2, maxSec:600,
     onProgress:sec=>{ document.getElementById('recTime').textContent=mmss(sec); },
-    // el bloque corta solo al llegar al tope; hay que pedirle el resultado acá mismo
-    // (si no, el stop() interno lo descarta — ver reports/monomoon-block-request.md)
+    // al llegar al tope, zd-rec (v2) corta la captura y llama acá con state todavía en
+    // 'rec': stopTake() pide la toma con stop() y la muestra (ver docs/zd-blocks.md)
     onLimit:()=>{ ZD.toast('Llegaste al tope de 10 minutos: la toma se cortó ahí.', { ms:7000 }); stopTake(); } });
   await wavRec.start();
   take.midi=ZD.midi.recorder({ ppq:96, bpm:120, trackName:MIDI_TRACK, bendRange:2 });
