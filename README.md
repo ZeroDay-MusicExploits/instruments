@@ -196,7 +196,8 @@ Funciona en vertical y en horizontal. Arriba van REC (con tiempo y LED CLIP) y e
 - **Guardar…** — guarda el patch actual en la biblioteca del navegador.
 - **⭳ JSON / ⭱ JSON** — exportar / importar un patch como archivo.
 - **● Grabar** (con contador `00:00`) — graba lo que tocás y lo deja listo para exportar.
-- **Indicador MIDI** — muestra conexión Web MIDI activa (no disponible en Safari/iOS, ver [Compatibilidad](#compatibilidad)).
+- **Conectar MIDI** — botón junto al indicador MIDI; pide el permiso de Web MIDI con un toque (no aparece en Safari ni en iOS; con el hub C2 muestra "MIDI ← C2").
+- **Indicador MIDI** — muestra el estado de Web MIDI: "MIDI —", "MIDI 1", "MIDI bloqueado" o "MIDI no disponible en este navegador" (no disponible en Safari/iOS, ver [Compatibilidad](#compatibilidad)).
 - **Instalar app** — PWA instalable (desde la web).
 
 ### Banco de osciladores
