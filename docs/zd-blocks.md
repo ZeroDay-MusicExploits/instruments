@@ -7,7 +7,9 @@ con `node tools/check-blocks.mjs`.
 
 La copia canónica de cada bloque está en `tools/blocks/<nombre>.html`, lista
 para pegar tal cual (incluye el `<script>` que la envuelve). `check-blocks`
-compara los 5 HTML entre sí **y** contra esa copia.
+compara los 5 HTML entre sí **y** contra esa copia, y
+`node tools/sync-blocks.mjs` la vuelve a pegar en los instrumentos que ya la
+tengan (ver más abajo).
 
 Un bloque es el tramo que va de `/* ZD-BLOCK:<nombre> v<n> */` a
 `/* /ZD-BLOCK:<nombre> */`, ambos incluidos, una sola vez por archivo.
@@ -449,6 +451,38 @@ cuadrado vacío.
 
 ---
 
+## `tools/sync-blocks.mjs` — volver a pegar los bloques
+
+Node >=18, sin dependencias. Para cada archivo de `descargables/*.html` y cada
+bloque, reemplaza la región que va de `/* ZD-BLOCK:<nombre> v<n> */` a
+`/* /ZD-BLOCK:<nombre> */` (los dos incluidos) por la de `tools/blocks/`. El
+número de versión sale de la copia canónica, así que subirlo ahí lo propaga solo.
+
+```
+node tools/sync-blocks.mjs                      # escribe
+node tools/sync-blocks.mjs --check              # no escribe; exit 1 si hay diferencias
+node tools/sync-blocks.mjs --only zd-midi       # un bloque (repetible, o con comas)
+node tools/sync-blocks.mjs --file Acid_Bass-303.html   # un archivo (repetible)
+```
+
+Reglas:
+
+- **Si el archivo no tiene el bloque, lo reporta como "pendiente" y NO lo
+  inserta.** Pegar un bloque por primera vez es trabajo de la sesión de ese
+  instrumento: hay que ubicarlo en el `<head>` en el orden de arriba, escribir el
+  `<style id="zd-mobile-skin">` y cablearlo (ver el checklist).
+- Un bloque abierto o cerrado más de una vez en el mismo archivo es un error y
+  corta la corrida (misma regla que `check-blocks`).
+- `--check` es lo que va en CI y antes de un commit: no escribe nada y falla si
+  algún instrumento quedó con una copia vieja.
+- Después de sincronizar, `node tools/check-blocks.mjs` tiene que quedar en verde:
+  `sync-blocks` pega y `check-blocks` verifica. Son dos pasos a propósito.
+
+Hoy en `main` solo `descargables/Acid_Bass-303.html` tiene bloques pegados; los
+otros 4 instrumentos salen como "pendiente" hasta que su sesión C los integre.
+
+---
+
 ## Checklist para pegarlos en un instrumento nuevo
 
 1. Copiar los 8 archivos de `tools/blocks/` al `<head>`, en el orden de arriba,
@@ -462,7 +496,25 @@ cuadrado vacío.
    `ZD.store.open` + restauración sin arrancar el audio, los exports por
    `ZD.dl.save`, los `alert/confirm/prompt` a `ZD.modal.*`, los knobs a
    `ZD.ui.a11ySlider`.
-6. `node tools/check-blocks.mjs` y `node tools/build-zip.mjs && node tools/check-zip.mjs`.
+6. `node tools/sync-blocks.mjs` (deja de salir como "pendiente"),
+   `node tools/check-blocks.mjs` y `node tools/build-zip.mjs && node tools/check-zip.mjs`.
+
+## Tests
+
+```
+node tools/tests/run.mjs            # todo
+node tools/tests/zd-midi-order.test.mjs     # Node puro
+node tools/tests/zd-mobile-cycle.test.mjs   # necesita Playwright + Chromium
+```
+
+`zd-mobile-cycle` levanta un servidor estático propio, abre
+`descargables/Acid_Bass-303.html` con `has_touch`/`is_mobile` y alterna el
+viewport para cubrir el ciclo salir/entrar del shell. Playwright no es
+dependencia del runtime ni del build:
+
+```
+npm i -D playwright && npx playwright install chromium
+```
 
 ---
 
