@@ -43,7 +43,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 - `manifests/<slug>.webmanifest` **estático** por instrumento. Ojo: las URLs del manifest son relativas **al manifest**, así que `start_url: "../descargables/<Archivo>.html"` y `scope: "../"`. Además `name`, `short_name`, `id`, `display: "standalone"`, `orientation: "any"`, colores e íconos.
 - Íconos PNG por instrumento (color de acento) en `icons/`: 192, 512, 512 maskable y `apple-touch-icon` 180.
-- **Un único `sw.js` en la raíz** (scope `/instruments/`): precache versionado (`zd-v1`) de los 5 instrumentos + manifests + íconos; *stale-while-revalidate* para HTML; al haber versión nueva, `postMessage` → toast "Nueva versión · Recargar". No precachear el ZIP.
+- **Un único `sw.js` en la raíz** (scope `/instruments/`): precache versionado (`zd-v2`) de los 5 instrumentos + manifests + íconos; *stale-while-revalidate* para HTML; al haber versión nueva, `postMessage` → toast "Nueva versión · Recargar". No precachear el ZIP.
 - El instrumento lo registra con `register('../sw.js', { scope: '../' })` desde `zd-pwa` (ver 3.2 para las condiciones).
 - Quitar el manifest armado con `blob:` en CronBeat y MonoMoon.
 - Botón **Instalar** unificado: `beforeinstallprompt` donde exista; en iOS, hint "Compartir → Agregar a inicio". Oculto si ya corre en `display-mode: standalone` o dentro de un iframe.
@@ -112,7 +112,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 ### 3.4 Anexo por instrumento
 
-**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v2 (shell portrait), `zd-audio`, `zd-store`, `zd-ui`, `zd-rec`, `zd-dl`, `zd-midi`, `zd-pwa`.
+**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v4 (shell portrait), `zd-audio`, `zd-store`, `zd-ui`, `zd-rec`, `zd-dl`, `zd-midi` v2, `zd-pwa` v2. Versiones y changelog: `docs/zd-blocks.md`.
 
 **ACID BASS-303** (piloto)
 - Portrait: steps 2×8 arriba; editor del paso (nota / accent / slide / gate) debajo; pad XY cutoff/resonance siempre visible; tabs [Seq | Sonido | Filtro | Patrón | Export].

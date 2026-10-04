@@ -7,7 +7,9 @@ con `node tools/check-blocks.mjs`.
 
 La copia canónica de cada bloque está en `tools/blocks/<nombre>.html`, lista
 para pegar tal cual (incluye el `<script>` que la envuelve). `check-blocks`
-compara los 5 HTML entre sí **y** contra esa copia.
+compara los 5 HTML entre sí **y** contra esa copia, y
+`node tools/sync-blocks.mjs` la vuelve a pegar en los instrumentos que ya la
+tengan (ver más abajo).
 
 Un bloque es el tramo que va de `/* ZD-BLOCK:<nombre> v<n> */` a
 `/* /ZD-BLOCK:<nombre> */`, ambos incluidos, una sola vez por archivo.
@@ -187,7 +189,7 @@ no sea `AbortError`, cae al `<a download>`. `prefer` fuerza una u otra.
 `pick()` crea su propio `<input type=file>`: no hace falta el input oculto en
 el markup.
 
-## `zd-midi` v1 — SMF y captura de performance
+## `zd-midi` v2 — SMF y captura de performance
 
 ```js
 ZD.midi.write({ ppq: 96, bpm, trackName, events }) // -> Blob audio/midi (formato 0)
@@ -199,8 +201,10 @@ ZD.midi.support()                         // { available, ios, reason }
 ```
 
 `write()` ordena por tick y, a igual tick, resuelve `off → cc → bend → on`
-(nunca un note-off después del note-on del mismo tick). El nombre de track se
-pasa a ASCII imprimible. `support()` es lo que hay que mostrar como
+(nunca un note-off después del note-on del mismo tick). Entre varios note-off
+del mismo tick ordena por altura ascendente, así el archivo sale igual en cada
+corrida; los note-on conservan el orden en que los empujó el instrumento. El
+nombre de track se pasa a ASCII imprimible. `support()` es lo que hay que mostrar como
 "MIDI no disponible en este navegador": **Web MIDI no existe en Safari ni en
 ningún navegador de iOS** (el bloque no lo asume, lo detecta).
 
@@ -218,6 +222,20 @@ const blob = rec.blob({ bpm, trackName });
 
 Los tiempos entran en **segundos** (`ctx.currentTime` sirve directo) y se
 convierten a ticks al cerrar. `rec.allOff()` cierra las notas abiertas.
+`noteOn()` de una altura ya abierta cierra la anterior en el mismo instante: ese
+off y el on nuevo caen en el mismo tick y los resuelve el orden de `write()`.
+
+Caso de prueba del orden a igual tick (es el que estaba roto en v1):
+
+```js
+ZD.midi.write({ ppq:96, bpm:120, events:[
+  { t:0,  type:'on',  pitch:60, vel:100 }, { t:48, type:'off', pitch:60 },
+  { t:48, type:'on',  pitch:60, vel:100 }, { t:96, type:'off', pitch:60 } ] })
+// track: 00 90 3c 64 · 30 80 3c 00 · 00 90 3c 64 · 30 80 3c 00
+// dos notas de 48 ticks, sin solaparse ni quedar de largo 0
+```
+
+Lo verifica `node tools/tests/zd-midi-order.test.mjs`.
 Acid Bass no usa el recorder: su MIDI sale del patrón de 16 pasos con
 `write()`. Lo usan MonoMoon, Nebularp y J4 (SPEC R4).
 
@@ -262,7 +280,7 @@ para escuchar y el botón de descarga (que pasa por `ZD.dl.save`). Acid Bass usa
 **solo la tarjeta**, para el resultado de su render offline; la captura en vivo
 es para Nebularp y J4.
 
-## `zd-mobile` v2 — shell portrait-first
+## `zd-mobile` v4 — shell portrait-first
 
 Reemplaza al shell landscape v1 y a `#zd-rotate`. Barra superior de 48 px →
 zona de tocar → tabs de 56 px + `env(safe-area-inset-bottom)` → bottom sheets
@@ -315,6 +333,29 @@ ZD.mobile.open(id) / close() / toggle(id)   // id '__menu' para el menú
 ZD.mobile.stage() / pane(id)       // nodos del shell
 ZD.mobile.mq                       // la media query de activación
 ```
+
+**Targets táctiles de la barra superior (v4).** El bloque pone un piso de
+44 px en los dos ejes para todo control que termine en `#zd-top`
+(`button`, `a`, `input`, `select`), venga del transporte del instrumento, del
+ícono de instalar que inyecta `zd-pwa` o del botón de menú propio. La barra mide
+48 px, así que 44 entra. Va con `min-width`/`min-height`, que ganan sobre un
+`width`/`height` fijo sin importar la especificidad (por eso levanta el
+`.zd-pwa-topicon` de 40×40 sin tocar `zd-pwa`), y **sin `!important`**: el
+`<style id="zd-mobile-skin">` de un instrumento puede decidir otra cosa a
+sabiendas. Ojo con eso: si el skin fija `min-height` con más especificidad, gana
+el skin y el control vuelve a quedar corto. Lo chequea el test.
+
+**Entrar y salir son idempotentes y reversibles (v3).** El shell se arma una
+sola vez (`build()`), pero los nodos se mueven en cada `enter()` y vuelven a su
+lugar en cada `exit()`, con un comentario `<!--zd-m-->` de marcador por nodo: tras
+N ciclos el DOM queda idéntico, los nodos son los mismos objetos (el cableado de
+eventos y el estado de los `<canvas>` sobreviven) y no queda ningún marcador
+suelto. El ciclo además devuelve el foco al elemento que lo tenía y el scroll de
+la página a donde estaba antes de entrar. En v2 `moveNodes()` vivía adentro de
+`build()`, así que al volver a entrar la barra, el stage, las tabs y los sheets
+quedaban vacíos.
+
+Lo verifica `node tools/tests/zd-mobile-cycle.test.mjs`.
 
 **Decisión que afecta a los 5 — la activación no mira la orientación:**
 
@@ -421,6 +462,38 @@ cuadrado vacío.
 
 ---
 
+## `tools/sync-blocks.mjs` — volver a pegar los bloques
+
+Node >=18, sin dependencias. Para cada archivo de `descargables/*.html` y cada
+bloque, reemplaza la región que va de `/* ZD-BLOCK:<nombre> v<n> */` a
+`/* /ZD-BLOCK:<nombre> */` (los dos incluidos) por la de `tools/blocks/`. El
+número de versión sale de la copia canónica, así que subirlo ahí lo propaga solo.
+
+```
+node tools/sync-blocks.mjs                      # escribe
+node tools/sync-blocks.mjs --check              # no escribe; exit 1 si hay diferencias
+node tools/sync-blocks.mjs --only zd-midi       # un bloque (repetible, o con comas)
+node tools/sync-blocks.mjs --file Acid_Bass-303.html   # un archivo (repetible)
+```
+
+Reglas:
+
+- **Si el archivo no tiene el bloque, lo reporta como "pendiente" y NO lo
+  inserta.** Pegar un bloque por primera vez es trabajo de la sesión de ese
+  instrumento: hay que ubicarlo en el `<head>` en el orden de arriba, escribir el
+  `<style id="zd-mobile-skin">` y cablearlo (ver el checklist).
+- Un bloque abierto o cerrado más de una vez en el mismo archivo es un error y
+  corta la corrida (misma regla que `check-blocks`).
+- `--check` es lo que va en CI y antes de un commit: no escribe nada y falla si
+  algún instrumento quedó con una copia vieja.
+- Después de sincronizar, `node tools/check-blocks.mjs` tiene que quedar en verde:
+  `sync-blocks` pega y `check-blocks` verifica. Son dos pasos a propósito.
+
+Hoy en `main` solo `descargables/Acid_Bass-303.html` tiene bloques pegados; los
+otros 4 instrumentos salen como "pendiente" hasta que su sesión C los integre.
+
+---
+
 ## Checklist para pegarlos en un instrumento nuevo
 
 1. Copiar los 8 archivos de `tools/blocks/` al `<head>`, en el orden de arriba,
@@ -434,4 +507,138 @@ cuadrado vacío.
    `ZD.store.open` + restauración sin arrancar el audio, los exports por
    `ZD.dl.save`, los `alert/confirm/prompt` a `ZD.modal.*`, los knobs a
    `ZD.ui.a11ySlider`.
-6. `node tools/check-blocks.mjs` y `node tools/build-zip.mjs && node tools/check-zip.mjs`.
+6. `node tools/sync-blocks.mjs` (deja de salir como "pendiente"),
+   `node tools/check-blocks.mjs` y `node tools/build-zip.mjs && node tools/check-zip.mjs`.
+
+## Tests
+
+```
+node tools/tests/run.mjs            # todo
+node tools/tests/zd-midi-order.test.mjs     # Node puro
+node tools/tests/zd-mobile-cycle.test.mjs   # necesita Playwright + Chromium
+node tools/tests/acid-verify.test.mjs       # idem
+```
+
+- `zd-midi-order` · el orden de eventos a igual tick en `write()` y en
+  `recorder()`, y el MIDI del patrón de Acid parseado como SMF.
+- `zd-mobile-cycle` · conformidad de `zd-mobile` para **cualquier** instrumento:
+  el ciclo salir/entrar del shell en los tres pares de viewport, el cableado de
+  eventos, el foco, el scroll, el banner de `zd-pwa` y los ≥44 px de los
+  controles de la barra superior. No sabe nada de un instrumento en particular.
+- `acid-verify` · la verificación completa del piloto, la que hay que volver a
+  pasar después de tocar un bloque: viewports 360×640 / 390×844 / 768×1024 /
+  844×390 / 1440×900, autoguardado, export JSON+MIDI+WAV (con ida y vuelta del
+  JSON), audio con suspend/resume, banner de instalación (que no tape PLAY ni el
+  pad XY), rotación de tablet 1180×820 ↔ 820×1180 **con el instrumento sonando**,
+  `file://`, iframe y registro del service worker sobre http.
+
+### `zd-mobile-cycle` en otro instrumento
+
+Es el test que una sesión C tiene que correr sobre lo suyo después de pegar o
+actualizar `zd-mobile`, **sin tocar nada de `tools/`**:
+
+```
+node tools/tests/zd-mobile-cycle.test.mjs --file descargables/Nebularp_2035.html
+node tools/tests/zd-mobile-cycle.test.mjs --file descargables/J4-Sirens_Station.html --cycles 6
+```
+
+Sin `--file` corre sobre el piloto, `descargables/Acid_Bass-303.html`.
+
+No hay nada del instrumento escrito en el test: al arrancar lee el
+`window.ZD_M` de la propia página y resuelve `keep`, `transport` y
+`tabs[].nodes` con `querySelectorAll`, igual que el bloque, así que las
+expectativas salen de la config. Después exige, en cada ciclo, que `#zd-stage`,
+`.zd-ttr` y cada pane tengan **exactamente** esos nodos con el shell activo, y
+que queden **vacíos** al salir. Imprime lo que resolvió, así se ve de entrada si
+un selector de `ZD_M` no matchea nada:
+
+```
+  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v4 · 4 ciclos
+  keep=[seqPanel, stepEditPanel, perfPanel] transport=[playBtn, .tempo-box, clipLed]
+  tab seq (SEQ) = [tempoKnob, tapBtn, scope, .seq-top, kbPanel]
+```
+
+Detalles que conviene saber antes de leer una falla:
+
+- Un instrumento sin el bloque pegado falla con "`window.ZD_M.keep` no resolvió
+  ningún nodo". Primero `node tools/sync-blocks.mjs`.
+- Los selectores de `ZD_M` que no son strings (una función que devuelve nodos)
+  no se pueden predecir: el test los avisa y no los exige.
+- El foco se prueba sobre el propio nodo de `keep[0]` (con `tabindex="-1"`), no
+  sobre un descendiente: un re-render del instrumento se llevaría puesto al
+  descendiente y la falla no sería del bloque.
+- El cableado de eventos se prueba con un listener propio enganchado **antes**
+  del ciclo, más la identidad del objeto DOM. No depende de ningún control del
+  instrumento.
+
+Playwright no es dependencia del runtime ni del build:
+
+```
+npm i -D playwright && npx playwright install chromium
+```
+
+---
+
+## Changelog de bloques
+
+Cuando sube un bloque, sube también el número del delimitador
+(`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
+que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-04 · `zd-mobile` v3 → v4
+
+Los controles de la barra superior medían 40 px de alto y SPEC R1 pide ≥44 px en
+el eje corto. La barra mide 48, así que 44 entra sin tocar la métrica del shell.
+
+- `#zd-tmenu` pasa de 44×40 a 44×44.
+- Piso genérico: `#zd-top button, #zd-top a, #zd-top input, #zd-top select`
+  con `min-width:44px; min-height:44px`. Alcanza a los nodos de `transport` del
+  instrumento y al `↓` de `zd-pwa` (40×40 fijos) sin tocar ese bloque, porque
+  `min-*` gana sobre `width`/`height` sin importar la especificidad.
+- Sin `!important`: un `zd-mobile-skin` con más especificidad sigue mandando.
+  **Lo que tiene que hacer cada sesión C:** revisar que su skin no fije un
+  `min-height` menor a 44 para los nodos del transporte. En Acid había
+  `html.zd-m #zd-top .btn-play{min-height:40px}` y pasó a 44.
+
+Medido en Acid con el ícono de instalar visible (360×640, 390×844, 768×1024 y
+844×390): barra 48 px, `#zd-tmenu` 44×44, `#zd-pwa-topbtn` 44×44, PLAY 76×44,
+tempo-box 58×44, sin recorte en `.zd-ttr` y sin scroll horizontal.
+
+### 2026-10-03 · `zd-midi` v1 → v2
+
+A igual tick, el note-off salía **después** del note-on, justo al revés de lo que
+promete la doc. El comparador usaba `(ORDER[a.type] || 9)` y `ORDER.off` valía
+`0`: por falsy, el off se iba a 9 y quedaba último.
+
+- `ORDER` pasa a `{ off:1, cc:2, bend:3, on:4 }` (ningún valor falsy) y el rango
+  se resuelve en `rank()`, que devuelve 9 solo para los tipos que no conoce.
+- Nuevo desempate: entre note-off del mismo tick, por **altura ascendente**. Los
+  note-on siguen en el orden en que los empujó el instrumento.
+- Sin cambios en la API pública ni en el formato de los eventos.
+
+Lo que arregla: una nota repetida en la misma altura cuyo off y on caen en el
+mismo tick quedaba de duración cero y dejaba la otra colgada hasta el off
+siguiente. Afectaba a Acid (`buildMIDI()` con un patrón tipo `0 ~ 0`), al
+`recorder()` de MonoMoon, Nebularp y J4 (re-trigger de la misma altura) y al
+patrón de fábrica de Acid (`0a 0s 12 ~ …`: `on` de 45 y `off` de 33 en el tick 96).
+
+### 2026-10-03 · `zd-mobile` v2 → v3
+
+Al volver a entrar al shell, `#zd-stage`, la barra superior, las tabs y los
+sheets quedaban vacíos: `enter()` llama a `build()`, que corre una sola vez
+(`if (built) return;`), y `moveNodes()` vivía adentro de `build()`. `exit()` sí
+devolvía los nodos con `restoreNodes()`.
+
+- `build()` guarda la columna de transporte en `trRef` y ya no mueve nodos.
+- `enter()` mueve los nodos cuando no hay ninguno movido
+  (`if (!moves.length) moveNodes(trRef)`): `restoreNodes()` vacía `moves`, así
+  que el ciclo queda simétrico y entrar dos veces seguidas no mueve nada dos veces.
+- El ciclo conserva el **foco** (el nodo que lo tenía se vuelve a enfocar con
+  `preventScroll`) y el **scroll de la página** (se guarda al entrar, porque el
+  shell pone `body{overflow:hidden}`, y se devuelve al salir).
+- Sin cambios en la API pública ni en el contrato de `window.ZD_M`.
+
+Lo que arregla: redimensionar una ventana de escritorio de un lado al otro de
+820 px, y rotar una tablet cuyo ancho cruza 1024 px (iPad Pro de 12,9": 1024 en
+vertical, 1366 en horizontal; en una de 1180×820 el shell entra en vertical y
+sale en horizontal).
