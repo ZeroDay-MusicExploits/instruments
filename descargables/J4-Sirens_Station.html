@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>J4-Sirens Station</title>
 <style>
 :root{
@@ -22,10 +22,14 @@ body{
     radial-gradient(120% 90% at 50% -10%, #3a1d15 0%, #1a0d09 60%, #0d0705 100%);
   color:var(--cream);
   font-family:var(--zd-mono);
-  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
   overflow-x:hidden;
-  touch-action:none;
+  /* SPEC R1: la pagina hace pan y zoom (sin doble tap). touch-action:none,
+     sin seleccion ni menu de long-press, solo en las superficies de tocar. */
+  touch-action:manipulation;
 }
+.xypad,.bigtrig,.scopewrap,.dial,.strip{touch-action:none}
+.xypad,.bigtrig,.scopewrap,.dial,.strip,.throwbtn,.latchbtn,.mode{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 /* leve textura CRT sobre todo */
 body::after{
   content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
@@ -46,7 +50,7 @@ body::after{
 .brand .t b{color:var(--oxblood)}
 .brand .t i{font-style:normal;color:var(--teal)}
 .plate{
-  font-family:var(--zd-mono);font-size:10px;color:var(--cream-dim);
+  font-family:var(--zd-mono);font-size:11px;color:var(--cream-dim);
   border:1px solid #5a3324;border-radius:6px;padding:6px 9px;text-align:right;
   background:linear-gradient(#3a1d14,#2a140e);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
 .plate b{color:var(--brass);font-weight:700}
@@ -77,7 +81,7 @@ body::after{
   background:radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,.6) 100%);
   mix-blend-mode:multiply}
 .scope-tag{position:absolute;top:8px;left:10px;font-family:var(--zd-mono);
-  font-size:10px;color:rgba(182,255,58,.6);letter-spacing:.15em}
+  font-size:11px;color:rgba(182,255,58,.6);letter-spacing:.15em}
 .scope-tag.r{left:auto;right:10px;color:rgba(55,224,224,.55)}
 
 /* ---------- modos ---------- */
@@ -91,7 +95,7 @@ body::after{
 .mode .led{width:9px;height:9px;border-radius:50%;margin:0 auto 7px;
   background:#20100b;box-shadow:inset 0 0 3px #000}
 .mode .nm{font-size:13px;font-weight:600;letter-spacing:.04em}
-.mode .sub{font-family:var(--zd-mono);font-size:8.5px;color:#7d6650;margin-top:2px;letter-spacing:.02em}
+.mode .sub{font-family:var(--zd-mono);font-size:11px;color:#7d6650;margin-top:2px;letter-spacing:.02em}
 .mode.on{color:var(--cream);border-color:var(--brass);
   background:linear-gradient(#4a2717,#341a10)}
 .mode.on .led{background:var(--led-gold);
@@ -105,22 +109,27 @@ body::after{
 .knobs{display:grid;gap:14px 10px;grid-template-columns:repeat(6,1fr)}
 .knob{display:flex;flex-direction:column;align-items:center;gap:5px}
 .dial{
-  --a:-135deg;width:58px;height:58px;border-radius:50%;position:relative;cursor:ns-resize;
+  --a:-135deg;--d:58px;width:var(--d);height:var(--d);border-radius:50%;position:relative;cursor:ns-resize;flex:none;
   background:
     radial-gradient(circle at 38% 32%, #6b4326, #3a2113 62%, #241009 100%);
   box-shadow:0 5px 10px rgba(0,0,0,.6),inset 0 2px 3px rgba(255,255,255,.18),
     inset 0 -4px 8px rgba(0,0,0,.5),0 0 0 3px #1c0d07,0 0 0 4px #5a3421;
   touch-action:none}
 .dial::before{ /* muesca de latón */
-  content:"";position:absolute;left:50%;top:6px;width:3px;height:20px;border-radius:2px;
+  content:"";position:absolute;left:50%;top:calc(var(--d)*.1);width:3px;height:calc(var(--d)*.34);border-radius:2px;
   background:linear-gradient(var(--brass-hi),var(--brass));
-  transform:translateX(-50%) rotate(0deg);transform-origin:50% 23px;
+  transform:translateX(-50%) rotate(0deg);transform-origin:50% calc(var(--d)*.4);
   transform:translateX(-50%) rotate(var(--a));box-shadow:0 0 6px rgba(240,212,136,.6)}
-.dial::after{content:"";position:absolute;inset:9px;border-radius:50%;
+.dial::after{content:"";position:absolute;inset:calc(var(--d)*.155);border-radius:50%;
   background:radial-gradient(circle at 40% 35%,#4a2c19,#2b160c);
   box-shadow:inset 0 1px 2px rgba(255,255,255,.12)}
-.knob .lab{font-size:10px;letter-spacing:.14em;color:var(--cream-dim);font-weight:500;text-align:center}
-.knob .val{font-family:var(--zd-mono);font-size:10px;color:var(--brass);min-height:13px}
+.knob .lab{font-size:11px;letter-spacing:.14em;color:var(--cream-dim);font-weight:500;text-align:center}
+.knob .val{font-family:var(--zd-mono);font-size:12px;color:var(--brass);min-height:15px}
+.knob .kslider{display:none;accent-color:var(--brass)}  /* slider alternativo: solo en los sheets del shell (SPEC R1) */
+.knob.drag .val{color:var(--cream)}
+.lfogrid{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.lfoknobs{display:flex;gap:12px}
+.lfosel{display:flex;flex-direction:column;gap:8px}
 
 /* ---------- selector segmentado ---------- */
 .seg{display:inline-flex;border-radius:8px;overflow:hidden;border:1px solid #4d2a1c;
@@ -132,7 +141,7 @@ body::after{
 .seg button.on{color:#1a0d08;background:linear-gradient(var(--brass-hi),var(--brass));font-weight:700}
 
 .field{display:flex;flex-direction:column;gap:6px}
-.field .lab{font-size:10px;letter-spacing:.14em;color:var(--cream-dim);font-weight:500}
+.field .lab{font-size:11px;letter-spacing:.14em;color:var(--cream-dim);font-weight:500}
 
 /* ---------- bloque LFO ---------- */
 .lfo{display:grid;grid-template-columns:auto 1fr;gap:12px 14px;align-items:center}
@@ -151,10 +160,32 @@ body::after{
 .bigtrig:active,.bigtrig.on{transform:translateY(4px);box-shadow:0 2px 0 #2c0d07;
   filter:brightness(1.25)}
 .bigtrig .t{font-size:22px;font-weight:700;letter-spacing:.08em}
-.bigtrig .s{font-family:var(--zd-mono);font-size:9px;color:#f3d6ce;letter-spacing:.12em}
+.bigtrig .s{font-family:var(--zd-mono);font-size:11px;color:#f3d6ce;letter-spacing:.12em}
 .bigtrig .halo{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(closest-side,rgba(255,120,160,.7),transparent);transition:opacity .12s}
 .bigtrig.on .halo{opacity:1}
+
+/* ---------- deck de performance: SIREN (hold/latch) + throws ---------- */
+.perfdeck{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto;
+  grid-template-areas:"siren latch" "throws throws";gap:10px;min-width:0}
+.perfdeck>.bigtrig{grid-area:siren;width:100%;font:inherit;-webkit-appearance:none;appearance:none}
+.perfdeck>.latchbtn{grid-area:latch}
+.perfdeck>.throws{grid-area:throws;margin:0}
+.latchbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  min-width:68px;min-height:44px;padding:8px 6px;cursor:pointer;touch-action:manipulation;
+  font:700 11px var(--zd-mono);letter-spacing:.14em;color:var(--cream-dim);
+  background:var(--zd-panel-2);border:1px solid var(--zd-outline);border-radius:var(--zd-r);
+  box-shadow:0 0 0 1px var(--zd-line),var(--zd-hard-sm),var(--zd-inset)}
+.latchbtn:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line)}
+.latchbtn .lled{width:11px;height:11px;border-radius:2px;background:#1b2a15;box-shadow:inset 0 0 3px #000}
+.latchbtn[aria-pressed="true"]{color:var(--cream);box-shadow:0 0 0 1px var(--brass),var(--zd-hard-sm)}
+.latchbtn[aria-pressed="true"] .lled{background:var(--brass);box-shadow:0 0 10px var(--brass)}
+.throwbtn{font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none}
+.padmode{position:absolute;top:6px;right:8px;pointer-events:none;font:700 11px var(--zd-mono);letter-spacing:.16em;
+  color:var(--brass);padding:2px 6px;border:1px solid currentColor;border-radius:3px;opacity:.85}
+/* el LED de on/off de cada efecto mide 14 px: el area de toque llega a 44 */
+.fxdot{position:relative}
+.fxdot::after{content:"";position:absolute;inset:-15px}
 
 .strip{display:flex;gap:3px;border-radius:12px;padding:8px;
   background:#1c0f0a;border:1px solid #4d2a1c;box-shadow:inset 0 3px 8px rgba(0,0,0,.6)}
@@ -167,14 +198,14 @@ body::after{
 .key.on,.key:active{transform:translateY(2px);filter:brightness(1.15)}
 .key.on{box-shadow:inset 0 0 14px rgba(226,178,60,.9)}
 .key .n{position:absolute;bottom:5px;left:0;right:0;text-align:center;
-  font-family:var(--zd-mono);font-size:8px;color:#7a663f}
+  font-family:var(--zd-mono);font-size:11px;color:#7a663f}
 .key.blk .n{color:#c9a24b}
 
 /* ---------- pie ---------- */
 .foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
-  font-family:var(--zd-mono);font-size:10px;color:var(--cream-dim);padding:2px 6px}
+  font-family:var(--zd-mono);font-size:12px;color:var(--cream-dim);padding:2px 6px}
 .foot kbd{font-family:var(--zd-mono);background:#2a140e;border:1px solid #4d2a1c;
-  border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--cream);font-size:10px}
+  border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--cream);font-size:11px}
 .filtnote{color:var(--brass)}
 
 /* ---------- efectos: bypass + throws ---------- */
@@ -189,7 +220,7 @@ body::after{
 .throwbtn:active,.throwbtn.on{transform:translateY(3px);box-shadow:0 1px 0 #180b07;filter:brightness(1.35)}
 .throwbtn .tt{font-size:15px;font-weight:600;letter-spacing:.05em}
 .throwbtn.on .tt{color:var(--led-red);text-shadow:0 0 10px rgba(224,73,47,.6)}
-.throwbtn .kk{font-family:var(--zd-mono);font-size:9px;color:#8a7154;margin-top:4px}
+.throwbtn .kk{font-family:var(--zd-mono);font-size:11px;color:#8a7154;margin-top:4px}
 
 /* ---------- overlay encendido ---------- */
 #power{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
@@ -232,11 +263,11 @@ body::after{
 .xydot{position:absolute;left:50%;top:50%;width:26px;height:26px;border-radius:50%;transform:translate(-50%,-50%);
   background:radial-gradient(circle at 40% 35%,#fff,var(--scope-a) 55%,transparent 72%);
   box-shadow:0 0 18px var(--scope-a),0 0 40px var(--scope-b);pointer-events:none}
-.axlab{position:absolute;font-family:var(--zd-mono);font-size:9px;color:var(--brass);pointer-events:none;letter-spacing:.08em}
+.axlab{position:absolute;font-family:var(--zd-mono);font-size:11px;color:var(--brass);pointer-events:none;letter-spacing:.08em}
 .axlab.x{bottom:6px;right:8px} .axlab.y{top:6px;left:8px;writing-mode:vertical-rl}
 .padtargets{display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:150px}
 
-.psub{font-family:var(--zd-mono);font-size:10px;color:var(--cream-dim);letter-spacing:.08em;margin:14px 0 8px}
+.psub{font-family:var(--zd-mono);font-size:11px;color:var(--cream-dim);letter-spacing:.08em;margin:14px 0 8px}
 .psub.first{margin-top:2px}
 .facrow,.ioRow,.slotsave,.slotlist{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .pbtn{font-family:var(--zd-mono);font-size:12px;letter-spacing:.05em;color:var(--cream);cursor:pointer;
@@ -249,18 +280,18 @@ body::after{
 .slot{display:inline-flex;border:1px solid #4d2a1c;border-radius:8px;overflow:hidden}
 .slotload{font-family:var(--zd-mono);font-size:12px;color:var(--cream);background:#2a140e;border:0;padding:8px 11px;cursor:pointer}
 .slotdel{background:#3a1512;border:0;border-left:1px solid #4d2a1c;color:var(--led-red);padding:8px 10px;cursor:pointer;font-size:12px}
-.muted{font-family:var(--zd-mono);font-size:10px;color:#7d6650}
-.pstatus{font-family:var(--zd-mono);font-size:10px;color:var(--led-green);margin-left:2px}
-.jsonarea{width:100%;margin-top:10px;min-height:86px;resize:vertical;font-family:var(--zd-mono);font-size:10px;
+.muted{font-family:var(--zd-mono);font-size:12px;color:#7d6650}
+.pstatus{font-family:var(--zd-mono);font-size:12px;color:var(--led-green);margin-left:2px}
+.jsonarea{width:100%;margin-top:10px;min-height:86px;resize:vertical;font-family:var(--zd-mono);font-size:12px;
   color:var(--cream-dim);background:#0b0806;border:1px solid #4d2a1c;border-radius:8px;padding:10px;outline:none}
 .jsonarea:focus{border-color:var(--brass)}
-@media (pointer:coarse){ .dial{width:66px;height:66px} .xypad{min-width:180px} }
+@media (pointer:coarse){ .dial{--d:66px} .xypad{min-width:180px} }
 
 @media (max-width:640px){
   .knobs{grid-template-columns:repeat(4,1fr)}
   .trigrow{grid-template-columns:1fr}
   .brand .t{font-size:24px}
-  .dial{width:52px;height:52px}
+  .dial{--d:52px}
 }
 @media (max-width:420px){ .knobs{grid-template-columns:repeat(3,1fr)} }
 </style>
@@ -311,12 +342,12 @@ body::after{
   .head{padding:6px 4px 14px; margin-bottom:14px; border-bottom:2px solid var(--zd-line-soft)}
   .brand{flex-direction:row; align-items:center; gap:16px; line-height:1}
   .brand .zd-text{display:flex; flex-direction:column; gap:7px}
-  .brand .k{font-size:9.5px; letter-spacing:.2em; color:var(--zd-phosphor); font-weight:700}
+  .brand .k{font-size:11px; letter-spacing:.2em; color:var(--zd-phosphor); font-weight:700}
   .brand .t{font-size:26px; font-weight:800; letter-spacing:.04em; text-shadow:0 0 18px rgba(240,106,216,.3)}
   .brand .t::before{content:">_ "; color:var(--zd-phosphor)}
   .brand .t b{color:var(--brass)}
   .brand .t i{color:var(--teal)}
-  .plate{border:1px solid var(--zd-line); border-radius:3px; background:var(--zd-well); box-shadow:none; font-size:10px; line-height:1.6}
+  .plate{border:1px solid var(--zd-line); border-radius:3px; background:var(--zd-well); box-shadow:none; font-size:11px; line-height:1.6}
   .plate b{color:var(--brass)}
 
   .panel{border-radius:var(--zd-r-lg); background:linear-gradient(180deg,#131f10,#0b1209); border:2px solid var(--zd-outline);
@@ -335,7 +366,7 @@ body::after{
   .mode:active{transform:translateY(3px); box-shadow:0 0 0 1px var(--zd-line)}
   .mode .led{border-radius:2px; background:#1b2a15}
   .mode .nm{font-weight:800; font-size:12.5px; letter-spacing:.08em}
-  .mode .sub{font-size:9px; color:var(--zd-ink-faint)}
+  .mode .sub{font-size:11px; color:var(--zd-ink-faint)}
   .mode.on{border-color:var(--zd-outline); background:#241022; box-shadow:0 0 0 1px var(--brass), var(--zd-hard), 0 0 20px -6px var(--brass)}
 
   .dial{background:radial-gradient(circle at 40% 32%, #26381f, #0b1209 70%);
@@ -347,7 +378,7 @@ body::after{
   .knob .val{color:var(--brass)}
 
   .seg{border-radius:var(--zd-r); border:1px solid var(--zd-outline); background:var(--zd-well); box-shadow:0 0 0 1px var(--zd-line); flex-wrap:wrap}
-  .seg button{padding:0 11px; min-height:38px; font-weight:600; touch-action:manipulation}
+  .seg button{padding:0 11px; min-height:44px; font-weight:600; touch-action:manipulation}
   .seg button+button{border-left:1px solid var(--zd-line)}
   .seg button.on{color:var(--zd-void); background:var(--brass)}
   .lfo .name{color:var(--brass); font-weight:800}
@@ -369,16 +400,17 @@ body::after{
 
   .fxdot{border-radius:2px; background:#1b2a15; box-shadow:inset 0 0 3px #000, 0 0 0 2px var(--zd-line); width:14px; height:14px}
   .throwbtn, .minibtn, .pbtn, .slotload{border-radius:var(--zd-r); background:var(--zd-panel-2); border:1px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm), var(--zd-inset); touch-action:manipulation}
-  .minibtn, .pbtn{min-height:40px; font-weight:700; letter-spacing:.08em}
+  .minibtn, .pbtn{min-height:44px; font-weight:700; letter-spacing:.08em}
   .throwbtn{box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard), var(--zd-inset); min-height:64px}
   .throwbtn:active,.throwbtn.on{box-shadow:0 0 0 1px var(--led-red), 0 1px 0 var(--zd-outline), 0 0 20px -6px var(--led-red)}
   .throwbtn .tt{font-weight:800}
   .throwbtn .kk{color:var(--zd-ink-faint)}
   .minibtn:active, .pbtn:active{transform:translateY(2px); box-shadow:0 0 0 1px var(--zd-line)}
   .slot{border:1px solid var(--zd-line); border-radius:var(--zd-r)}
-  .slotload{box-shadow:none; border:0; min-height:38px}
+  .slotload{box-shadow:none; border:0; min-height:44px}
+  .slotdel{min-width:44px}
   .slotdel{background:#2a0e08; border-left:1px solid var(--zd-line)}
-  .pin, .jsonarea{background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r); color:var(--zd-ink); min-height:40px}
+  .pin, .jsonarea{background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r); color:var(--zd-ink); min-height:44px}
   .pin:focus, .jsonarea:focus{border-color:var(--brass)}
   .psub{color:var(--zd-ink-dim); text-transform:uppercase; letter-spacing:.16em; font-weight:700}
   .muted{color:var(--zd-ink-faint)}
@@ -400,6 +432,108 @@ body::after{
   #power .big{letter-spacing:.14em; font-weight:800}
   #power .sm{color:var(--zd-phosphor)}
   @media (max-width:640px){ .zd-logo{height:48px} .brand .t{font-size:20px} }
+</style>
+<style id="zd-mobile-skin">
+  /* ===== J4-SIRENS STATION · piel del shell portrait (zd-mobile v4) =====
+     Solo presentacion: que nodo ocupa que lugar lo decide window.ZD_M y el
+     reparto de alto lo decide este archivo. Nada de esto es parte del bloque. */
+
+  /* ---- metricas ----
+     alto util = viewport sin las zonas inseguras. El pad XY se queda con el
+     60 % (SPEC 3.4) y el deck de performance con lo que sobra hasta las tabs,
+     entre 132 y 214 px. Debajo de 640 px de alto manda el piso del deck. */
+  html.zd-m body{
+    --j4-util:calc(100vh - var(--zd-sat) - var(--zd-sab));
+    --j4-deck:clamp(132px, calc(var(--zd-stage-h) - .6 * var(--j4-util) - 18px), 214px);
+    --j4-throw-h:clamp(44px, 7vh, 60px);
+    --j4-peek:45vh;
+  }
+  @supports (height:100dvh){ html.zd-m body{
+    --j4-util:calc(100dvh - var(--zd-sat) - var(--zd-sab));
+    --j4-throw-h:clamp(44px, 7dvh, 60px);
+    --j4-peek:45dvh;
+  } }
+
+  /* ---- zona de tocar: pad XY arriba, SIREN y throws abajo (al alcance del pulgar) ---- */
+  html.zd-m #zd-stage > #xypad{flex:1 1 auto; width:auto; min-width:0; min-height:96px; aspect-ratio:auto;}
+  html.zd-m #zd-stage > #perfDeck{flex:none; height:var(--j4-deck); gap:6px;
+    grid-template-columns:minmax(0,1fr) 72px; grid-template-rows:minmax(0,1fr) var(--j4-throw-h);}
+  html.zd-m #perfDeck > .bigtrig{min-height:0; height:100%; padding:4px;}
+  html.zd-m #perfDeck .bigtrig .t{font-size:clamp(20px, 6.5vw, 32px);}
+  html.zd-m #perfDeck > .latchbtn{min-width:0; height:100%;}
+  html.zd-m #perfDeck > .throws{gap:6px; grid-template-columns:repeat(3,minmax(0,1fr));}
+  html.zd-m #perfDeck .throwbtn{min-height:0; height:100%; padding:2px 4px;}
+  html.zd-m #perfDeck .throwbtn .tt{font-size:12.5px; letter-spacing:.03em; white-space:nowrap;}
+  html.zd-m #perfDeck .throwbtn .kk{display:none;}
+
+  /* ---- sheet en modo peek (SPEC R1): la zona de tocar se achica por encima
+     del sheet y queda pad + SIREN + throws en una fila. El banner de
+     instalar se esconde mientras haya un sheet abierto. ---- */
+  html.zd-m #zd-sheet.peek{height:var(--j4-peek);}
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{height:calc(var(--zd-stage-h) - var(--j4-peek));}
+  html.zd-m.zd-sheet-open #zd-stage > .zd-pwa-in-stage{display:none;}
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #perfDeck{height:58px;
+    grid-template-columns:minmax(0,1.25fr) minmax(0,3fr); grid-template-rows:minmax(0,1fr);
+    grid-template-areas:"siren throws";}
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck > .latchbtn,
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck .bigtrig .s{display:none;}
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck .bigtrig .t{font-size:18px;}
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck .throwbtn .tt{font-size:11.5px; white-space:normal; line-height:1.15;}
+
+  /* ---- barra superior ---- */
+  @media (max-width:400px){ html.zd-m #zd-top .zd-ttitle{display:none;} }
+
+  /* ---- paneles dentro de los sheets ---- */
+  html.zd-m #zd-sheet .panel{padding:9px; border-radius:var(--zd-r); box-shadow:0 0 0 1px var(--zd-line);}
+  html.zd-m #zd-sheet .rowlabel{margin:0 0 8px;}
+  html.zd-m #zd-sheet .modes{grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px;}
+  html.zd-m #zd-sheet .mode{min-height:56px; padding:7px 2px 6px;}
+  html.zd-m #zd-sheet .seg{flex-wrap:wrap;}
+  html.zd-m #zd-sheet .oscsel{margin-bottom:10px !important; gap:10px !important;}
+  html.zd-m #zd-sheet .lfo{grid-template-columns:minmax(0,1fr); gap:6px;}
+  html.zd-m #zd-sheet .lfogrid{flex-direction:column; align-items:stretch; gap:8px;}
+  html.zd-m #zd-sheet #lfoBlocks{gap:12px !important;}
+  html.zd-m #zd-sheet .padtargets{min-width:0;}
+  html.zd-m #zd-sheet #scope{height:120px;}
+  html.zd-m #zd-sheet .vizctl{margin-top:8px;}
+  html.zd-m #zd-sheet .pin{flex:1; min-width:0;}
+  html.zd-m #zd-sheet .foot{flex-direction:column; align-items:flex-start; padding:4px 2px;}
+
+  /* knobs en los sheets: perilla chica + slider alternativo + valor (SPEC R1) */
+  html.zd-m #zd-sheet .knobs{display:grid; grid-template-columns:minmax(0,1fr); gap:6px;}
+  html.zd-m #zd-sheet .knob{flex-direction:row; align-items:center; gap:9px; padding:3px 8px;
+    background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r);}
+  html.zd-m #zd-sheet .dial{--d:42px; order:0;}
+  html.zd-m #zd-sheet .knob .lab{order:1; width:72px; flex:none; text-align:left;}
+  html.zd-m #zd-sheet .knob .kslider{order:2; display:block; flex:1; min-width:60px; height:44px; margin:0;}
+  html.zd-m #zd-sheet .knob .val{order:3; width:62px; flex:none; text-align:right;}
+  @media (min-width:620px){ html.zd-m #zd-sheet .knobs{grid-template-columns:repeat(2,minmax(0,1fr));} }
+
+  /* teclado en el sheet: 4 filas de 5 en cuartas (la grave abajo, como un
+     bajo o una grilla isomorfica), teclas de 44 px de alto o mas */
+  html.zd-m #zd-sheet .strip{flex-wrap:wrap-reverse; gap:4px; padding:5px;}
+  html.zd-m #zd-sheet .key,
+  html.zd-m #zd-sheet .key.blk{flex:1 0 18%; max-width:calc(20% - 3px); margin:0; min-height:48px; height:48px;
+    z-index:auto; border-radius:3px;}
+
+  /* ---- landscape: el pad a la izquierda, el deck en una columna a la derecha ---- */
+  @media (orientation:landscape) and (max-height:600px){
+    html.zd-m #zd-stage{flex-flow:row wrap; align-content:stretch;}
+    html.zd-m #zd-stage > .zd-pwa-in-stage{flex:1 1 100%;}
+    html.zd-m #zd-stage > #xypad{flex:1 1 0; height:auto; min-height:0;}
+    html.zd-m #zd-stage > #perfDeck{flex:0 0 clamp(250px, 40vw, 360px); height:auto;
+      grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr) 48px;
+      grid-template-areas:"siren throws" "latch throws";}
+    html.zd-m #perfDeck > .latchbtn{flex-direction:row;}
+    html.zd-m #perfDeck > .throws{grid-template-columns:minmax(0,1fr); grid-template-rows:repeat(3,minmax(0,1fr));}
+    /* peek a media pantalla: el sheet a la izquierda y se sigue tocando a la derecha */
+    html.zd-m #zd-sheet.peek{right:50%; height:var(--zd-stage-h); max-height:none;}
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{left:50%; height:var(--zd-stage-h); flex-flow:column nowrap;}
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #xypad{flex:1 1 auto;}
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #perfDeck{flex:none; height:64px;}
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck > .throws{grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-rows:minmax(0,1fr);}
+  }
 </style>
 <!-- ===== bloques ZD compartidos · ver docs/zd-blocks.md =====
      Se copian byte a byte en los 5 instrumentos (SPEC 3.1.2) y se verifican con
@@ -1587,7 +1721,7 @@ window.ZD_M={name:'J4 Sirens Station', title:'<b>J4</b> SIRENS',
 Object.assign(window.ZD_M, {
   titleParts: ['J4 ', 'SIRENS'],
   transport: [],
-  keep: ['#xypad', '#bigTrig', '#throwRow'],
+  keep: ['#xypad', '#perfDeck'],
   tabs: [
     { id:'sir', label:'SIRENA',  title:'MODO · OSCILADOR · FILTRO', peek:true,
       nodes:['#modesPanel', '#oscPanel'] },
@@ -2417,7 +2551,7 @@ Object.assign(window.ZD_M, {
   <!-- OSCILADOR + FILTRO -->
   <section class="panel" id="oscPanel">
     <div class="rowlabel">OSCILADOR · FILTRO · MOVIMIENTO</div>
-    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-bottom:16px">
+    <div class="oscsel" style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-bottom:16px">
       <div class="field">
         <span class="lab">FORMA DE ONDA</span>
         <div class="seg" id="waveSeg"></div>
@@ -2446,13 +2580,12 @@ Object.assign(window.ZD_M, {
   <section class="panel" id="echoPanel">
     <div class="rowlabel">TAPE ECHO<span class="fxdot on" id="echoOn"></span></div>
     <div class="knobs" id="knobsEcho"></div>
-    <div class="throws" id="throwRow"></div>
   </section>
 
   <!-- REVERB -->
   <section class="panel" id="revPanel">
     <div class="rowlabel">SPRING / PLATE REVERB<span class="fxdot on" id="revOn"></span></div>
-    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-bottom:14px">
+    <div class="oscsel" style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-bottom:14px">
       <div class="field"><span class="lab">CARÁCTER</span><div class="seg" id="revModeSeg"></div></div>
     </div>
     <div class="knobs" id="knobsRev"></div>
@@ -2472,6 +2605,7 @@ Object.assign(window.ZD_M, {
         <div class="xydot" id="xydot"></div>
         <span class="axlab x" id="xLab">X</span>
         <span class="axlab y" id="yLab">Y</span>
+        <span class="padmode" id="padMode">WAIL</span>
       </div>
       <div class="padtargets" id="padTargets">
         <div class="field"><span class="lab">EJE X</span><div class="seg" id="padXSeg"></div></div>
@@ -2482,12 +2616,17 @@ Object.assign(window.ZD_M, {
 
   <!-- DISPARADORES -->
   <section class="panel" id="trigPanel">
-    <div class="rowlabel">DISPARO</div>
+    <div class="rowlabel">DISPARO · THROWS</div>
     <div class="trigrow">
-      <div class="bigtrig" id="bigTrig">
-        <div class="halo"></div>
-        <div class="t">SIREN</div>
-        <div class="s">MANTENÉ APRETADO · [ESPACIO]</div>
+      <!-- deck de performance: en el shell movil va entero a la zona de tocar -->
+      <div class="perfdeck" id="perfDeck">
+        <button type="button" class="bigtrig" id="bigTrig">
+          <span class="halo"></span>
+          <span class="t">SIREN</span>
+          <span class="s" id="sirenHint">MANTENÉ APRETADO · [ESPACIO]</span>
+        </button>
+        <button type="button" class="latchbtn" id="latchBtn"><span class="lled"></span><span>LATCH</span></button>
+        <div class="throws" id="throwRow"></div>
       </div>
       <div class="strip" id="strip"></div>
     </div>
@@ -2520,7 +2659,7 @@ Object.assign(window.ZD_M, {
     <span class="filtnote" id="filtStatus">filtro: —</span>
     <div class="hint">
       <span class="hw">J4 - Sirens Station   //</span>
-      <span class="cline">Desarrollado por <b><a href="https://zeroday-musicexploits.github.io/instruments/" target="_blank">Zero Day - Music Exploits</a></b> · Argentina 2026</span>
+      <span class="cline">Desarrollado por <b><a href="https://zeroday-musicexploits.github.io/instruments/" target="_blank" rel="noopener">Zero Day - Music Exploits</a></b> · Argentina 2026</span>
     </div>
   </div>
 </div>
@@ -3036,12 +3175,17 @@ function buildThrows(){
     {t:'FEEDBACK ∞',k:'4',set:setFbInf},
     {t:'KILL',      k:'8',set:setKill}
   ];
+  // momentaneos: activos mientras haya un dedo encima. El puntero queda
+  // capturado, asi que correr el pulgar no los suelta antes de tiempo.
   defs.forEach(d=>{
-    const b=el('div','throwbtn'); b.innerHTML='<div class="tt">'+d.t+'</div><div class="kk">['+d.k+']</div>';
-    const on=e=>{b.classList.add('on');d.set(true);e.preventDefault();};
-    const off=()=>{b.classList.remove('on');d.set(false);};
+    const b=el('button','throwbtn'); b.type='button';
+    b.append(el('span','tt',d.t), el('span','kk','['+d.k+']'));
+    const ptrs=new Set();
+    const on=e=>{ e.preventDefault(); try{ b.setPointerCapture(e.pointerId); }catch(_){}
+      ptrs.add(e.pointerId); if(ptrs.size===1){ b.classList.add('on'); d.set(true); } };
+    const off=e=>{ if(!ptrs.delete(e.pointerId) || ptrs.size) return; b.classList.remove('on'); d.set(false); };
     b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off);
-    b.addEventListener('pointerleave',off); b.addEventListener('pointercancel',off);
+    b.addEventListener('pointercancel',off); b.addEventListener('lostpointercapture',off);
     d.ref=b; row.appendChild(b);
   });
   window.__throws=defs;
@@ -3160,15 +3304,17 @@ function buildPadUI(){
   mk('padXSeg',()=>padX,v=>{padX=v;const l=document.getElementById('xLab');if(l)l.textContent='X · '+labelFor(v);});
   mk('padYSeg',()=>padY,v=>{padY=v;const l=document.getElementById('yLab');if(l)l.textContent='Y · '+labelFor(v);});
   const pad=document.getElementById('xypad'), dot=document.getElementById('xydot');
-  if(!pad)return; let down=false;
+  if(!pad)return; let padPid=null;   // un solo puntero maneja el pad: un segundo dedo no lo hace saltar
   const set=e=>{ const r=pad.getBoundingClientRect();
     let nx=(e.clientX-r.left)/r.width, ny=1-(e.clientY-r.top)/r.height;
     nx=Math.max(0,Math.min(1,nx)); ny=Math.max(0,Math.min(1,ny));
     if(KREG[padX])KREG[padX].setNorm(nx); if(KREG[padY])KREG[padY].setNorm(ny);
     dot.style.left=(nx*100)+'%'; dot.style.top=((1-ny)*100)+'%'; };
-  pad.addEventListener('pointerdown',e=>{down=true; pad.setPointerCapture&&e.pointerId!=null&&pad.setPointerCapture(e.pointerId); set(e); e.preventDefault();});
-  pad.addEventListener('pointermove',e=>{ if(down){set(e);e.preventDefault();} });
-  pad.addEventListener('pointerup',()=>down=false); pad.addEventListener('pointercancel',()=>down=false);
+  pad.addEventListener('pointerdown',e=>{ if(padPid!=null) return; padPid=e.pointerId;
+    try{ pad.setPointerCapture(e.pointerId); }catch(_){} pad.classList.add('hot'); set(e); e.preventDefault(); });
+  pad.addEventListener('pointermove',e=>{ if(e.pointerId===padPid){ set(e); e.preventDefault(); } });
+  const padEnd=e=>{ if(e.pointerId!==padPid) return; padPid=null; pad.classList.remove('hot'); };
+  pad.addEventListener('pointerup',padEnd); pad.addEventListener('pointercancel',padEnd); pad.addEventListener('lostpointercapture',padEnd);
   const lx=document.getElementById('xLab'), ly=document.getElementById('yLab');
   if(lx)lx.textContent='X · '+labelFor(padX); if(ly)ly.textContent='Y · '+labelFor(padY);
   updatePadCursor();
@@ -3202,6 +3348,7 @@ function noteOn(id, midi){
     ampGate(true); filterGate(true);
     if(P.mode==='random') startSampleHold();
   }
+  afterVoice();
 }
 function noteOff(id){
   const idx=held.findIndex(h=>h.id===id);
@@ -3213,7 +3360,10 @@ function noteOff(id){
     curNote=held[held.length-1].midi;
     glideTo(curNote);
   }
+  afterVoice();
 }
+/* despues de cada cambio de la voz (no toca el audio): estado del boton SIREN */
+function afterVoice(){ renderSiren(); }
 function glideTo(midi){
   const t=ctx.currentTime, g=Math.max(0.001,P.glide/1000);
   if(P.mode==='noise'){
@@ -3318,12 +3468,15 @@ function buildModes(){
     d.addEventListener('click',()=>{
       P.mode=m.id;
       [...box.children].forEach(c=>c.classList.toggle('on',c.dataset.mode===m.id));
-      applyMode(); applyCutoffBase();
+      applyMode(); applyCutoffBase(); renderModeTag();
     });
     box.appendChild(d);
   });
-  UIREFRESH.push(()=>{ [...box.children].forEach(c=>c.classList.toggle('on',c.dataset.mode===P.mode)); });
+  UIREFRESH.push(()=>{ [...box.children].forEach(c=>c.classList.toggle('on',c.dataset.mode===P.mode)); renderModeTag(); });
+  renderModeTag();
 }
+/* el modo se ve sobre el pad XY: en el shell movil los modos viven en un sheet */
+function renderModeTag(){ const t=document.getElementById('padMode'); if(t) t.textContent=P.mode.toUpperCase(); }
 
 /* --- selector segmentado --- */
 function buildSeg(host, opts, get, onPick){
@@ -3340,38 +3493,72 @@ function buildSeg(host, opts, get, onPick){
   UIREFRESH.push(()=>{ const cur=get(); [...seg.children].forEach(c=>c.classList.toggle('on',c.dataset.v===cur)); });
 }
 
-/* --- perilla --- */
+/* --- perilla ---
+   Arrastre vertical con captura del puntero (sin listeners en window, que en
+   tactil frenaban el scroll de toda la pagina), valor siempre visible, doble
+   tap = valor por defecto, long-press = valor numerico en la unidad que se ve,
+   rueda del mouse y un slider alternativo que solo aparece en los sheets del
+   shell movil (SPEC R1). */
+const clamp01=n=>Math.max(0,Math.min(1,n));
+/* unidad y factor de la entrada numerica: numero tipeado = valor * factor */
+const KIN={
+  rate:['Hz',1], depth:['%',100], cutoff:['Hz',1], reso:['%',100/1.15], envAmt:['%',100], glide:['ms',1],
+  atk:['ms',1], dec:['ms',1], sus:['%',100], rel:['ms',1], vol:['%',100], drive:['×',1],
+  lrate:['Hz',1], ldepth:['%',100], etime:['ms',1000], efb:['%',100/1.1], etone:['Hz',1], ewow:['%',100],
+  esat:['×',1], mix:['%',100], rdecay:['s',1], rtone:['Hz',1], phrate:['Hz',1], phdepth:['%',100], phfb:['%',100/0.9]
+};
+function knobUI(hostEl, o){ // o = {key, label, aria, get, set, specKey}
+  const spec=SPEC[o.specKey], kin=KIN[o.specKey]||['',1], name=o.aria||o.label;
+  const wrap=el('div','knob'), dial=el('div','dial'), lab=el('div','lab',o.label), val=el('div','val');
+  const sld=el('input','kslider'); sld.type='range'; sld.min='0'; sld.max='1'; sld.step='0.001'; sld.tabIndex=-1;
+  sld.setAttribute('aria-label',name+' (deslizador)');
+  wrap.append(dial,lab,val,sld); hostEl.appendChild(wrap);
+  const toNorm=v=> spec.log ? Math.log(v/spec.min)/Math.log(spec.max/spec.min) : (v-spec.min)/(spec.max-spec.min);
+  const fromNorm=n=> spec.log ? spec.min*Math.pow(spec.max/spec.min,n) : spec.min+n*(spec.max-spec.min);
+  const getN=()=>clamp01(toNorm(o.get()));
+  const render=()=>{ const v=o.get(), n=clamp01(toNorm(v));
+    dial.style.setProperty('--a',(-135+n*270)+'deg'); val.textContent=spec.fmt(v); sld.value=String(n); };
+  const setN=n=>{ o.set(fromNorm(clamp01(n))); render(); };
+  const reset=()=>{ if(o.key in DEF){ o.set(DEF[o.key]); render(); } };
+  function askValue(){
+    if(!(window.ZD&&ZD.modal)) return;
+    const k=kin[1], u=kin[0], r=x=>String(Math.round(x*100)/100);
+    ZD.modal.prompt('Entre '+r(spec.min*k)+' y '+r(spec.max*k)+' '+u+'. Valor actual: '+spec.fmt(o.get())+'.',
+      { title:name, value:r(o.get()*k), maxlength:12, label:name+' en '+u })
+      .then(t=>{ if(t==null) return; const x=parseFloat(String(t).replace(',','.'));
+        if(!isFinite(x)){ ZD.toast('Ese valor no es un número',{kind:'error'}); return; }
+        o.set(Math.max(spec.min,Math.min(spec.max,x/k))); render(); });
+  }
+  let pid=null, startY=0, startN=0, moved=0, lpTimer=null, lpFired=false, lastTap=0;
+  const clearLP=()=>{ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } };
+  dial.addEventListener('pointerdown',e=>{
+    if(pid!=null) return;
+    e.preventDefault();
+    pid=e.pointerId; startY=e.clientY; startN=getN(); moved=0; lpFired=false;
+    try{ dial.setPointerCapture(pid); }catch(_){}
+    wrap.classList.add('drag'); clearLP();
+    lpTimer=setTimeout(()=>{ lpTimer=null; lpFired=true; pid=null; wrap.classList.remove('drag'); askValue(); },550);
+  });
+  dial.addEventListener('pointermove',e=>{
+    if(e.pointerId!==pid) return;
+    const dy=startY-e.clientY; moved=Math.max(moved,Math.abs(dy)); if(moved>6) clearLP();
+    setN(startN+dy*(e.shiftKey?0.28:1)/200);
+  });
+  const end=e=>{
+    if(e.pointerId!==pid) return;
+    pid=null; clearLP(); wrap.classList.remove('drag');
+    if(lpFired||moved>6||e.type!=='pointerup') return;
+    const now=performance.now(); if(now-lastTap<320){ lastTap=0; reset(); } else lastTap=now;   // doble tap = reset
+  };
+  dial.addEventListener('pointerup',end); dial.addEventListener('pointercancel',end); dial.addEventListener('lostpointercapture',end);
+  dial.addEventListener('wheel',e=>{ e.preventDefault(); setN(getN()-Math.sign(e.deltaY)*(e.shiftKey?0.005:0.02)); },{passive:false});
+  sld.addEventListener('input',()=>setN(parseFloat(sld.value)));
+  render(); KNOBS.push(render);
+  return { setNorm:setN, getNorm:getN, render, dial, askValue };
+}
+const KPRE={knobsEcho:'ECO', knobsRev:'REVERB', knobsPh:'PHASER'};
 function makeKnob(host, key, label, get, set, specKey){
-  const spec=SPEC[specKey];
-  const wrap=el('div','knob');
-  const dial=el('div','dial');
-  const lab=el('div','lab',label);
-  const val=el('div','val');
-  wrap.append(dial,lab,val);
-  document.getElementById(host).appendChild(wrap);
-
-  const toNorm=v=> spec.log ? Math.log(v/spec.min)/Math.log(spec.max/spec.min)
-                            : (v-spec.min)/(spec.max-spec.min);
-  const fromNorm=n=> spec.log ? spec.min*Math.pow(spec.max/spec.min,n)
-                              : spec.min+n*(spec.max-spec.min);
-  const render=()=>{ const v=get(); const n=Math.max(0,Math.min(1,toNorm(v)));
-    dial.style.setProperty('--a',(-135+n*270)+'deg'); val.textContent=spec.fmt(v); };
-  render();
-  KREG[key]={ setNorm:n=>{ set(fromNorm(Math.max(0,Math.min(1,n)))); render(); },
-              getNorm:()=>Math.max(0,Math.min(1,toNorm(get()))) };
-
-  let startY=0, startN=0, drag=false;
-  const down=e=>{ drag=true; startY=(e.touches?e.touches[0].clientY:e.clientY);
-    startN=Math.max(0,Math.min(1,toNorm(get()))); dial.setPointerCapture&&e.pointerId!=null&&dial.setPointerCapture(e.pointerId);
-    e.preventDefault(); };
-  const move=e=>{ if(!drag)return; const y=(e.touches?e.touches[0].clientY:e.clientY);
-    let n=startN+(startY-y)/200; n=Math.max(0,Math.min(1,n));
-    set(fromNorm(n)); render(); e.preventDefault(); };
-  const up=()=>{ drag=false; };
-  dial.addEventListener('pointerdown',down); window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
-  dial.addEventListener('touchstart',down,{passive:false}); window.addEventListener('touchmove',move,{passive:false}); window.addEventListener('touchend',up);
-  dial.addEventListener('dblclick',()=>{ set(DEF[key]); render(); }); // reset
-  KNOBS.push(render);
+  KREG[key]=knobUI(document.getElementById(host),{ key, label, aria:(KPRE[host]?KPRE[host]+' ':'')+label, get, set, specKey });
 }
 const KNOBS=[]; const DEF={}; const KREG={}; const UIREFRESH=[];
 
@@ -3399,17 +3586,52 @@ function buildStrip(){
   const rel=e=>{ if(downId!==e.pointerId&&e.pointerId!=null)return; downId=null;
     [...strip.children].forEach(c=>c.classList.remove('on')); noteOff('strip'); };
   strip.addEventListener('pointerup',rel); strip.addEventListener('pointercancel',rel);
-  window.addEventListener('pointerup',e=>{ if(downId!=null){ downId=null;
+  // soltar fuera de la tira (mouse): solo el puntero que la estaba tocando
+  window.addEventListener('pointerup',e=>{ if(downId!=null && e.pointerId===downId){ downId=null;
     [...strip.children].forEach(c=>c.classList.remove('on')); noteOff('strip'); }});
 }
 
-/* --- disparador grande --- */
+/* --- disparador grande: SIREN con hold o latch ---
+   HOLD: suena mientras haya un dedo (o el Espacio) apretado. LATCH: cada
+   toque prende o apaga. Cada puntero queda capturado por el boton, asi que
+   un pulgar que se corre un poco no corta la sirena, y se puede tocar el pad
+   XY con otro dedo al mismo tiempo. */
+let latchMode=false;
+const sirenPtrs=new Set();
+const sirenLatched=()=>held.some(h=>h.id==='pad');
+function sirenToggle(){ if(sirenLatched()) noteOff('pad'); else noteOn('pad',57); }
+function setLatch(on){
+  latchMode=!!on;
+  if(!latchMode && sirenLatched() && !sirenPtrs.size) noteOff('pad');
+  renderSiren();
+}
+function renderSiren(){
+  const b=document.getElementById('bigTrig'), l=document.getElementById('latchBtn'), h=document.getElementById('sirenHint');
+  const on=held.some(x=>x.id==='pad'||x.id==='space');
+  if(b) b.classList.toggle('on',on);
+  if(l) l.setAttribute('aria-pressed',latchMode?'true':'false');
+  if(h) h.textContent=latchMode?'TOCÁ: PRENDE / APAGA · [ESPACIO]':'MANTENÉ APRETADO · [ESPACIO]';
+}
 function buildBigTrig(){
   const b=document.getElementById('bigTrig');
-  const on=e=>{ b.classList.add('on'); noteOn('pad',57); e.preventDefault(); };
-  const off=()=>{ b.classList.remove('on'); noteOff('pad'); };
-  b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off);
-  b.addEventListener('pointerleave',off); b.addEventListener('pointercancel',off);
+  b.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    try{ b.setPointerCapture(e.pointerId); }catch(_){}
+    sirenPtrs.add(e.pointerId);
+    if(sirenPtrs.size>1) return;
+    if(latchMode) sirenToggle(); else noteOn('pad',57);
+  });
+  const up=e=>{
+    if(!sirenPtrs.delete(e.pointerId) || sirenPtrs.size) return;
+    if(!latchMode) noteOff('pad');
+  };
+  b.addEventListener('pointerup',up); b.addEventListener('pointercancel',up); b.addEventListener('lostpointercapture',up);
+  // Enter con el foco en el boton: en hold no tiene sentido un "clic", asi que dispara un toque corto
+  b.addEventListener('keydown',e=>{ if(e.key!=='Enter'||e.repeat) return; e.preventDefault();
+    if(latchMode) sirenToggle(); else { noteOn('pad',57); setTimeout(()=>noteOff('pad'),400); } });
+  const l=document.getElementById('latchBtn');
+  if(l) l.addEventListener('click',()=>setLatch(!latchMode));
+  renderSiren();
 }
 
 /* --- teclado físico (layout tracker) --- */
@@ -3423,7 +3645,7 @@ function bindKeyboard(){
     if(e.code==='Digit1'){e.preventDefault(); if(!heldKeys.has('Digit1')){heldKeys.add('Digit1'); setThrow(true); markThrow(0,true);} return;}
     if(e.code==='Digit4'){e.preventDefault(); if(!heldKeys.has('Digit4')){heldKeys.add('Digit4'); setFbInf(true); markThrow(1,true);} return;}
     if(e.code==='Digit8'){e.preventDefault(); if(!heldKeys.has('Digit8')){heldKeys.add('Digit8'); setKill(true); markThrow(2,true);} return;}
-    if(e.code==='Space'){ e.preventDefault(); if(!heldKeys.has('Space')){heldKeys.add('Space'); noteOn('space',57);} return; }
+    if(e.code==='Space'){ e.preventDefault(); if(!heldKeys.has('Space')){heldKeys.add('Space'); if(latchMode) sirenToggle(); else noteOn('space',57);} return; }
     const m=KEYMAP[e.code]; if(m==null)return; e.preventDefault();
     if(heldKeys.has(e.code))return; heldKeys.add(e.code);
     noteOn('k'+e.code,m); hlKey(m,true);
@@ -3432,7 +3654,7 @@ function bindKeyboard(){
     if(e.code==='Digit1'){ heldKeys.delete('Digit1'); setThrow(false); markThrow(0,false); return; }
     if(e.code==='Digit4'){ heldKeys.delete('Digit4'); setFbInf(false); markThrow(1,false); return; }
     if(e.code==='Digit8'){ heldKeys.delete('Digit8'); setKill(false); markThrow(2,false); return; }
-    if(e.code==='Space'){ heldKeys.delete('Space'); noteOff('space'); return; }
+    if(e.code==='Space'){ heldKeys.delete('Space'); if(!latchMode) noteOff('space'); return; }
     const m=KEYMAP[e.code]; if(m==null)return;
     heldKeys.delete(e.code); noteOff('k'+e.code); hlKey(m,false);
   });
@@ -3480,16 +3702,18 @@ function buildLFOs(){
   [0,1].forEach(i=>{
     const block=el('div','lfo');
     const name=el('div','name','LFO '+(i+1));
-    const grid=el('div'); grid.style.cssText='display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end';
+    const grid=el('div','lfogrid');
     // perillas rate/depth
-    const kh=el('div','knobs'); kh.style.cssText='display:flex;gap:12px;grid-template-columns:none';
-    kh.id='lfoK'+i; 
+    const kh=el('div','knobs lfoknobs');
+    kh.id='lfoK'+i;
     block.append(name,grid); host.appendChild(block); grid.appendChild(kh);
-    DEF['l'+i+'rate']=P.lfo[i].rate;
-    makeKnobInline(kh,'RATE',()=>P.lfo[i].rate,v=>{P.lfo[i].rate=v; if(userLFO[i])userLFO[i].osc.frequency.setTargetAtTime(v,ctx.currentTime,.02);},'lrate');
-    makeKnobInline(kh,'DEPTH',()=>P.lfo[i].depth,v=>{P.lfo[i].depth=v; routeLFO(i); recomputeTrem();},'ldepth');
+    DEF['l'+i+'rate']=P.lfo[i].rate; DEF['l'+i+'depth']=P.lfo[i].depth;
+    knobUI(kh,{ key:'l'+i+'rate', label:'RATE', aria:'LFO '+(i+1)+' RATE', specKey:'lrate', get:()=>P.lfo[i].rate,
+      set:v=>{P.lfo[i].rate=v; if(userLFO[i])userLFO[i].osc.frequency.setTargetAtTime(v,ctx.currentTime,.02);} });
+    knobUI(kh,{ key:'l'+i+'depth', label:'DEPTH', aria:'LFO '+(i+1)+' DEPTH', specKey:'ldepth', get:()=>P.lfo[i].depth,
+      set:v=>{P.lfo[i].depth=v; routeLFO(i); recomputeTrem();} });
     // selectores dest + shape
-    const sel=el('div'); sel.style.cssText='display:flex;flex-direction:column;gap:8px';
+    const sel=el('div','lfosel');
     const destF=el('div','field'); destF.appendChild(el('span','lab','DESTINO'));
     const destSeg=el('div','seg');
     [['off','OFF'],['pitch','TONO'],['filter','FILTRO'],['amp','AMP']].forEach(([v,l])=>{
@@ -3513,25 +3737,6 @@ function buildLFOs(){
     sel.append(destF,shpF); grid.appendChild(sel);
   });
 }
-/* perilla inline (para LFOs) */
-function makeKnobInline(host,label,get,set,specKey){
-  const spec=SPEC[specKey];
-  const wrap=el('div','knob'); const dial=el('div','dial');
-  wrap.append(dial,el('div','lab',label)); const val=el('div','val'); wrap.appendChild(val);
-  host.appendChild(wrap);
-  const toNorm=v=> spec.log?Math.log(v/spec.min)/Math.log(spec.max/spec.min):(v-spec.min)/(spec.max-spec.min);
-  const fromNorm=n=> spec.log?spec.min*Math.pow(spec.max/spec.min,n):spec.min+n*(spec.max-spec.min);
-  const render=()=>{const v=get();const n=Math.max(0,Math.min(1,toNorm(v)));
-    dial.style.setProperty('--a',(-135+n*270)+'deg');val.textContent=spec.fmt(v);};
-  render(); KNOBS.push(render);
-  let sy=0,sn=0,drag=false;
-  const down=e=>{drag=true;sy=(e.touches?e.touches[0].clientY:e.clientY);sn=Math.max(0,Math.min(1,toNorm(get())));e.preventDefault();};
-  const move=e=>{if(!drag)return;const y=(e.touches?e.touches[0].clientY:e.clientY);let n=sn+(sy-y)/200;n=Math.max(0,Math.min(1,n));set(fromNorm(n));render();e.preventDefault();};
-  const up=()=>drag=false;
-  dial.addEventListener('pointerdown',down);window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
-  dial.addEventListener('touchstart',down,{passive:false});window.addEventListener('touchmove',move,{passive:false});window.addEventListener('touchend',up);
-}
-
 /* ------------------------------------------------------------- arranque ---*/
 buildUI();
 sizeScope(); window.addEventListener('resize',sizeScope);
