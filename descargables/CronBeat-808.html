@@ -141,6 +141,7 @@
   .spacer{flex:1}
   .util{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
   .seqacts{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .fnote{flex:1 1 100%; margin:0; font-size:12px; line-height:1.45; color:var(--ink-dim)}
   .filegrp{display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding-left:12px; margin-left:2px; border-left:2px solid var(--zd-line-soft)}
   .btn{ height:40px; padding:0 14px; border-radius:var(--zd-r); cursor:pointer; background:var(--zd-panel-2); color:var(--ink-dim);
     border:1px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm), var(--zd-inset);
@@ -2578,6 +2579,7 @@ window.ZD_M = {
           <button class="btn accent" id="saveMidi" title="Exportar el patrón activo a MIDI">Patrón→MIDI</button>
           <select class="bars" id="bars" title="Compases a exportar"><option value="1">×1</option><option value="2" selected>×2</option><option value="4">×4</option><option value="8">×8</option></select>
           <button class="btn accent" id="saveWav" title="Exportar el patrón a WAV">Exportar WAV</button>
+          <p class="fnote" id="midiNote" hidden></p>
         </div>
       </div>
     </header>
@@ -3021,8 +3023,8 @@ function ensureAudio(){
     eng = buildEngine(ctx); AA = {ac:ctx, noise:eng.noise};
     return;
   }
-  if(ctx){ if(ctx.state==='suspended') ctx.resume(); return; }
-  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if(ctx){ if(ctx.state!=='running' && ctx.state!=='closed') ctx.resume().catch(()=>{}); return; }
+  ctx = new (window.AudioContext || window.webkitAudioContext)((window.ZD && ZD.audio) ? ZD.audio.options() : {latencyHint:'interactive'});
   eng = buildEngine(ctx); AA = {ac:ctx, noise:eng.noise};
 }
 
@@ -3347,24 +3349,49 @@ const fileInput = document.getElementById('fileInput');
 let pendingTrack = -1;
 function openFilePicker(t){ pendingTrack=t; fileInput.value=''; fileInput.click(); }
 fileInput.addEventListener('change', ()=>{ if(fileInput.files[0] && pendingTrack>=0) loadSampleFile(pendingTrack, fileInput.files[0]); });
+const decodedAt = KIT.map(()=>0);   // frecuencia a la que se decodificó cada sample
+let offDecoder = null;
+function decoder(){
+  if(ctx) return ctx;
+  if(!offDecoder){ const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext; offDecoder=new OAC(1, 1, 48000); }
+  return offDecoder;
+}
+function decodeBytes(dc, ab){ return (window.ZD && ZD.audio) ? ZD.audio.decode(dc, ab) : dc.decodeAudioData(ab); }
 function loadSampleFile(t, file){
   ensureAudio();
   const reader=new FileReader();
   reader.onload=()=>{
-    const ab=reader.result;
+    const ab=reader.result, prev={raw:sampleRaw[t], edit:sampleEdit[t], at:decodedAt[t]};
     sampleRaw[t]={bytes:new Uint8Array(ab).slice(), name:file.name, type:file.type||''};
-    ctx.decodeAudioData(ab, buf=>{ sampleOrig[t]=buf; sampleEdit[t]=defaultEdit(); sampleBuffers[t]=buf; sampleNames[t]=file.name; updateVoiceLabel(t); refreshEditorPadList(); flashVoice(t); },
-      ()=>{ sampleRaw[t]=null; toast('No pude decodificar "'+file.name+'". Probá WAV, MP3 u OGG.'); });
+    sampleEdit[t]=defaultEdit(); decodedAt[t]=ctx.sampleRate;
+    decodeBytes(ctx, ab).then(buf=>{ sampleOrig[t]=buf; sampleEdit[t]=defaultEdit(); sampleBuffers[t]=buf; sampleNames[t]=file.name; updateVoiceLabel(t); refreshEditorPadList(); flashVoice(t); markDirty(); },
+      ()=>{ sampleRaw[t]=prev.raw; sampleEdit[t]=prev.edit; decodedAt[t]=prev.at;   // queda el sample que había
+        toast('No pude decodificar "'+file.name+'". Probá WAV, MP3 u OGG.'); });
   };
   reader.readAsArrayBuffer(file);
 }
+/* edit se fija ANTES de decodificar: si el autoguardado corre mientras tanto,
+   buildProject() ya ve los parámetros del editor y no los pisa con los de
+   fábrica. Si el sample no se puede decodificar (p. ej. un formato que este
+   navegador no lee) los bytes se conservan en el proyecto: no se pierden. */
 function setSampleFromBytes(t, bytes, name, type, edit){
   sampleRaw[t]={bytes:bytes.slice(), name, type:type||''};
+  sampleEdit[t]=edit?Object.assign(defaultEdit(),edit):defaultEdit();
+  const raw=sampleRaw[t], dc=decoder(); decodedAt[t]=dc.sampleRate;
   const copy = bytes.slice().buffer;
-  ctx.decodeAudioData(copy, async buf=>{ sampleOrig[t]=buf; sampleEdit[t]=edit?Object.assign(defaultEdit(),edit):defaultEdit();
+  return decodeBytes(dc, copy).then(async buf=>{ if(sampleRaw[t]!==raw) return;   // lo reemplazaron mientras tanto
+    sampleOrig[t]=buf;
     try{ sampleBuffers[t]=await renderEdited(buf, sampleEdit[t]); }catch(e){ sampleBuffers[t]=buf; }
     sampleNames[t]=name; updateVoiceLabel(t); refreshEditorPadList(); },
-    ()=>{ sampleRaw[t]=null; });
+    ()=>{ if(sampleRaw[t]===raw) toast('No pude decodificar el sample "'+name+'" en este navegador. Queda guardado en el proyecto.'); });
+}
+/* Con el contexto real ya creado, los samples decodificados sin él (a 48 kHz
+   en un OfflineAudioContext) se vuelven a decodificar a su frecuencia, así
+   suenan exactamente igual que antes. Idempotente. */
+function resyncSamples(){
+  if(!ctx) return;
+  for(let t=0;t<N_TRACKS;t++){ const r=sampleRaw[t];
+    if(r && decodedAt[t] && decodedAt[t]!==ctx.sampleRate) setSampleFromBytes(t, r.bytes, r.name, r.type, sampleEdit[t]); }
 }
 function clearSample(t){ sampleBuffers[t]=null; sampleNames[t]=null; sampleRaw[t]=null; sampleOrig[t]=null; sampleEdit[t]=null; updateVoiceLabel(t); refreshEditorPadList(); if(edPadIdx===t) selectEditorPad(-1); }
 function updateVoiceLabel(t){
@@ -3631,7 +3658,9 @@ function refreshTrackControls(){
    TRANSPORT
    ========================================================================= */
 const runBtn=document.getElementById('run'), runGlyph=document.getElementById('runGlyph'), runLabel=document.getElementById('runLabel');
-function setRunUI(p){ runBtn.classList.toggle('playing',p); runGlyph.textContent=p?'■':'▶'; runLabel.textContent=p?'Parar':'Tocar'; }
+function setRunUI(p){ runBtn.classList.toggle('playing',p); runGlyph.textContent=p?'■':'▶'; runLabel.textContent=p?'Parar':'Tocar';
+  runBtn.setAttribute('aria-pressed', p?'true':'false');
+  if(!HOST && window.ZD && ZD.audio) ZD.audio.setPlaying(p); }
 runBtn.addEventListener('click', ()=>{ ensureAudio(); togglePlay('pattern'); });
 
 const recBtn=document.getElementById('rec'); let recording=false;
@@ -3851,6 +3880,16 @@ function seedPattern(){
   const set=(name,steps,acc=[])=>{ const t=KIT.findIndex(v=>v.name===name); if(t<0) return; steps.forEach(s=>pattern[t][s]=1); acc.forEach(s=>pattern[t][s]=2); };
   set('Bombo',[0,6,10],[0]); set('Redoblante',[4,12],[4,12]); set('Hat cerrado',[0,2,4,6,8,10,12,14]); set('Hat abierto',[7,15]); set('Clap',[12]);
 }
+if(!HOST && window.ZD && ZD.audio){
+  ZD.audio.attach({ getContext:()=>ctx, ensure:()=>ensureAudio(), onResumed:resyncSamples });
+  ZD.audio.bindGesture(window);
+}
+/* Web MIDI no existe en Safari ni en ningún navegador de iOS (zd-midi lo
+   detecta). CronBeat no toma MIDI en vivo; el aviso aclara que el export sí anda. */
+(function(){ const sup=(window.ZD && ZD.midi) ? ZD.midi.support() : {available:true}, note=document.getElementById('midiNote');
+  if(sup.available || !note) return;
+  note.textContent='MIDI no disponible en este navegador (Web MIDI): Patrón→MIDI y Canción→MIDI igual descargan un archivo .mid.';
+  note.hidden=false; })();
 buildRuler(); buildTracks(); buildPads(); buildMatrix(); buildMixer(); bindTrackBar(); selectTrack(0); buildPatBar(); bindFX(); bindEditor(); seedPattern(); renderSong(); renderAll(); updatePatBar(); refreshFXControls(); refreshEditorPadList(); setTempo(tempo);
 const isTouch=(window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
 setView(isTouch ? 'pads' : 'seq');
