@@ -1,0 +1,236 @@
+TAP version 13
+  CronBeat · primer tap: trigger@suspended/down · contexto running
+# Subtest: CronBeat · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+not ok 1 - CronBeat · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 1789.536528
+  type: 'test'
+  location: '<repo>/tools/tests/first-hit.test.mjs:126:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    CronBeat: no puede programar golpes con el contexto suspendido
+    + actual - expected
+    
+    + [
+    +   'trigger@suspended/down'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'trigger@suspended/down'
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertDeferred (file://<repo>/tools/tests/first-hit.test.mjs:119:10)
+    TestContext.<anonymous> (file://<repo>/tools/tests/first-hit.test.mjs:134:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+  Nebularp · primer tap: voz@suspended/down voz@suspended/down voz@suspended/down voz@suspended/down · contexto running
+# Subtest: Nebularp · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+not ok 2 - Nebularp · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 1377.365634
+  type: 'test'
+  location: '<repo>/tools/tests/first-hit.test.mjs:126:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Nebularp: no puede programar golpes con el contexto suspendido
+    + actual - expected
+    
+    + [
+    +   'voz@suspended/down',
+    +   'voz@suspended/down',
+    +   'voz@suspended/down',
+    +   'voz@suspended/down'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'voz@suspended/down'
+    1: 'voz@suspended/down'
+    2: 'voz@suspended/down'
+    3: 'voz@suspended/down'
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertDeferred (file://<repo>/tools/tests/first-hit.test.mjs:119:10)
+    TestContext.<anonymous> (file://<repo>/tools/tests/first-hit.test.mjs:134:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  CronBeat · suspendido → tap: trigger@suspended/down · contexto running
+# Subtest: CronBeat · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+not ok 3 - CronBeat · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 2585.804165
+  type: 'test'
+  location: '<repo>/tools/tests/first-hit.test.mjs:142:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    CronBeat: no puede programar golpes con el contexto suspendido
+    + actual - expected
+    
+    + [
+    +   'trigger@suspended/down'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'trigger@suspended/down'
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertDeferred (file://<repo>/tools/tests/first-hit.test.mjs:119:10)
+    TestContext.<anonymous> (file://<repo>/tools/tests/first-hit.test.mjs:152:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  CronBeat · corriendo → tap: trigger@running/down
+# Subtest: CronBeat · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 4 - CronBeat · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2627.002937
+  type: 'test'
+  ...
+  Nebularp · suspendido → tap: voz@suspended/down voz@suspended/down voz@suspended/down voz@suspended/down · contexto running
+# Subtest: Nebularp · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+not ok 5 - Nebularp · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 2709.699933
+  type: 'test'
+  location: '<repo>/tools/tests/first-hit.test.mjs:142:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Nebularp: no puede programar golpes con el contexto suspendido
+    + actual - expected
+    
+    + [
+    +   'voz@suspended/down',
+    +   'voz@suspended/down',
+    +   'voz@suspended/down',
+    +   'voz@suspended/down'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'voz@suspended/down'
+    1: 'voz@suspended/down'
+    2: 'voz@suspended/down'
+    3: 'voz@suspended/down'
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertDeferred (file://<repo>/tools/tests/first-hit.test.mjs:119:10)
+    TestContext.<anonymous> (file://<repo>/tools/tests/first-hit.test.mjs:152:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  Nebularp · corriendo → tap: voz@running/down voz@running/down voz@running/down voz@running/down
+# Subtest: Nebularp · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 6 - Nebularp · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2681.608813
+  type: 'test'
+  ...
+  MonoMoon · suspendido → tap: noteOn@suspended/down · contexto running
+# Subtest: MonoMoon · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+not ok 7 - MonoMoon · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 2593.521329
+  type: 'test'
+  location: '<repo>/tools/tests/first-hit.test.mjs:142:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    MonoMoon: no puede programar golpes con el contexto suspendido
+    + actual - expected
+    
+    + [
+    +   'noteOn@suspended/down'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'noteOn@suspended/down'
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertDeferred (file://<repo>/tools/tests/first-hit.test.mjs:119:10)
+    TestContext.<anonymous> (file://<repo>/tools/tests/first-hit.test.mjs:152:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  MonoMoon · corriendo → tap: noteOn@running/down
+# Subtest: MonoMoon · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 8 - MonoMoon · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2602.590861
+  type: 'test'
+  ...
+  J4 · suspendido → tap: noteOn@suspended/down · contexto running
+# Subtest: J4 · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+not ok 9 - J4 · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 2556.223757
+  type: 'test'
+  location: '<repo>/tools/tests/first-hit.test.mjs:142:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    J4: no puede programar golpes con el contexto suspendido
+    + actual - expected
+    
+    + [
+    +   'noteOn@suspended/down'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'noteOn@suspended/down'
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertDeferred (file://<repo>/tools/tests/first-hit.test.mjs:119:10)
+    TestContext.<anonymous> (file://<repo>/tools/tests/first-hit.test.mjs:152:7)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  J4 · corriendo → tap: noteOn@running/down
+# Subtest: J4 · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 10 - J4 · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2557.313099
+  type: 'test'
+  ...
+# Subtest: MonoMoon · la pantalla de encendido toma el primer toque (puerta)
+ok 11 - MonoMoon · la pantalla de encendido toma el primer toque (puerta)
+  ---
+  duration_ms: 525.628621
+  type: 'test'
+  ...
+# Subtest: J4 · la pantalla de encendido toma el primer toque (puerta)
+ok 12 - J4 · la pantalla de encendido toma el primer toque (puerta)
+  ---
+  duration_ms: 497.554286
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 6
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 25128.251103

@@ -1,0 +1,134 @@
+TAP version 13
+  tap → AudioContext creados 4 · VCA 0.0001 · RMS salida 0.0003 · activeSemi=0 · teclas .down=1 · envolvente on
+# Subtest: Acid · primer toque táctil en una tecla: al soltar no queda ninguna voz sonando
+not ok 1 - Acid · primer toque táctil en una tecla: al soltar no queda ninguna voz sonando
+  ---
+  duration_ms: 2562.885363
+  type: 'test'
+  location: '<repo>/tools/tests/acid-first-key.test.mjs:86:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    después de soltar: un solo contexto, sin nota activa, sin tecla marcada y el VCA cerrado
+    + actual - expected
+    
+      {
+    +   activeSemi: 0,
+    -   activeSemi: null,
+        colgada: false,
+    +   contexts: 4,
+    +   down: 1
+    -   contexts: 1,
+    -   down: 0
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    contexts: 1
+    activeSemi: ~
+    down: 0
+    colgada: false
+  actual:
+    contexts: 4
+    activeSemi: 0
+    down: 1
+    colgada: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/acid-first-key.test.mjs:97:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+  A → AudioContext creados 2 · VCA 0.72 · RMS salida 0.4995 · activeSemi=0 · teclas .down=1 · envolvente on
+# Subtest: Acid · primera tecla del teclado de PC (A): al soltar no queda ninguna voz sonando
+not ok 2 - Acid · primera tecla del teclado de PC (A): al soltar no queda ninguna voz sonando
+  ---
+  duration_ms: 1656.132982
+  type: 'test'
+  location: '<repo>/tools/tests/acid-first-key.test.mjs:104:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   activeSemi: 0,
+    +   colgada: true,
+    +   contexts: 2,
+    +   down: 1
+    -   activeSemi: null,
+    -   colgada: false,
+    -   contexts: 1,
+    -   down: 0
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    contexts: 1
+    activeSemi: ~
+    down: 0
+    colgada: false
+  actual:
+    contexts: 2
+    activeSemi: 0
+    down: 1
+    colgada: true
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/acid-first-key.test.mjs:112:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  PLAY → AudioContext creados 3 · sonando true
+# Subtest: Acid · el primer clic en PLAY arma un solo AudioContext
+not ok 3 - Acid · el primer clic en PLAY arma un solo AudioContext
+  ---
+  duration_ms: 1340.077097
+  type: 'test'
+  location: '<repo>/tools/tests/acid-first-key.test.mjs:118:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   contexts: 3,
+    -   contexts: 1,
+        playing: true,
+    +   same: false
+    -   same: true
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    contexts: 1
+    playing: true
+    same: true
+  actual:
+    contexts: 3
+    playing: true
+    same: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/acid-first-key.test.mjs:125:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  sostenida 500 ms: VCA 0.72, RMS 0.5036, .down=1 · soltada: VCA 0.0001, RMS 0.0003
+# Subtest: Acid · con el motor andando no cambia nada: mantener sostiene, soltar apaga
+ok 4 - Acid · con el motor andando no cambia nada: mantener sostiene, soltar apaga
+  ---
+  duration_ms: 2573.997883
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 1
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8179.59704

@@ -1,0 +1,92 @@
+TAP version 13
+  CronBeat · primer tap: trigger@running/up · contexto running
+# Subtest: CronBeat · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+ok 1 - CronBeat · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 1825.683344
+  type: 'test'
+  ...
+  Nebularp · primer tap: voz@running/up voz@running/up voz@running/up voz@running/up · contexto running
+# Subtest: Nebularp · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+ok 2 - Nebularp · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 1426.569964
+  type: 'test'
+  ...
+  CronBeat · suspendido → tap: trigger@running/up · contexto running
+# Subtest: CronBeat · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 3 - CronBeat · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3061.956386
+  type: 'test'
+  ...
+  CronBeat · corriendo → tap: trigger@running/down
+# Subtest: CronBeat · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 4 - CronBeat · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2567.532496
+  type: 'test'
+  ...
+  Nebularp · suspendido → tap: voz@running/up voz@running/up voz@running/up voz@running/up · contexto running
+# Subtest: Nebularp · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 5 - Nebularp · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3230.231447
+  type: 'test'
+  ...
+  Nebularp · corriendo → tap: voz@running/down voz@running/down voz@running/down voz@running/down
+# Subtest: Nebularp · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 6 - Nebularp · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2750.401329
+  type: 'test'
+  ...
+  MonoMoon · suspendido → tap: noteOn@running/up · contexto running
+# Subtest: MonoMoon · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 7 - MonoMoon · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3135.83587
+  type: 'test'
+  ...
+  MonoMoon · corriendo → tap: noteOn@running/down
+# Subtest: MonoMoon · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 8 - MonoMoon · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2638.233714
+  type: 'test'
+  ...
+  J4 · suspendido → tap: noteOn@running/up · contexto running
+# Subtest: J4 · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 9 - J4 · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3083.656509
+  type: 'test'
+  ...
+  J4 · corriendo → tap: noteOn@running/down
+# Subtest: J4 · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 10 - J4 · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2559.869381
+  type: 'test'
+  ...
+# Subtest: MonoMoon · la pantalla de encendido toma el primer toque (puerta)
+ok 11 - MonoMoon · la pantalla de encendido toma el primer toque (puerta)
+  ---
+  duration_ms: 534.472087
+  type: 'test'
+  ...
+# Subtest: J4 · la pantalla de encendido toma el primer toque (puerta)
+ok 12 - J4 · la pantalla de encendido toma el primer toque (puerta)
+  ---
+  duration_ms: 504.19696
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 27346.296736

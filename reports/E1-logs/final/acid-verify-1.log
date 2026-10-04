@@ -1,0 +1,102 @@
+TAP version 13
+  360×640 (mínimo) · shell · tabs=5 · PLAY 44px · pad 217px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 360×640 (mínimo) · layout
+ok 1 - Acid · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 822.70542
+  type: 'test'
+  ...
+  390×844 · shell · tabs=5 · PLAY 44px · pad 421px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 390×844 · layout
+ok 2 - Acid · 390×844 · layout
+  ---
+  duration_ms: 385.179315
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · tabs=5 · PLAY 44px · pad 586px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 768×1024 (iPad vertical) · layout
+ok 3 - Acid · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 412.493524
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · tabs=5 · PLAY 44px · pad 120px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 844×390 (landscape) · layout
+ok 4 - Acid · 844×390 (landscape) · layout
+  ---
+  duration_ms: 404.683832
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell · sin scroll horizontal
+# Subtest: Acid · 1440×900 (escritorio) · layout
+ok 5 - Acid · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 372.242511
+  type: 'test'
+  ...
+  360×640 · banner 82px, no tapa PLAY/tempo/pad, "Ahora no" lo descarta
+  390×844 · banner 82px, no tapa PLAY/tempo/pad, "Ahora no" lo descarta
+# Subtest: Acid · el banner de instalación no tapa PLAY ni el pad XY (360×640 y 390×844)
+ok 6 - Acid · el banner de instalación no tapa PLAY ni el pad XY (360×640 y 390×844)
+  ---
+  duration_ms: 1512.714447
+  type: 'test'
+  ...
+  guardado {"gate0":"tie","note1":55,"kbOct":4} → restaurado {"gate0":"tie","note1":55,"kbOct":4} (+ toast)
+# Subtest: Acid · autoguardado: tocar → recargar → mismo estado
+ok 7 - Acid · autoguardado: tocar → recargar → mismo estado
+  ---
+  duration_ms: 2472.115676
+  type: 'test'
+  ...
+  acid-bass-20261004-2039.json 2379B (ida y vuelta ok) · acid-bass-20261004-2039.mid 163B (13 notas, sin defectos) · acid-bass-20261004-2039.wav 224616B
+# Subtest: Acid · export JSON / MIDI / WAV
+ok 8 - Acid · export JSON / MIDI / WAV
+  ---
+  duration_ms: 5346.067808
+  type: 'test'
+  ...
+  44100 Hz · running → suspended → resume() → running · visibilitychange → running
+# Subtest: Acid · audio: destrabar, sonar, suspend y resume
+ok 9 - Acid · audio: destrabar, sonar, suspend y resume
+  ---
+  duration_ms: 2776.644421
+  type: 'test'
+  ...
+  8 rotaciones sonando · ctx.currentTime 0.53 → 2.40 · pasos vistos 7,9,11,13,15,1,3,5
+# Subtest: Acid · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+ok 10 - Acid · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+  ---
+  duration_ms: 2842.945794
+  type: 'test'
+  ...
+  file:// · SW no registrado · aviso local con [Abrir web] → https://zeroday-musicexploits.github.io/instruments/descargables/Acid_Bass-303.html · 0 pedidos de red
+# Subtest: Acid · file://: sin service worker, sin manifest, con el aviso del archivo local
+ok 11 - Acid · file://: sin service worker, sin manifest, con el aviso del archivo local
+  ---
+  duration_ms: 529.401762
+  type: 'test'
+  ...
+  hosted · SW http://127.0.0.1:34905/sw.js con scope http://127.0.0.1:34905/ · manifest ../manifests/acid-bass.webmanifest
+# Subtest: Acid · hosted: el service worker se registra y zd-pwa queda activo
+ok 12 - Acid · hosted: el service worker se registra y zd-pwa queda activo
+  ---
+  duration_ms: 435.661127
+  type: 'test'
+  ...
+  iframe · ZD.pwa inerte (active=false, 0 banner, 0 CSS) · shell=false · 0 errores
+# Subtest: Acid · iframe: zd-pwa inerte, sin banner y sin errores
+ok 13 - Acid · iframe: zd-pwa inerte, sin banner y sin errores
+  ---
+  duration_ms: 640.645628
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18978.03207

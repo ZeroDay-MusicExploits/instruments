@@ -1,0 +1,19 @@
+descargables/CronBeat-808.html       perf 91  a11y 100  bp 100  seo 100
+    performance · first-contentful-paint (0.78) 2.2 s
+    performance · largest-contentful-paint (0.86) 2.7 s
+    performance · total-blocking-time (0.98) 100 ms
+    performance · cumulative-layout-shift (0.91) 0.093
+    performance · speed-index (0.99) 2.2 s
+descargables/MonoMoon70.html         perf 96  a11y 100  bp 100  seo 100
+descargables/Nebularp_2035.html      perf 92  a11y 100  bp 100  seo 100
+    performance · first-contentful-paint (0.84) 2.0 s
+    performance · largest-contentful-paint (0.89) 2.5 s
+    performance · total-blocking-time (0.94) 160 ms
+    performance · cumulative-layout-shift (0.93) 0.084
+    performance · speed-index (0.99) 2.0 s
+descargables/J4-Sirens_Station.html  perf 96  a11y 100  bp 100  seo 100
+descargables/Acid_Bass-303.html      perf 93  a11y 100  bp 100  seo 100
+    performance · first-contentful-paint (0.88) 1.9 s
+    performance · largest-contentful-paint (0.92) 2.4 s
+    performance · total-blocking-time (0.95) 150 ms
+    performance · cumulative-layout-shift (0.92) 0.092

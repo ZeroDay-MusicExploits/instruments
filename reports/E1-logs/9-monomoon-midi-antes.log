@@ -1,0 +1,74 @@
+TAP version 13
+  al cargar: {"calls":1,"txt":"MIDI 1","dot":true,"btn":null}
+# Subtest: MonoMoon · al cargar no se pide MIDI; el botón "Conectar MIDI" lo pide con el gesto
+not ok 1 - MonoMoon · al cargar no se pide MIDI; el botón "Conectar MIDI" lo pide con el gesto
+  ---
+  duration_ms: 1275.936295
+  type: 'test'
+  location: '<repo>/tools/tests/monomoon-midi.test.mjs:66:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    al cargar: cero llamadas y el botón visible
+    + actual - expected
+    
+      {
+    +   btn: null,
+    +   calls: 1
+    -   btn: 'Conectar MIDI',
+    -   calls: 0
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    calls: 0
+    btn: 'Conectar MIDI'
+  actual:
+    calls: 1
+    btn: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/monomoon-midi.test.mjs:71:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: MonoMoon · permiso negado: "MIDI bloqueado" y el botón queda para reintentar
+not ok 2 - MonoMoon · permiso negado: "MIDI bloqueado" y el botón queda para reintentar
+  ---
+  duration_ms: 31321.468049
+  type: 'test'
+  location: '<repo>/tools/tests/monomoon-midi.test.mjs:82:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    page.click: Timeout 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('#midiBtn')[22m
+    
+  code: 'ERR_TEST_FAILURE'
+  name: 'TimeoutError'
+  stack: |-
+    TestContext.<anonymous> (<repo>/tools/tests/monomoon-midi.test.mjs:86:16)
+  ...
+  sin Web MIDI: {"calls":0,"txt":"MIDI no disponible en este navegador","dot":false,"btn":null}
+# Subtest: MonoMoon · sin Web MIDI: "MIDI no disponible en este navegador", sin botón
+ok 3 - MonoMoon · sin Web MIDI: "MIDI no disponible en este navegador", sin botón
+  ---
+  duration_ms: 751.494732
+  type: 'test'
+  ...
+  hub C2: {"calls":0,"txt":"MIDI ← C2","dot":true,"btn":null}
+# Subtest: MonoMoon · con el hub C2: "MIDI ← C2", sin botón y sin pedir MIDI
+ok 4 - MonoMoon · con el hub C2: "MIDI ← C2", sin botón y sin pedir MIDI
+  ---
+  duration_ms: 1643.827027
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 2
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 35021.338187

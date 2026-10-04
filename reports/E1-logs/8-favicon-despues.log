@@ -1,0 +1,75 @@
+TAP version 13
+  Acid_Bass-303.html: 32×32 · 1548 B en base64 · fondo 220,239,58 (ícono acid-bass: 220,239,58)
+  CronBeat-808.html: 32×32 · 1532 B en base64 · fondo 250,183,42 (ícono cronbeat: 250,183,42)
+  J4-Sirens_Station.html: 32×32 · 1536 B en base64 · fondo 240,106,216 (ícono j4-sirens: 240,106,216)
+  MonoMoon70.html: 32×32 · 1532 B en base64 · fondo 242,166,60 (ícono monomoon: 242,166,60)
+  Nebularp_2035.html: 32×32 · 1528 B en base64 · fondo 154,140,255 (ícono nebularp: 154,140,255)
+# Subtest: Acid_Bass-303.html · favicon inline de 32×32 con el color de acento
+ok 1 - Acid_Bass-303.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 386.788197
+  type: 'test'
+  ...
+# Subtest: CronBeat-808.html · favicon inline de 32×32 con el color de acento
+ok 2 - CronBeat-808.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 3.765517
+  type: 'test'
+  ...
+# Subtest: J4-Sirens_Station.html · favicon inline de 32×32 con el color de acento
+ok 3 - J4-Sirens_Station.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 3.322083
+  type: 'test'
+  ...
+# Subtest: MonoMoon70.html · favicon inline de 32×32 con el color de acento
+ok 4 - MonoMoon70.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 3.323931
+  type: 'test'
+  ...
+# Subtest: Nebularp_2035.html · favicon inline de 32×32 con el color de acento
+ok 5 - Nebularp_2035.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 3.603517
+  type: 'test'
+  ...
+# Subtest: Acid_Bass-303.html · el favicon resuelve a data: y carga (http y file://)
+ok 6 - Acid_Bass-303.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 316.047966
+  type: 'test'
+  ...
+# Subtest: CronBeat-808.html · el favicon resuelve a data: y carga (http y file://)
+ok 7 - CronBeat-808.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 244.244336
+  type: 'test'
+  ...
+# Subtest: J4-Sirens_Station.html · el favicon resuelve a data: y carga (http y file://)
+ok 8 - J4-Sirens_Station.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 278.905679
+  type: 'test'
+  ...
+# Subtest: MonoMoon70.html · el favicon resuelve a data: y carga (http y file://)
+ok 9 - MonoMoon70.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 288.892828
+  type: 'test'
+  ...
+# Subtest: Nebularp_2035.html · el favicon resuelve a data: y carga (http y file://)
+ok 10 - Nebularp_2035.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 296.430555
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1846.369602

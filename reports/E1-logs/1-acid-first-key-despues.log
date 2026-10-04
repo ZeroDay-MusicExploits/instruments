@@ -1,0 +1,38 @@
+TAP version 13
+  tap → AudioContext creados 1 · VCA 0.0001 · RMS salida 0.0003 · activeSemi=null · teclas .down=0 · envolvente on off
+# Subtest: Acid · primer toque táctil en una tecla: al soltar no queda ninguna voz sonando
+ok 1 - Acid · primer toque táctil en una tecla: al soltar no queda ninguna voz sonando
+  ---
+  duration_ms: 2528.973193
+  type: 'test'
+  ...
+  A → AudioContext creados 1 · VCA 0.0001 · RMS salida 0.0003 · activeSemi=null · teclas .down=0 · envolvente on off
+# Subtest: Acid · primera tecla del teclado de PC (A): al soltar no queda ninguna voz sonando
+ok 2 - Acid · primera tecla del teclado de PC (A): al soltar no queda ninguna voz sonando
+  ---
+  duration_ms: 1664.287437
+  type: 'test'
+  ...
+  PLAY → AudioContext creados 1 · sonando true
+# Subtest: Acid · el primer clic en PLAY arma un solo AudioContext
+ok 3 - Acid · el primer clic en PLAY arma un solo AudioContext
+  ---
+  duration_ms: 1414.526997
+  type: 'test'
+  ...
+  sostenida 500 ms: VCA 0.72, RMS 0.5164, .down=1 · soltada: VCA 0.0001, RMS 0.0003
+# Subtest: Acid · con el motor andando no cambia nada: mantener sostiene, soltar apaga
+ok 4 - Acid · con el motor andando no cambia nada: mantener sostiene, soltar apaga
+  ---
+  duration_ms: 2536.440534
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8166.480359

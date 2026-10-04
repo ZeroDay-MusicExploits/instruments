@@ -1,0 +1,23 @@
+run.mjs                            exit=0  pass 178 fail 0  317s
+acid-verify-1                      exit=0  pass 13 fail 0  19s
+acid-verify-2                      exit=0  pass 13 fail 0  19s
+acid-verify-3                      exit=0  pass 13 fail 0  19s
+cronbeat-verify-1                  exit=0  pass 24 fail 0  53s
+cronbeat-verify-2                  exit=0  pass 24 fail 0  52s
+cronbeat-verify-3                  exit=0  pass 24 fail 0  53s
+j4-verify-1                        exit=0  pass 18 fail 0  34s
+j4-verify-2                        exit=0  pass 18 fail 0  33s
+j4-verify-3                        exit=0  pass 18 fail 0  33s
+monomoon-verify-1                  exit=0  pass 23 fail 0  56s
+monomoon-verify-2                  exit=0  pass 23 fail 0  55s
+monomoon-verify-3                  exit=0  pass 23 fail 0  56s
+nebularp-verify-1                  exit=0  pass 17 fail 0  36s
+nebularp-verify-2                  exit=0  pass 17 fail 0  38s
+nebularp-verify-3                  exit=0  pass 17 fail 0  36s
+cycle-Acid_Bass-303                exit=0  pass 7 fail 0  4s
+cycle-CronBeat-808                 exit=0  pass 7 fail 0  4s
+cycle-J4-Sirens_Station            exit=0  pass 7 fail 0  6s
+cycle-MonoMoon70                   exit=0  pass 7 fail 0  4s
+cycle-Nebularp_2035                exit=0  pass 7 fail 0  4s
+check-blocks: OK: sin diferencias entre los bloques presentes.
+FIN

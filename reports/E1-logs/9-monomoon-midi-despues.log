@@ -1,0 +1,39 @@
+TAP version 13
+  al cargar: {"calls":0,"txt":"MIDI —","dot":false,"btn":{"text":"Conectar MIDI","disabled":false}}
+  tras el botón: {"calls":1,"txt":"MIDI 1","dot":true,"btn":null}
+# Subtest: MonoMoon · al cargar no se pide MIDI; el botón "Conectar MIDI" lo pide con el gesto
+ok 1 - MonoMoon · al cargar no se pide MIDI; el botón "Conectar MIDI" lo pide con el gesto
+  ---
+  duration_ms: 2103.974465
+  type: 'test'
+  ...
+  negado: {"calls":1,"txt":"MIDI bloqueado","dot":false,"btn":{"text":"Conectar MIDI","disabled":false}}
+# Subtest: MonoMoon · permiso negado: "MIDI bloqueado" y el botón queda para reintentar
+ok 2 - MonoMoon · permiso negado: "MIDI bloqueado" y el botón queda para reintentar
+  ---
+  duration_ms: 1665.815731
+  type: 'test'
+  ...
+  sin Web MIDI: {"calls":0,"txt":"MIDI no disponible en este navegador","dot":false,"btn":null}
+# Subtest: MonoMoon · sin Web MIDI: "MIDI no disponible en este navegador", sin botón
+ok 3 - MonoMoon · sin Web MIDI: "MIDI no disponible en este navegador", sin botón
+  ---
+  duration_ms: 721.020049
+  type: 'test'
+  ...
+  hub C2: {"calls":0,"txt":"MIDI ← C2","dot":true,"btn":null}
+# Subtest: MonoMoon · con el hub C2: "MIDI ← C2", sin botón y sin pedir MIDI
+ok 4 - MonoMoon · con el hub C2: "MIDI ← C2", sin botón y sin pedir MIDI
+  ---
+  duration_ms: 1641.547575
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6168.548449

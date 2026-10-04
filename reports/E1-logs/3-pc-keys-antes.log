@@ -1,0 +1,200 @@
+TAP version 13
+  Acid: {"espacioEnKnob":{"transporte":true,"notas":2},"espacioYFlechasEnBoton":{"transporte":true,"otro":false,"notas":2},"tipearConModal":{"recibe":true,"transporte":true,"otro":false,"notas":10},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: Acid · los atajos no le roban teclas a los controles ni a un modal
+not ok 1 - Acid · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 4929.03464
+  type: 'test'
+  location: '<repo>/tools/tests/pc-keys.test.mjs:92:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    ningún atajo con un control enfocado o un modal abierto; con el foco en la página, las letras tocan
+    + actual - expected
+    
+      {
+        espacioEnKnob: {
+    +     notas: 2,
+    +     transporte: true
+    -     notas: 0,
+    -     transporte: false
+        },
+        espacioEnLaPagina: {
+          transporte: true
+        },
+        espacioYFlechasEnBoton: {
+    +     notas: 2,
+    -     notas: 0,
+          otro: false,
+    +     transporte: true
+    -     transporte: false
+        },
+        letraEnLaPagina: {
+          notas: true
+        },
+        tipearConModal: {
+    +     notas: 10,
+    -     notas: 0,
+          otro: false,
+          recibe: true,
+    +     transporte: true
+    -     transporte: false
+        }
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    espacioEnKnob:
+      transporte: false
+      notas: 0
+    espacioYFlechasEnBoton:
+      transporte: false
+      otro: false
+      notas: 0
+    tipearConModal:
+      recibe: true
+      transporte: false
+      otro: false
+      notas: 0
+    letraEnLaPagina:
+      notas: true
+    espacioEnLaPagina:
+      transporte: true
+  actual:
+    espacioEnKnob:
+      transporte: true
+      notas: 2
+    espacioYFlechasEnBoton:
+      transporte: true
+      otro: false
+      notas: 2
+    tipearConModal:
+      recibe: true
+      transporte: true
+      otro: false
+      notas: 10
+    letraEnLaPagina:
+      notas: true
+    espacioEnLaPagina:
+      transporte: true
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/pc-keys.test.mjs:140:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+  CronBeat: {"espacioEnKnob":{"transporte":true,"notas":3},"espacioYFlechasEnBoton":{"transporte":true,"otro":true,"notas":3},"tipearConModal":{"recibe":true,"transporte":true,"otro":false,"notas":11},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: CronBeat · los atajos no le roban teclas a los controles ni a un modal
+not ok 2 - CronBeat · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 4436.567287
+  type: 'test'
+  location: '<repo>/tools/tests/pc-keys.test.mjs:92:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    ningún atajo con un control enfocado o un modal abierto; con el foco en la página, las letras tocan
+    + actual - expected
+    
+      {
+        espacioEnKnob: {
+    +     notas: 3,
+    +     transporte: true
+    -     notas: 0,
+    -     transporte: false
+        },
+        espacioEnLaPagina: {
+          transporte: true
+        },
+        espacioYFlechasEnBoton: {
+    +     notas: 3,
+    +     otro: true,
+    +     transporte: true
+    -     notas: 0,
+    -     otro: false,
+    -     transporte: false
+        },
+        letraEnLaPagina: {
+          notas: true
+        },
+        tipearConModal: {
+    +     notas: 11,
+    -     notas: 0,
+          otro: false,
+          recibe: true,
+    +     transporte: true
+    -     transporte: false
+        }
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    espacioEnKnob:
+      transporte: false
+      notas: 0
+    espacioYFlechasEnBoton:
+      transporte: false
+      otro: false
+      notas: 0
+    tipearConModal:
+      recibe: true
+      transporte: false
+      otro: false
+      notas: 0
+    letraEnLaPagina:
+      notas: true
+    espacioEnLaPagina:
+      transporte: true
+  actual:
+    espacioEnKnob:
+      transporte: true
+      notas: 3
+    espacioYFlechasEnBoton:
+      transporte: true
+      otro: true
+      notas: 3
+    tipearConModal:
+      recibe: true
+      transporte: true
+      otro: false
+      notas: 11
+    letraEnLaPagina:
+      notas: true
+    espacioEnLaPagina:
+      transporte: true
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/pc-keys.test.mjs:140:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+  Nebularp: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: Nebularp · los atajos no le roban teclas a los controles ni a un modal
+ok 3 - Nebularp · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3669.019701
+  type: 'test'
+  ...
+  MonoMoon: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true}}
+# Subtest: MonoMoon · los atajos no le roban teclas a los controles ni a un modal
+ok 4 - MonoMoon · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3670.095349
+  type: 'test'
+  ...
+  J4: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: J4 · los atajos no le roban teclas a los controles ni a un modal
+ok 5 - J4 · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 4112.173267
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 3
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 20843.628815

@@ -1,0 +1,45 @@
+TAP version 13
+  Acid: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: Acid · los atajos no le roban teclas a los controles ni a un modal
+ok 1 - Acid · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3987.225834
+  type: 'test'
+  ...
+  CronBeat: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: CronBeat · los atajos no le roban teclas a los controles ni a un modal
+ok 2 - CronBeat · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3537.715625
+  type: 'test'
+  ...
+  Nebularp: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: Nebularp · los atajos no le roban teclas a los controles ni a un modal
+ok 3 - Nebularp · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3575.856596
+  type: 'test'
+  ...
+  MonoMoon: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true}}
+# Subtest: MonoMoon · los atajos no le roban teclas a los controles ni a un modal
+ok 4 - MonoMoon · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3632.358462
+  type: 'test'
+  ...
+  J4: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: J4 · los atajos no le roban teclas a los controles ni a un modal
+ok 5 - J4 · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 4088.552626
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18846.772538

@@ -1,0 +1,132 @@
+TAP version 13
+  360×640 (mínimo) · shell · barra 48px · play 45×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 49×128 · tabs 54
+# Subtest: Nebularp · 360×640 (mínimo) · layout
+ok 1 - Nebularp · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 835.467347
+  type: 'test'
+  ...
+  390×844 · shell · barra 48px · play 45×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 53×201 · tabs 54
+# Subtest: Nebularp · 390×844 · layout
+ok 2 - Nebularp · 390×844 · layout
+  ---
+  duration_ms: 401.85787
+  type: 'test'
+  ...
+  430×932 · shell · barra 48px · play 104×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 59×229 · tabs 54
+# Subtest: Nebularp · 430×932 · layout
+ok 3 - Nebularp · 430×932 · layout
+  ---
+  duration_ms: 392.402734
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · barra 48px · play 104×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 54×517 · tabs 54
+# Subtest: Nebularp · 768×1024 (iPad vertical) · layout
+ok 4 - Nebularp · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 403.485701
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · barra 48px · play 104×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 53×131 · tabs 54
+# Subtest: Nebularp · 844×390 (landscape) · layout
+ok 5 - Nebularp · 844×390 (landscape) · layout
+  ---
+  duration_ms: 374.864741
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell · sin scroll horizontal
+# Subtest: Nebularp · 1440×900 (escritorio) · layout
+ok 6 - Nebularp · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 391.388442
+  type: 'test'
+  ...
+  360×640 · banner 82px · no tapa PLAY/REC/latch/tap/orbit/octava/piano/tabs · teclas 87px · "Ahora no" ok
+  390×844 · banner 82px · no tapa PLAY/REC/latch/tap/orbit/octava/piano/tabs · teclas 176px · "Ahora no" ok
+# Subtest: Nebularp · el banner de instalación no tapa el pad (360×640 y 390×844)
+ok 7 - Nebularp · el banner de instalación no tapa el pad (360×640 y 390×844)
+  ---
+  duration_ms: 1786.649198
+  type: 'test'
+  ...
+  6 knobs + 3 botones cambiados · held=[C5 E5] · AudioContext al restaurar: 0 · PLAY false
+# Subtest: Nebularp · autoguardado: tocar → recargar → mismo estado, sin audio
+ok 8 - Nebularp · autoguardado: tocar → recargar → mismo estado, sin audio
+  ---
+  duration_ms: 3781.782701
+  type: 'test'
+  ...
+  nebularp-20261004-2048.json 923B · envoltorio ok · ida y vuelta Gate/Ratchet = 150%/100% · otra app → modal "ERROR AL IMPORTAREse JSON es de otro instrumento (acid-bass-303). Abri…"
+# Subtest: Nebularp · JSON: export, ida y vuelta y rechazo con mensaje
+ok 9 - Nebularp · JSON: export, ida y vuelta y rechazo con mensaje
+  ---
+  duration_ms: 749.614338
+  type: 'test'
+  ...
+  track: 00 90 3c 64 · 30 80 3c 00 · 00 90 3c 64 · 30 80 3c 00
+# Subtest: Nebularp · zd-midi v2 embebido: off antes que on a igual tick
+ok 10 - Nebularp · zd-midi v2 embebido: off antes que on a igual tick
+  ---
+  duration_ms: 390.342243
+  type: 'test'
+  ...
+  ↓ Descargar MIDI (36 notas) · nebularp-20261004-2048.mid · fmt 0 · 96 ppq · 91.99998773333498 bpm · 36 notas · alturas 60,64,67,72,76,79
+  repeticiones de la misma altura: 30 · hueco min 1 / max 235 ticks · defectos 0
+  nebularp-20261004-2048.wav · 2 ch · 44100 Hz (ctx 44100) · 16 bit · 4.05 s · pico 0.353
+# Subtest: Nebularp · REC: arpegio con gate 150 % y ratchet 100 % → MIDI sano + WAV
+ok 11 - Nebularp · REC: arpegio con gate 150 % y ratchet 100 % → MIDI sano + WAV
+  ---
+  duration_ms: 4831.697494
+  type: 'test'
+  ...
+  Chord 42 notas · pad 2 notas (la sostenida cierra en 168/168) · autoplay 10 notas · 0 defectos
+# Subtest: Nebularp · REC: Chord, pad sostenido al cortar y autoplay → MIDI sano
+ok 12 - Nebularp · REC: Chord, pad sostenido al cortar y autoplay → MIDI sano
+  ---
+  duration_ms: 11026.154736
+  type: 'test'
+  ...
+  1 contexto · interactive · running · suspend → overlay → toque → running (voces 12→20→32) · visibilitychange → running · parado: overlay=false
+# Subtest: Nebularp · audio: destrabar, sonar, suspend → overlay → resume
+ok 13 - Nebularp · audio: destrabar, sonar, suspend → overlay → resume
+  ---
+  duration_ms: 4303.131087
+  type: 'test'
+  ...
+  8 rotaciones sonando · ctx 0.71→3.62 s · voces 64 · notas en la órbita G4,C5,E5,G5,C4 · latch [C4 E4 G4]
+# Subtest: Nebularp · rotación de tablet 1180×820 ↔ 820×1180 con el arpegio sonando
+ok 14 - Nebularp · rotación de tablet 1180×820 ↔ 820×1180 con el arpegio sonando
+  ---
+  duration_ms: 4106.192739
+  type: 'test'
+  ...
+  file:// · SW no · aviso local → https://zeroday-musicexploits.github.io/instruments/descargables/Nebularp_2035.html · 0 pedidos de red · shell=true
+# Subtest: Nebularp · file://: sin SW, sin red, con el aviso del archivo local
+ok 15 - Nebularp · file://: sin SW, sin red, con el aviso del archivo local
+  ---
+  duration_ms: 543.646639
+  type: 'test'
+  ...
+  SW http://127.0.0.1:42677/sw.js · scope http://127.0.0.1:42677/ · ../manifests/nebularp.webmanifest · theme #070b06
+# Subtest: Nebularp · hosted: SW registrado y manifest de Nebularp
+ok 16 - Nebularp · hosted: SW registrado y manifest de Nebularp
+  ---
+  duration_ms: 409.468809
+  type: 'test'
+  ...
+  iframe · ZD.pwa inerte · shell=true · audio running · 0 errores
+# Subtest: Nebularp · iframe (360 px): zd-pwa inerte, shell activo, sin errores
+ok 17 - Nebularp · iframe (360 px): zd-pwa inerte, shell activo, sin errores
+  ---
+  duration_ms: 1066.133662
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 35817.994916

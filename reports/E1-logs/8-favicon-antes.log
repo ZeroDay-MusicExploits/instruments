@@ -1,0 +1,287 @@
+TAP version 13
+# Subtest: Acid_Bass-303.html · favicon inline de 32×32 con el color de acento
+not ok 1 - Acid_Bass-303.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 390.178366
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:28:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    tiene que haber exactamente un <link rel="icon">
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:32:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: CronBeat-808.html · favicon inline de 32×32 con el color de acento
+not ok 2 - CronBeat-808.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 1.806072
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:28:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    tiene que haber exactamente un <link rel="icon">
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:32:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: J4-Sirens_Station.html · favicon inline de 32×32 con el color de acento
+not ok 3 - J4-Sirens_Station.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 1.644147
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:28:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    tiene que haber exactamente un <link rel="icon">
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:32:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: MonoMoon70.html · favicon inline de 32×32 con el color de acento
+not ok 4 - MonoMoon70.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 1.587256
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:28:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    tiene que haber exactamente un <link rel="icon">
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:32:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Nebularp_2035.html · favicon inline de 32×32 con el color de acento
+not ok 5 - Nebularp_2035.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 1.994418
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:28:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    tiene que haber exactamente un <link rel="icon">
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:32:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Acid_Bass-303.html · el favicon resuelve a data: y carga (http y file://)
+not ok 6 - Acid_Bass-303.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 186.552757
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:57:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    http
+    + actual - expected
+    
+      {
+    +   href: null
+    -   href: 'data:image/png;base64,',
+    -   w: 32
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    href: 'data:image/png;base64,'
+    w: 32
+  actual:
+    href: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:67:16)
+    runNextTicks (node:internal/process/task_queues:64:5)
+    process.processImmediate (node:internal/timers:452:9)
+    process.callbackTrampoline (node:internal/async_hooks:130:17)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: CronBeat-808.html · el favicon resuelve a data: y carga (http y file://)
+not ok 7 - CronBeat-808.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 131.33907
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:57:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    http
+    + actual - expected
+    
+      {
+    +   href: null
+    -   href: 'data:image/png;base64,',
+    -   w: 32
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    href: 'data:image/png;base64,'
+    w: 32
+  actual:
+    href: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:67:16)
+    runNextTicks (node:internal/process/task_queues:64:5)
+    process.processImmediate (node:internal/timers:452:9)
+    process.callbackTrampoline (node:internal/async_hooks:130:17)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: J4-Sirens_Station.html · el favicon resuelve a data: y carga (http y file://)
+not ok 8 - J4-Sirens_Station.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 129.319564
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:57:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    http
+    + actual - expected
+    
+      {
+    +   href: null
+    -   href: 'data:image/png;base64,',
+    -   w: 32
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    href: 'data:image/png;base64,'
+    w: 32
+  actual:
+    href: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:67:16)
+    runNextTicks (node:internal/process/task_queues:64:5)
+    process.processImmediate (node:internal/timers:452:9)
+    process.callbackTrampoline (node:internal/async_hooks:130:17)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: MonoMoon70.html · el favicon resuelve a data: y carga (http y file://)
+not ok 9 - MonoMoon70.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 132.918872
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:57:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    http
+    + actual - expected
+    
+      {
+    +   href: null
+    -   href: 'data:image/png;base64,',
+    -   w: 32
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    href: 'data:image/png;base64,'
+    w: 32
+  actual:
+    href: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:67:16)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Nebularp_2035.html · el favicon resuelve a data: y carga (http y file://)
+not ok 10 - Nebularp_2035.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 132.766729
+  type: 'test'
+  location: '<repo>/tools/tests/favicon.test.mjs:57:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    http
+    + actual - expected
+    
+      {
+    +   href: null
+    -   href: 'data:image/png;base64,',
+    -   w: 32
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    href: 'data:image/png;base64,'
+    w: 32
+  actual:
+    href: ~
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/favicon.test.mjs:67:16)
+    runNextTicks (node:internal/process/task_queues:64:5)
+    process.processImmediate (node:internal/timers:452:9)
+    process.callbackTrampoline (node:internal/async_hooks:130:17)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 0
+# fail 10
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1132.26273

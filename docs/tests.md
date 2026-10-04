@@ -38,6 +38,14 @@ Orden de uso:
 | `zd-audio-resumed.test.mjs` | Cuántas veces corre `onResumed` de `zd-audio`. | sí |
 | `zd-pwa-choice.test.mjs` | Banner, ↓ y menú tras `userChoice` / `appinstalled` (`zd-pwa` v3). | sí |
 | `zd-mobile-cycle.test.mjs` | Conformidad de `zd-mobile` para cualquier instrumento (`--file`, `--cycles`). | sí |
+| `acid-first-key.test.mjs` | Acid: el primer toque de una tecla no deja una nota colgada y arma un solo `AudioContext` (E1). | sí |
+| `first-hit.test.mjs` | CB, NB, MM, J4: con el audio sin destrabar o suspendido el golpe espera al destrabe; corriendo, sale en el `pointerdown` (iOS emulado, E1). | sí |
+| `pc-keys.test.mjs` | Los 5: los atajos del teclado de PC no le roban teclas a knobs, botones ni modales (E1). | sí |
+| `logo-once.test.mjs` | El logo en base64 va una sola vez y se ve en todos sus lugares, en http y `file://` (E1). | sí |
+| `zd-rec-comments.test.mjs` | Ningún instrumento dice que `zd-rec` descarta la toma del tope (E1). | no |
+| `favicon.test.mjs` | Favicon inline (PNG 32×32, color de acento) en los 5, en http y `file://` (E1). | sí |
+| `monomoon-midi.test.mjs` | MonoMoon pide Web MIDI con el botón «Conectar MIDI», no al cargar; sin Web MIDI y con hub C2 (E1). | sí |
+| `monomoon-xypad-a11y.test.mjs` | MonoMoon: el pad XY sin `aria-valuetext`, con el valor descrito y anunciado (E1). | sí |
 | `acid-verify.test.mjs` | Verificación completa de Acid Bass-303 (el piloto). | sí |
 | `cronbeat-verify.test.mjs` | Verificación completa de CronBeat-8:08: 24 casos (R1–R5, C2 simulado, extras). | sí |
 | `monomoon-verify.test.mjs` | Verificación completa de MonoMoon'70: 23 casos. | sí |
@@ -63,7 +71,9 @@ Los helpers están en `tools/tests/lib/` (`serve.mjs`: servidor estático bajo
   con un clon superficial).
 - Chromium headless arranca todo `AudioContext` en `running`: lo que depende de
   la política de gestos de iOS se **emula** y **no reemplaza** la prueba en un
-  iPhone (ver `docs/QA-dispositivos.md`).
+  iPhone (ver `docs/QA-dispositivos.md`). `first-hit` envuelve el
+  `AudioContext` para que nazca suspendido y solo reanude con activación
+  transitoria (pointerup táctil, touchend, click, keydown, mousedown).
 - `reports/D1-barrido-verify.mjs` no es un test: mide (no falla) los puntos b y
   c de `reports/D1-barrido.md`, cuyos números de línea son de un commit
   concreto. Por eso sigue en `reports/`.

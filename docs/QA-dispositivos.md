@@ -8,7 +8,15 @@ verificar en dispositivo" de `reports/cronbeat.md`, `reports/monomoon.md`,
 salen de las pruebas compartidas y del barrido (apartado "Primer toque").
 
 **Estado: ningún punto está probado en un dispositivo.** Tampoco se probó en
-WebKit ni en Firefox. Cuando alguien pruebe, marca la casilla y anota
+WebKit ni en Firefox.
+
+**Actualizado por E1 (2026-10-04, `reports/E1.md`).** Cambió lo que hay que
+mirar en el primer toque (el golpe ya no se programa con el audio suspendido:
+sale al levantar el dedo), en los atajos de teclado de CB y AC, en el MIDI de
+MM (ahora con un botón «Conectar MIDI») y en el pad XY de MM (lectores de
+pantalla). Se agregaron el favicon de los 5 y el arreglo de Acid que creaba
+varios `AudioContext` en el primer gesto. Todo eso está medido en Chromium,
+con la regla de gestos de iOS **emulada**: falta el dispositivo. Cuando alguien pruebe, marca la casilla y anota
 dispositivo, sistema operativo, navegador y fecha al final de la línea.
 
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
@@ -44,17 +52,25 @@ se marcan en cada lugar donde se ejecutan.
 - [ ] **P0-1** · Todos · Primer toque con el switch de silencio **activado** y
       **desactivado** (`audioSession.type = 'playback'` en Safari 16.4+;
       `<audio>` silencioso en versiones anteriores). Casos por instrumento:
-  - CB: primer golpe en un pad grande (dispara en `pointerdown`; el destrabe
-    completo ocurre en `pointerup`/`touchend`): ¿suena el primer golpe o sale
-    mudo hasta soltar? Con *note repeat* activo, ¿hay ráfaga al destrabar?
-  - NB: primera tecla del piano (`unlockAudio()` sin esperar + `noteOn`):
-    ¿suena o sale mudo/muy corto?
-  - AC: primera tecla del teclado; y un toque muy corto (la nota no debe
-    quedar colgada: medido en Chromium, ver `reports/D1-barrido.md`, c).
+  - CB: primer golpe en un pad grande. Desde E1, si el audio no está
+    destrabado el golpe **no** se programa en el `pointerdown`: se dispara al
+    levantar el dedo, cuando `zd-audio` destraba. Esperado: el primer golpe
+    suena (un poco tarde, lo que dura el toque) y una sola vez; ese primer
+    golpe va sin *note repeat*, el siguiente ya con repeat. Ningún golpe
+    perdido ni ráfaga.
+  - NB: primera tecla del piano. Esperado: suena al levantar el dedo como nota
+    corta (~180 ms), o sostenida si el dedo sigue apoyado cuando destraba.
+  - AC: primera tecla del teclado y un toque muy corto: la nota no puede
+    quedar colgada (E1 lo arregló: sale corta) y el primer gesto crea **un
+    solo** `AudioContext` (antes creaba 2–4; iOS limita la cantidad).
   - MM: "Pulsá para encender" destraba y la primera tecla suena; probar también
-    tocar una tecla directo, sin pasar por el overlay.
+    tocar una tecla directo, sin pasar por el overlay (sale corta al soltar).
   - J4: "TOCÁ PARA ENCENDER" destraba y el SIREN siguiente suena; el overlay no
     queda trabado si `resume()` tarda.
+  - Todos (E1): después de una llamada o de volver de segundo plano **sin**
+    que aparezca "Tocá para reanudar" (con todo callado), el primer toque de
+    un pad/tecla/SIREN suena al levantar el dedo y no sale mudo. Con el audio
+    ya andando, nada cambia: el golpe sale en el `pointerdown`.
 - [ ] **P1** · Todos · Bloqueo de pantalla con algo sonando, llamada entrante,
       Siri y segundo plano → volver: aparece "Tocá para reanudar" y un toque
       reanuda. (J4: con la sirena latcheada.)
@@ -168,7 +184,8 @@ se marcan en cada lugar donde se ejecutan.
       en dos columnas.
 - [ ] **P1** · Todos · Teclado físico: mapeos de cada instrumento (NB A–;, Z/X,
       Espacio; MM A–Ñ / W–P; J4 filas Z y Q, Espacio = SIREN, 1/4/8 = throws);
-      que no toque notas mientras se escribe en un modal (nombre de patch/banco).
+      que no toque notas mientras se escribe en un modal (nombre de patch/banco;
+      E1 lo arregló en AC y CB, medido en Chromium).
 - [ ] **P2** · Todos · Ventana/tablet que cruza 820 px de ancho: el shell se
       vuelve a armar bien.
 
@@ -190,8 +207,11 @@ se marcan en cada lugar donde se ejecutan.
       sheet abierto (no está manejado: sale de la página).
 - [ ] **P1** · Todos · Web Share / descarga de WAV, MIDI y JSON (Android usa
       descarga directa o la hoja de Compartir según `navigator.canShare`).
-- [ ] **P1** · MM · Web MIDI con un controlador USB: notas, bend, CC1; la toma de
-      REC los registra con la velocity.
+- [ ] **P1** · MM · Web MIDI con un controlador USB, desde el botón «Conectar
+      MIDI» de la barra (PATCHES en el teléfono): el pedido de permiso aparece
+      recién al tocarlo, no al abrir; notas, bend, CC1; la toma de REC los
+      registra con la velocity. Negar el permiso deja «MIDI bloqueado» y el
+      botón para reintentar.
 - [ ] **P2** · MM · NB · J4 · REC de varios minutos: memoria y tamaño del WAV
       (~10 MB/min; tope de 10 min ≈ 115 MB).
 - [ ] **P2** · Lighthouse móvil sobre el sitio publicado: Accesibilidad ≥90,
@@ -204,9 +224,19 @@ se marcan en cada lugar donde se ejecutan.
 - [ ] **P1** · Todos · Safari y Firefox: audio, REC (en Firefox el AudioWorklet
       debería estar), exportaciones, sesión/autoguardado, modo liviano (NB, J4)
       y migración (MM).
-- [ ] **P1** · Todos · Atajos de teclado: CB y AC roban Espacio/←→ y letras en
-      botones y prompts (`reports/D1-barrido.md`, b); confirmar a mano en cada
-      navegador qué tecla se come cada control.
+- [ ] **P1** · Todos · Atajos de teclado (E1 los arregló en CB y AC con el
+      criterio de MM): en Safari y Firefox, Espacio sobre un botón activa ese
+      botón y no da play; Espacio sobre un knob abre su valor y no da play; ←→
+      sobre un botón no cambian el tempo de CB; tipear en un prompt no toca
+      notas; con el foco en la página, las letras tocan y Espacio da play. (NB y
+      J4: con foco puesto con el mouse, Espacio sigue siendo play/SIREN a
+      propósito.)
+- [ ] **P2** · Todos · Favicon (E1): la pestaña muestra el ícono del instrumento
+      (isotipo sobre su color de acento) en Chrome, Safari y Firefox, y en
+      `file://`; sin pedido a `/favicon.ico`.
+- [ ] **P2** · MM · VoiceOver (macOS/iOS) y TalkBack: el pad XY se anuncia como
+      grupo con su nombre, al enfocarlo se lee el valor ("Corte … Hz, énfasis
+      N") y cada flecha anuncia el valor nuevo (E1).
 - [ ] **P2** · Todos · Chrome/Edge reales: botón "↓ Instalar" del header
       dispara el flujo nativo y desaparece al instalar desde la barra de
       direcciones (`appinstalled`). En Safari/Firefox de escritorio no debe

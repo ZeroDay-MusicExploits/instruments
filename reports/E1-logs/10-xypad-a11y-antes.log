@@ -1,0 +1,53 @@
+TAP version 13
+  al cargar: {"role":"group","tabindex":"0","label":true,"bad":["aria-valuetext"],"desc":"","live":null,"liveOutsidePad":false,"cutoff":340,"res":0.32}
+  teclado:   {"role":"group","tabindex":"0","label":true,"bad":["aria-valuetext"],"desc":"","live":null,"liveOutsidePad":false,"cutoff":446,"res":0.36}
+  arrastre:  {"role":"group","tabindex":"0","label":true,"bad":["aria-valuetext"],"desc":"","live":null,"liveOutsidePad":false,"cutoff":2339,"res":0.7}
+# Subtest: MonoMoon · pad XY: sin aria-valuetext, valor por aria-describedby y anuncios solo con el teclado
+not ok 1 - MonoMoon · pad XY: sin aria-valuetext, valor por aria-describedby y anuncios solo con el teclado
+  ---
+  duration_ms: 2027.139315
+  type: 'test'
+  location: '<repo>/tools/tests/monomoon-xypad-a11y.test.mjs:49:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    grupo enfocable con aria-label y sin atributos de valor
+    + actual - expected
+    
+      {
+    +   bad: [
+    +     'aria-valuetext'
+    +   ],
+    -   bad: [],
+        label: true,
+        role: 'group',
+        tabindex: '0'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    role: 'group'
+    tabindex: '0'
+    label: true
+    bad:
+  actual:
+    role: 'group'
+    tabindex: '0'
+    label: true
+    bad:
+      0: 'aria-valuetext'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<repo>/tools/tests/monomoon-xypad-a11y.test.mjs:72:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2052.375133

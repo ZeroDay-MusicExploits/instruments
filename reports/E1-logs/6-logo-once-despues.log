@@ -1,0 +1,59 @@
+TAP version 13
+  copias del logo: {"Acid_Bass-303.html":1,"CronBeat-808.html":1,"J4-Sirens_Station.html":1,"MonoMoon70.html":1,"Nebularp_2035.html":1}
+# Subtest: el logo en base64 va una sola vez en cada instrumento
+ok 1 - el logo en base64 va una sola vez en cada instrumento
+  ---
+  duration_ms: 392.429166
+  type: 'test'
+  ...
+  http 390×844: header ok · encendido ok · barra del shell ok
+# Subtest: J4-Sirens_Station.html · http 390×844 · todos los logos se ven y usan la misma imagen
+ok 2 - J4-Sirens_Station.html · http 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 457.129565
+  type: 'test'
+  ...
+  http 1280×860: header ok · encendido ok
+# Subtest: J4-Sirens_Station.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+ok 3 - J4-Sirens_Station.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 427.504129
+  type: 'test'
+  ...
+  file:// 390×844: header ok · encendido ok · barra del shell ok
+# Subtest: J4-Sirens_Station.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+ok 4 - J4-Sirens_Station.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 397.268866
+  type: 'test'
+  ...
+  http 390×844: encendido ok · header ok · barra del shell ok
+# Subtest: MonoMoon70.html · http 390×844 · todos los logos se ven y usan la misma imagen
+ok 5 - MonoMoon70.html · http 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 433.96791
+  type: 'test'
+  ...
+  http 1280×860: encendido ok · header ok
+# Subtest: MonoMoon70.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+ok 6 - MonoMoon70.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 434.92664
+  type: 'test'
+  ...
+  file:// 390×844: encendido ok · header ok · barra del shell ok
+# Subtest: MonoMoon70.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+ok 7 - MonoMoon70.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 414.564697
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2979.757253

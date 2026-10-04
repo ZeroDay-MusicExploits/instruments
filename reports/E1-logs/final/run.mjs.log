@@ -1,0 +1,1596 @@
+
+────────────────────────────────────────────────────────────────────────
+▶ acid-first-key.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  tap → AudioContext creados 1 · VCA 0.0001 · RMS salida 0.0003 · activeSemi=null · teclas .down=0 · envolvente on off
+# Subtest: Acid · primer toque táctil en una tecla: al soltar no queda ninguna voz sonando
+ok 1 - Acid · primer toque táctil en una tecla: al soltar no queda ninguna voz sonando
+  ---
+  duration_ms: 2478.578482
+  type: 'test'
+  ...
+  A → AudioContext creados 1 · VCA 0.0001 · RMS salida 0.0003 · activeSemi=null · teclas .down=0 · envolvente on off
+# Subtest: Acid · primera tecla del teclado de PC (A): al soltar no queda ninguna voz sonando
+ok 2 - Acid · primera tecla del teclado de PC (A): al soltar no queda ninguna voz sonando
+  ---
+  duration_ms: 1677.961338
+  type: 'test'
+  ...
+  PLAY → AudioContext creados 1 · sonando true
+# Subtest: Acid · el primer clic en PLAY arma un solo AudioContext
+ok 3 - Acid · el primer clic en PLAY arma un solo AudioContext
+  ---
+  duration_ms: 1350.419795
+  type: 'test'
+  ...
+  sostenida 500 ms: VCA 0.72, RMS 0.5086, .down=1 · soltada: VCA 0.0001, RMS 0.0003
+# Subtest: Acid · con el motor andando no cambia nada: mantener sostiene, soltar apaga
+ok 4 - Acid · con el motor andando no cambia nada: mantener sostiene, soltar apaga
+  ---
+  duration_ms: 2556.476919
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8092.010477
+
+────────────────────────────────────────────────────────────────────────
+▶ acid-verify.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (mínimo) · shell · tabs=5 · PLAY 44px · pad 217px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 360×640 (mínimo) · layout
+ok 1 - Acid · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 811.370414
+  type: 'test'
+  ...
+  390×844 · shell · tabs=5 · PLAY 44px · pad 421px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 390×844 · layout
+ok 2 - Acid · 390×844 · layout
+  ---
+  duration_ms: 388.544522
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · tabs=5 · PLAY 44px · pad 586px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 768×1024 (iPad vertical) · layout
+ok 3 - Acid · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 397.509333
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · tabs=5 · PLAY 44px · pad 120px · barra ≥44 · sin scroll horizontal
+# Subtest: Acid · 844×390 (landscape) · layout
+ok 4 - Acid · 844×390 (landscape) · layout
+  ---
+  duration_ms: 404.107968
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell · sin scroll horizontal
+# Subtest: Acid · 1440×900 (escritorio) · layout
+ok 5 - Acid · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 391.775668
+  type: 'test'
+  ...
+  360×640 · banner 82px, no tapa PLAY/tempo/pad, "Ahora no" lo descarta
+  390×844 · banner 82px, no tapa PLAY/tempo/pad, "Ahora no" lo descarta
+# Subtest: Acid · el banner de instalación no tapa PLAY ni el pad XY (360×640 y 390×844)
+ok 6 - Acid · el banner de instalación no tapa PLAY ni el pad XY (360×640 y 390×844)
+  ---
+  duration_ms: 1509.932835
+  type: 'test'
+  ...
+  guardado {"gate0":"tie","note1":55,"kbOct":4} → restaurado {"gate0":"tie","note1":55,"kbOct":4} (+ toast)
+# Subtest: Acid · autoguardado: tocar → recargar → mismo estado
+ok 7 - Acid · autoguardado: tocar → recargar → mismo estado
+  ---
+  duration_ms: 2458.388461
+  type: 'test'
+  ...
+  acid-bass-20261004-2033.json 2379B (ida y vuelta ok) · acid-bass-20261004-2033.mid 163B (13 notas, sin defectos) · acid-bass-20261004-2034.wav 224616B
+# Subtest: Acid · export JSON / MIDI / WAV
+ok 8 - Acid · export JSON / MIDI / WAV
+  ---
+  duration_ms: 5377.81334
+  type: 'test'
+  ...
+  44100 Hz · running → suspended → resume() → running · visibilitychange → running
+# Subtest: Acid · audio: destrabar, sonar, suspend y resume
+ok 9 - Acid · audio: destrabar, sonar, suspend y resume
+  ---
+  duration_ms: 2776.937984
+  type: 'test'
+  ...
+  8 rotaciones sonando · ctx.currentTime 0.53 → 2.38 · pasos vistos 7,9,11,13,15,1,3,5
+# Subtest: Acid · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+ok 10 - Acid · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+  ---
+  duration_ms: 2815.596482
+  type: 'test'
+  ...
+  file:// · SW no registrado · aviso local con [Abrir web] → https://zeroday-musicexploits.github.io/instruments/descargables/Acid_Bass-303.html · 0 pedidos de red
+# Subtest: Acid · file://: sin service worker, sin manifest, con el aviso del archivo local
+ok 11 - Acid · file://: sin service worker, sin manifest, con el aviso del archivo local
+  ---
+  duration_ms: 520.317082
+  type: 'test'
+  ...
+  hosted · SW http://127.0.0.1:34009/sw.js con scope http://127.0.0.1:34009/ · manifest ../manifests/acid-bass.webmanifest
+# Subtest: Acid · hosted: el service worker se registra y zd-pwa queda activo
+ok 12 - Acid · hosted: el service worker se registra y zd-pwa queda activo
+  ---
+  duration_ms: 421.172391
+  type: 'test'
+  ...
+  iframe · ZD.pwa inerte (active=false, 0 banner, 0 CSS) · shell=false · 0 errores
+# Subtest: Acid · iframe: zd-pwa inerte, sin banner y sin errores
+ok 13 - Acid · iframe: zd-pwa inerte, sin banner y sin errores
+  ---
+  duration_ms: 625.508992
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18922.951611
+
+────────────────────────────────────────────────────────────────────────
+▶ cronbeat-verify.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (mínimo) · shell · pasos 38×48 · pad ≥82 px · barra ≥44 · sin scroll horizontal
+# Subtest: CronBeat · 360×640 (mínimo) · layout
+ok 1 - CronBeat · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 915.771995
+  type: 'test'
+  ...
+  390×844 · shell · pasos 42×48 · pad ≥90 px · barra ≥44 · sin scroll horizontal
+# Subtest: CronBeat · 390×844 · layout
+ok 2 - CronBeat · 390×844 · layout
+  ---
+  duration_ms: 433.772286
+  type: 'test'
+  ...
+  430×932 · shell · pasos 47×48 · pad ≥100 px · barra ≥44 · sin scroll horizontal
+# Subtest: CronBeat · 430×932 · layout
+ok 3 - CronBeat · 430×932 · layout
+  ---
+  duration_ms: 426.621817
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · pasos 89×60 · pad ≥171 px · barra ≥44 · sin scroll horizontal
+# Subtest: CronBeat · 768×1024 (iPad vertical) · layout
+ok 4 - CronBeat · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 433.142696
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · pasos 50×104 · pad ≥64 px · barra ≥44 · sin scroll horizontal
+# Subtest: CronBeat · 844×390 (landscape) · layout
+ok 5 - CronBeat · 844×390 (landscape) · layout
+  ---
+  duration_ms: 439.402624
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell (layout de escritorio) · sin scroll horizontal
+# Subtest: CronBeat · 1440×900 (escritorio) · layout
+ok 6 - CronBeat · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 417.1447
+  type: 'test'
+  ...
+  1024×768 (escritorio chico) · sin shell (layout de escritorio) · sin scroll horizontal
+# Subtest: CronBeat · 1024×768 (escritorio chico) · layout
+ok 7 - CronBeat · 1024×768 (escritorio chico) · layout
+  ---
+  duration_ms: 445.327934
+  type: 'test'
+  ...
+  PADS · SEQ · FX · SAMPLE · CANCIÓN · MENÚ: sin scroll horizontal, targets ≥44 px (patrones A–H 39×48, grilla de 8)
+# Subtest: CronBeat · las 5 pestañas abren sin scroll horizontal y con targets ≥44 px (360×640)
+ok 8 - CronBeat · las 5 pestañas abren sin scroll horizontal y con targets ≥44 px (360×640)
+  ---
+  duration_ms: 3266.000609
+  type: 'test'
+  ...
+  pad → pista 6 · ▶▶ → pista 8 · ACENTO pone acento (2), sin ACENTO paso normal (1)
+# Subtest: CronBeat · táctil: tocar un pad elige su pista, ◀ ▶ y ACENTO
+ok 9 - CronBeat · táctil: tocar un pad elige su pista, ◀ ▶ y ACENTO
+  ---
+  duration_ms: 894.798613
+  type: 'test'
+  ...
+  360×640 · banner 82 px arriba del stage · pads ≥62 px · nada tapado
+  390×844 · banner 82 px arriba del stage · pads ≥90 px · nada tapado
+# Subtest: CronBeat · banner de instalación: no tapa transporte, pasos ni pads (360×640 y 390×844)
+ok 10 - CronBeat · banner de instalación: no tapa transporte, pasos ni pads (360×640 y 390×844)
+  ---
+  duration_ms: 1282.514701
+  type: 'test'
+  ...
+  Instalar → prompt() ×1 (aceptado: sin banner; rechazado: sin banner y zd:pwa:dismissed, zd-pwa v3) · "Ahora no" → no vuelve; menú sigue; a los 15 días vuelve
+# Subtest: CronBeat · Instalar llama a prompt() una sola vez; "Ahora no" dura 14 días
+ok 11 - CronBeat · Instalar llama a prompt() una sola vez; "Ahora no" dura 14 días
+  ---
+  duration_ms: 3793.127915
+  type: 'test'
+  ...
+  display-mode standalone · 0 banner · 0 ícono · ítem oculto
+# Subtest: CronBeat · standalone: sin banner, sin ↓ y sin ítem de instalar
+ok 12 - CronBeat · standalone: sin banner, sin ↓ y sin ítem de instalar
+  ---
+  duration_ms: 671.319498
+  type: 'test'
+  ...
+  file:// · SW no registrado · aviso local → https://zeroday-musicexploits.github.io/instruments/descargables/CronBeat-808.html · 0 pedidos de red
+# Subtest: CronBeat · file://: sin service worker, sin pedidos de red, solo el aviso local
+ok 13 - CronBeat · file://: sin service worker, sin pedidos de red, solo el aviso local
+  ---
+  duration_ms: 815.497643
+  type: 'test'
+  ...
+  hosted · SW http://127.0.0.1:37599/sw.js · scope http://127.0.0.1:37599/ · manifest ../manifests/cronbeat.webmanifest
+# Subtest: CronBeat · hosted: el service worker se registra y zd-pwa queda activo
+ok 14 - CronBeat · hosted: el service worker se registra y zd-pwa queda activo
+  ---
+  duration_ms: 461.199912
+  type: 'test'
+  ...
+  iframe sin hub · ZD.pwa inerte (0 banner, 0 CSS) · 0 errores
+# Subtest: CronBeat · iframe: zd-pwa inerte, sin banner y sin errores
+ok 15 - CronBeat · iframe: zd-pwa inerte, sin banner y sin errores
+  ---
+  duration_ms: 933.369968
+  type: 'test'
+  ...
+  restaurado idéntico (patrones A y C, canción, FX, mezcla, sample + edición) · ctx=null al restaurar · 48000 → 44100 Hz tras el gesto
+# Subtest: CronBeat · autoguardado con samples: tocar → recargar → mismo estado, sin arrancar audio
+ok 16 - CronBeat · autoguardado con samples: tocar → recargar → mismo estado, sin arrancar audio
+  ---
+  duration_ms: 5149.157924
+  type: 'test'
+  ...
+  caja-ritmos-db → zd:cronbeat:session sin pérdida (la anterior intacta) · "Empezar de cero" con modal → limpio
+# Subtest: CronBeat · migración sin pérdida desde caja-ritmos-db y "Empezar de cero"
+ok 17 - CronBeat · migración sin pérdida desde caja-ritmos-db y "Empezar de cero"
+  ---
+  duration_ms: 2598.065584
+  type: 'test'
+  ...
+  cronbeat-20261004-2034.json · cronbeat-patron-a-20261004-2034.mid (32 notas, 0 defectos) · cronbeat-patron-a-20261004-2034.wav (44100 Hz, 16-bit, estéreo, 6.15 s) · JSON ida y vuelta con sample · MIDI ida y vuelta
+# Subtest: CronBeat · export JSON / MIDI / WAV válidos y JSON de ida y vuelta
+ok 18 - CronBeat · export JSON / MIDI / WAV válidos y JSON de ida y vuelta
+  ---
+  duration_ms: 3495.831956
+  type: 'test'
+  ...
+  iOS: JSON y MIDI comparten en el gesto; el WAV, desde ↓ DESCARGAR WAV de la tarjeta (gesto nuevo)
+# Subtest: CronBeat · iOS (UA de iPhone): las tres descargas salen por Web Share con archivo
+ok 19 - CronBeat · iOS (UA de iPhone): las tres descargas salen por Web Share con archivo
+  ---
+  duration_ms: 10287.822169
+  type: 'test'
+  ...
+  44100 Hz · latencyHint interactive · wake lock pedido 1/soltado 1 · overlay al suspender · visibilitychange reanuda
+# Subtest: CronBeat · audio: destrabe en el gesto, wake lock, suspend/resume
+ok 20 - CronBeat · audio: destrabe en el gesto, wake lock, suspend/resume
+  ---
+  duration_ms: 3072.972263
+  type: 'test'
+  ...
+  8 rotaciones sonando · ctx.currentTime 0.55 → 2.56 · pasos vistos 7,9,11,14,0,2,4,6
+# Subtest: CronBeat · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+ok 21 - CronBeat · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento sonando
+  ---
+  duration_ms: 3046.836632
+  type: 'test'
+  ...
+  deshacer/rehacer ok · velocidades 0.99/0.63/0.26 · repeat 6 golpes a 117 ms y se corta al soltar · REC+repeat 7 pasos, 0 duplicados · choke corta la cola y se guarda
+# Subtest: CronBeat · extras: deshacer/rehacer, velocidad por altura, note repeat y choke
+ok 22 - CronBeat · extras: deshacer/rehacer, velocidad por altura, note repeat y choke
+  ---
+  duration_ms: 5467.069637
+  type: 'test'
+  ...
+  hub: registerInstrument ×1 · ctx del hub · tempo del hub (100) · play/stop por HOST.transport · 72 ticks = 3 pasos · sin autoguardado · zd-audio/zd-pwa inertes
+  base f2b750b · adaptador, HOST, ensureAudio(HOST) y scheduler/start/stop idénticos · 0 líneas agregadas que leen HOST:
+# Subtest: CronBeat · embebido en un hub C2: registra, sigue el reloj del hub y no autoguarda
+ok 23 - CronBeat · embebido en un hub C2: registra, sigue el reloj del hub y no autoguarda
+  ---
+  duration_ms: 3377.057728
+  type: 'test'
+  ...
+# Subtest: CronBeat · adaptador C2 intacto (diff contra la base de la rama)
+ok 24 - CronBeat · adaptador C2 intacto (diff contra la base de la rama)
+  ---
+  duration_ms: 19.251991
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 52188.573517
+
+────────────────────────────────────────────────────────────────────────
+▶ favicon.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  Acid_Bass-303.html: 32×32 · 1548 B en base64 · fondo 220,239,58 (ícono acid-bass: 220,239,58)
+  CronBeat-808.html: 32×32 · 1532 B en base64 · fondo 250,183,42 (ícono cronbeat: 250,183,42)
+  J4-Sirens_Station.html: 32×32 · 1536 B en base64 · fondo 240,106,216 (ícono j4-sirens: 240,106,216)
+  MonoMoon70.html: 32×32 · 1532 B en base64 · fondo 242,166,60 (ícono monomoon: 242,166,60)
+  Nebularp_2035.html: 32×32 · 1528 B en base64 · fondo 154,140,255 (ícono nebularp: 154,140,255)
+# Subtest: Acid_Bass-303.html · favicon inline de 32×32 con el color de acento
+ok 1 - Acid_Bass-303.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 387.288983
+  type: 'test'
+  ...
+# Subtest: CronBeat-808.html · favicon inline de 32×32 con el color de acento
+ok 2 - CronBeat-808.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 4.397892
+  type: 'test'
+  ...
+# Subtest: J4-Sirens_Station.html · favicon inline de 32×32 con el color de acento
+ok 3 - J4-Sirens_Station.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 3.368819
+  type: 'test'
+  ...
+# Subtest: MonoMoon70.html · favicon inline de 32×32 con el color de acento
+ok 4 - MonoMoon70.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 3.346161
+  type: 'test'
+  ...
+# Subtest: Nebularp_2035.html · favicon inline de 32×32 con el color de acento
+ok 5 - Nebularp_2035.html · favicon inline de 32×32 con el color de acento
+  ---
+  duration_ms: 3.660093
+  type: 'test'
+  ...
+# Subtest: Acid_Bass-303.html · el favicon resuelve a data: y carga (http y file://)
+ok 6 - Acid_Bass-303.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 363.081827
+  type: 'test'
+  ...
+# Subtest: CronBeat-808.html · el favicon resuelve a data: y carga (http y file://)
+ok 7 - CronBeat-808.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 254.561105
+  type: 'test'
+  ...
+# Subtest: J4-Sirens_Station.html · el favicon resuelve a data: y carga (http y file://)
+ok 8 - J4-Sirens_Station.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 290.241692
+  type: 'test'
+  ...
+# Subtest: MonoMoon70.html · el favicon resuelve a data: y carga (http y file://)
+ok 9 - MonoMoon70.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 308.850049
+  type: 'test'
+  ...
+# Subtest: Nebularp_2035.html · el favicon resuelve a data: y carga (http y file://)
+ok 10 - Nebularp_2035.html · el favicon resuelve a data: y carga (http y file://)
+  ---
+  duration_ms: 278.504347
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1918.547684
+
+────────────────────────────────────────────────────────────────────────
+▶ first-hit.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  CronBeat · primer tap: trigger@running/up · contexto running
+# Subtest: CronBeat · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+ok 1 - CronBeat · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 1809.944125
+  type: 'test'
+  ...
+  Nebularp · primer tap: voz@running/up voz@running/up voz@running/up voz@running/up · contexto running
+# Subtest: Nebularp · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+ok 2 - Nebularp · primer toque sin audio destrabado: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 1461.490924
+  type: 'test'
+  ...
+  CronBeat · suspendido → tap: trigger@running/up · contexto running
+# Subtest: CronBeat · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 3 - CronBeat · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3152.647897
+  type: 'test'
+  ...
+  CronBeat · corriendo → tap: trigger@running/down
+# Subtest: CronBeat · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 4 - CronBeat · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2567.126195
+  type: 'test'
+  ...
+  Nebularp · suspendido → tap: voz@running/up voz@running/up voz@running/up voz@running/up · contexto running
+# Subtest: Nebularp · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 5 - Nebularp · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3234.776344
+  type: 'test'
+  ...
+  Nebularp · corriendo → tap: voz@running/down voz@running/down voz@running/down voz@running/down
+# Subtest: Nebularp · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 6 - Nebularp · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2697.395291
+  type: 'test'
+  ...
+  MonoMoon · suspendido → tap: noteOn@running/up · contexto running
+# Subtest: MonoMoon · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 7 - MonoMoon · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3099.750052
+  type: 'test'
+  ...
+  MonoMoon · corriendo → tap: noteOn@running/down
+# Subtest: MonoMoon · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 8 - MonoMoon · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2561.388935
+  type: 'test'
+  ...
+  J4 · suspendido → tap: noteOn@running/up · contexto running
+# Subtest: J4 · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+ok 9 - J4 · contexto suspendido después de andar: el golpe espera al destrabe (iOS emulado)
+  ---
+  duration_ms: 3053.443491
+  type: 'test'
+  ...
+  J4 · corriendo → tap: noteOn@running/down
+# Subtest: J4 · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+ok 10 - J4 · con el contexto corriendo no cambia nada: el golpe sale en el pointerdown
+  ---
+  duration_ms: 2567.855657
+  type: 'test'
+  ...
+# Subtest: MonoMoon · la pantalla de encendido toma el primer toque (puerta)
+ok 11 - MonoMoon · la pantalla de encendido toma el primer toque (puerta)
+  ---
+  duration_ms: 533.45241
+  type: 'test'
+  ...
+# Subtest: J4 · la pantalla de encendido toma el primer toque (puerta)
+ok 12 - J4 · la pantalla de encendido toma el primer toque (puerta)
+  ---
+  duration_ms: 492.8047
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 27257.900053
+
+────────────────────────────────────────────────────────────────────────
+▶ j4-verify.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (mínimo) · shell · pad 346×384 (60 % del alto) · SIREN 268×83 · throws 45/45/45 px · barra ≥44
+# Subtest: J4 · 360×640 (mínimo) · layout
+ok 1 - J4 · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 1680.615576
+  type: 'test'
+  ...
+  390×844 · shell · pad 376×508 (60 % del alto) · SIREN 298×149 · throws 59/59/59 px · barra ≥44
+# Subtest: J4 · 390×844 · layout
+ok 2 - J4 · 390×844 · layout
+  ---
+  duration_ms: 1217.159653
+  type: 'test'
+  ...
+  430×932 · shell · pad 416×596 (64 % del alto) · SIREN 338×148 · throws 60/60/60 px · barra ≥44
+# Subtest: J4 · 430×932 · layout
+ok 3 - J4 · 430×932 · layout
+  ---
+  duration_ms: 1228.985576
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · pad 754×688 (67 % del alto) · SIREN 676×148 · throws 60/60/60 px · barra ≥44
+# Subtest: J4 · 768×1024 (iPad vertical) · layout
+ok 4 - J4 · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 1279.999563
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · pad 486×274 (70 % del alto) · SIREN 177×220 · throws 87/87/87 px · barra ≥44
+# Subtest: J4 · 844×390 (landscape) · layout
+ok 5 - J4 · 844×390 (landscape) · layout
+  ---
+  duration_ms: 1236.64265
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell · pad 554×343 · sin scroll horizontal
+# Subtest: J4 · 1440×900 (escritorio) · layout
+ok 6 - J4 · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 1052.595537
+  type: 'test'
+  ...
+  360×640 · banner 82 px, no tapa REC/pad/SIREN/LATCH/throws · prompt() 1 vez
+  390×844 · banner 82 px, no tapa REC/pad/SIREN/LATCH/throws · prompt() 1 vez
+  "Ahora no" → sin banner tras recargar (ícono ↓ sí) · con la marca de hace 15 días vuelve
+# Subtest: J4 · banner de instalación: no tapa REC, el pad ni SIREN; prompt() una vez; "Ahora no" 14 días
+ok 7 - J4 · banner de instalación: no tapa REC, el pad ni SIREN; prompt() una vez; "Ahora no" 14 días
+  ---
+  duration_ms: 3491.897527
+  type: 'test'
+  ...
+  standalone · sin banner, sin ↓, ítem del menú oculto
+# Subtest: J4 · standalone: sin banner, sin ícono ↓ ni ítem de instalar
+ok 8 - J4 · standalone: sin banner, sin ícono ↓ ni ítem de instalar
+  ---
+  duration_ms: 601.553592
+  type: 'test'
+  ...
+  migración 1 slot (1 dañado descartado) · {"cutoff":181,"etime":0.351,"mode":"alarm","padX":"rate","latch":true,"viz":"mandala","ph":true} vuelve igual y sin AudioContext
+# Subtest: J4 · autoguardado: tocar → recargar → mismo estado, sin arrancar el audio; slots migrados
+ok 9 - J4 · autoguardado: tocar → recargar → mismo estado, sin arrancar el audio; slots migrados
+  ---
+  duration_ms: 2494.685254
+  type: 'test'
+  ...
+  j4-sirens-20261004-2035.json (ida y vuelta, patch viejo, error en modal) · j4-sirens-20261004-2035.wav 323628 B 44100 Hz · j4-sirens-20261004-2035.mid 3 notas, 41 bends, glide -7.0→-0.8
+# Subtest: J4 · export JSON / MIDI / WAV
+ok 10 - J4 · export JSON / MIDI / WAV
+  ---
+  duration_ms: 4770.454752
+  type: 'test'
+  ...
+  latencyHint interactive · running → suspended → resume() → running · visibilitychange → running
+# Subtest: J4 · audio: el primer toque enciende, suspend y resume, latencyHint
+ok 11 - J4 · audio: el primer toque enciende, suspend y resume, latencyHint
+  ---
+  duration_ms: 1965.322234
+  type: 'test'
+  ...
+  8 rotaciones con la sirena latcheada · ctx.currentTime 0.52 → 2.44 · sin cortes
+# Subtest: J4 · rotación de tablet 1180×820 ↔ 820×1180 con la sirena sonando
+ok 12 - J4 · rotación de tablet 1180×820 ↔ 820×1180 con la sirena sonando
+  ---
+  duration_ms: 2926.159433
+  type: 'test'
+  ...
+  SIREN + pad: cutoff 57 → 923 con la sirena sonando · soltar el pad no la corta
+# Subtest: J4 · pad XY y SIREN con dos dedos a la vez
+ok 13 - J4 · pad XY y SIREN con dos dedos a la vez
+  ---
+  duration_ms: 1167.871147
+  type: 'test'
+  ...
+  1180×820 sin shell: swipe → scrollY 385
+  768×1024: el sheet scrollea (scrollTop 109) · el pad toma el gesto sin scrollear
+# Subtest: J4 · scroll táctil: la página sin shell y el sheet en 768×1024; el pad no arrastra nada
+ok 14 - J4 · scroll táctil: la página sin shell y el sheet en 768×1024; el pad no arrastra nada
+  ---
+  duration_ms: 5288.1698
+  type: 'test'
+  ...
+  file:// · aviso local con [Abrir web] → https://zeroday-musicexploits.github.io/instruments/descargables/J4-Sirens_Station.html · sin banner · 0 pedidos de red · audio running
+# Subtest: J4 · file://: sin service worker, sin manifest, solo el aviso del archivo local
+ok 15 - J4 · file://: sin service worker, sin manifest, solo el aviso del archivo local
+  ---
+  duration_ms: 776.696482
+  type: 'test'
+  ...
+  SW http://127.0.0.1:38561/sw.js scope http://127.0.0.1:38561/ · theme-color #070b06 · instalable (0 errores)
+# Subtest: J4 · hosted: service worker registrado e instalable
+ok 16 - J4 · hosted: service worker registrado e instalable
+  ---
+  duration_ms: 364.575365
+  type: 'test'
+  ...
+  iframe · ZD.pwa inerte (0 banner, 0 CSS) · sin hub C2 → HOST null · 0 errores
+# Subtest: J4 · iframe: zd-pwa inerte, sin banner, sin errores
+ok 17 - J4 · iframe: zd-pwa inerte, sin banner, sin errores
+  ---
+  duration_ms: 804.499598
+  type: 'test'
+  ...
+  hub C2 · registrado {"v":1,"id":"j4test","name":"J4 Sirens"} · mismo AudioContext · eco 0.6 s · título "J4 Sirens · C2" · sin autoguardado
+# Subtest: J4 · hub C2 falso: el adaptador registra, arranca sin gesto y no autoguarda
+ok 18 - J4 · hub C2 falso: el adaptador registra, arranca sin gesto y no autoguarda
+  ---
+  duration_ms: 648.690474
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 33023.838103
+
+────────────────────────────────────────────────────────────────────────
+▶ logo-once.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  copias del logo: {"Acid_Bass-303.html":1,"CronBeat-808.html":1,"J4-Sirens_Station.html":1,"MonoMoon70.html":1,"Nebularp_2035.html":1}
+# Subtest: el logo en base64 va una sola vez en cada instrumento
+ok 1 - el logo en base64 va una sola vez en cada instrumento
+  ---
+  duration_ms: 372.869688
+  type: 'test'
+  ...
+  http 390×844: header ok · encendido ok · barra del shell ok
+# Subtest: J4-Sirens_Station.html · http 390×844 · todos los logos se ven y usan la misma imagen
+ok 2 - J4-Sirens_Station.html · http 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 431.023803
+  type: 'test'
+  ...
+  http 1280×860: header ok · encendido ok
+# Subtest: J4-Sirens_Station.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+ok 3 - J4-Sirens_Station.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 427.832671
+  type: 'test'
+  ...
+  file:// 390×844: header ok · encendido ok · barra del shell ok
+# Subtest: J4-Sirens_Station.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+ok 4 - J4-Sirens_Station.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 396.839144
+  type: 'test'
+  ...
+  http 390×844: encendido ok · header ok · barra del shell ok
+# Subtest: MonoMoon70.html · http 390×844 · todos los logos se ven y usan la misma imagen
+ok 5 - MonoMoon70.html · http 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 429.156562
+  type: 'test'
+  ...
+  http 1280×860: encendido ok · header ok
+# Subtest: MonoMoon70.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+ok 6 - MonoMoon70.html · http 1280×860 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 427.194122
+  type: 'test'
+  ...
+  file:// 390×844: encendido ok · header ok · barra del shell ok
+# Subtest: MonoMoon70.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+ok 7 - MonoMoon70.html · file:// 390×844 · todos los logos se ven y usan la misma imagen
+  ---
+  duration_ms: 426.280646
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2941.717587
+
+────────────────────────────────────────────────────────────────────────
+▶ monomoon-midi.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  al cargar: {"calls":0,"txt":"MIDI —","dot":false,"btn":{"text":"Conectar MIDI","disabled":false}}
+  tras el botón: {"calls":1,"txt":"MIDI 1","dot":true,"btn":null}
+# Subtest: MonoMoon · al cargar no se pide MIDI; el botón "Conectar MIDI" lo pide con el gesto
+ok 1 - MonoMoon · al cargar no se pide MIDI; el botón "Conectar MIDI" lo pide con el gesto
+  ---
+  duration_ms: 2117.084134
+  type: 'test'
+  ...
+  negado: {"calls":1,"txt":"MIDI bloqueado","dot":false,"btn":{"text":"Conectar MIDI","disabled":false}}
+# Subtest: MonoMoon · permiso negado: "MIDI bloqueado" y el botón queda para reintentar
+ok 2 - MonoMoon · permiso negado: "MIDI bloqueado" y el botón queda para reintentar
+  ---
+  duration_ms: 1667.936314
+  type: 'test'
+  ...
+  sin Web MIDI: {"calls":0,"txt":"MIDI no disponible en este navegador","dot":false,"btn":null}
+# Subtest: MonoMoon · sin Web MIDI: "MIDI no disponible en este navegador", sin botón
+ok 3 - MonoMoon · sin Web MIDI: "MIDI no disponible en este navegador", sin botón
+  ---
+  duration_ms: 748.892171
+  type: 'test'
+  ...
+  hub C2: {"calls":0,"txt":"MIDI ← C2","dot":true,"btn":null}
+# Subtest: MonoMoon · con el hub C2: "MIDI ← C2", sin botón y sin pedir MIDI
+ok 4 - MonoMoon · con el hub C2: "MIDI ← C2", sin botón y sin pedir MIDI
+  ---
+  duration_ms: 1645.945476
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6210.899559
+
+────────────────────────────────────────────────────────────────────────
+▶ monomoon-verify.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (mínimo): shell=true · blancas 37×82 · ruedas 30×156 · pad 332×176 · macro 40×40
+# Subtest: MonoMoon · R1 · 360×640 (mínimo)
+ok 1 - MonoMoon · R1 · 360×640 (mínimo)
+  ---
+  duration_ms: 1620.9291
+  type: 'test'
+  ...
+  390×844: shell=true · blancas 41×127 · ruedas 30×245 · pad 362×291 · macro 40×40
+# Subtest: MonoMoon · R1 · 390×844
+ok 2 - MonoMoon · R1 · 390×844
+  ---
+  duration_ms: 1109.964563
+  type: 'test'
+  ...
+  430×932: shell=true · blancas 47×137 · ruedas 30×265 · pad 402×359 · macro 40×40
+# Subtest: MonoMoon · R1 · 430×932
+ok 3 - MonoMoon · R1 · 430×932
+  ---
+  duration_ms: 1164.056882
+  type: 'test'
+  ...
+  768×1024 (iPad vertical): shell=true · blancas 47×228 · ruedas 30×216 · pad 740×494 · macro 46×46
+# Subtest: MonoMoon · R1 · 768×1024 (iPad vertical)
+ok 4 - MonoMoon · R1 · 768×1024 (iPad vertical)
+  ---
+  duration_ms: 1161.92733
+  type: 'test'
+  ...
+  844×390 (landscape): shell=true · blancas 53×110 · ruedas 30×98 · pad 316×77 · macro 36×36
+# Subtest: MonoMoon · R1 · 844×390 (landscape)
+ok 5 - MonoMoon · R1 · 844×390 (landscape)
+  ---
+  duration_ms: 1165.188285
+  type: 'test'
+  ...
+  1440×900 (escritorio): shell=false · blancas 70×128 · ruedas 30×120 · pad 438×118 · macro 44×44
+# Subtest: MonoMoon · R1 · 1440×900 (escritorio)
+ok 6 - MonoMoon · R1 · 1440×900 (escritorio)
+  ---
+  duration_ms: 1120.099975
+  type: 'test'
+  ...
+  glissando C4→E4→C5 · 2 dedos · pitch vuelve al centro · macro ↔ sección · doble tap · long-press "1.5k"
+# Subtest: MonoMoon · R1 · toque: glissando entre filas, multitáctil, ruedas, macros, doble tap, long-press
+ok 7 - MonoMoon · R1 · toque: glissando entre filas, multitáctil, ruedas, macros, doble tap, long-press
+  ---
+  duration_ms: 3631.379572
+  type: 'test'
+  ...
+  360×640: banner 346×82 sin superposición · prompt() ×1 · 14 días
+  390×844: banner 376×82 sin superposición · prompt() ×1 · 14 días
+# Subtest: MonoMoon · R2 · el banner no tapa REC, macros ni teclado; prompt() una vez; "Ahora no" 14 días
+ok 8 - MonoMoon · R2 · el banner no tapa REC, macros ni teclado; prompt() una vez; "Ahora no" 14 días
+  ---
+  duration_ms: 7422.387351
+  type: 'test'
+  ...
+  9 cambios → recargar → idéntico · 0 AudioContext · 1.2k / duo / C5 / 45ms
+# Subtest: MonoMoon · R3 · tocar → recargar → mismo estado, sin arrancar el audio
+ok 9 - MonoMoon · R3 · tocar → recargar → mismo estado, sin arrancar el audio
+  ---
+  duration_ms: 4283.402132
+  type: 'test'
+  ...
+  3 registros viejos (1 roto) → 2 patches en zd:monomoon-lib:session · DB vieja intacta · una sola vez
+# Subtest: MonoMoon · R3 · migración de "hackwave-minimoog" sin perder patches (la vieja queda intacta)
+ok 10 - MonoMoon · R3 · migración de "hackwave-minimoog" sin perder patches (la vieja queda intacta)
+  ---
+  duration_ms: 3791.555707
+  type: 'test'
+  ...
+# Subtest: MonoMoon · R3 · sin IndexedDB guarda en localStorage
+ok 11 - MonoMoon · R3 · sin IndexedDB guarda en localStorage
+  ---
+  duration_ms: 2775.856118
+  type: 'test'
+  ...
+  monomoon-20261004-2036.json · ida y vuelta · 4 rechazos en modal · patch 'hackwave-minimoog' acotado
+# Subtest: MonoMoon · R4 · JSON de estado completo: ida y vuelta, rechazos y patch viejo
+ok 12 - MonoMoon · R4 · JSON de estado completo: ida y vuelta, rechazos y patch viejo
+  ---
+  duration_ms: 4123.891571
+  type: 'test'
+  ...
+  WAV monomoon-20261004-2036.wav · PCM16 estéreo 44100 Hz · 2.40 s · pico 0.36
+  MIDI monomoon-20261004-2036.mid · 9 notas · {"tempo":1,"trackName":1,"cc1":7,"cc74":10,"cc71":10,"bend":15,"on":9,"off":9,"eot":1} · 0 defectos
+# Subtest: MonoMoon · R4 · REC: WAV + MIDI de performance de la misma toma
+ok 13 - MonoMoon · R4 · REC: WAV + MIDI de performance de la misma toma
+  ---
+  duration_ms: 4107.225545
+  type: 'test'
+  ...
+  tope (1 s en la prueba): tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · aviso en un toast
+# Subtest: MonoMoon · R4 · REC: al llegar al tope la toma no se pierde
+ok 14 - MonoMoon · R4 · REC: al llegar al tope la toma no se pierde
+  ---
+  duration_ms: 3015.32765
+  type: 'test'
+  ...
+  1 contexto interactive · running · suspend→overlay→toque→running · visibilitychange · CLIP con pulso angosto 32' a vol 100
+# Subtest: MonoMoon · R5 · audio: destrabar dentro del gesto, suspend → overlay → reanudar, CLIP
+ok 15 - MonoMoon · R5 · audio: destrabar dentro del gesto, suspend → overlay → reanudar, CLIP
+  ---
+  duration_ms: 6072.956737
+  type: 'test'
+  ...
+  8 rotaciones con Do4 sonando · ctx.currentTime 0.64 → 2.52
+# Subtest: MonoMoon · rotación de tablet 1180×820 ↔ 820×1180 con una nota sonando
+ok 16 - MonoMoon · rotación de tablet 1180×820 ↔ 820×1180 con una nota sonando
+  ---
+  duration_ms: 3009.776153
+  type: 'test'
+  ...
+  0 diálogos nativos · 35 sliders con nombre único · switches · teclas con aria-pressed
+# Subtest: MonoMoon · R6 · cero diálogos nativos, sliders con nombre y teclado
+ok 17 - MonoMoon · R6 · cero diálogos nativos, sliders con nombre y teclado
+  ---
+  duration_ms: 1023.039383
+  type: 'test'
+  ...
+  file:// · aviso local → canonical · 0 pedidos de red · 0 errores
+# Subtest: MonoMoon · file://: sin SW, sin pedidos de red, solo el aviso local
+ok 18 - MonoMoon · file://: sin SW, sin pedidos de red, solo el aviso local
+  ---
+  duration_ms: 510.373646
+  type: 'test'
+  ...
+  SW registrado · ../manifests/monomoon.webmanifest · theme-color #070b06 · "MonoMoon"
+# Subtest: MonoMoon · hosted: SW registrado, manifest estático y theme-color del manifest
+ok 19 - MonoMoon · hosted: SW registrado, manifest estático y theme-color del manifest
+  ---
+  duration_ms: 1624.62418
+  type: 'test'
+  ...
+  iframe · zd-pwa inerte · shell activo · audio running · 0 errores
+# Subtest: MonoMoon · iframe: zd-pwa inerte, shell activo y el audio arranca
+ok 20 - MonoMoon · iframe: zd-pwa inerte, shell activo y el audio arranca
+  ---
+  duration_ms: 1601.867791
+  type: 'test'
+  ...
+  registro slotA · ctx del host · 'MIDI ← C2' · midiMessage toca · stop suelta · sin sesión, con biblioteca · probe {"factory":true,"ctorGain":true,"worklet":"blob"}
+  8bef265..HEAD: 0 líneas quitadas con HOST/zeroday_sync/registerInstrument/C2_*; 4 agregadas (solo lecturas de HOST)
+# Subtest: MonoMoon · C2: con un hub falso registra, toca por MIDI, para y no autoguarda el patch
+ok 21 - MonoMoon · C2: con un hub falso registra, toca por MIDI, para y no autoguarda el patch
+  ---
+  duration_ms: 1862.171714
+  type: 'test'
+  ...
+# Subtest: MonoMoon · el adaptador C2 no cambió (git diff filtrado)
+ok 22 - MonoMoon · el adaptador C2 no cambió (git diff filtrado)
+  ---
+  duration_ms: 10.152328
+  type: 'test'
+  ...
+# Subtest: MonoMoon · bloques idénticos (check-blocks)
+ok 23 - MonoMoon · bloques idénticos (check-blocks)
+  ---
+  duration_ms: 44.517364
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 56283.173359
+
+────────────────────────────────────────────────────────────────────────
+▶ monomoon-xypad-a11y.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  al cargar: {"role":"group","tabindex":"0","label":true,"bad":[],"desc":"Corte 340 Hz, énfasis 32","live":"","liveOutsidePad":true,"cutoff":340,"res":0.32}
+  teclado:   {"role":"group","tabindex":"0","label":true,"bad":[],"desc":"Corte 446 Hz, énfasis 36","live":"Corte 446 Hz, énfasis 36","liveOutsidePad":true,"cutoff":446,"res":0.36}
+  arrastre:  {"role":"group","tabindex":"0","label":true,"bad":[],"desc":"Corte 2.3k Hz, énfasis 70","live":"Corte 446 Hz, énfasis 36","liveOutsidePad":true,"cutoff":2339,"res":0.7}
+# Subtest: MonoMoon · pad XY: sin aria-valuetext, valor por aria-describedby y anuncios solo con el teclado
+ok 1 - MonoMoon · pad XY: sin aria-valuetext, valor por aria-describedby y anuncios solo con el teclado
+  ---
+  duration_ms: 1997.714853
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2024.405458
+
+────────────────────────────────────────────────────────────────────────
+▶ nebularp-verify.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (mínimo) · shell · barra 48px · play 45×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 49×128 · tabs 54
+# Subtest: Nebularp · 360×640 (mínimo) · layout
+ok 1 - Nebularp · 360×640 (mínimo) · layout
+  ---
+  duration_ms: 801.382325
+  type: 'test'
+  ...
+  390×844 · shell · barra 48px · play 45×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 53×201 · tabs 54
+# Subtest: Nebularp · 390×844 · layout
+ok 2 - Nebularp · 390×844 · layout
+  ---
+  duration_ms: 409.659665
+  type: 'test'
+  ...
+  430×932 · shell · barra 48px · play 104×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 59×229 · tabs 54
+# Subtest: Nebularp · 430×932 · layout
+ok 3 - Nebularp · 430×932 · layout
+  ---
+  duration_ms: 396.432648
+  type: 'test'
+  ...
+  768×1024 (iPad vertical) · shell · barra 48px · play 104×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 54×517 · tabs 54
+# Subtest: Nebularp · 768×1024 (iPad vertical) · layout
+ok 4 - Nebularp · 768×1024 (iPad vertical) · layout
+  ---
+  duration_ms: 405.06105
+  type: 'test'
+  ...
+  844×390 (landscape) · shell · barra 48px · play 104×44 · recBtn 63×44 · zd-tmenu 44×44 · teclas 53×131 · tabs 54
+# Subtest: Nebularp · 844×390 (landscape) · layout
+ok 5 - Nebularp · 844×390 (landscape) · layout
+  ---
+  duration_ms: 428.219547
+  type: 'test'
+  ...
+  1440×900 (escritorio) · sin shell · sin scroll horizontal
+# Subtest: Nebularp · 1440×900 (escritorio) · layout
+ok 6 - Nebularp · 1440×900 (escritorio) · layout
+  ---
+  duration_ms: 404.145649
+  type: 'test'
+  ...
+  360×640 · banner 82px · no tapa PLAY/REC/latch/tap/orbit/octava/piano/tabs · teclas 87px · "Ahora no" ok
+  390×844 · banner 82px · no tapa PLAY/REC/latch/tap/orbit/octava/piano/tabs · teclas 176px · "Ahora no" ok
+# Subtest: Nebularp · el banner de instalación no tapa el pad (360×640 y 390×844)
+ok 7 - Nebularp · el banner de instalación no tapa el pad (360×640 y 390×844)
+  ---
+  duration_ms: 1745.703135
+  type: 'test'
+  ...
+  6 knobs + 3 botones cambiados · held=[C5 E5] · AudioContext al restaurar: 0 · PLAY false
+# Subtest: Nebularp · autoguardado: tocar → recargar → mismo estado, sin audio
+ok 8 - Nebularp · autoguardado: tocar → recargar → mismo estado, sin audio
+  ---
+  duration_ms: 3732.880305
+  type: 'test'
+  ...
+  nebularp-20261004-2037.json 923B · envoltorio ok · ida y vuelta Gate/Ratchet = 150%/100% · otra app → modal "ERROR AL IMPORTAREse JSON es de otro instrumento (acid-bass-303). Abri…"
+# Subtest: Nebularp · JSON: export, ida y vuelta y rechazo con mensaje
+ok 9 - Nebularp · JSON: export, ida y vuelta y rechazo con mensaje
+  ---
+  duration_ms: 706.26169
+  type: 'test'
+  ...
+  track: 00 90 3c 64 · 30 80 3c 00 · 00 90 3c 64 · 30 80 3c 00
+# Subtest: Nebularp · zd-midi v2 embebido: off antes que on a igual tick
+ok 10 - Nebularp · zd-midi v2 embebido: off antes que on a igual tick
+  ---
+  duration_ms: 394.937848
+  type: 'test'
+  ...
+  ↓ Descargar MIDI (41 notas) · nebularp-20261004-2037.mid · fmt 0 · 96 ppq · 91.99998773333498 bpm · 41 notas · alturas 60,64,67,72,76,79
+  repeticiones de la misma altura: 35 · hueco min 1 / max 235 ticks · defectos 0
+  nebularp-20261004-2037.wav · 2 ch · 44100 Hz (ctx 44100) · 16 bit · 4.05 s · pico 0.377
+# Subtest: Nebularp · REC: arpegio con gate 150 % y ratchet 100 % → MIDI sano + WAV
+ok 11 - Nebularp · REC: arpegio con gate 150 % y ratchet 100 % → MIDI sano + WAV
+  ---
+  duration_ms: 6191.238901
+  type: 'test'
+  ...
+  Chord 42 notas · pad 2 notas (la sostenida cierra en 166/166) · autoplay 10 notas · 0 defectos
+# Subtest: Nebularp · REC: Chord, pad sostenido al cortar y autoplay → MIDI sano
+ok 12 - Nebularp · REC: Chord, pad sostenido al cortar y autoplay → MIDI sano
+  ---
+  duration_ms: 12471.226863
+  type: 'test'
+  ...
+  1 contexto · interactive · running · suspend → overlay → toque → running (voces 12→20→32) · visibilitychange → running · parado: overlay=false
+# Subtest: Nebularp · audio: destrabar, sonar, suspend → overlay → resume
+ok 13 - Nebularp · audio: destrabar, sonar, suspend → overlay → resume
+  ---
+  duration_ms: 4331.96373
+  type: 'test'
+  ...
+  8 rotaciones sonando · ctx 0.74→3.67 s · voces 64 · notas en la órbita G4,C5,E5,G5,E4 · latch [C4 E4 G4]
+# Subtest: Nebularp · rotación de tablet 1180×820 ↔ 820×1180 con el arpegio sonando
+ok 14 - Nebularp · rotación de tablet 1180×820 ↔ 820×1180 con el arpegio sonando
+  ---
+  duration_ms: 4168.903177
+  type: 'test'
+  ...
+  file:// · SW no · aviso local → https://zeroday-musicexploits.github.io/instruments/descargables/Nebularp_2035.html · 0 pedidos de red · shell=true
+# Subtest: Nebularp · file://: sin SW, sin red, con el aviso del archivo local
+ok 15 - Nebularp · file://: sin SW, sin red, con el aviso del archivo local
+  ---
+  duration_ms: 553.314085
+  type: 'test'
+  ...
+  SW http://127.0.0.1:40971/sw.js · scope http://127.0.0.1:40971/ · ../manifests/nebularp.webmanifest · theme #070b06
+# Subtest: Nebularp · hosted: SW registrado y manifest de Nebularp
+ok 16 - Nebularp · hosted: SW registrado y manifest de Nebularp
+  ---
+  duration_ms: 406.036512
+  type: 'test'
+  ...
+  iframe · ZD.pwa inerte · shell=true · audio running · 0 errores
+# Subtest: Nebularp · iframe (360 px): zd-pwa inerte, shell activo, sin errores
+ok 17 - Nebularp · iframe (360 px): zd-pwa inerte, shell activo, sin errores
+  ---
+  duration_ms: 1111.600014
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 38692.921114
+
+────────────────────────────────────────────────────────────────────────
+▶ pc-keys.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  Acid: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: Acid · los atajos no le roban teclas a los controles ni a un modal
+ok 1 - Acid · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 4149.064235
+  type: 'test'
+  ...
+  CronBeat: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: CronBeat · los atajos no le roban teclas a los controles ni a un modal
+ok 2 - CronBeat · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3603.177033
+  type: 'test'
+  ...
+  Nebularp: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: Nebularp · los atajos no le roban teclas a los controles ni a un modal
+ok 3 - Nebularp · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3592.402653
+  type: 'test'
+  ...
+  MonoMoon: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true}}
+# Subtest: MonoMoon · los atajos no le roban teclas a los controles ni a un modal
+ok 4 - MonoMoon · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 3601.742155
+  type: 'test'
+  ...
+  J4: {"espacioEnKnob":{"transporte":false,"notas":0},"espacioYFlechasEnBoton":{"transporte":false,"otro":false,"notas":0},"tipearConModal":{"recibe":true,"transporte":false,"otro":false,"notas":0},"letraEnLaPagina":{"notas":true},"espacioEnLaPagina":{"transporte":true}}
+# Subtest: J4 · los atajos no le roban teclas a los controles ni a un modal
+ok 5 - J4 · los atajos no le roban teclas a los controles ni a un modal
+  ---
+  duration_ms: 4105.687073
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19074.008432
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-audio-resumed.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  antes: n=0 (null) · primerDestrabe: n=1 (running) · seisClicsCorriendo: n=1 (running) · dosTeclas: n=1 (running) · gestoDesdeSuspended: n=2 (running) · seisClicsMas: n=2 (running) · resumeDesdeSuspended: n=3 (running)
+# Subtest: zd-audio v2 · onResumed solo en la transición a 'running', no en cada gesto
+ok 1 - zd-audio v2 · onResumed solo en la transición a 'running', no en cada gesto
+  ---
+  duration_ms: 3096.906286
+  type: 'test'
+  ...
+  antes: ctx=null · sample a 48000 Hz · primer gesto: ctx running a 44100 Hz, sample re-decodificado a 44100 Hz (buffer 44100 Hz), onResumed ×1 · 6 clics más: onResumed ×1
+# Subtest: descargables/CronBeat-808.html (zd-audio v2) · el primer destrabe re-decodifica los samples restaurados, y los clics siguientes no llaman a onResumed
+ok 2 - descargables/CronBeat-808.html (zd-audio v2) · el primer destrabe re-decodifica los samples restaurados, y los clics siguientes no llaman a onResumed
+  ---
+  duration_ms: 2081.53263
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5223.618643
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-midi-order.test.mjs
+────────────────────────────────────────────────────────────────────────
+
+caso del reporte
+ppq=96 bpm=120.00 track="repro" eventos=7
+  orden (tick:evento): 0:on60 48:off60 48:on60 96:off60
+  notas=2 [60 0→48 (48)] [60 48→96 (48)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+orden a igual tick (24): off → cc → bend → on
+
+acorde repetido en el tick 48: off60 off64 off67 on67 on60 on64
+
+recorder: notas repetidas
+ppq=96 bpm=120.00 track="repetidas" eventos=11
+  orden (tick:evento): 0:on60 48:off60 48:on60 96:off60 96:on60 144:off60 144:on60 192:off60
+  notas=4 [60 0→48 (48)] [60 48→96 (48)] [60 96→144 (48)] [60 144→192 (48)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0 ~ 0"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=7
+  orden (tick:evento): 0:on33 48:off33 48:on33 60:off33
+  notas=2 [33 0→48 (48)] [33 48→60 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0a 0s 12 ~ 0a . 7s 12a 0 0s 3 . 12a 10s 7 0"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=29
+  orden (tick:evento): 0:on33 14:off33 24:on33 48:on45 49:off33 96:off45 96:on33 110:off33 144:on40 168:on45 169:off40 182:off45 192:on33 204:off33 216:on33 240:on36 241:off33 252:off36 288:on45 302:off45 312:on43 336:on40 337:off43 348:off40 360:on33 372:off33
+  notas=13 [33 0→14 (14)] [33 24→49 (25)] [45 48→96 (48)] [33 96→110 (14)] [40 144→169 (25)] [45 168→182 (14)] [33 192→204 (12)] [33 216→241 (25)] [36 240→252 (12)] [45 288→302 (14)] [43 312→337 (25)] [40 336→348 (12)] [33 360→372 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0 ~ 0 ~ 0 ~ 0 ~ 0 ~ 0 ~ 0 ~ 0 ~"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=19
+  orden (tick:evento): 0:on33 48:off33 48:on33 96:off33 96:on33 144:off33 144:on33 192:off33 192:on33 240:off33 240:on33 288:off33 288:on33 336:off33 336:on33 384:off33
+  notas=8 [33 0→48 (48)] [33 48→96 (48)] [33 96→144 (48)] [33 144→192 (48)] [33 192→240 (48)] [33 240→288 (48)] [33 288→336 (48)] [33 336→384 (48)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "0s 0 0s 0 0s 0 0s 0"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=19
+  orden (tick:evento): 0:on33 24:off33 24:on33 36:off33 48:on33 72:off33 72:on33 84:off33 96:on33 120:off33 120:on33 132:off33 144:on33 168:off33 168:on33 180:off33
+  notas=8 [33 0→24 (24)] [33 24→36 (12)] [33 48→72 (24)] [33 72→84 (12)] [33 96→120 (24)] [33 120→132 (12)] [33 144→168 (24)] [33 168→180 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+
+Acid "12 ~ ~ 12 . 12 12 12"
+ppq=96 bpm=130.00 track="ZERO DAY ACID BASS-303" eventos=13
+  orden (tick:evento): 0:on45 72:off45 72:on45 84:off45 120:on45 132:off45 144:on45 156:off45 168:on45 180:off45
+  notas=5 [45 0→72 (72)] [45 72→84 (12)] [45 120→132 (12)] [45 144→156 (12)] [45 168→180 (12)]
+  off-después-de-on-en-el-mismo-tick=0 solapadas=0 colgadas=0 duración-cero=0 off-huérfanos=0
+TAP version 13
+# Subtest: zd-midi v2 · caso del reporte: off y on de la misma altura en el tick 48
+ok 1 - zd-midi v2 · caso del reporte: off y on de la misma altura en el tick 48
+  ---
+  duration_ms: 2.947728
+  type: 'test'
+  ...
+# Subtest: zd-midi v2 · todos los tipos a igual tick: off → cc → bend → on
+ok 2 - zd-midi v2 · todos los tipos a igual tick: off → cc → bend → on
+  ---
+  duration_ms: 0.679998
+  type: 'test'
+  ...
+# Subtest: zd-midi v2 · note-off estable por altura a igual tick
+ok 3 - zd-midi v2 · note-off estable por altura a igual tick
+  ---
+  duration_ms: 0.636055
+  type: 'test'
+  ...
+# Subtest: zd-midi v2 · recorder(): nota repetida que cae en el mismo tick
+ok 4 - zd-midi v2 · recorder(): nota repetida que cae en el mismo tick
+  ---
+  duration_ms: 0.776598
+  type: 'test'
+  ...
+# Subtest: Acid Bass-303 · patrón "0 ~ 0": nota ligada que termina donde arranca otra igual
+ok 5 - Acid Bass-303 · patrón "0 ~ 0": nota ligada que termina donde arranca otra igual
+  ---
+  duration_ms: 0.957419
+  type: 'test'
+  ...
+# Subtest: Acid Bass-303 · patrón de fábrica y otros con alturas repetidas
+ok 6 - Acid Bass-303 · patrón de fábrica y otros con alturas repetidas
+  ---
+  duration_ms: 2.012664
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15.789257
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-mobile-cycle.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+
+  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v4 · 4 ciclos
+  keep=[seqPanel, stepEditPanel, perfPanel] transport=[playBtn, .tempo-box, clipLed]
+  tab seq (SEQ) = [tempoKnob, tapBtn, scope, .seq-top, kbPanel]
+  tab snd (SONIDO) = [oscPanel, distPanel]
+  tab filt (FILTRO) = [filtPanel, filterStatus]
+  tab pat (PATRÓN) = [.gen-row, factoryBankLbl, bank]
+  tab exp (EXPORT) = [ioPanel]
+  ciclo 1 · 1180×820 · shell=false · #zd-stage=[] · placeholders=0
+  ciclo 1 · 820×1180 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · tablet 1180×820 (sin shell) ↔ 820×1180 (shell)
+ok 1 - zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · tablet 1180×820 (sin shell) ↔ 820×1180 (shell)
+  ---
+  duration_ms: 1065.690024
+  type: 'test'
+  ...
+  ciclo 1 · 1440×900 · shell=false · #zd-stage=[] · placeholders=0
+  ciclo 1 · 390×844 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · escritorio 1440×900 (sin shell) ↔ teléfono 390×844 (shell)
+ok 2 - zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · escritorio 1440×900 (sin shell) ↔ teléfono 390×844 (shell)
+  ---
+  duration_ms: 560.093808
+  type: 'test'
+  ...
+  ciclo 1 · 844×390 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  ciclo 1 · 390×844 · shell=true · #zd-stage=[seqPanel, stepEditPanel, perfPanel] · placeholders=19
+  4 ciclos sin cambios en el DOM · errores de consola: 0
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · teléfono 844×390 ↔ 390×844 (shell en los dos: rotar no re-mueve nada)
+ok 3 - zd-mobile v4 · descargables/Acid_Bass-303.html · 4 ciclos · teléfono 844×390 ↔ 390×844 (shell en los dos: rotar no re-mueve nada)
+  ---
+  duration_ms: 384.211306
+  type: 'test'
+  ...
+  listener sobre seqPanel, enganchado antes del ciclo: 1 click(s) después de volver a entrar
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · el cableado de eventos sigue vivo después de volver a entrar
+ok 4 - zd-mobile v4 · descargables/Acid_Bass-303.html · el cableado de eventos sigue vivo después de volver a entrar
+  ---
+  duration_ms: 284.810505
+  type: 'test'
+  ...
+  foco sobre section#seqPanel.panel (seqPanel)
+  foco foco → foco → foco · scrollY 320 → (reflow: 417) → 0 en el shell → 417 al salir
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · el foco y el scroll sobreviven el ciclo
+ok 5 - zd-mobile v4 · descargables/Acid_Bass-303.html · el foco y el scroll sobreviven el ciclo
+  ---
+  duration_ms: 301.429531
+  type: 'test'
+  ...
+  antes del ciclo: #zd-stage=[zd-pwa, seqPanel, stepEditPanel, perfPanel]
+  después de 3 ciclos: #zd-stage=[zd-pwa, seqPanel, stepEditPanel, perfPanel]
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · el banner de zd-pwa sigue siendo el primer hijo de \#zd-stage
+ok 6 - zd-mobile v4 · descargables/Acid_Bass-303.html · el banner de zd-pwa sigue siendo el primer hijo de \#zd-stage
+  ---
+  duration_ms: 480.878731
+  type: 'test'
+  ...
+  820×1180 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  390×844 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  844×390 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+  390×844 · playBtn 76×44 · bpmInput 58×44 · zd-pwa-topbtn 44×44 · zd-tmenu 44×44
+# Subtest: zd-mobile v4 · descargables/Acid_Bass-303.html · los controles de la barra superior miden ≥44 px (SPEC R1)
+ok 7 - zd-mobile v4 · descargables/Acid_Bass-303.html · los controles de la barra superior miden ≥44 px (SPEC R1)
+  ---
+  duration_ms: 613.966479
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3714.622252
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-pwa-choice.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  360×640 (shell) · rechazado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=ahora installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v3 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+ok 1 - zd-pwa v3 · 360×640 (shell) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 1677.34258
+  type: 'test'
+  ...
+  360×640 (shell) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 1
+# Subtest: zd-pwa v3 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+ok 2 - zd-pwa v3 · 360×640 (shell) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 963.847062
+  type: 'test'
+  ...
+  360×640 (shell) · appinstalled → prompts=0 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v3 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+ok 3 - zd-pwa v3 · 360×640 (shell) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 569.372702
+  type: 'test'
+  ...
+  1440×900 (escritorio) · rechazado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=ahora installedToasts=0 otherToasts=[]
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+ok 4 - zd-pwa v3 · 1440×900 (escritorio) · rechazar el diálogo nativo cuenta como "Ahora no"
+  ---
+  duration_ms: 1265.004922
+  type: 'test'
+  ...
+  1440×900 (escritorio) · aceptado → prompts=1 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[] · + appinstalled → toasts 1
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+ok 5 - zd-pwa v3 · 1440×900 (escritorio) · aceptar y appinstalled desmontan todo, con un solo "App instalada"
+  ---
+  duration_ms: 951.303447
+  type: 'test'
+  ...
+  1440×900 (escritorio) · appinstalled → prompts=0 banner=false topIcon=false desktopBtn=false menuItem=false dismissed=null installedToasts=1 otherToasts=[]
+# Subtest: zd-pwa v3 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+ok 6 - zd-pwa v3 · 1440×900 (escritorio) · appinstalled sin pasar por el prompt desmonta el banner y el ↓
+  ---
+  duration_ms: 573.781792
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6063.019284
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-rec-comments.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+# Subtest: ningún instrumento dice que zd-rec descarta la toma del tope
+ok 1 - ningún instrumento dice que zd-rec descarta la toma del tope
+  ---
+  duration_ms: 12.558879
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18.7496
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-rec-instruments.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  Nebularp · worklet: tope → botón "●REC" (aria-pressed=false) · recorder idle/worklet · tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cerró sola.","Toma lista · 0:01.0 · 172.5 KB"]
+  Nebularp · worklet: 2ª toma a mano → "0:00.5 · 82.0 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: Nebularp (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 1 - Nebularp (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3250.937576
+  type: 'test'
+  ...
+  Nebularp · mediarecorder: tope → botón "●REC" (aria-pressed=false) · recorder idle/mediarecorder · tarjeta "0:01.0 · 165.4 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cerró sola.","Toma lista · 0:01.0 · 165.4 KB"]
+  Nebularp · mediarecorder: 2ª toma a mano → "0:00.5 · 82.7 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: Nebularp (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 2 - Nebularp (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 2890.072433
+  type: 'test'
+  ...
+  J4 · worklet: tope → botón "● REC" (aria-pressed=false) · recorder idle/worklet · tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · avisos ["La toma llegó al tope de 10 minutos y se cerró sola.","Toma lista · 0:01.0"]
+  J4 · worklet: 2ª toma a mano → "0:00.5 · 80.0 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: J4 (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 3 - J4 (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3287.234341
+  type: 'test'
+  ...
+  J4 · mediarecorder: tope → botón "● REC" (aria-pressed=false) · recorder idle/mediarecorder · tarjeta "0:01.0 · 165.4 KB · 44.1 kHz · estéreo" · avisos ["La toma llegó al tope de 10 minutos y se cerró sola.","Toma lista · 0:01.0"]
+  J4 · mediarecorder: 2ª toma a mano → "0:00.4 · 72.4 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: J4 (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 4 - J4 (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3329.94001
+  type: 'test'
+  ...
+  MonoMoon · worklet: tope → botón "● REC" (aria-pressed=false) · recorder idle/worklet · tarjeta "0:01.0 · 172.5 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cortó ahí.","Toma lista: 0:01.0 · WAV y MIDI en PATCHES"]
+  MonoMoon · worklet: 2ª toma a mano → "0:00.5 · 80.0 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: MonoMoon (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 5 - MonoMoon (zd-rec v2) · worklet · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3422.859552
+  type: 'test'
+  ...
+  MonoMoon · mediarecorder: tope → botón "● REC" (aria-pressed=false) · recorder idle/mediarecorder · tarjeta "0:01.0 · 165.4 KB · 44.1 kHz · estéreo" · avisos ["Llegaste al tope de 10 minutos: la toma se cortó ahí.","Toma lista: 0:01.0 · WAV y MIDI en PATCHES"]
+  MonoMoon · mediarecorder: 2ª toma a mano → "0:00.4 · 72.4 KB · 44.1 kHz · estéreo" · recorder idle
+# Subtest: MonoMoon (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+ok 6 - MonoMoon (zd-rec v2) · mediarecorder · tope forzado a 1 s: la toma no se pierde y la UI vuelve a REC
+  ---
+  duration_ms: 3455.601545
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19665.493478
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-rec-limit.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  worklet: onLimit ×1 {"max":1,"state":"rec","res":{"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"}} · stop() después del tope → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"} · 2º stop() → null
+# Subtest: zd-rec v2 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+ok 1 - zd-rec v2 · worklet · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1738.950981
+  type: 'test'
+  ...
+  worklet: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":1,"bytes":176684,"blob":true,"sampleRate":44100,"channels":2,"mode":"worklet"} · stop() después → null
+# Subtest: zd-rec v2 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+ok 2 - zd-rec v2 · worklet · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1173.403859
+  type: 'test'
+  ...
+  mediarecorder: onLimit ×1 {"max":1,"state":"rec","res":{"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"}} · stop() después del tope → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"} · 2º stop() → null
+# Subtest: zd-rec v2 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+ok 3 - zd-rec v2 · mediarecorder · onLimit solo avisa y después el usuario toca ■: obtiene la toma
+  ---
+  duration_ms: 1374.065945
+  type: 'test'
+  ...
+  mediarecorder: onLimit con state="rec" · stop() adentro de onLimit → {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"} · stop() después → null
+# Subtest: zd-rec v2 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+ok 4 - zd-rec v2 · mediarecorder · onLimit llama a stop() (patrón J4/MonoMoon): obtiene la toma
+  ---
+  duration_ms: 1203.656865
+  type: 'test'
+  ...
+  normal 0.41 s · después del tope + start(): 0.3 s · cancel() suelta la toma del tope
+# Subtest: zd-rec v2 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+ok 5 - zd-rec v2 · worklet · sin tope: stop() normal, y start() después del tope descarta la toma vieja
+  ---
+  duration_ms: 2820.659844
+  type: 'test'
+  ...
+  a los 0,75 s de la 2ª toma: state=rec, onLimit ×0 · cerrada por su propio tope: {"keys":"blob,bytes,channels,duration,mode,sampleRate","dur":0.96,"bytes":169384,"blob":true,"sampleRate":44100,"channels":2,"mode":"mediarecorder"}
+# Subtest: zd-rec v2 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+ok 6 - zd-rec v2 · mediarecorder · el temporizador del tope de una toma vieja no corta la siguiente
+  ---
+  duration_ms: 1602.094448
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9936.200112
+
+────────────────────────────────────────────────────────────────────────
+▶ zd-ui-prompt.test.mjs
+────────────────────────────────────────────────────────────────────────
+TAP version 13
+  al enfocar: selección [0, 4] de "1400" · tipear 2500 + Enter → "2500"
+# Subtest: zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+ok 1 - zd-ui v2 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 sobre 1400 da 2500
+  ---
+  duration_ms: 923.755895
+  type: 'test'
+  ...
+  Acid_Bass-303.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: Acid_Bass-303.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 2 - Acid_Bass-303.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 803.121449
+  type: 'test'
+  ...
+  CronBeat-808.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: CronBeat-808.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 3 - CronBeat-808.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 785.862071
+  type: 'test'
+  ...
+  J4-Sirens_Station.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: J4-Sirens_Station.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 4 - J4-Sirens_Station.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 749.098488
+  type: 'test'
+  ...
+  MonoMoon70.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: MonoMoon70.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 5 - MonoMoon70.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 786.388169
+  type: 'test'
+  ...
+  Nebularp_2035.html: selección [0, 4] · tipear 2500 + Enter → "2500"
+# Subtest: Nebularp_2035.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+ok 6 - Nebularp_2035.html (zd-ui v2) · el prompt reemplaza el valor y el instrumento no se roba las teclas
+  ---
+  duration_ms: 803.69871
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4899.937648
+
+OK: 20 archivos de test en verde
