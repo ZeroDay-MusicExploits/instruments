@@ -280,7 +280,7 @@ para escuchar y el botón de descarga (que pasa por `ZD.dl.save`). Acid Bass usa
 **solo la tarjeta**, para el resultado de su render offline; la captura en vivo
 es para Nebularp y J4.
 
-## `zd-mobile` v3 — shell portrait-first
+## `zd-mobile` v4 — shell portrait-first
 
 Reemplaza al shell landscape v1 y a `#zd-rotate`. Barra superior de 48 px →
 zona de tocar → tabs de 56 px + `env(safe-area-inset-bottom)` → bottom sheets
@@ -333,6 +333,17 @@ ZD.mobile.open(id) / close() / toggle(id)   // id '__menu' para el menú
 ZD.mobile.stage() / pane(id)       // nodos del shell
 ZD.mobile.mq                       // la media query de activación
 ```
+
+**Targets táctiles de la barra superior (v4).** El bloque pone un piso de
+44 px en los dos ejes para todo control que termine en `#zd-top`
+(`button`, `a`, `input`, `select`), venga del transporte del instrumento, del
+ícono de instalar que inyecta `zd-pwa` o del botón de menú propio. La barra mide
+48 px, así que 44 entra. Va con `min-width`/`min-height`, que ganan sobre un
+`width`/`height` fijo sin importar la especificidad (por eso levanta el
+`.zd-pwa-topicon` de 40×40 sin tocar `zd-pwa`), y **sin `!important`**: el
+`<style id="zd-mobile-skin">` de un instrumento puede decidir otra cosa a
+sabiendas. Ojo con eso: si el skin fija `min-height` con más especificidad, gana
+el skin y el control vuelve a quedar corto. Lo chequea el test.
 
 **Entrar y salir son idempotentes y reversibles (v3).** El shell se arma una
 sola vez (`build()`), pero los nodos se mueven en cada `enter()` y vuelven a su
@@ -535,6 +546,25 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-04 · `zd-mobile` v3 → v4
+
+Los controles de la barra superior medían 40 px de alto y SPEC R1 pide ≥44 px en
+el eje corto. La barra mide 48, así que 44 entra sin tocar la métrica del shell.
+
+- `#zd-tmenu` pasa de 44×40 a 44×44.
+- Piso genérico: `#zd-top button, #zd-top a, #zd-top input, #zd-top select`
+  con `min-width:44px; min-height:44px`. Alcanza a los nodos de `transport` del
+  instrumento y al `↓` de `zd-pwa` (40×40 fijos) sin tocar ese bloque, porque
+  `min-*` gana sobre `width`/`height` sin importar la especificidad.
+- Sin `!important`: un `zd-mobile-skin` con más especificidad sigue mandando.
+  **Lo que tiene que hacer cada sesión C:** revisar que su skin no fije un
+  `min-height` menor a 44 para los nodos del transporte. En Acid había
+  `html.zd-m #zd-top .btn-play{min-height:40px}` y pasó a 44.
+
+Medido en Acid con el ícono de instalar visible (360×640, 390×844, 768×1024 y
+844×390): barra 48 px, `#zd-tmenu` 44×44, `#zd-pwa-topbtn` 44×44, PLAY 76×44,
+tempo-box 58×44, sin recorte en `.zd-ttr` y sin scroll horizontal.
 
 ### 2026-10-03 · `zd-midi` v1 → v2
 

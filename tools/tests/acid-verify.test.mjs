@@ -77,6 +77,16 @@ const rect = (page, sel) => page.evaluate((s) => {
 }, sel);
 const overlap = (a, b) => !!(a && b && a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h);
 
+/* SPEC R1: todo control de la barra superior, ≥44 px en el eje corto. Mira el
+   DOM, no una lista de selectores: sirve igual para cualquier instrumento. */
+const topBarUnder44 = (page) => page.evaluate(() => {
+  const top = document.getElementById('zd-top');
+  if (!top) return [];
+  return Array.from(top.querySelectorAll('button,a,input,select'))
+    .map((e) => { const r = e.getBoundingClientRect(); return { id: e.id || e.className || e.tagName, w: Math.round(r.width), h: Math.round(r.height) }; })
+    .filter((c) => c.w > 0 && c.h > 0 && Math.min(c.w, c.h) < 44);
+});
+
 // ───────────────────────────────── R1 · viewports ─────────────────────────────
 
 for (const v of VIEWPORTS) {
@@ -104,17 +114,16 @@ for (const v of VIEWPORTS) {
         assert.deepEqual(s.stage, ['seqPanel', 'stepEditPanel', 'perfPanel'], `${v.label}: el stage tiene que tener los 3 paneles`);
         const play = await rect(page, '#playBtn');
         const pad = await rect(page, '#xypad');
-        // La barra superior mide 48 px (SPEC R1) y sus controles salen de 40:
-        // el propio bloque define #zd-tmenu en 44×40. Es el alto que hay hoy en
-        // los 5 instrumentos, no lo que pide SPEC R1 ("≥44 px en el eje corto"):
-        // queda anotado como desvío conocido de la barra, no de la zona de tocar.
-        assert.ok(play.visible && play.h >= 40, `${v.label}: PLAY tiene que medir ≥40 px de alto, mide ${play.h}`);
+        // SPEC R1: target táctil ≥44 px en el eje corto. La barra mide 48, así
+        // que 44 entra. Desde zd-mobile v4 el piso lo pone el bloque para todo
+        // lo que caiga en #zd-top, venga del instrumento, de zd-pwa o de él.
+        assert.ok(play.visible && play.h >= 44, `${v.label}: PLAY tiene que medir ≥44 px de alto, mide ${play.h}`);
         assert.ok(pad.visible && pad.h > 40, `${v.label}: el pad XY tiene que estar visible (${pad.h} px)`);
-        for (const sel of ['#zd-tabs button', '#zd-tmenu']) {
-          const h = await page.evaluate((q) => Math.min(...Array.from(document.querySelectorAll(q)).map((e) => e.getBoundingClientRect().height)), sel);
-          assert.ok(h >= 36, `${v.label}: ${sel} mide ${h} px de alto`);
-        }
-        console.log(`  ${v.label} · shell · tabs=${s.tabs} · PLAY ${Math.round(play.h)}px · pad ${Math.round(pad.h)}px · sin scroll horizontal`);
+        const small = await topBarUnder44(page);
+        assert.deepEqual(small, [], `${v.label}: controles de la barra superior por debajo de 44 px en el eje corto`);
+        const tabH = await page.evaluate(() => Math.min(...Array.from(document.querySelectorAll('#zd-tabs button')).map((e) => e.getBoundingClientRect().height)));
+        assert.ok(tabH >= 44, `${v.label}: las tabs miden ${tabH} px de alto`);
+        console.log(`  ${v.label} · shell · tabs=${s.tabs} · PLAY ${Math.round(play.h)}px · pad ${Math.round(pad.h)}px · barra ≥44 · sin scroll horizontal`);
       } else {
         console.log(`  ${v.label} · sin shell · sin scroll horizontal`);
       }

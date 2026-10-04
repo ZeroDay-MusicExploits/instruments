@@ -1,5 +1,5 @@
 <script>
-/* ZD-BLOCK:zd-mobile v3 */
+/* ZD-BLOCK:zd-mobile v4 */
 /* Shell portrait-first: barra superior 48px + zona de tocar + tabs 56px +
    bottom sheets. Se configura entero por window.ZD_M (ningun selector ni
    texto del instrumento vive aca). Un solo movimiento de nodos por activacion:
@@ -8,7 +8,8 @@
    v3: entrar y salir son idempotentes y reversibles. El movimiento de nodos
    salio de build() (que corre una sola vez) y vive en enter(), asi que volver
    a entrar despues de un exit() vuelve a armar el shell en vez de dejar el
-   stage vacio. Ademas el ciclo conserva el foco y el scroll de la pagina. */
+   stage vacio. Ademas el ciclo conserva el foco y el scroll de la pagina.
+   v4: los controles de la barra superior miden 44px en los dos ejes (SPEC R1). */
 (function () {
   'use strict';
   var ZD = window.ZD || (window.ZD = {});
@@ -39,7 +40,15 @@
     '#zd-top .zd-ttitle b{color:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
     '#zd-top .zd-ttr{display:flex;align-items:center;gap:6px;margin-left:auto;min-width:0;overflow:hidden}',
     '#zd-top .zd-ttr>*{margin:0!important}',
-    '#zd-tmenu{flex:none;width:44px;height:40px;cursor:pointer;font:700 15px var(--zd-mono,monospace);',
+    /* SPEC R1: target tactil >=44px en el eje corto. La barra mide 48, asi que
+       44 entra. Es un piso generico para cualquier control que termine en la
+       barra: los del transporte (del instrumento), el icono de instalar (que
+       inyecta zd-pwa con 40x40 fijos) y el de menu de aca. min-width/min-height
+       ganan sobre un width/height fijo sin importar la especificidad, y van sin
+       !important para que el skin de un instrumento pueda decidir otra cosa a
+       sabiendas (lo chequea tools/tests/zd-mobile-cycle.test.mjs). */
+    '#zd-top button,#zd-top a,#zd-top input,#zd-top select{min-width:44px;min-height:44px}',
+    '#zd-tmenu{flex:none;width:44px;height:44px;cursor:pointer;font:700 15px var(--zd-mono,monospace);',
     'color:var(--zd-ink,#e9ebef);background:var(--zd-panel-2,#1c2430);border:1px solid var(--zd-outline,#000);',
     'border-radius:var(--zd-r,4px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 2px 0 var(--zd-outline,#000);touch-action:manipulation}',
     '#zd-tmenu:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24)}',
