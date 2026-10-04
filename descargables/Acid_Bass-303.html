@@ -3357,8 +3357,16 @@ function keyUpSemi(e){ kbUps++; if(e) e.classList.remove('down'); if(activeSemi!
 function auditionNote(midi,short){ if(!Engine.started){ Engine.ensure().then(()=>auditionNote(midi,short)); return; }
   const t=Engine.ctx.currentTime+0.005, freq=midiToFreq(midi); Engine.setPitch(t,freq,null,0); Engine.triggerAmp(t,false); Engine.triggerFilter(t,false); if(short) Engine.releaseAmp(t+0.18); }
 const pcDown=new Set();
-window.addEventListener('keydown', e=>{ if(e.repeat) return; const k=e.key.toLowerCase();
-  if(k===' '){ if(document.activeElement && document.activeElement.tagName==='INPUT') return; e.preventDefault(); togglePlay(); return; }
+/* Los atajos no le roban teclas a los controles (mismo criterio que MonoMoon): nada si
+   otro handler ya la usó (un knob con Espacio abre su entrada numérica), si se escribe
+   en un campo o si hay un modal abierto; Espacio sobre un botón o un knob es de ese control. */
+function pcKeysOff(e){ const t=e.target;
+  if(e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return true;
+  if(t && t.closest && t.closest('input,select,textarea,[contenteditable]:not([contenteditable="false"])')) return true;
+  return !!document.querySelector('.zd-scrim'); }
+const PC_CTL='button,a[href],[role=button],[role=slider],[role=switch],[role=tab]';
+window.addEventListener('keydown', e=>{ if(e.repeat || pcKeysOff(e)) return; const k=e.key.toLowerCase();
+  if(k===' '){ if(e.target.closest && e.target.closest(PC_CTL)) return; e.preventDefault(); togglePlay(); return; }
   if(k==='z'){ kbOct=clamp(kbOct-1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); return; }
   if(k==='x'){ kbOct=clamp(kbOct+1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); return; }
   if(k in KB_KEYMAP && !pcDown.has(k)){ pcDown.add(k); const semi=KB_KEYMAP[k]; keyDownSemi(semi, $('#keyboard').querySelector('.key[data-semi="'+semi+'"]')); } });

@@ -3961,14 +3961,18 @@ const keyToTrack={}; KIT.forEach((v,i)=> keyToTrack[v.key]=i); const heldKeys=ne
    editable, los <select>, los diálogos de zd-ui y, para las flechas, los
    sliders (←→ los mueven: SPEC R6). */
 function typingTarget(el){ return !!(el && el.closest && (el.isContentEditable || el.closest('input:not([type=range]):not([type=button]), textarea, select, .zd-dlg'))); }
+/* ...ni con un modal abierto aunque el foco esté afuera, ni si otro handler ya usó la
+   tecla; Espacio y ←→ sobre un control (botón, slider, link) son de ese control. */
+const PC_CTL='button,a[href],input,[role=button],[role=slider],[role=switch],[role=tab]';
 window.addEventListener('keydown', e=>{
+  if(e.defaultPrevented || document.querySelector('.zd-scrim')) return;
   if((e.ctrlKey || e.metaKey) && !e.altKey && e.target!==bpmVal && !typingTarget(e.target)){
     const z=e.key.toLowerCase();
     if(z==='z' && !e.shiftKey){ e.preventDefault(); undo(); return; }
     if((z==='z' && e.shiftKey) || z==='y'){ e.preventDefault(); redo(); return; }
   }
   if(e.target===bpmVal || typingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return; const k=e.key.toLowerCase();
-  if((e.key==='ArrowRight'||e.key==='ArrowLeft') && e.target.matches && e.target.matches('input[type=range]')) return;
+  if((e.code==='Space'||e.key==='ArrowRight'||e.key==='ArrowLeft') && e.target.closest && e.target.closest(PC_CTL)) return;
   if(e.code==='Space'){ e.preventDefault(); ensureAudio(); togglePlay('pattern'); return; }
   if(e.key==='ArrowRight'){ e.preventDefault(); setTempo(tempo+(e.shiftKey?5:1)); return; }
   if(e.key==='ArrowLeft'){ e.preventDefault(); setTempo(tempo-(e.shiftKey?5:1)); return; }
