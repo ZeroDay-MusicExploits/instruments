@@ -192,7 +192,9 @@ body::after{
 .latchbtn .lled{width:11px;height:11px;border-radius:2px;background:#1b2a15;box-shadow:inset 0 0 3px #000}
 .latchbtn[aria-pressed="true"]{color:var(--cream);box-shadow:0 0 0 1px var(--brass),var(--zd-hard-sm)}
 .latchbtn[aria-pressed="true"] .lled{background:var(--brass);box-shadow:0 0 10px var(--brass)}
-.mode{font:inherit;width:100%;-webkit-appearance:none;appearance:none}
+.mode{font:inherit;width:100%;-webkit-appearance:none;appearance:none;display:flex;flex-direction:column;align-items:center}
+.mode>span{display:block}
+[hidden]{display:none!important}   /* que display:flex de .ioRow y otros no le gane al atributo hidden */
 .throwbtn{font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none}
 .padmode{position:absolute;top:6px;right:8px;pointer-events:none;font:700 11px var(--zd-mono);letter-spacing:.16em;
   color:var(--brass);padding:2px 6px;border:1px solid currentColor;border-radius:3px;opacity:.85}
@@ -525,6 +527,9 @@ body::after{
   html.zd-m #zd-sheet .lfogrid{flex-direction:column; align-items:stretch; gap:8px;}
   html.zd-m #zd-sheet #lfoBlocks{gap:12px !important;}
   html.zd-m #zd-sheet .padtargets{min-width:0;}
+  html.zd-m #zd-sheet #padXSeg, html.zd-m #zd-sheet #padYSeg{display:grid; grid-template-columns:repeat(3,minmax(0,1fr));}
+  html.zd-m #zd-sheet #padXSeg button:nth-child(4), html.zd-m #zd-sheet #padYSeg button:nth-child(4){border-left:0;}
+  html.zd-m #zd-sheet #padXSeg button:nth-child(n+4), html.zd-m #zd-sheet #padYSeg button:nth-child(n+4){border-top:1px solid var(--zd-line);}
   html.zd-m #zd-sheet #scope{height:120px;}
   html.zd-m #zd-sheet .vizctl{margin-top:8px;}
   html.zd-m #zd-sheet .pin{flex:1; min-width:0;}
@@ -559,6 +564,7 @@ body::after{
     html.zd-m #perfDeck > .throws{grid-template-columns:minmax(0,1fr); grid-template-rows:repeat(3,minmax(0,1fr));}
     /* peek a media pantalla: el sheet a la izquierda y se sigue tocando a la derecha */
     html.zd-m #zd-sheet.peek{right:50%; height:var(--zd-stage-h); max-height:none;}
+    html.zd-m #zd-sheet.peek .knobs{grid-template-columns:minmax(0,1fr);}   /* media pantalla: una columna */
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{left:50%; height:var(--zd-stage-h); flex-flow:column nowrap;}
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #xypad{flex:1 1 auto;}
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #perfDeck{flex:none; height:64px;}
@@ -2805,6 +2811,9 @@ const MODES = [
 
 /* ---------------------------------------------------------------- audio ---*/
 let ctx=null, master=null, analyser=null, shaper=null;
+/* audioReady: el grafo entero esta armado. ctx se asigna al principio de
+   initAudio, antes de dos await, asi que "hay ctx" no alcanza para tocar nodos. */
+let audioReady=false;
 
 /* ADAPTADOR C2 v1 — detección del hub ANTES de armar el motor (para rutear al canal). */
 let HOST=null, C2_OUT=null, C2_CHANNEL=null, SLOT_ID='j4siren';
@@ -2962,6 +2971,7 @@ async function initAudio(){
   osc.start(); noiseSrc.start(); modeLFO.start();
   userLFO.forEach(l=>l.osc.start());
 
+  audioReady=true;
   applyMode(); applyReso(); applyCutoffBase(); applyLFOs();
   applyEcho(); applyReverb(); applyPhaser();
   runScope();
@@ -3001,7 +3011,7 @@ function modeDepthHz(){
   }
 }
 function applyMode(){
-  if(!ctx)return;
+  if(!audioReady)return;
   const t=ctx.currentTime;
   document.getElementById('plateMode').textContent=P.mode.toUpperCase();
   clearScheduler();
@@ -3064,7 +3074,7 @@ function clearScheduler(){ if(sh){ clearTimeout(sh); sh=null; } }
 /* ---- LFOs de usuario ---- */
 const LSHAPE={sine:'sine',tri:'triangle',square:'square',ramp:'sawtooth'};
 function applyLFOs(){
-  if(!ctx)return;
+  if(!audioReady)return;
   userLFO.forEach((l,i)=>{
     const cfg=P.lfo[i];
     l.osc.type=LSHAPE[cfg.shape]||'sine';
@@ -3317,7 +3327,7 @@ function applyPatch(raw){
   if(p.echo)Object.assign(P.echo,p.echo);
   if(p.rev)Object.assign(P.rev,p.rev);
   if(p.ph)Object.assign(P.ph,p.ph);
-  if(ctx){
+  if(audioReady){
     applyWave(); applyReso(); applyCutoffBase(); applyMode();
     applyLFOs(); applyEcho(); buildIR(); applyReverb(); applyPhaser();
     if(master)master.gain.setTargetAtTime(P.vol,ctx.currentTime,.02);
@@ -3519,8 +3529,8 @@ async function startRec(){
   if(recState!=='idle') return;
   recState='starting'; renderRec(0);
   try{
-    if(!ctx){ if(!HOST && window.ZD && ZD.audio) await ZD.audio.unlock(); else await boot(); }
-    if(!analyser) throw new Error('el audio no arrancó');
+    if(!audioReady){ if(!HOST && window.ZD && ZD.audio) await ZD.audio.unlock(); else await boot(); }
+    if(!audioReady) throw new Error('el audio no arrancó');
     await getRecorder().start();
   }catch(e){
     recState='idle'; renderRec();
@@ -3718,7 +3728,7 @@ function toggleExpand(){
 
 /* ---------------------------------------------------------- notas / gate --*/
 function noteOn(id, midi){
-  if(!ctx)return;
+  if(!audioReady)return;
   const ex=held.find(h=>h.id===id);
   const fromSilence = held.length===0;
   if(ex) ex.midi=midi; else held.push({id,midi});
@@ -3731,6 +3741,7 @@ function noteOn(id, midi){
   afterVoice();
 }
 function noteOff(id){
+  if(!audioReady)return;   // sin grafo no hay voz que soltar (el adaptador C2 puede llamar antes)
   const idx=held.findIndex(h=>h.id===id);
   if(idx>=0) held.splice(idx,1);
   if(held.length===0){
