@@ -157,6 +157,8 @@
   .btn.warn:hover{color:#ffb4a3; box-shadow:0 0 0 1px var(--danger), var(--zd-hard-sm)}
   .btn.accent{color:var(--zd-phosphor); box-shadow:0 0 0 1px var(--zd-phosphor-dim), var(--zd-hard-sm), var(--zd-inset)}
   .btn.accent:hover{color:var(--zd-phosphor-hi)}
+  .btn:disabled{opacity:.45; cursor:default}
+  #undoBtn, #redoBtn{min-width:44px; font-size:16px; padding:0 10px}
   select.bars, .ed-top select, .songrow select{ -webkit-appearance:none; appearance:none; height:40px; border-radius:var(--zd-r);
     background:#050804 linear-gradient(45deg,transparent 50%,var(--zd-phosphor) 50%) no-repeat right 10px center / 7px 7px;
     color:var(--zd-phosphor); border:1px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line);
@@ -2599,6 +2601,8 @@ window.ZD_M = {
         <div class="patops">
           <button class="btn" id="patCopy" title="Copiar el patrón actual">Copiar</button>
           <button class="btn" id="patPaste" title="Pegar en el patrón actual">Pegar</button>
+          <button class="btn" id="undoBtn" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer" disabled>↶</button>
+          <button class="btn" id="redoBtn" type="button" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer" disabled>↷</button>
         </div>
       </div>
       <div class="ruler"><div></div><div class="beats" id="ruler"></div></div>
@@ -3282,7 +3286,28 @@ function refreshMix(){ for(let t=0;t<mixRows.length;t++) refreshMixRow(t); }
 /* Al entrar al shell: la mezcla refleja lo que se haya tocado en escritorio. */
 function cbShellEnter(){ refreshMix(); refreshTrkName(); }
 
-function toggleCell(t,s,accent){ const cur=pattern[t][s];
+/* ---- deshacer / rehacer ----
+   Cubre lo que se edita a mano: pasos, patrones (limpiar, aleatorio, pegar,
+   MIDI importado), lo grabado con REC y el arreglo de la canción. No cubre
+   samples, FX ni mezcla. Un gesto continuo (arrastrar compases, una ráfaga de
+   REC) cuenta como un solo paso. Abrir un proyecto JSON vacía el historial. */
+const undoStack=[], redoStack=[], UNDO_MAX=60; let lastUndo={tag:null, t:0};
+const undoBtn=document.getElementById('undoBtn'), redoBtn=document.getElementById('redoBtn');
+function seqSnapshot(){ return JSON.stringify({ p:patterns, s:song, a:activePattern }); }
+function recordUndo(tag){ const now=performance.now();
+  if(tag && tag===lastUndo.tag && now-lastUndo.t<1500){ lastUndo.t=now; return; }
+  undoStack.push(seqSnapshot()); if(undoStack.length>UNDO_MAX) undoStack.shift();
+  redoStack.length=0; lastUndo={tag:tag||null, t:now}; refreshUndoUI(); }
+function applySnapshot(str){ const o=JSON.parse(str);
+  for(let pi=0;pi<N_PATTERNS;pi++) for(let t=0;t<N_TRACKS;t++) for(let st=0;st<N_STEPS;st++) patterns[pi][t][st]=(o.p[pi]&&o.p[pi][t]&&o.p[pi][t][st])||0;
+  song=o.s; activePattern=o.a; pattern=patterns[activePattern];
+  renderAll(); updatePatBar(); renderSong(); markDirty(); }
+function undo(){ if(!undoStack.length) return; redoStack.push(seqSnapshot()); applySnapshot(undoStack.pop()); lastUndo={tag:null,t:0}; refreshUndoUI(); toast('Deshecho'); }
+function redo(){ if(!redoStack.length) return; undoStack.push(seqSnapshot()); applySnapshot(redoStack.pop()); lastUndo={tag:null,t:0}; refreshUndoUI(); toast('Rehecho'); }
+function clearUndo(){ undoStack.length=0; redoStack.length=0; lastUndo={tag:null,t:0}; refreshUndoUI(); }
+function refreshUndoUI(){ if(undoBtn) undoBtn.disabled=!undoStack.length; if(redoBtn) redoBtn.disabled=!redoStack.length; }
+
+function toggleCell(t,s,accent){ recordUndo(); const cur=pattern[t][s];
   if(accent) pattern[t][s]=cur===2?1:2; else pattern[t][s]=cur?0:1;
   renderCell(t,s); updatePatBar();
   if(pattern[t][s] && !isPlaying){ ensureAudio(); trigger(AA, eng, t, ctx.currentTime, pattern[t][s]===2?VEL_ACCENT:VEL_ON); }
@@ -3313,25 +3338,25 @@ function renderSong(){
     const idx=document.createElement('div'); idx.className='idx'; idx.textContent=(i+1);
     const sel=document.createElement('select'); sel.setAttribute('aria-label','Patrón del bloque '+(i+1));
     PAT_LABELS.forEach((lab,pi)=>{ const o=document.createElement('option'); o.value=pi; o.textContent='Patrón '+lab; if(pi===blk.pattern) o.selected=true; sel.appendChild(o); });
-    sel.addEventListener('change', ()=>{ blk.pattern=+sel.value; });
+    sel.addEventListener('change', ()=>{ recordUndo(); blk.pattern=+sel.value; });
     const reps=document.createElement('div'); reps.className='reps';
     const ri=document.createElement('input'); ri.type='range'; ri.min=1; ri.max=16; ri.value=blk.reps; ri.setAttribute('aria-label','Compases del bloque '+(i+1));
     const rb=document.createElement('b'); rb.textContent=blk.reps;
     const rs=document.createElement('span'); rs.textContent='compases';
-    ri.addEventListener('input', ()=>{ blk.reps=+ri.value; rb.textContent=ri.value; });
+    ri.addEventListener('input', ()=>{ recordUndo('reps'+i); blk.reps=+ri.value; rb.textContent=ri.value; });
     reps.append(ri, rb, rs);
     const sp=document.createElement('div'); sp.className='sp';
     const up=document.createElement('button'); up.type='button'; up.className='mv'; up.textContent='▲'; up.title='Subir'; up.setAttribute('aria-label','Subir el bloque '+(i+1));
-    up.addEventListener('click', ()=>{ if(i>0){ const tmp=song[i-1]; song[i-1]=song[i]; song[i]=tmp; renderSong(); } });
+    up.addEventListener('click', ()=>{ if(i>0){ recordUndo(); const tmp=song[i-1]; song[i-1]=song[i]; song[i]=tmp; renderSong(); } });
     const dn=document.createElement('button'); dn.type='button'; dn.className='mv'; dn.textContent='▼'; dn.title='Bajar'; dn.setAttribute('aria-label','Bajar el bloque '+(i+1));
-    dn.addEventListener('click', ()=>{ if(i<song.length-1){ const tmp=song[i+1]; song[i+1]=song[i]; song[i]=tmp; renderSong(); } });
+    dn.addEventListener('click', ()=>{ if(i<song.length-1){ recordUndo(); const tmp=song[i+1]; song[i+1]=song[i]; song[i]=tmp; renderSong(); } });
     const del=document.createElement('button'); del.type='button'; del.className='mv del'; del.textContent='✕'; del.title='Quitar'; del.setAttribute('aria-label','Quitar el bloque '+(i+1));
-    del.addEventListener('click', ()=>{ song.splice(i,1); renderSong(); });
+    del.addEventListener('click', ()=>{ recordUndo(); song.splice(i,1); renderSong(); });
     row.append(idx, sel, reps, sp, up, dn, del); songListEl.appendChild(row);
   });
   updateSongUI();
 }
-function addBlock(){ song.push({pattern:activePattern, reps:2}); renderSong(); }
+function addBlock(){ recordUndo(); song.push({pattern:activePattern, reps:2}); renderSong(); }
 function highlightSongBlock(idx){ document.querySelectorAll('#songList .songrow').forEach((r,i)=> r.classList.toggle('playing', i===idx));
   if(isPlaying && playMode==='song') songNowEl.textContent='sonando · bloque '+(idx+1)+' / '+song.length; }
 function updateSongUI(){
@@ -3346,10 +3371,10 @@ songLoopBtn.classList.toggle('on', songLoop); pressed(songLoopBtn, songLoop);
 songLoopBtn.addEventListener('click', ()=>{ songLoop=!songLoop; songLoopBtn.classList.toggle('on', songLoop); pressed(songLoopBtn, songLoop); });
 document.getElementById('songAdd').addEventListener('click', addBlock);
 document.getElementById('patCopy').addEventListener('click', ()=>{ patternClipboard=patterns[activePattern].map(r=>r.slice()); toast('Patrón '+PAT_LABELS[activePattern]+' copiado.'); });
-document.getElementById('patPaste').addEventListener('click', ()=>{ if(!patternClipboard){ toast('No hay nada copiado.'); return; } patterns[activePattern]=patternClipboard.map(r=>r.slice()); pattern=patterns[activePattern]; renderAll(); updatePatBar(); toast('Pegado en '+PAT_LABELS[activePattern]+'.'); });
+document.getElementById('patPaste').addEventListener('click', ()=>{ if(!patternClipboard){ toast('No hay nada copiado.'); return; } recordUndo(); patterns[activePattern]=patternClipboard.map(r=>r.slice()); pattern=patterns[activePattern]; renderAll(); updatePatBar(); toast('Pegado en '+PAT_LABELS[activePattern]+'.'); });
 
 function livePlay(t, accent){ ensureAudio(); trigger(AA, eng, t, ctx.currentTime, accent?VEL_ACCENT:VEL_ON); flashVoice(t);
-  if(recording && isPlaying){ const s=quantizedStep(); pattern[t][s]=accent?2:Math.max(pattern[t][s],1); renderCell(t,s); } }
+  if(recording && isPlaying){ recordUndo('rec'); const s=quantizedStep(); pattern[t][s]=accent?2:Math.max(pattern[t][s],1); renderCell(t,s); } }
 const flashTimers=[], rowTimers=[];
 function flashVoice(t){ const p=rows[t].pad; p.classList.add('flash'); const bp=bigpads[t]; if(bp) bp.classList.add('flash');
   clearTimeout(flashTimers[t]); flashTimers[t]=setTimeout(()=>{ p.classList.remove('flash'); if(bp) bp.classList.remove('flash'); },100);
@@ -3584,6 +3609,7 @@ function importMIDI(bytes){
   ensureAudio();
   const {div, notes}=parseMIDI(bytes); if(!notes.length){ ZD.modal.error('El MIDI no tiene notas que CronBeat pueda leer.', {title:'ERROR AL IMPORTAR'}); return; }
   const st=div/4;
+  recordUndo();
   for(let pi=0;pi<N_PATTERNS;pi++) for(let t=0;t<N_TRACKS;t++) patterns[pi][t].fill(0);
   let maxBar=0;
   notes.forEach(n=>{ const gstep=Math.round(n.tick/st), bar=Math.floor(gstep/N_STEPS), step=((gstep%N_STEPS)+N_STEPS)%N_STEPS;
@@ -3706,8 +3732,9 @@ const masterEl=document.getElementById('master'), masterOut=document.getElementB
 masterEl.addEventListener('input', ()=>{ masterVol=masterEl.value/100; masterOut.textContent=masterEl.value; if(eng) eng.master.gain.setTargetAtTime(masterVol, ctx.currentTime, 0.01); });
 const metroBtn=document.getElementById('metro');
 metroBtn.addEventListener('click', ()=>{ metronomeOn=!metronomeOn; metroBtn.classList.toggle('on',metronomeOn); pressed(metroBtn, metronomeOn); });
-document.getElementById('clear').addEventListener('click', ()=>{ for(let t=0;t<N_TRACKS;t++) pattern[t].fill(0); renderAll(); updatePatBar(); });
-document.getElementById('random').addEventListener('click', ()=>{
+undoBtn.addEventListener('click', undo); redoBtn.addEventListener('click', redo);
+document.getElementById('clear').addEventListener('click', ()=>{ recordUndo(); for(let t=0;t<N_TRACKS;t++) pattern[t].fill(0); renderAll(); updatePatBar(); });
+document.getElementById('random').addEventListener('click', ()=>{ recordUndo();
   const density={ kick:0.28, snare:0.14, clap:0.12, hat:0.55, cowbell:0.12, rim:0.16, tom:0.08, cymbal:0.04, shaker:0.4, zap:0.08 };
   for(let t=0;t<N_TRACKS;t++){ const type=KIT[t].type; const d=density[type]??0.15;
     for(let s=0;s<N_STEPS;s++){ let on=Math.random()<d; if(type==='kick'&&(s===0||s===8)) on=true; if(type==='snare'&&(s===4||s===12)) on=Math.random()<0.7; pattern[t][s]=on?(Math.random()<0.2?2:1):0; } }
@@ -3722,6 +3749,11 @@ const keyToTrack={}; KIT.forEach((v,i)=> keyToTrack[v.key]=i); const heldKeys=ne
    sliders (←→ los mueven: SPEC R6). */
 function typingTarget(el){ return !!(el && el.closest && (el.isContentEditable || el.closest('input:not([type=range]):not([type=button]), textarea, select, .zd-dlg'))); }
 window.addEventListener('keydown', e=>{
+  if((e.ctrlKey || e.metaKey) && !e.altKey && e.target!==bpmVal && !typingTarget(e.target)){
+    const z=e.key.toLowerCase();
+    if(z==='z' && !e.shiftKey){ e.preventDefault(); undo(); return; }
+    if((z==='z' && e.shiftKey) || z==='y'){ e.preventDefault(); redo(); return; }
+  }
   if(e.target===bpmVal || typingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return; const k=e.key.toLowerCase();
   if((e.key==='ArrowRight'||e.key==='ArrowLeft') && e.target.matches && e.target.matches('input[type=range]')) return;
   if(e.code==='Space'){ e.preventDefault(); ensureAudio(); togglePlay('pattern'); return; }
@@ -3784,7 +3816,7 @@ function loadProject(obj, silent, noAudio){
   setTempo(tempo); swingEl.value=Math.round(swing*100); swingOut.textContent=swingEl.value+'%';
   masterEl.value=Math.round(masterVol*100); masterOut.textContent=masterEl.value;
   songLoopBtn.classList.toggle('on', songLoop); pressed(songLoopBtn, songLoop);
-  renderAll(); updatePatBar(); renderSong(); refreshFXControls(); refreshTrackControls(); applyAllToEngine();
+  renderAll(); updatePatBar(); renderSong(); refreshFXControls(); refreshTrackControls(); applyAllToEngine(); clearUndo();
   if(!silent) toast('Proyecto cargado.');
 }
 
