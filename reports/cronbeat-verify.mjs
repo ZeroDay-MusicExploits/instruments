@@ -612,6 +612,64 @@ test('CronBeat · rotación de tablet 1180×820 ↔ 820×1180 con el instrumento
   } finally { await ctx.close(); }
 });
 
+// ─────────────────────────────── extras (SPEC 3.4) ────────────────────────────
+
+test('CronBeat · extras: deshacer/rehacer, velocidad por altura, note repeat y choke', async () => {
+  const { ctx, page, errors } = await open({ width: 1440, height: 900 }, { touch: false });
+  try {
+    // deshacer / rehacer
+    const a0 = () => page.evaluate(() => patterns[0][0].join(''));
+    const base = await a0();
+    await page.click('.track[data-track="0"] .step[data-step="1"]');
+    await page.click('#clear');
+    await page.keyboard.press('Control+z'); const u1 = await a0();
+    await page.keyboard.press('Control+z'); const u2 = await a0();
+    await page.keyboard.press('Control+Shift+z'); await page.keyboard.press('Control+y'); const r2 = await a0();
+    assert.equal(u2, base); assert.equal(u1, base.slice(0, 1) + '1' + base.slice(2)); assert.equal(r2, '0'.repeat(16));
+    // espía sobre trigger(): velocidad y tiempos de lo que suena en vivo
+    await page.click('#tabPads');
+    await page.evaluate(() => { window.__hits = []; const o = window.trigger; window.trigger = function (A, E, track, time, vel) { if (A === AA) __hits.push({ track, time, vel }); return o.apply(this, arguments); }; });
+    const box = await (await page.$('.bigpad[data-track="4"]')).boundingBox();
+    await page.click('#velPos');
+    for (const y of [3, box.height / 2, box.height - 3]) await page.mouse.click(box.x + box.width / 2, box.y + y);
+    const vels = await page.evaluate(() => __hits.map((h) => +h.vel.toFixed(2)));
+    assert.ok(vels[0] > 0.95 && vels[1] > 0.5 && vels[1] < 0.75 && vels[2] < 0.3, `velocidades ${vels}`);
+    await page.click('#velPos');
+    // note repeat 1/16 sin transporte: intervalo = un paso, se corta al soltar
+    await page.click('#rptSeg [data-r="16"]');
+    await page.evaluate(() => { __hits = []; });
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await page.mouse.down(); await page.waitForTimeout(600); await page.mouse.up();
+    const n0 = await page.evaluate(() => __hits.length); await page.waitForTimeout(400);
+    const rp = await page.evaluate(() => ({ n: __hits.length, gaps: __hits.slice(1).map((h, i) => h.time - __hits[i].time), spb: secondsPerStep(), live: repeats.size }));
+    assert.ok(rp.n >= 4 && rp.n === n0 && rp.live === 0, `repeat: ${n0} golpes al soltar, ${rp.n} después`);
+    assert.ok(rp.gaps.every((g) => Math.abs(g - rp.spb) < 0.002), 'cada repetición a un paso de 1/16: ' + JSON.stringify(rp.gaps.map((g) => +g.toFixed(4))) + ' spb ' + rp.spb);
+    // con transporte + REC: graba en la grilla, sin golpes duplicados
+    await page.evaluate(() => { for (let st = 0; st < 16; st++) pattern[4][st] = 0; renderAll(); __hits = []; });
+    await page.click('#run'); await page.waitForTimeout(300); await page.click('#rec');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await page.mouse.down(); await page.waitForTimeout(700); await page.mouse.up();
+    await page.waitForTimeout(2100);
+    await page.click('#rec'); await page.click('#run');
+    const rec = await page.evaluate(() => ({ on: pattern[4].filter(Boolean).length, times: __hits.filter((h) => h.track === 4).map((h) => h.time).sort((a, b) => a - b) }));
+    const dup = rec.times.filter((t, i) => i && Math.abs(t - rec.times[i - 1]) < 0.005).length;
+    assert.ok(rec.on >= 4, `REC + repeat tiene que grabar pasos (grabó ${rec.on})`);
+    assert.equal(dup, 0, 'ningún paso puede sonar dos veces a la vez');
+    await page.click('#rptSeg [data-r="0"]');
+    // choke: corta la cola del hat abierto; se guarda con el proyecto
+    const ch = await page.evaluate(async () => {
+      async function tail(on) { chokeOn = on; const off = new OfflineAudioContext(2, 44100, 44100); const E = buildEngine(off); const A = { ac: off, noise: E.noise };
+        E.revReturn.gain.value = 0; E.dlyReturn.gain.value = 0; trigger(A, E, 5, 0, 0.8); trigger(A, E, 4, 0.12, 0.8);
+        const d = (await off.startRendering()).getChannelData(0); let s = 0; for (let i = Math.floor(0.2 * 44100); i < Math.floor(0.45 * 44100); i++) s += d[i] * d[i]; return Math.sqrt(s); }
+      const sin = await tail(false), con = await tail(true); chokeOn = false;
+      document.getElementById('chokeBtn').click(); const saved = buildProject().choke; document.getElementById('chokeBtn').click();
+      return { sin, con, saved };
+    });
+    assert.ok(ch.sin > 1e-3 && ch.con < 1e-9, `choke: cola ${ch.sin} sin choke, ${ch.con} con choke`);
+    assert.equal(ch.saved, true, 'el choke se guarda con el proyecto');
+    console.log(`  deshacer/rehacer ok · velocidades ${vels.join('/')} · repeat ${rp.n} golpes a ${(rp.spb * 1000).toFixed(0)} ms y se corta al soltar · REC+repeat ${rec.on} pasos, 0 duplicados · choke corta la cola y se guarda`);
+    assert.deepEqual(errors, []);
+  } finally { await ctx.close(); }
+});
+
 // ───────────────────────────── C2 · hub simulado ──────────────────────────────
 
 test('CronBeat · embebido en un hub C2: registra, sigue el reloj del hub y no autoguarda', async () => {
