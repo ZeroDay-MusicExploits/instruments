@@ -2992,7 +2992,10 @@ function buildMIDI(){
     if(st.gate==='rest'){ if(active){ active.end=tickStart; active=null; } prevSlide=false; continue; }
     if(st.gate==='tie'){ prevSlide=st.slide; continue; }
     const pitch=clamp(patNote(i),0,127), vel=st.accent?118:92;
-    if(prevSlide && active){ active.end=tickStart+1; } else if(active){ active.end=tickStart; }
+    // el +1 es el solape de un tick que hace legato el slide; si las dos notas
+    // tienen la misma altura ese solape sería una nota solapada en el mismo canal
+    // (MIDI ilegal: el off de la primera mataría a la segunda), así que no solapa
+    if(prevSlide && active){ active.end=tickStart+(active.pitch===pitch?0:1); } else if(active){ active.end=tickStart; }
     active={start:tickStart, end:null, pitch, vel}; notes.push(active);
     const connect=st.slide || next.gate==='tie'; if(!connect){ active.end=tickStart+Math.round(tickStep*(st.accent?0.6:0.5)); active=null; }
     prevSlide=st.slide; }
