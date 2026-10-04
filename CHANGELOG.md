@@ -5,6 +5,48 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Unreleased]
 
+### Versión mobile-first (2026-10-04)
+Los 5 instrumentos pasan a funcionar **en vertical** (360×640 como mínimo)
+y dejan de pedir girar el teléfono: sin `#zd-rotate`, sin `maximum-scale` ni
+`user-scalable=no`. Horizontal y escritorio siguen funcionando.
+
+- **Layout portrait-first.** Barra superior de 48 px, zona de tocar, 5 pestañas
+  inferiores y *bottom sheets* (con modo *peek* donde se toca mientras se
+  ajusta). Pestañas: CronBeat `PADS · SEQ · FX · SAMPLE · CANCIÓN`; MonoMoon
+  `OSC · FILTRO · MOD · VOZ · PATCHES`; Nebularp `ESCALA · ARP · SONIDO ·
+  ESPACIO · TECLADO` (con el panel Sesión); J4 `SIRENA · ENV·LFO · FX · PAD ·
+  SESIÓN`; Acid `SEQ · SONIDO · FILTRO · PATRÓN · EXPORT`. Menú ⋯ con
+  «← Sitio», «Instalar app» y «Empezar de cero».
+- **REC → WAV en vivo** en MonoMoon, Nebularp y J4 (PCM 16-bit estéreo, tope
+  de 10 min), con tarjeta de resultado (escuchar, descargar).
+- **MIDI de performance** en MonoMoon, Nebularp y J4 (notas, pitch bend, CC1,
+  CC74/CC71 según el instrumento).
+- **JSON de estado completo** con envoltorio `{ app, version, savedAt, data }`
+  y validación al importar, en los 5.
+- **Autoguardado** (IndexedDB con respaldo en `localStorage`, debounce de 1,5 s)
+  en los 5; restaura sin arrancar el audio. MonoMoon migra su biblioteca desde
+  `hackwave-minimoog` y J4 sus slots desde `dubsiren.preset.*`, sin borrar lo viejo.
+- **Descargas** por Web Share con archivo en iOS (`ZD.dl`), con nombre
+  `<slug>-YYYYMMDD-HHmm.<ext>`.
+- **Audio en iOS**: destrabe dentro del gesto, `audioSession` de reproducción,
+  reanudar tras interrupciones («Tocá para reanudar»), Wake Lock mientras
+  suena e indicador de CLIP (solo mide).
+- **PWA real**: `manifests/*.webmanifest` estáticos, íconos, `sw.js` con
+  precache versionado (`zd-v3`) y aviso de nueva versión; oferta de instalación
+  descartable (`zd-pwa` v3).
+- **Extras**: CronBeat con deshacer/rehacer, velocidad por altura del dedo,
+  note repeat y choke de hats (opcional); Nebularp con autoplay generativo;
+  J4 con visualizador de baja carga.
+- **Bloques**: `zd-ui` v2, `zd-audio` v2, `zd-rec` v2 y `zd-pwa` v3 (ver
+  `docs/zd-blocks.md`).
+- **Sitio**: flags, manuales y roadmap de las 5 landings y el README
+  actualizados contra el código; `docs/QA-dispositivos.md` con la lista
+  consolidada de pruebas en dispositivo; los scripts de verificación pasan a
+  `tools/tests/` (`docs/tests.md`).
+
+Todo se verificó en Chromium (Playwright). Nada se probó todavía en un iPhone,
+iPad o Android reales: ver `docs/QA-dispositivos.md`.
+
 ### Sitio (`index.html`, `landing-*.html`, `privacidad.html`, `404.html`)
 - El sitio pasa de renderizarse en el cliente (React + `support.js` cargados
   desde unpkg) a HTML y CSS estático generado en build time: `data/instrumentos.json`
@@ -12,8 +54,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   sin JavaScript (verificado con `curl`).
 - Estado honesto por instrumento: `exporta`/`guarda`/`app` salen de
   `data/instrumentos.json` y las landings solo muestran lo que el instrumento
-  cumple hoy (p. ej. Nebularp y J4-Sirens Station exportan JSON, no WAV/MIDI
-  todavía; el autoguardado automático hoy es exclusivo de CronBeat-8:08).
+  cumple hoy (con la versión mobile-first los 5 exportan WAV · MIDI · JSON,
+  autoguardan y son instalables; ver la entrada de abajo).
 - SEO: `title`/`description`/canonical/Open Graph/Twitter Card/favicon/
   `theme-color` por página, JSON-LD `SoftwareApplication` en cada landing,
   `sitemap.xml`, `robots.txt`, OG images 1200×630 por instrumento generadas
@@ -52,7 +94,6 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
   landing correspondiente.
 - Build/check reproducibles del ZIP de descargables
   (`tools/build-zip.mjs` / `tools/check-zip.mjs`).
-- ACID BASS-303: primer paso de layout portrait-first (R1).
 
 ## Antes de este changelog
 El historial previo (`git log`) incluye: primer commit de los 5 instrumentos,

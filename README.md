@@ -53,11 +53,11 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 1. **Entrá al sitio**: https://zeroday-musicexploits.github.io/instruments/. Desde "Probalo acá" podés tocar cualquiera de los 5 directo en el navegador, sin descargar nada.
 2. La primera interacción (clic, tap o tecla) desbloquea el audio del navegador — vas a ver un aviso tipo "Pulsá para encender". Es un requisito de los navegadores modernos, no un bug.
 3. Si lo vas a usar seguido, instalalo desde la web como PWA (ver abajo) o descargá el HTML de la landing del instrumento para abrirlo sin conexión.
-4. El trabajo (patrones, patches, presets, arreglos) se guarda según el instrumento — cada landing dice si autoguarda o si el respaldo es manual vía JSON. Para llevarte el audio afuera: cada uno exporta lo que su landing indica (WAV y/o MIDI donde ya está implementado), y todos exportan/importan JSON.
+4. El trabajo (patrones, patches, presets, arreglos) se guarda según el instrumento — los 5 autoguardan en el navegador y restauran al volver (sin arrancar el audio); «Empezar de cero» borra la sesión. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso, así que conviene exportar un JSON de respaldo. Para llevarte el audio afuera, los 5 exportan WAV, MIDI y JSON (en iPhone salen por Compartir).
 
 ## Instalación desde la web (PWA)
 
-Instalado desde la web, cada instrumento queda como una app aparte, usable sin conexión. Para instalar: abrí el instrumento desde su landing (no el HTML descargado — ver por qué abajo) y usá "Instalar app" si el navegador lo ofrece, o el menú del navegador (en iOS: Compartir → Agregar a inicio).
+Instalado desde la web, cada instrumento queda como una app aparte, usable sin conexión. Para instalar: abrí el instrumento desde su landing (no el HTML descargado — ver por qué abajo) y usá "Instalar app" si el navegador lo ofrece, o el menú del navegador (en iOS: Compartir → Agregar a inicio). La web ofrece un banner descartable y un ícono ↓ en la barra superior; en navegadores embebidos (Instagram, Facebook, TikTok…) avisa que abras el link en Safari o Chrome.
 
 ## El HTML descargable
 
@@ -76,6 +76,17 @@ Una caja de ritmos completa: secuenciador de patrones tocable en vivo, banco de 
 
 <details>
 <summary><strong>Manual de usuario completo</strong></summary>
+
+### En el teléfono (vertical)
+Funciona en vertical y en horizontal. En el teléfono, la barra superior lleva TOCAR/■, REC y el BPM editable, y abajo hay 5 pestañas que abren sheets.
+
+- Zona de tocar — arriba, la pista elegida del secuenciador en 2 filas de 8 pasos; abajo, los 16 pads en 4×4. Tocar un pad lo hace sonar y elige su pista; ◀ ▶ cambian de pista sin sonar; ACENTO reemplaza al Shift.
+- PADS — opciones de ejecución (velocidad por altura del dedo, note repeat 1/8·1/16·1/32) y mezcla por pad (M/S/VOL/PAN/sample).
+- SEQ — patrones A–H, copiar/pegar, ↶ ↷ (deshacer/rehacer), metrónomo, aleatorio, limpiar, tempo ± / tap, swing y master.
+- FX — las 4 tarjetas de efectos y los envíos por pista.
+- SAMPLE — el editor de sample no destructivo.
+- CANCIÓN — modo canción y archivo (JSON, abrir, MIDI, compases, WAV).
+- Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
 ### Pestañas principales
 - **Secuenciador** — programación de patrones.
@@ -122,7 +133,7 @@ El original del sample **nunca se pisa** — todo lo que hacés ahí es reversib
 - **Canción→MIDI** — exporta el arreglo completo a MIDI.
 
 ### Mantenimiento
-- **Reiniciar proyecto** — borra todo lo autoguardado en este navegador (usar con cuidado).
+- **Empezar de cero** (menú ⋯ en el teléfono; «Reiniciar proyecto» en escritorio) — borra lo autoguardado en este navegador, con confirmación.
 
 ### Teclado de PC
 | Tecla | Acción |
@@ -135,11 +146,16 @@ El original del sample **nunca se pisa** — todo lo que hacés ahí es reversib
 | `←` `→` | Ajustan el tempo |
 | `Shift` (al tocar un pad) | Golpe con acento |
 
+### Guardado, exportación e instalación
+- El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo.
+- Exportar: JSON del proyecto, MIDI del patrón o de la canción y WAV (el resultado queda en una tarjeta con escuchar y ↓ DESCARGAR WAV). En iPhone salen por Compartir.
+- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+
 ### Estado real (export / guardado)
-Exporta **WAV · MIDI · JSON**. Es el único de los 5 con **autoguardado automático** (tocar → recargar → mismo estado); los otros 4 respaldan vía exportar/importar JSON manual.
+Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
 
 ### Estado del roadmap
-Fases 1 a 5 completas: modo canción, autoguardado, PWA, export JSON/WAV, editor de sample no destructivo, y export/import MIDI de patrones y canciones. Único punto pendiente (opcional): **choke groups** (silenciar un pad al disparar otro, ej. hi-hat abierto/cerrado).
+Fases 1 a 5 completas: modo canción, autoguardado, export JSON/WAV, editor de sample no destructivo y export/import MIDI de patrones y canciones. Versión mobile-first: layout vertical con pestañas y sheets, PWA instalable con uso sin conexión, WAV/MIDI/JSON por Compartir en iOS, deshacer/rehacer, velocidad por altura del dedo, note repeat y choke groups de hats (opcional). Sin puntos pendientes en el roadmap.
 
 </details>
 
@@ -154,6 +170,15 @@ Un sintetizador analógico virtual monofónico estilo Minimoog: banco de oscilad
 
 <details>
 <summary><strong>Manual de usuario completo</strong></summary>
+
+### En el teléfono (vertical)
+Funciona en vertical y en horizontal. Arriba van REC (con tiempo y LED CLIP) y el pad XY; abajo, el teclado con las ruedas Pitch/Mod verticales al costado.
+
+- Macros — Cutoff, Reso, Env Amt, A/R, Glide y Volumen, sincronizadas con los knobs de cada sheet. Pad XY: X = corte, Y = énfasis.
+- Teclado — dos octavas; en pantallas angostas pasa a dos filas de una octava (la grave abajo). El glissando funciona entre filas.
+- OSC · FILTRO · MOD · VOZ — sheets de sonido; mientras están abiertos el teclado sigue disponible para tocar.
+- PATCHES — presets, biblioteca, JSON, la última toma de REC, MIDI de entrada y la ayuda del teclado de PC.
+- Knobs — arrastre vertical, doble tap = valor de fábrica, long-press (o Enter) = valor numérico.
 
 ### Encendido y cabecera
 - **Pulsá para encender** — desbloquea el audio al primer toque.
@@ -208,11 +233,16 @@ Visualización en tiempo real de la forma de onda de salida.
 | `Z` / `X` | Bajar / subir octava |
 | `Espacio` | Pánico (corta todas las notas sonando) |
 
+### Guardado, exportación e instalación
+- El patch en edición y la biblioteca se autoguardan en este navegador. La biblioteca anterior (hackwave-minimoog) se migra sola y la vieja queda intacta. «Empezar de cero» vuelve al patch de fábrica (pide confirmación). Exportá un JSON de respaldo: Safari puede vaciar el almacenamiento de sitios no instalados.
+- Exportar: JSON (patch + biblioteca), MIDI y WAV de la toma de REC. En iPhone salen por Compartir.
+- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+
 ### Estado real (export / guardado)
-Exporta **WAV · JSON**. El respaldo de patches es manual (biblioteca local + export/import JSON); no tiene autoguardado automático del estado en edición todavía.
+Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
 
 ### Estado del roadmap
-Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); persistencia de patches (JSON + IndexedDB con biblioteca local), librería de presets clásicos, export WAV, Web MIDI y PWA instalable (F4). Roadmap cerrado.
+Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); presets, biblioteca local, Web MIDI y PWA (F4). Versión mobile-first: layout vertical con 6 macros, pad XY y sheets, autoguardado del patch y de la biblioteca, REC → WAV y MIDI de la toma (notas, pitch bend, CC1, CC74/CC71) y JSON completo. Roadmap cerrado.
 
 </details>
 
@@ -227,6 +257,14 @@ Un arpegiador ambiental y generativo: sostenés (o dejás en Latch) un acorde y 
 
 <details>
 <summary><strong>Manual de usuario completo</strong></summary>
+
+### En el teléfono (vertical)
+Funciona en vertical y en horizontal. Arriba, el orbit y una columna con BPM, tap y latch; abajo, el piano multitáctil (en pantallas angostas, dos filas de una octava). La barra superior lleva PLAY y REC.
+
+- ESCALA · ARP · SONIDO · ESPACIO — sheets de ajuste; con ellos abiertos el piano, el latch y la octava siguen a mano para tocar.
+- TECLADO — panel Sesión: última toma de REC, guardar/abrir JSON, Empezar de cero, modo liviano del visualizador y ayuda del teclado de PC.
+- Knobs — doble tap = reset, long-press (o Enter) = valor numérico, slider alternativo en los sheets.
+- Menú ⋯ — ← Sitio, Instalar app, guardar/abrir sesión (JSON) y Empezar de cero.
 
 ### Arranque
 - Estado inicial: **"motor dormido — tocá un acorde"**.
@@ -279,11 +317,24 @@ Mismo mapeo estilo piano que MonoMoon'70.
 - Con el transporte **en marcha**, sostener un acorde hace que el arpegiador lo recorra automáticamente.
 - Con **Latch** activo, el acorde queda sonando solo, manos libres, hasta tocar uno nuevo.
 
+### REC y exportación
+- ● REC (barra superior) — graba la salida en vivo; al cortar, la toma ofrece escuchar, ↓ DESCARGAR WAV y el MIDI de las notas de esa toma (con el tempo del momento).
+- JSON — la sesión completa (escala, arpegio, sonido, espacio, drone y acorde latcheado), con validación al abrir.
+- En iPhone, los archivos salen por Compartir.
+
+### Autoplay generativo
+- Autoplay — el instrumento toca solo; tocar una tecla o detener el transporte lo apaga. No se guarda en la sesión.
+
+### Guardado, modo liviano e instalación
+- El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo.
+- Modo liviano — el visualizador dibuja menos (se fuerza con «reducir movimiento» del sistema); es una preferencia del dispositivo.
+- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+
 ### Estado real (export / guardado)
-Exporta **JSON** (el estado completo del instrumento). WAV y MIDI de performance están planeados pero todavía no implementados — no están listados como disponibles hasta que lo estén de verdad. Sin autoguardado automático todavía.
+Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
 
 ### Estado del roadmap
-Se completó el documento de planificación y el prompt de handoff para desarrollo (mismas condiciones que CronBeat-8:08 y MonoMoon'70: 100% client-side).
+Planificación y desarrollo base completos (100% client-side, como CronBeat-8:08 y MonoMoon'70). Versión mobile-first: layout vertical con orbit, piano multitáctil y sheets, autoguardado de la sesión, REC → WAV, MIDI de las notas del arpegio, JSON completo, PWA instalable con uso sin conexión y autoplay generativo.
 
 </details>
 
@@ -298,6 +349,15 @@ Una sirena dub completa: motor de síntesis con varios modos, cadena de efectos 
 
 <details>
 <summary><strong>Manual de usuario completo</strong></summary>
+
+### En el teléfono (vertical)
+Funciona en vertical y en horizontal. El pad XY ocupa gran parte de la pantalla y, debajo, el deck de performance al alcance del pulgar: SIREN grande (mantener o LATCH), ECHO THROW, FEEDBACK ∞ y KILL.
+
+- SIRENA · ENV·LFO · FX · PAD — sheets de ajuste; mientras están abiertos quedan el pad y una fila con SIREN y los throws para tocar.
+- PAD — ejes del pad, teclado de notas (en el teléfono, 4 filas de 5 en cuartas) y opciones del visualizador.
+- SESIÓN — grabación (REC), patches y archivos.
+- Perillas — arrastre vertical, doble tap = valor por defecto, long-press (o Enter) = valor numérico.
+- Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
 ### Encendido
 **Tocá para encender** — activa el audio; subí un poco el volumen del sistema al empezar.
@@ -351,11 +411,21 @@ Mapeo de 2 octavas.
 - **Drift** extra de tono en modo Drone.
 - Visualizador **CRT / psicodélico**: osciloscopio, Lissajous y mandala, con pantalla completa.
 
+### REC y exportación
+- ● REC — graba la salida en vivo (WAV 16-bit estéreo, hasta 10 min). ■ cierra la toma y aparece la tarjeta con escuchar, ↓ DESCARGAR WAV y ↓ MIDI DE LA TOMA (notas, pitch bend ±24 st, CC74/CC71 del pad).
+- JSON — el estado completo más tus patches guardados (sirve de respaldo); también abre los dubsiren-patch.json de versiones anteriores.
+- En iPhone, los archivos salen por Compartir.
+
+### Guardado, visualizador e instalación
+- El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo. Los patches guardados van aparte y no los borra «Empezar de cero».
+- Visualizador: VISUAL ON/OFF y BAJA CARGA (~20 fps, sin glow); «reducir movimiento» del sistema lo deja en una línea fija.
+- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+
 ### Estado real (export / guardado)
-Exporta **JSON** (presets). WAV y MIDI de performance están planeados pero todavía no implementados. Hoy el respaldo son slots manuales en `localStorage`; sin autoguardado automático del estado en vivo todavía.
+Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
 
 ### Estado del roadmap
-4 fases completas: **F1** motor + 5 modos + filtro resonante + teclado PC/touch básico · **F2** cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · **F3** pad X-Y, visualizador psicodélico y sistema de presets (fábrica + localStorage + export/import JSON) · **F4** ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets.
+4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y presets · F4 ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Versión mobile-first: layout vertical con pad XY protagonista, deck de performance con hold/latch, sheets, autoguardado del estado actual, REC → WAV, MIDI de performance, JSON completo, visualizador de baja carga y PWA instalable con uso sin conexión.
 
 </details>
 
@@ -370,6 +440,16 @@ Un bajo ácido tipo TB-303 modernizado: secuenciador clásico de 16 pasos con no
 
 <details>
 <summary><strong>Manual de usuario completo</strong></summary>
+
+### En el teléfono (vertical)
+Funciona en vertical y en horizontal. Arriba, los 16 pasos en 2 filas de 8 con el editor del paso (nota/accent/slide/gate) y el pad XY siempre visible; abajo, 5 pestañas que abren sheets.
+
+- SEQ — secuenciador, tempo y teclado.
+- SONIDO y FILTRO — oscilador, distorsión y filtro resonante; mientras están abiertos el pad XY y los pasos siguen disponibles.
+- PATRÓN — generador de patrones y banco de fábrica.
+- EXPORT — patches (JSON), MIDI y WAV.
+- Knobs — arrastre vertical, doble tap = reset, long-press (o Enter) = valor numérico.
+- Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
 ### Encendido y transporte
 - **▶ PLAY** — arranca el secuenciador.
@@ -417,11 +497,15 @@ El gesto acid clásico: arrastrá con el dedo mientras suena — **X = Cutoff**,
 | `Z` / `X` | Octava del teclado (`−` / `+`) |
 | `Espacio` | Play / Stop |
 
+### Guardado e instalación
+- Patrón, parámetros, banco de usuario, tempo y swing se autoguardan en este navegador y se restauran al volver, sin arrancar el audio. «Empezar de cero» lo borra (pide confirmación). Exportá un JSON de respaldo: Safari puede vaciar el almacenamiento de sitios no instalados.
+- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+
 ### Estado real (export / guardado)
-Exporta **WAV · MIDI · JSON**. El respaldo es manual vía exportar/importar JSON; sin autoguardado automático del patrón en edición todavía.
+Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
 
 ### Estado del roadmap
-4 fases completas: **F1** motor de síntesis + secuenciador clásico de 16 pasos (note/accent/slide/gate) · **F2** modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · **F3** touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · **F4** patches y banco de fábrica (guardar/cargar JSON, export MIDI y WAV, 8 patrones de fábrica).
+4 fases completas: F1 motor de síntesis + secuenciador clásico de 16 pasos · F2 modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · F3 touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · F4 patches y banco de fábrica (JSON, MIDI y WAV, 8 patrones). Versión mobile-first: layout vertical con pestañas y sheets, autoguardado, PWA instalable con uso sin conexión y exportación por Compartir en iOS.
 
 </details>
 
