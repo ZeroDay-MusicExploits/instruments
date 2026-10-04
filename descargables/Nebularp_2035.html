@@ -2892,6 +2892,7 @@ window.ZD_M = {
     physOrder.push(midi);
     if (state.latch && wasEmpty){ heldSet.clear(); heldOrder.length = 0; } // acorde nuevo reinicia el latch
     addArp(midi);
+    if (state.latch) markDirty();
     rebuildSequence(); renderHeld(); refreshKeys(); drawOrbit();
     if (!state.playing){                 // feedback directo del pad
       resumeAudio();
@@ -3100,7 +3101,7 @@ window.ZD_M = {
     heldKeys.clear();
     keys.forEach(k => { const m = quantize(keyRawMidi(k)); heldKeys.set(k, m); noteOn(m); });
     octVal.textContent = "C" + state.baseOctave;
-    renderPiano(); refreshKeys();
+    renderPiano(); refreshKeys(); markDirty();
   }
 
   /* ===================================================================
@@ -3118,7 +3119,7 @@ window.ZD_M = {
       b.addEventListener("click", () => {
         [...host.children].forEach(c => c.setAttribute("aria-pressed", "false"));
         b.setAttribute("aria-pressed", "true");
-        onPick(val);
+        onPick(val); markDirty();
       });
       host.appendChild(b);
     });
@@ -3142,8 +3143,10 @@ window.ZD_M = {
     return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
   }
 
-  // Autoguardado: los controles avisan cada cambio (R3 conecta el guardado).
-  function markDirty(){}
+  // Autoguardado (SPEC R3): `session` arranca en null y markDirty no hace nada
+  // hasta que la sesión terminó de restaurar (var: lo usan los knobs al crearse).
+  var session = null, sessionReady = false;
+  function markDirty(){ if (session && sessionReady) session.save(); }
 
   // Knobs por clave de `state`: dos knobs pueden escribir la misma clave
   // (Detune del pad y Spread de la voz comparten state.detune).
@@ -3342,7 +3345,7 @@ window.ZD_M = {
     euclidTgl.setAttribute("aria-pressed", String(state.euclidOn));
     updateEuclidReadout();
   }
-  euclidTgl.addEventListener("click", () => { state.euclidOn = !state.euclidOn; updateEuclidUI(); });
+  euclidTgl.addEventListener("click", () => { state.euclidOn = !state.euclidOn; updateEuclidUI(); markDirty(); });
   makeKnob($("euclidKnobs"), { key:"euclidK", step:1, name:"Pulsos", min:1, max:16, value:state.euclidK, color:"var(--cyan)", format:v => String(Math.round(v)), onChange:v => { state.euclidK = clamp(Math.round(v), 1, state.euclidN); rebuildEuclid(); updateEuclidReadout(); } });
   makeKnob($("euclidKnobs"), { key:"euclidN", step:1, name:"Pasos", min:2, max:16, value:state.euclidN, color:"var(--cyan)", format:v => String(Math.round(v)), onChange:v => { state.euclidN = Math.round(v); if (state.euclidK > state.euclidN) state.euclidK = state.euclidN; rebuildEuclid(); updateEuclidReadout(); syncKnobs("euclidK"); } });
 
@@ -3372,7 +3375,7 @@ window.ZD_M = {
     latchBtn.classList.toggle("on", state.latch);
     latchBtn.setAttribute("aria-pressed", String(state.latch));
   }
-  latchBtn.addEventListener("click", () => setLatch(!state.latch));
+  latchBtn.addEventListener("click", () => { setLatch(!state.latch); markDirty(); });
 
   // Tap tempo
   let taps = [];
@@ -3597,6 +3600,118 @@ window.ZD_M = {
   renderPiano(); updateLatchUI(); updateEuclidUI();
   initStars(); drawOrbit();
   requestAnimationFrame(frame);
+
+  /* ===================================================================
+     ESTADO SERIALIZABLE + AUTOGUARDADO DE SESIÓN (SPEC R3)
+     Lo mismo que se guarda solo es lo que exporta el JSON (R4). Restaurar
+     pasa por applyState(), que sincroniza toda la UI y NO arranca el audio:
+     los onChange de los knobs están todos guardados contra "todavía no hay
+     grafo" y initAudio() lee `state` al armarse.
+  =================================================================== */
+  const APP_ID = "nebularp-2035", APP_VERSION = 1, APP_SLUG = "nebularp";
+  const NUM = (min, max, int) => ({ t:"num", min, max, int:!!int });
+  // Qué se guarda y en qué rango (los de los knobs y selectores).
+  const SCHEMA = {
+    scale:{ t:"enum", values:Object.keys(SCALES) }, root:NUM(0, 11, true), latch:{ t:"bool" },
+    pattern:{ t:"enum", values:PATTERNS.map(p => p[0]) }, subdiv:{ t:"enum", values:Object.keys(SUBDIVS) },
+    octaves:NUM(1, 4, true), bpm:NUM(40, 200, true), baseOctave:NUM(0, 7, true),
+    gate:NUM(0.05, 1.5), swing:NUM(0, 0.6), humanize:NUM(0, 0.03), prob:NUM(0, 1), ratchet:NUM(0, 1),
+    euclidOn:{ t:"bool" }, euclidN:NUM(2, 16, true), euclidK:NUM(1, 16, true),
+    attack:NUM(0.005, 2), release:NUM(0.05, 4), cutoff:NUM(200, 12000), detune:NUM(0, 40), level:NUM(0, 1),
+    voices:NUM(1, 7, true), width:NUM(0, 1), flfoRate:NUM(0.02, 2), flfoDepth:NUM(0, 1),
+    revMix:NUM(0, 1), revSize:NUM(1, 7), revBright:NUM(0, 1), dlyMix:NUM(0, 1), dlyTime:NUM(0.05, 0.7), dlyFb:NUM(0, 0.85),
+    chMix:NUM(0, 1), chDepth:NUM(0, 1), chRate:NUM(0.05, 3), panDepth:NUM(0, 1), panRate:NUM(0.02, 2),
+    drone:NUM(0, 1),
+  };
+  // Valida y acota claves conocidas; ignora el resto. -> { s, n }
+  function sanitizeState(src){
+    const s = {}; let n = 0;
+    if (!src || typeof src !== "object" || Array.isArray(src)) return { s, n };
+    for (const k in SCHEMA){
+      if (!Object.prototype.hasOwnProperty.call(src, k)) continue;
+      const d = SCHEMA[k], v = src[k];
+      if (d.t === "num"){
+        if (typeof v !== "number" || !isFinite(v)) continue;
+        s[k] = clamp(d.int ? Math.round(v) : v, d.min, d.max); n++;
+      } else if (d.t === "enum"){
+        if (typeof v === "string" && d.values.includes(v)){ s[k] = v; n++; }
+      } else if (typeof v === "boolean"){ s[k] = v; n++; }
+    }
+    return { s, n };
+  }
+  function sanitizeNotes(list){
+    if (!Array.isArray(list)) return [];
+    const out = [];
+    for (const m of list.slice(0, 32)) if (typeof m === "number" && Number.isInteger(m) && m >= 0 && m <= 127 && !out.includes(m)) out.push(m);
+    return out;
+  }
+  // Estado musical completo. Con latch, también el acorde que queda sonando.
+  function snapshot(){
+    const st = {};
+    for (const k in SCHEMA) st[k] = state[k];
+    return { state:st, latched: state.latch ? heldOrder.slice(0, 32) : [] };
+  }
+  const DEFAULTS = snapshot();     // antes de restaurar nada: es el "de fábrica"
+
+  function syncSeg(host, val){
+    [...host.children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.val === String(val))));
+  }
+  // -> cantidad de claves aplicadas (0 = no había nada utilizable)
+  function applyState(data){
+    const { s, n } = sanitizeState(data && data.state);
+    if (!n) return 0;
+    // Lo que no es knob va directo; Pasos antes que Pulsos (Pulsos <= Pasos).
+    for (const k in s) state[k] = s[k];
+    if (state.euclidK > state.euclidN) state.euclidK = state.euclidN;
+    // Knobs en orden de creación: Detune (0-25) y después Spread (0-40), así
+    // el valor final de state.detune es el guardado aunque pase de 25.
+    KNOB_LIST.forEach(k => { if (k.key in s) k.set(s[k.key]); });
+    syncSeg($("patternSeg"), state.pattern); syncSeg($("subdivSeg"), state.subdiv);
+    syncSeg($("octSeg"), state.octaves); syncSeg($("scaleSeg"), state.scale); syncSeg($("rootSeg"), state.root);
+    heldSet.clear(); heldOrder.length = 0;
+    if (state.latch) sanitizeNotes(data.latched).forEach(addArp);
+    else physOrder.forEach(addArp);
+    rebuildEuclid(); updateEuclidUI(); updateLatchUI();
+    octVal.textContent = "C" + state.baseOctave; renderPiano();
+    rebuildSequence(); renderHeld(); refreshKeys(); drawOrbit();
+    setDroneRoot();                // no-op si el audio todavía no arrancó
+    return n;
+  }
+
+  function sessionData(){ return snapshot(); }
+  function applySession(d){ return applyState(d) > 0; }
+
+  async function resetAll(){
+    const ok = await ZD.modal.confirm("Se borran la escala, el arpegiador, el sonido y el acorde guardados en este navegador. No se puede deshacer.",
+      { title:"EMPEZAR DE CERO", ok:"BORRAR TODO", cancel:"CANCELAR", danger:true });
+    if (!ok) return;
+    sessionReady = false;
+    if (session) await session.clear();
+    applyState(DEFAULTS);
+    // No volvemos a guardar: la sesión queda vacía hasta el próximo cambio, así
+    // la siguiente carga arranca limpia y sin el toast de "sesión restaurada".
+    sessionReady = true;
+    ZD.toast("Listo: todo de cero");
+  }
+
+  // Acciones del menú del shell (la config vive fuera de este IIFE).
+  const ACTIONS = { reset:() => resetAll() };
+  document.addEventListener("nebularp:action", (e) => { const f = ACTIONS[e.detail]; if (f) f(); });
+
+  (async function initSession(){
+    // Con el hub C2 el dueño del estado es el host: no restauramos ni guardamos
+    // para no pelearnos con él (docs/zd-blocks.md, zd-store).
+    if (HOST || !(window.ZD && ZD.store)) return;
+    session = ZD.store.open({ slug:APP_SLUG, app:APP_ID, version:APP_VERSION, debounce:1500, getData:sessionData });
+    ZD.store.persist();
+    let env = null;
+    try { env = await session.load(); } catch(e){ env = null; }
+    const r = env ? session.unwrap(env) : null;
+    if (r && r.ok && r.data && applySession(r.data)){
+      ZD.toast("Sesión restaurada", { ms:9000, action:{ label:"Empezar de cero", onClick:resetAll } });
+    }
+    sessionReady = true;
+  })();
 
   /* ===================================================================
      ADAPTADOR C2 v1 — Nebularp 2035 (arpegiador). Inyectado DENTRO del IIFE
