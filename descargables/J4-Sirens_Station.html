@@ -1737,7 +1737,12 @@ Object.assign(window.ZD_M, {
   menuTitle: 'MENÚ',
   menu: [
     { label: '← Sitio', href: '../index.html' },
-    { label: '↓ Instalar app', id: 'zd-install-btn', hidden: true }
+    { label: '↓ Instalar app', id: 'zd-install-btn', hidden: true },
+    { label: 'Empezar de cero', onClick(){ if (typeof resetAll === 'function') resetAll(); } }
+  ],
+  menuNotes: [
+    'La sesión se guarda sola en este navegador. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá el JSON como backup.',
+    'Se instala desde la web. Un HTML abierto con doble clic (file://) funciona igual, pero el navegador no deja instalarlo.'
   ]
 });
 </script>
@@ -2643,6 +2648,11 @@ Object.assign(window.ZD_M, {
       <button class="pbtn" id="btnSaveSlot">GUARDAR</button>
     </div>
     <div class="slotlist" id="slotList"></div>
+    <div class="psub">Sesión</div>
+    <div class="ioRow">
+      <button class="pbtn" id="btnReset" type="button">EMPEZAR DE CERO</button>
+      <span class="muted">La sesión se guarda sola en este navegador.</span>
+    </div>
     <div class="psub">Exportar / importar JSON</div>
     <div class="ioRow">
       <button class="pbtn" id="btnExport">EXPORTAR</button>
@@ -2904,6 +2914,7 @@ async function initAudio(){
 
 /* ---------------------------------------------------- aplicar parámetros --*/
 function setDrive(v){
+  if(!shaper)return;   // sin audio todavia: el valor ya esta en P y initAudio lo aplica
   const n=1024, curve=new Float32Array(n), k=v*2;
   for(let i=0;i<n;i++){const x=i/(n-1)*2-1; curve[i]=Math.tanh(k*x)/Math.tanh(k);}
   shaper.curve=curve; shaper.oversample='2x';
@@ -3009,6 +3020,7 @@ function applyLFOs(){
 }
 function routeLFO(i){
   const l=userLFO[i], cfg=P.lfo[i];
+  if(!l)return;        // sin audio todavia: applyLFOs lo rutea al armar el grafo
   try{ l.depthGain.disconnect(); }catch(e){}
   if(cfg.dest==='pitch'){
     l.depthGain.gain.value=cfg.depth*1200;      // cents
@@ -3166,7 +3178,7 @@ function buildFXUI(){
 }
 function fxDot(id,get,set){ const d=document.getElementById(id); if(!d)return;
   const upd=()=>d.classList.toggle('on',!!get());
-  d.addEventListener('click',()=>{set(!get());upd();}); upd(); UIREFRESH.push(upd); }
+  d.addEventListener('click',()=>{set(!get());upd();markDirty();}); upd(); UIREFRESH.push(upd); }
 function markThrow(i,on){ const b=window.__throws&&window.__throws[i]; if(b&&b.ref)b.ref.classList.toggle('on',on); }
 function buildThrows(){
   const row=document.getElementById('throwRow'); if(!row)return;
@@ -3209,8 +3221,33 @@ function currentPatch(){
     lfo:P.lfo, echo:P.echo, rev:P.rev, ph:P.ph
   }));
 }
-function applyPatch(p){
-  if(!p||typeof p!=='object')return;
+/* Valida y acota un patch que viene de afuera (sesion guardada, slot, JSON,
+   area de texto): tipos, listas cerradas y los rangos de las perillas. Lo que
+   no reconoce lo ignora. null si no trae ninguna clave de patch valida. */
+const WAVES=['saw','square','triangle','sine'], MSHAPES=['ramp','tri','sine','square'],
+      LDESTS=['off','pitch','filter','amp'], LSHAPES=['sine','tri','square','ramp'], REVMODES=['spring','plate'];
+function cleanPatch(p){
+  if(!p||typeof p!=='object'||Array.isArray(p)) return null;
+  const out={}; let n=0;
+  const num=(src,k,spec,dst)=>{ const v=src[k]; if(typeof v==='number'&&isFinite(v)){ dst[k]=Math.max(spec.min,Math.min(spec.max,v)); n++; } };
+  const pick=(src,k,list,dst)=>{ if(list.indexOf(src[k])>=0){ dst[k]=src[k]; n++; } };
+  const bool=(src,k,dst)=>{ if(typeof src[k]==='boolean'){ dst[k]=src[k]; n++; } };
+  const obj=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  pick(p,'wave',WAVES,out); pick(p,'mode',MODES.map(m=>m.id),out); pick(p,'shape',MSHAPES,out);
+  ['rate','depth','cutoff','reso','envAmt','glide','atk','dec','sus','rel','vol','drive'].forEach(k=>num(p,k,SPEC[k],out));
+  if(Array.isArray(p.lfo)) out.lfo=p.lfo.slice(0,2).map(l=>{ const o={}; if(obj(l)){ num(l,'rate',SPEC.lrate,o);
+    num(l,'depth',SPEC.ldepth,o); pick(l,'dest',LDESTS,o); pick(l,'shape',LSHAPES,o); } return o; });
+  // el tiempo de eco se acota al DelayNode (2 s), no a la perilla: el hub C2 lo sincroniza hasta 1,5 s
+  if(obj(p.echo)){ const e=p.echo, o=out.echo={}; num(e,'time',{min:0.02,max:2},o); num(e,'fb',SPEC.efb,o);
+    num(e,'tone',SPEC.etone,o); num(e,'wow',SPEC.ewow,o); num(e,'sat',SPEC.esat,o); num(e,'mix',SPEC.mix,o); bool(e,'on',o); }
+  if(obj(p.rev)){ const r=p.rev, o=out.rev={}; pick(r,'mode',REVMODES,o); num(r,'decay',SPEC.rdecay,o);
+    num(r,'tone',SPEC.rtone,o); num(r,'mix',SPEC.mix,o); bool(r,'on',o); }
+  if(obj(p.ph)){ const h=p.ph, o=out.ph={}; num(h,'rate',SPEC.phrate,o); num(h,'depth',SPEC.phdepth,o);
+    num(h,'fb',SPEC.phfb,o); num(h,'mix',SPEC.mix,o); bool(h,'on',o); }
+  return n?out:null;
+}
+function applyPatch(raw){
+  const p=cleanPatch(raw); if(!p) return false;
   if(p.wave)P.wave=p.wave; if(p.mode)P.mode=p.mode; if(p.shape)P.shape=p.shape;
   ['rate','depth','cutoff','reso','envAmt','glide','atk','dec','sus','rel','vol','drive'].forEach(k=>{ if(typeof p[k]==='number')P[k]=p[k]; });
   if(Array.isArray(p.lfo)) P.lfo=p.lfo.map((l,i)=>Object.assign({},P.lfo[i]||{rate:1,depth:0,dest:'off',shape:'sine'},l));
@@ -3224,7 +3261,8 @@ function applyPatch(p){
     if(master)master.gain.setTargetAtTime(P.vol,ctx.currentTime,.02);
     setDrive(P.drive);
   }
-  refreshUI();
+  refreshUI(); markDirty();
+  return true;
 }
 
 /* banco de fábrica (arranque temático; el banco completo llega en Fase 4) */
@@ -3253,7 +3291,9 @@ function buildPresetsUI(){
     rd.onload=()=>{ try{ applyPatch(JSON.parse(rd.result)); flash('cargado'); }catch(err){ flash('archivo inválido'); } };
     rd.readAsText(f); e.target.value=''; });
   on('btnSaveSlot','click',saveSlot);
-  renderSlots();
+  on('slotName','keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); saveSlot(); } });
+  on('btnReset','click',()=>resetAll());
+  loadSlots(); renderSlots();
 }
 function exportPatch(){
   const json=JSON.stringify(currentPatch(),null,2);
@@ -3272,21 +3312,64 @@ function copyPatch(){
     navigator.clipboard.writeText(ta.value).then(()=>flash('copiado')).catch(()=>flash(ok?'copiado':'seleccioná y copiá'));
   } else flash(ok?'copiado':'seleccioná y copiá');
 }
-const LS='dubsiren.preset.';
+/* ---- patches guardados (slots) ----
+   Biblioteca aparte de la sesion: sigue andando dentro del hub C2 (donde el
+   autoguardado va apagado) y "Empezar de cero" no la toca. Clave
+   zd:j4-sirens:slots con el envoltorio {app, version, savedAt, data}. La
+   primera vez copia los slots viejos (dubsiren.preset.<nombre>) y deja esas
+   claves intactas (SPEC R3: migrar sin perder, la vieja queda una version). */
+const APP_ID='j4-sirens-station', APP_VERSION=1, APP_SLUG='j4-sirens';
+const SLOTS_KEY='zd:'+APP_SLUG+':slots', SLOTS_OLD='dubsiren.preset.';
+let slots=[];
+const slotName=s=>String(s==null?'':s).trim().slice(0,28);
+function sortSlots(list){ return list.sort((a,b)=>a.name.localeCompare(b.name,'es')); }
+function validSlots(list){
+  const out=[], seen={};
+  (Array.isArray(list)?list:[]).forEach(x=>{ if(!x||typeof x!=='object') return;
+    const name=slotName(x.name), patch=cleanPatch(x.patch);
+    if(!name||!patch||seen[name]) return; seen[name]=1;
+    out.push({ name, patch:x.patch, savedAt:typeof x.savedAt==='string'?x.savedAt:null }); });
+  return sortSlots(out);
+}
+function storeSlots(){
+  try{ localStorage.setItem(SLOTS_KEY, JSON.stringify({ app:APP_ID, version:APP_VERSION, savedAt:new Date().toISOString(), data:{ slots } })); return true; }
+  catch(e){ return false; }
+}
+function loadSlots(){
+  let env=null;
+  try{ env=JSON.parse(localStorage.getItem(SLOTS_KEY)||'null'); }catch(e){ env=null; }
+  if(env && env.data && Array.isArray(env.data.slots)){ slots=validSlots(env.data.slots); return 'ok'; }
+  const old=[];
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
+    if(!k||k.indexOf(SLOTS_OLD)!==0) continue;
+    let patch=null; try{ patch=JSON.parse(localStorage.getItem(k)); }catch(e){}
+    old.push({ name:k.slice(SLOTS_OLD.length), patch }); } }catch(e){}
+  slots=validSlots(old);
+  if(!slots.length) return 'vacio';
+  return storeSlots() ? 'migrado' : 'sin-guardar';
+}
 function saveSlot(){
-  const el2=document.getElementById('slotName'); const nm=(el2&&el2.value||'').trim();
-  if(!nm){flash('poné un nombre');return;}
-  try{ localStorage.setItem(LS+nm, JSON.stringify(currentPatch())); el2.value=''; renderSlots(); flash('guardado'); }
-  catch(e){ flash('no se pudo guardar acá'); }
+  const inp=document.getElementById('slotName'); const nm=slotName(inp&&inp.value);
+  if(!nm){ flash('poné un nombre'); if(inp) inp.focus(); return; }
+  const prev=slots.findIndex(x=>x.name===nm), item={ name:nm, patch:currentPatch(), savedAt:new Date().toISOString() };
+  if(prev>=0) slots[prev]=item; else slots.push(item);
+  sortSlots(slots);
+  if(!storeSlots()){ ZD.modal.error('Este navegador no deja guardar acá (almacenamiento lleno o bloqueado). Exportá el JSON para no perderlo.',{title:'NO SE PUDO GUARDAR'}); return; }
+  inp.value=''; renderSlots(); flash(prev>=0?'actualizado: '+nm:'guardado: '+nm);
 }
 function renderSlots(){
-  const box=document.getElementById('slotList'); if(!box)return; box.innerHTML='';
-  let keys=[]; try{ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k&&k.indexOf(LS)===0)keys.push(k.slice(LS.length));} }catch(e){}
-  if(!keys.length){ box.appendChild(el('span','muted','sin patches guardados en este navegador')); return; }
-  keys.sort().forEach(nm=>{
+  const box=document.getElementById('slotList'); if(!box)return; box.replaceChildren();
+  if(!slots.length){ box.appendChild(el('span','muted','sin patches guardados en este navegador')); return; }
+  slots.forEach(sl=>{
     const chip=el('div','slot');
-    const load=el('button','slotload',nm); load.addEventListener('click',()=>{ try{ applyPatch(JSON.parse(localStorage.getItem(LS+nm))); flash('cargado: '+nm); }catch(e){flash('error');} });
-    const del=el('button','slotdel','✕'); del.addEventListener('click',()=>{ try{localStorage.removeItem(LS+nm);renderSlots();}catch(e){} });
+    const load=el('button','slotload',sl.name); load.type='button';
+    load.addEventListener('click',()=>{ flash(applyPatch(sl.patch)?'cargado: '+sl.name:'ese patch está dañado'); });
+    const del=el('button','slotdel','✕'); del.type='button'; del.setAttribute('aria-label','Borrar el patch '+sl.name);
+    del.addEventListener('click',async()=>{
+      const ok=await ZD.modal.confirm('Se borra «'+sl.name+'» de los patches guardados en este navegador.',{ title:'BORRAR PATCH', ok:'BORRAR', danger:true });
+      if(!ok) return;
+      slots=slots.filter(x=>x!==sl); storeSlots(); renderSlots(); flash('borrado: '+sl.name);
+    });
     chip.append(load,del); box.appendChild(chip);
   });
 }
@@ -3298,11 +3381,12 @@ function buildPadUI(){
   const opts=[['cutoff','CUTOFF'],['reso','RESO'],['rate','RATE'],['depth','DEPTH'],['etime','ECHO'],['efb','F.BACK']];
   const mk=(host,getSel,onPick)=>{ const seg=document.getElementById(host); if(!seg)return;
     opts.forEach(([v,l])=>{ const b=el('button',null,l); b.dataset.v=v; if(v===getSel())b.classList.add('on');
-      b.addEventListener('click',()=>{[...seg.children].forEach(c=>c.classList.toggle('on',c.dataset.v===v));onPick(v);updatePadCursor();});
+      b.addEventListener('click',()=>{ onPick(v); updatePadCursor(); markDirty(); });
       seg.appendChild(b); });
+    UIREFRESH.push(()=>{ const cur=getSel(); [...seg.children].forEach(c=>c.classList.toggle('on',c.dataset.v===cur)); });
   };
-  mk('padXSeg',()=>padX,v=>{padX=v;const l=document.getElementById('xLab');if(l)l.textContent='X · '+labelFor(v);});
-  mk('padYSeg',()=>padY,v=>{padY=v;const l=document.getElementById('yLab');if(l)l.textContent='Y · '+labelFor(v);});
+  mk('padXSeg',()=>padX,v=>setPadAxis('x',v));
+  mk('padYSeg',()=>padY,v=>setPadAxis('y',v));
   const pad=document.getElementById('xypad'), dot=document.getElementById('xydot');
   if(!pad)return; let padPid=null;   // un solo puntero maneja el pad: un segundo dedo no lo hace saltar
   const set=e=>{ const r=pad.getBoundingClientRect();
@@ -3315,9 +3399,14 @@ function buildPadUI(){
   pad.addEventListener('pointermove',e=>{ if(e.pointerId===padPid){ set(e); e.preventDefault(); } });
   const padEnd=e=>{ if(e.pointerId!==padPid) return; padPid=null; pad.classList.remove('hot'); };
   pad.addEventListener('pointerup',padEnd); pad.addEventListener('pointercancel',padEnd); pad.addEventListener('lostpointercapture',padEnd);
-  const lx=document.getElementById('xLab'), ly=document.getElementById('yLab');
-  if(lx)lx.textContent='X · '+labelFor(padX); if(ly)ly.textContent='Y · '+labelFor(padY);
-  updatePadCursor();
+  setPadAxis('x',padX); setPadAxis('y',padY);
+}
+const PAD_KEYS=['cutoff','reso','rate','depth','etime','efb'];
+function setPadAxis(axis,v){
+  if(PAD_KEYS.indexOf(v)<0) return;
+  if(axis==='x') padX=v; else padY=v;
+  const l=document.getElementById(axis==='x'?'xLab':'yLab'); if(l) l.textContent=axis.toUpperCase()+' · '+labelFor(v);
+  UIREFRESH.forEach(f=>{try{f();}catch(e){}}); updatePadCursor();
 }
 function updatePadCursor(){ const dot=document.getElementById('xydot'); if(!dot)return;
   const nx=KREG[padX]?KREG[padX].getNorm():0.5, ny=KREG[padY]?KREG[padY].getNorm():0.5;
@@ -3468,7 +3557,7 @@ function buildModes(){
     d.addEventListener('click',()=>{
       P.mode=m.id;
       [...box.children].forEach(c=>c.classList.toggle('on',c.dataset.mode===m.id));
-      applyMode(); applyCutoffBase(); renderModeTag();
+      applyMode(); applyCutoffBase(); renderModeTag(); markDirty();
     });
     box.appendChild(d);
   });
@@ -3486,7 +3575,7 @@ function buildSeg(host, opts, get, onPick){
     if(o.v===get()) b.classList.add('on');
     b.addEventListener('click',()=>{
       [...seg.children].forEach(c=>c.classList.toggle('on',c.dataset.v===o.v));
-      onPick(o.v);
+      onPick(o.v); markDirty();
     });
     seg.appendChild(b);
   });
@@ -3518,8 +3607,8 @@ function knobUI(hostEl, o){ // o = {key, label, aria, get, set, specKey}
   const getN=()=>clamp01(toNorm(o.get()));
   const render=()=>{ const v=o.get(), n=clamp01(toNorm(v));
     dial.style.setProperty('--a',(-135+n*270)+'deg'); val.textContent=spec.fmt(v); sld.value=String(n); };
-  const setN=n=>{ o.set(fromNorm(clamp01(n))); render(); };
-  const reset=()=>{ if(o.key in DEF){ o.set(DEF[o.key]); render(); } };
+  const setN=n=>{ o.set(fromNorm(clamp01(n))); render(); markDirty(); };
+  const reset=()=>{ if(o.key in DEF){ o.set(DEF[o.key]); render(); markDirty(); } };
   function askValue(){
     if(!(window.ZD&&ZD.modal)) return;
     const k=kin[1], u=kin[0], r=x=>String(Math.round(x*100)/100);
@@ -3527,7 +3616,7 @@ function knobUI(hostEl, o){ // o = {key, label, aria, get, set, specKey}
       { title:name, value:r(o.get()*k), maxlength:12, label:name+' en '+u })
       .then(t=>{ if(t==null) return; const x=parseFloat(String(t).replace(',','.'));
         if(!isFinite(x)){ ZD.toast('Ese valor no es un número',{kind:'error'}); return; }
-        o.set(Math.max(spec.min,Math.min(spec.max,x/k))); render(); });
+        o.set(Math.max(spec.min,Math.min(spec.max,x/k))); render(); markDirty(); });
   }
   let pid=null, startY=0, startN=0, moved=0, lpTimer=null, lpFired=false, lastTap=0;
   const clearLP=()=>{ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } };
@@ -3603,7 +3692,7 @@ function sirenToggle(){ if(sirenLatched()) noteOff('pad'); else noteOn('pad',57)
 function setLatch(on){
   latchMode=!!on;
   if(!latchMode && sirenLatched() && !sirenPtrs.size) noteOff('pad');
-  renderSiren();
+  renderSiren(); markDirty();
 }
 function renderSiren(){
   const b=document.getElementById('bigTrig'), l=document.getElementById('latchBtn'), h=document.getElementById('sirenHint');
@@ -3719,7 +3808,7 @@ function buildLFOs(){
     [['off','OFF'],['pitch','TONO'],['filter','FILTRO'],['amp','AMP']].forEach(([v,l])=>{
       const b=el('button',null,l); b.dataset.v=v; if(v===P.lfo[i].dest)b.classList.add('on');
       b.addEventListener('click',()=>{[...destSeg.children].forEach(c=>c.classList.toggle('on',c.dataset.v===v));
-        P.lfo[i].dest=v; routeLFO(i); recomputeTrem();});
+        P.lfo[i].dest=v; routeLFO(i); recomputeTrem(); markDirty();});
       destSeg.appendChild(b);
     });
     destF.appendChild(destSeg);
@@ -3729,7 +3818,7 @@ function buildLFOs(){
     [['sine','∿'],['tri','△'],['square','⊓'],['ramp','⋰']].forEach(([v,l])=>{
       const b=el('button',null,l); b.dataset.v=v; if(v===P.lfo[i].shape)b.classList.add('on');
       b.addEventListener('click',()=>{[...shpSeg.children].forEach(c=>c.classList.toggle('on',c.dataset.v===v));
-        P.lfo[i].shape=v; if(userLFO[i])userLFO[i].osc.type=LSHAPE[v];});
+        P.lfo[i].shape=v; if(userLFO[i])userLFO[i].osc.type=LSHAPE[v]; markDirty();});
       shpSeg.appendChild(b);
     });
     shpF.appendChild(shpSeg);
@@ -3738,8 +3827,61 @@ function buildLFOs(){
   });
 }
 /* ------------------------------------------------------------- arranque ---*/
+/* ---- autoguardado (SPEC R3) ----
+   zd-store: IndexedDB (fallback localStorage), clave zd:j4-sirens:session,
+   debounce de 1,5 s + visibilitychange/pagehide/freeze (los engancha el
+   bloque). Se guarda el estado actual completo: el patch (P), los ejes del
+   pad, el modo del visualizador y si SIREN va en hold o latch. Al abrir
+   restaura sin arrancar el audio: applyPatch solo toca nodos si ya hay
+   contexto. var y no let: markDirty() puede correr antes de llegar aca. */
+var Session=null, sessionReady=false;
+function markDirty(){ if(Session && sessionReady) Session.save(); }
+const VIZ_MODES=['scope','liss','mandala'];
+function snapshotSession(){ return { patch:currentPatch(), pad:{ x:padX, y:padY }, viz:{ mode:vizMode }, perf:{ latch:latchMode } }; }
+function restoreSession(d){
+  if(!d||typeof d!=='object') return false;
+  let ok=false;
+  if(d.patch && applyPatch(d.patch)) ok=true;
+  if(d.pad && typeof d.pad==='object'){
+    if(PAD_KEYS.indexOf(d.pad.x)>=0){ setPadAxis('x',d.pad.x); ok=true; }
+    if(PAD_KEYS.indexOf(d.pad.y)>=0){ setPadAxis('y',d.pad.y); ok=true; }
+  }
+  if(d.viz && VIZ_MODES.indexOf(d.viz.mode)>=0){ vizMode=d.viz.mode; ok=true; }
+  if(d.perf && typeof d.perf.latch==='boolean'){ setLatch(d.perf.latch); ok=true; }
+  refreshUI();
+  return ok;
+}
+async function resetAll(){
+  const ok=await ZD.modal.confirm('Vuelve el sonido de fábrica y se borra la sesión guardada en este navegador. Los patches guardados no se tocan.',
+    { title:'EMPEZAR DE CERO', ok:'EMPEZAR DE CERO', cancel:'CANCELAR', danger:true });
+  if(!ok) return;
+  sessionReady=false;
+  if(Session) await Session.clear();
+  applyPatch(DEFAULT_PATCH); setPadAxis('x','cutoff'); setPadAxis('y','reso'); vizMode='scope'; setLatch(false); refreshUI();
+  // No se vuelve a guardar: la sesion queda vacia hasta el proximo cambio, asi
+  // la siguiente carga arranca limpia y sin el toast de "sesion restaurada".
+  sessionReady=true;
+  ZD.toast('Listo: sonido de fábrica');
+}
+
 buildUI();
 sizeScope(); window.addEventListener('resize',sizeScope);
+const DEFAULT_PATCH=currentPatch();   // el sonido de fabrica, antes de restaurar nada
+
+(async function initSession(){
+  // Con el hub C2 el dueño del estado es el host (setState): no restaura ni
+  // guarda para no pelearse con el (docs/zd-blocks.md). Los slots si andan.
+  if(HOST){ sessionReady=false; return; }
+  if(!(window.ZD && ZD.store)){ sessionReady=true; return; }
+  Session=ZD.store.open({ slug:APP_SLUG, app:APP_ID, version:APP_VERSION, debounce:1500, getData:snapshotSession });
+  ZD.store.persist();
+  let env=null;
+  try{ env=await Session.load(); }catch(e){ env=null; }
+  const r=env?Session.unwrap(env):null;
+  if(r && r.ok && r.data && restoreSession(r.data))
+    ZD.toast('Sesión restaurada',{ ms:9000, action:{ label:'Empezar de cero', onClick:resetAll } });
+  sessionReady=true;
+})();
 
 const power=document.getElementById('power');
 async function boot(){
