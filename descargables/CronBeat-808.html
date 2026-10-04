@@ -257,6 +257,12 @@
     box-shadow:0 0 0 1px var(--z), 0 0 30px -4px var(--z), 0 1px 0 var(--zd-outline); transform:translateY(3px); }
   .bigpad:active::before,.bigpad.flash::before{background:var(--zd-void)}
   .bigpad.flash .k{background:rgba(0,0,0,.2); color:var(--zd-void); border-color:rgba(0,0,0,.35)}
+  .padopts{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; justify-content:center; max-width:820px; margin:0 auto 14px}
+  .padopts .seg{margin:0; align-items:center}
+  .padopts .seg button{flex:none; min-width:52px; height:40px; font-size:12px}
+  .padopts .optlbl{font-size:11px; letter-spacing:.16em; color:var(--ink-dim); font-weight:700; margin-right:4px}
+  .padopts .btn.on{color:var(--zd-void); background:var(--inst-accent); box-shadow:0 0 0 1px var(--inst-accent), var(--zd-hard-sm)}
+  .pads.rpt .bigpad .n::after{content:" ↻"; color:var(--inst-accent)}
   .pads-hint{text-align:center; color:var(--ink-faint); font-size:12px; margin-top:18px}
   .pads-hint b{color:var(--zd-alert)}
   @media (max-width:560px){ .pads{gap:9px} .bigpad{padding:10px; border-radius:6px} .bigpad .n{font-size:12px} }
@@ -487,6 +493,9 @@
   html.zd-m .pmrow .pmsl{grid-column:1 / -1; display:grid; grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr); gap:6px; align-items:center}
   html.zd-m .pmrow .pmsl span{font-size:11px; letter-spacing:.1em; color:var(--ink-dim)}
   html.zd-m .pmrow .pmsl input[type=range]{width:100%}
+  html.zd-m #zd-sheet .padopts{display:grid; grid-template-columns:1fr; gap:8px; margin:0; max-width:none}
+  html.zd-m #zd-sheet .padopts .seg{display:grid; grid-template-columns:auto repeat(4,minmax(0,1fr)); gap:4px}
+  html.zd-m #zd-sheet .padopts .seg button{height:44px; min-width:0}
   html.zd-m #zd-sheet .pads-hint{margin:0; text-align:left; font-size:12px; line-height:1.5}
   @media (min-width:600px){
     html.zd-m .pmrow{grid-template-columns:minmax(120px,1fr) 44px 44px minmax(0,2.4fr) 44px}
@@ -1737,7 +1746,7 @@ window.ZD_M = {
   keep: ['#seq', '#pads'],
   tabs: [
     { id:'pads', label:'PADS',    title:'PADS · MEZCLA · SAMPLES',
-      nodes:['#padMix', '#padsHint'] },
+      nodes:['#padOpts', '#padMix', '#padsHint'] },
     { id:'seq',  label:'SEQ',     title:'PATRÓN · TEMPO · GLOBAL', peek:true,
       nodes:['#patbar', '#seqActs', '#tempoBox', '#globKnobs'] },
     { id:'fx',   label:'FX',      title:'EFECTOS · ENVÍOS POR PISTA', peek:true,
@@ -2618,6 +2627,13 @@ window.ZD_M = {
     </section>
 
     <section class="view" id="padsView">
+      <div class="padopts" id="padOpts" role="group" aria-label="Ejecución de los pads">
+        <button type="button" class="btn" id="velPos" aria-pressed="false" title="Más arriba en el pad, más fuerte">Velocidad por altura</button>
+        <div class="seg" id="rptSeg" role="group" aria-label="Note repeat: mantené apretado un pad">
+          <span class="optlbl" aria-hidden="true">REPEAT</span>
+          <button type="button" data-r="0" aria-label="Note repeat apagado">off</button><button type="button" data-r="8" aria-label="Note repeat en corcheas">1/8</button><button type="button" data-r="16" aria-label="Note repeat en semicorcheas">1/16</button><button type="button" data-r="32" aria-label="Note repeat en fusas">1/32</button>
+        </div>
+      </div>
       <div class="pads" id="pads"></div>
       <div class="padmix" id="padMix" role="group" aria-label="Mezcla por pad"></div>
       <div class="pads-hint" id="padsHint">Tocá con mouse, touch o teclado. Con <b>REC</b> activo y sonando, tus golpes se graban en el patrón. En el teléfono, tocar un pad elige su pista: sus 16 pasos quedan arriba de los pads.</div>
@@ -3198,7 +3214,10 @@ function buildPads(){
     /* disparador: role=button + teclado. aria-pressed = pad elegido (en el
        shell, su pista es la que se edita en 2×8 arriba de los pads) */
     bp.setAttribute('role','button'); bp.tabIndex=0; bp.setAttribute('aria-label', voice.name+' (tecla '+voice.key.toUpperCase()+')'); pressed(bp,false);
-    bp.addEventListener('pointerdown', e=>{ if(e.target.classList.contains('smp')) return; e.preventDefault(); livePlay(t, e.shiftKey || accentMode); selectTrack(t); });
+    bp.addEventListener('pointerdown', e=>{ if(e.target.classList.contains('smp')) return; e.preventDefault();
+      const acc=e.shiftKey || accentMode, vel=padVel(bp, e); livePlay(t, acc, vel); selectTrack(t); startRepeat(bp, t, e, vel, acc); });
+    bp.addEventListener('pointermove', e=>{ const R=repeats.get(e.pointerId); if(R && perf.velPos){ const v=padVel(bp, e); if(v!=null) R.vel=v; } });
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=> bp.addEventListener(ev, e=> stopRepeat(e.pointerId)));
     bp.addEventListener('keydown', e=>{ if(e.target!==bp || (e.key!=='Enter' && e.key!==' ')) return; e.preventDefault(); e.stopPropagation(); if(e.repeat) return; livePlay(t, e.shiftKey || accentMode); selectTrack(t); });
     smp.addEventListener('click', e=>{ e.stopPropagation(); if(sampleBuffers[t]) removeSample(t); else openFilePicker(t); });
     bp.addEventListener('dragover', e=>{ e.preventDefault(); bp.classList.add('dragover'); });
@@ -3373,8 +3392,67 @@ document.getElementById('songAdd').addEventListener('click', addBlock);
 document.getElementById('patCopy').addEventListener('click', ()=>{ patternClipboard=patterns[activePattern].map(r=>r.slice()); toast('Patrón '+PAT_LABELS[activePattern]+' copiado.'); });
 document.getElementById('patPaste').addEventListener('click', ()=>{ if(!patternClipboard){ toast('No hay nada copiado.'); return; } recordUndo(); patterns[activePattern]=patternClipboard.map(r=>r.slice()); pattern=patterns[activePattern]; renderAll(); updatePatBar(); toast('Pegado en '+PAT_LABELS[activePattern]+'.'); });
 
-function livePlay(t, accent){ ensureAudio(); trigger(AA, eng, t, ctx.currentTime, accent?VEL_ACCENT:VEL_ON); flashVoice(t);
-  if(recording && isPlaying){ recordUndo('rec'); const s=quantizedStep(); pattern[t][s]=accent?2:Math.max(pattern[t][s],1); renderCell(t,s); } }
+function livePlay(t, accent, vel){ ensureAudio(); const v = accent ? VEL_ACCENT : (vel!=null ? vel : VEL_ON);
+  trigger(AA, eng, t, ctx.currentTime, v); flashVoice(t);
+  if(recording && isPlaying){ recordUndo('rec'); const s=quantizedStep(); pattern[t][s]=(accent || v>=0.9)?2:Math.max(pattern[t][s],1); renderCell(t,s); } }
+
+/* ---- ejecución en pads (extras): velocidad por altura y note repeat ----
+   Son preferencias de este dispositivo (localStorage), no del proyecto: no
+   cambian lo que suena el patrón, solo cómo responden los pads al dedo. */
+const PREFS_KEY='zd:cronbeat:prefs', perf={ velPos:false, repeat:0 };   // repeat: 0 | 8 | 16 | 32
+try{ const p=JSON.parse(localStorage.getItem(PREFS_KEY)||'{}');
+  if(typeof p.velPos==='boolean') perf.velPos=p.velPos; if([0,8,16,32].includes(p.repeat)) perf.repeat=p.repeat; }catch(e){}
+function savePerf(){ try{ localStorage.setItem(PREFS_KEY, JSON.stringify(perf)); }catch(e){} }
+/* arriba del pad = fuerte (1.0), abajo = suave (0.25); el acento manda */
+function padVel(bp, e){ if(!perf.velPos) return null; const r=bp.getBoundingClientRect(); if(!r.height) return null;
+  const y=Math.min(1, Math.max(0, (e.clientY-r.top)/r.height)); return 0.25 + 0.75*(1-y); }
+/* Note repeat: mientras el dedo sigue apoyado, el pad se repite a 1/8, 1/16
+   o 1/32 del tempo, con el mismo look-ahead que el secuenciador. Sonando, los
+   golpes caen en la grilla del patrón (con swing) y con REC se graban; un paso
+   que el secuenciador ya va a tocar no se dispara dos veces. */
+const repeats=new Map();   // pointerId -> estado
+function repeatDiv(){ return secondsPerStep()*16/perf.repeat; }
+function startRepeat(bp, t, e, vel, accent){
+  if(!perf.repeat || !ctx) return;
+  try{ bp.setPointerCapture(e.pointerId); }catch(_){}
+  const div=repeatDiv(), grid=isPlaying && !HOST;
+  const next = grid ? playStartTime + (Math.floor((ctx.currentTime-playStartTime)/div)+1)*div : ctx.currentTime + div;
+  const R={ t, vel, accent, next, timer:0 };
+  stopRepeat(e.pointerId); repeats.set(e.pointerId, R);
+  R.timer=setInterval(()=>repeatTick(R), LOOKAHEAD); repeatTick(R);
+}
+function repeatTick(R){
+  if(!ctx || !eng) return;
+  while(R.next < ctx.currentTime + SCHEDULE_AHEAD){
+    const time=R.next, v = R.accent ? VEL_ACCENT : (R.vel!=null ? R.vel : VEL_ON);
+    let play=true, at=time;
+    if(isPlaying && !HOST){
+      const spb=secondsPerStep(), pos=(time-playStartTime)/spb, k=Math.round(pos);
+      if(Math.abs(pos-k) < 0.01){                       // cae en la grilla de 1/16
+        const st=((k%N_STEPS)+N_STEPS)%N_STEPS;
+        if(st%2===1) at = time + swing*spb;
+        if(recording){ const was=pattern[R.t][st]>0;
+          recordUndo('rec'); pattern[R.t][st]=(R.accent || v>=0.9)?2:Math.max(pattern[R.t][st],1); renderCell(R.t,st); updatePatBar();
+          play = !was && time < nextNoteTime;            // si no, lo toca el secuenciador
+        }
+      }
+    }
+    if(play){ trigger(AA, eng, R.t, at, v); setTimeout(()=>flashVoice(R.t), Math.max(0,(at-ctx.currentTime)*1000)); }
+    R.next += repeatDiv();
+  }
+}
+function stopRepeat(id){ const R=repeats.get(id); if(!R) return; clearInterval(R.timer); repeats.delete(id); }
+function stopAllRepeats(){ for(const id of [...repeats.keys()]) stopRepeat(id); }
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') stopAllRepeats(); });
+function bindPadOpts(){
+  const vb=Eg('velPos'), seg=document.querySelectorAll('#rptSeg button');
+  const paint=()=>{ vb.classList.toggle('on', perf.velPos); pressed(vb, perf.velPos);
+    seg.forEach(b=>{ const on=+b.dataset.r===perf.repeat; b.classList.toggle('on', on); pressed(b, on); });
+    padsEl.classList.toggle('rpt', perf.repeat>0); };
+  vb.addEventListener('click', ()=>{ perf.velPos=!perf.velPos; savePerf(); paint(); });
+  seg.forEach(b=> b.addEventListener('click', ()=>{ perf.repeat=+b.dataset.r; if(!perf.repeat) stopAllRepeats(); savePerf(); paint(); }));
+  paint();
+}
 const flashTimers=[], rowTimers=[];
 function flashVoice(t){ const p=rows[t].pad; p.classList.add('flash'); const bp=bigpads[t]; if(bp) bp.classList.add('flash');
   clearTimeout(flashTimers[t]); flashTimers[t]=setTimeout(()=>{ p.classList.remove('flash'); if(bp) bp.classList.remove('flash'); },100);
@@ -4000,7 +4078,7 @@ if(!HOST && window.ZD && ZD.audio){
   note.textContent='MIDI no disponible en este navegador (Web MIDI): Patrón→MIDI y Canción→MIDI igual descargan un archivo .mid.';
   note.hidden=false; })();
 document.querySelectorAll('.fx-ctl, .ed-ctl, .field').forEach(c=>{ const l=c.querySelector('label'), i=c.querySelector('input[type=range]'); if(l && i && i.id) l.htmlFor=i.id; });
-buildRuler(); buildTracks(); buildPads(); buildMatrix(); buildMixer(); bindTrackBar(); selectTrack(0); buildPatBar(); bindFX(); bindEditor(); seedPattern(); renderSong(); renderAll(); updatePatBar(); refreshFXControls(); refreshEditorPadList(); setTempo(tempo);
+buildRuler(); buildTracks(); buildPads(); buildMatrix(); buildMixer(); bindTrackBar(); bindPadOpts(); selectTrack(0); buildPatBar(); bindFX(); bindEditor(); seedPattern(); renderSong(); renderAll(); updatePatBar(); refreshFXControls(); refreshEditorPadList(); setTempo(tempo);
 const isTouch=(window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
 setView(isTouch ? 'pads' : 'seq');
 initSession();
