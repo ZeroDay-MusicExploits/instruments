@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NEBULARP 2035 · arpegiador cósmico</title>
 <style>
   :root{
@@ -243,7 +243,7 @@
   .pkey.white.off{ background:linear-gradient(180deg,#bdb3d2 0%,#9488b0 100%); }
   .pkey .kbhint{
     position:absolute; bottom:7px; left:0; right:0; text-align:center;
-    font-size:10px; font-weight:600; color:rgba(30,20,50,.5); pointer-events:none;
+    font-size:11px; font-weight:600; color:rgba(30,20,50,.5); pointer-events:none;
   }
   .pkey.black .kbhint{ color:rgba(220,210,240,.4); bottom:5px; }
   .pkey.active .kbhint{ color:rgba(8,5,17,.6); }
@@ -312,7 +312,7 @@
   .mark{font-weight:800; letter-spacing:.22em; padding-left:0; font-size:clamp(24px,4.4vw,36px);
     background:linear-gradient(92deg, var(--cyan), var(--peri) 42%, var(--magenta)); -webkit-background-clip:text; background-clip:text}
   .mark::before{content:">_ "; -webkit-text-fill-color:var(--zd-phosphor); letter-spacing:0}
-  .tagline{color:var(--zd-phosphor); font-size:9.5px; font-weight:700; letter-spacing:.2em; text-transform:uppercase}
+  .tagline{color:var(--zd-phosphor); font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase}
   .status{font-size:11px; padding:6px 10px; border:1px solid var(--zd-line); border-radius:3px; background:var(--zd-well)}
   .status .dot{border-radius:2px}
 
@@ -340,7 +340,7 @@
   .panel h2{font-size:12px; font-weight:800; letter-spacing:.18em; text-transform:uppercase}
   .panel h2 .bead{border-radius:2px; width:9px; height:9px}
   .panel .hint{font-size:11.5px; color:var(--zd-ink-faint); line-height:1.5}
-  .field > .flabel, .subhead{font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--zd-ink-dim)}
+  .field > .flabel, .subhead{font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--zd-ink-dim)}
 
   .seg{gap:5px}
   .seg button{min-height:40px; border-radius:var(--zd-r); background:var(--zd-well); border:1px solid var(--zd-line); font-size:12px; touch-action:manipulation}
@@ -351,15 +351,24 @@
 
   .knob .dial{border-radius:50%; background:radial-gradient(circle at 42% 32%, #1f301b, #070b06 72%); box-shadow:0 0 0 2px var(--zd-outline), 0 3px 0 2px var(--zd-outline)}
   .knob .dial:focus-visible{box-shadow:var(--zd-focus)!important}
-  .knob .kname{font-size:10.5px; font-weight:700; letter-spacing:.06em}
+  .knob .kname{font-size:11px; font-weight:700; letter-spacing:.06em}
   .knob .kval{color:var(--peri)}
+  .knob .kslider{display:none}
+  .kslider{-webkit-appearance:none; appearance:none; width:100%; height:44px; margin:0; background:transparent; cursor:pointer; touch-action:pan-y}
+  .kslider::-webkit-slider-runnable-track{height:6px; border-radius:3px; border:1px solid var(--zd-line);
+    background:linear-gradient(90deg, var(--peri) 0%, var(--peri) var(--fill,50%), var(--zd-well) var(--fill,50%), var(--zd-well) 100%)}
+  .kslider::-moz-range-track{height:6px; border-radius:3px; background:var(--zd-well); border:1px solid var(--zd-line)}
+  .kslider::-moz-range-progress{height:6px; border-radius:3px; background:var(--peri)}
+  .kslider::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:22px; height:22px; margin-top:-9px; border-radius:4px;
+    background:var(--zd-paper); border:2px solid var(--zd-outline); box-shadow:0 2px 0 var(--zd-outline)}
+  .kslider::-moz-range-thumb{width:20px; height:20px; border-radius:4px; background:var(--zd-paper); border:2px solid var(--zd-outline)}
 
   .chip{border-radius:3px; border-color:rgba(242,196,110,.5); background:rgba(242,196,110,.08)}
   kbd{background:var(--zd-well); border:1px solid var(--zd-line); border-bottom-width:3px; border-radius:3px; color:var(--zd-phosphor)}
   .legend-line b, .note b{color:var(--peri)}
   .octctl .oval{color:var(--zd-phosphor)}
 
-  .kbwrap .kbtitle{color:var(--zd-ink-faint); text-transform:uppercase; letter-spacing:.14em; font-size:10.5px}
+  .kbwrap .kbtitle{color:var(--zd-ink-faint); text-transform:uppercase; letter-spacing:.14em; font-size:11px}
   .piano{border-radius:var(--zd-r); border:2px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), 0 4px 0 var(--zd-outline); background:#030602; padding:0}
   .pkey.white{background:linear-gradient(180deg,#f3f2ec 0%,#d6d4cc 100%); border-right:2px solid var(--zd-outline); border-radius:0 0 3px 3px; box-shadow:inset 0 -5px 0 rgba(0,0,0,.12)}
   .pkey.black{background:linear-gradient(180deg,#1b2a17,#070b06); border:2px solid var(--zd-outline); border-top:0; border-radius:0 0 3px 3px; box-shadow:inset 0 -4px 0 rgba(182,245,154,.07), 0 3px 0 rgba(0,0,0,.4)}
@@ -404,10 +413,46 @@
   html.zd-m .piano{flex:1; height:auto; min-height:96px; overscroll-behavior:none;}
   html.zd-m .pkey .kbhint{display:none;}
 
+  /* piano: dos filas de una octava cuando no entran 14 blancas de >=44px.
+     Container query sobre .kbwrap (solo dentro del shell): vale igual para
+     portrait, landscape y tablet. Sin soporte queda la fila única de siempre.
+     La octava grave va abajo (wrap-reverse); las negras se ubican con las
+     variables --o (octava) y --b (blanca a su izquierda) que pone renderPiano. */
+  html.zd-m .kbwrap{container-type:inline-size;}
+  @container (max-width:640px){
+    .piano{flex-wrap:wrap-reverse; align-content:stretch;}
+    .pkey.white{flex:0 0 calc(100% / 7); min-height:0;}
+    .pkey.white:nth-child(n+8){border-bottom:3px solid var(--zd-outline);}
+    .pkey.white:nth-child(7), .pkey.white:nth-child(14){border-right:none;}
+    .pkey.black{left:calc(var(--b) * 100% / 7) !important; top:calc((1 - var(--o)) * 50%); height:30%; width:10.4%;}
+  }
+
+  /* sheet en modo peek (SPEC R1: la zona de tocar sigue usable): en vertical
+     el stage se achica por encima del sheet y queda el piano con latch y
+     octava; el orbit, el BPM y el tap vuelven al cerrar. En landscape el
+     sheet ocupa la mitad izquierda y el piano sigue a la derecha (abajo). */
+  @media not all and (orientation:landscape) and (max-height:600px){
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{height:calc(var(--zd-stage-h) - 45dvh);
+      grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto minmax(0,1fr);
+      grid-template-areas:"banner banner" "oct side" "piano piano";}
+    @supports not (height:100dvh){
+      html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{height:calc(var(--zd-stage-h) - 45vh);}
+    }
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) .orbit-frame,
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) .hero .transport .knob,
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) .hero .tap{display:none;}
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) .hero .transport{flex-direction:row; justify-content:flex-end; min-width:0;}
+  }
+
   /* ---- barra superior: transporte compacto ---- */
   html.zd-m #zd-top .play{min-height:40px; padding:0 12px; font-size:12px; letter-spacing:.06em; gap:7px;
     box-shadow:0 0 0 1px var(--edge-glow), var(--zd-hard-sm);}
   @media (max-width:560px){ html.zd-m #zd-top .zd-ttitle{display:none;} }
+  /* a <430px el botón queda en el glifo; el texto sigue para lectores de pantalla */
+  @media (max-width:429px){
+    html.zd-m #zd-top .play{padding:0 14px;}
+    html.zd-m #zd-top #playLabel{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  }
 
   /* ---- paneles dentro de los sheets ---- */
   html.zd-m #zd-sheet .panel{padding:9px 10px; border-radius:var(--zd-r); box-shadow:0 0 0 1px var(--zd-line); backdrop-filter:none;}
@@ -415,6 +460,21 @@
   html.zd-m #zd-sheet .field{margin-bottom:12px;}
   html.zd-m #zd-sheet .scalegrid{gap:12px;}
   html.zd-m #zd-sheet .note{margin:0; text-align:left;}
+  html.zd-m #zd-sheet .seg button,
+  html.zd-m #zd-sheet .tgl{min-height:44px;}
+
+  /* knobs en los sheets: knob chico + slider alternativo táctil (SPEC R1) */
+  html.zd-m #zd-sheet .knobs{display:grid; grid-template-columns:1fr; gap:7px;}
+  html.zd-m #zd-sheet .knob{flex-direction:row; align-items:center; gap:9px; width:auto;
+    background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r); padding:3px 8px;}
+  html.zd-m #zd-sheet .knob .dial,
+  html.zd-m #zd-sheet .knob svg{width:44px; height:44px; flex:none;}
+  html.zd-m #zd-sheet .knob .kname{order:1; flex:none; width:80px; text-align:left;}
+  html.zd-m #zd-sheet .knob .kslider{order:2; display:block; flex:1; min-width:60px;}
+  html.zd-m #zd-sheet .knob .kval{order:3; flex:none; width:66px; text-align:right; font-size:12px;}
+  /* dos columnas según el ancho real del sheet (en landscape el peek va a media pantalla) */
+  html.zd-m #zd-sheet .zd-sbody{container:zdsheet / inline-size;}
+  @container zdsheet (min-width:600px){ html.zd-m #zd-sheet .knobs{grid-template-columns:1fr 1fr;} }
 
   /* ---- landscape: mejora progresiva, no otro layout ---- */
   @media (orientation:landscape) and (max-height:600px){
@@ -423,8 +483,10 @@
       grid-template-areas:"banner banner banner" "orbit side piano" "orbit oct piano";}
     html.zd-m .hero .transport{display:grid; grid-template-columns:1fr 1fr; align-content:center;}
     html.zd-m .hero .transport .knob{grid-column:1 / -1;}
-    html.zd-m #zd-sheet{max-height:80dvh;}
-    html.zd-m #zd-sheet.peek{max-height:60dvh;}
+    html.zd-m #zd-sheet,
+    html.zd-m #zd-sheet.peek{max-height:calc(var(--zd-stage-h) - 4px);}
+    html.zd-m #zd-sheet.peek{right:auto; width:min(52%, 520px);
+      border-right:2px solid var(--zd-outline);}
   }
 </style>
 
@@ -3051,7 +3113,7 @@ window.ZD_M = {
     host.innerHTML = "";
     items.forEach(([val, label]) => {
       const b = document.createElement("button");
-      b.textContent = label; b.type = "button";
+      b.textContent = label; b.type = "button"; b.dataset.val = String(val);
       b.setAttribute("aria-pressed", String(val === current));
       b.addEventListener("click", () => {
         [...host.children].forEach(c => c.setAttribute("aria-pressed", "false"));
@@ -3080,24 +3142,40 @@ window.ZD_M = {
     return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
   }
 
+  // Autoguardado: los controles avisan cada cambio (R3 conecta el guardado).
+  function markDirty(){}
+
+  // Knobs por clave de `state`: dos knobs pueden escribir la misma clave
+  // (Detune del pad y Spread de la voz comparten state.detune).
+  const KNOBS = {};
+  const KNOB_LIST = [];          // en orden de creación (importa al restaurar)
+  function syncKnobs(key){ (KNOBS[key] || []).forEach(k => k.show(state[key])); }
+
+  // Entrada numérica (long-press / Enter): el número va en la unidad que se ve.
+  const UNIT_MUL = { "%":100, "ms":1000 };
+
   function makeKnob(host, opt){
-    // opt: {name, min, max, value, scale, color, format, onChange}
+    // opt: {key, name, min, max, value, scale, step, unit, color, format, onChange}
     const scale = opt.scale || "lin";
     const A0 = -135, A1 = 135, SWEEP = A1 - A0, cx = 33, cy = 33, R = 26;
     const wrap = document.createElement("div"); wrap.className = "knob";
     const dial = document.createElement("div"); dial.className = "dial";
-    dial.tabIndex = 0; dial.setAttribute("role", "slider");
-    dial.setAttribute("aria-label", opt.name);
+    dial.tabIndex = 0;
     const kname = document.createElement("div"); kname.className = "kname"; kname.textContent = opt.name;
     const kval = document.createElement("div"); kval.className = "kval";
+    // SVG fijo: opt.color sale del código (variables CSS), nunca de datos externos.
     dial.innerHTML =
-      `<svg viewBox="0 0 66 66">
+      `<svg viewBox="0 0 66 66" aria-hidden="true" focusable="false">
         <path d="${arcPath(cx, cy, R, A0, A1)}" fill="none" stroke="var(--edge)" stroke-width="4" stroke-linecap="round"/>
         <path class="fill" fill="none" stroke="${opt.color}" stroke-width="4" stroke-linecap="round" filter="drop-shadow(0 0 4px ${opt.color})"/>
         <line class="ind" x1="33" y1="33" x2="33" y2="12" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
         <circle cx="33" cy="33" r="4" fill="var(--surface-2)" stroke="var(--edge-glow)"/>
       </svg>`;
-    wrap.appendChild(dial); wrap.appendChild(kname); wrap.appendChild(kval); host.appendChild(wrap);
+    // slider alternativo: oculto en escritorio, visible en los sheets del shell móvil (SPEC R1)
+    const sld = document.createElement("input");
+    sld.type = "range"; sld.className = "kslider"; sld.min = "0"; sld.max = "1"; sld.step = "0.001";
+    sld.tabIndex = -1; sld.setAttribute("aria-label", opt.name + " (slider)");
+    wrap.appendChild(dial); wrap.appendChild(kname); wrap.appendChild(kval); wrap.appendChild(sld); host.appendChild(wrap);
 
     const fillEl = dial.querySelector(".fill");
     const indEl  = dial.querySelector(".ind");
@@ -3109,7 +3187,7 @@ window.ZD_M = {
       ? Math.exp(Math.log(opt.min) + f * (Math.log(opt.max) - Math.log(opt.min)))
       : opt.min + f * (opt.max - opt.min);
 
-    let value = opt.value;
+    let value = opt.value, a11y = null;
     function render(){
       const f = clamp(toFrac(value), 0, 1);
       const ang = A0 + f * SWEEP;
@@ -3117,40 +3195,85 @@ window.ZD_M = {
       const [ix, iy] = polar(cx, cy, R - 4, ang);
       indEl.setAttribute("x2", ix); indEl.setAttribute("y2", iy);
       kval.textContent = opt.format(value);
-      dial.setAttribute("aria-valuenow", (Math.round(value * 1000) / 1000));
-      dial.setAttribute("aria-valuetext", opt.format(value));
+      sld.value = String(f); sld.style.setProperty("--fill", (f * 100) + "%");
+      if (a11y) a11y.refresh(f);
     }
-    function set(v){ value = clamp(v, opt.min, opt.max); render(); opt.onChange(value); }
-    dial.setAttribute("aria-valuemin", opt.min); dial.setAttribute("aria-valuemax", opt.max);
+    // show: solo pinta (restaurar, sincronizar knobs gemelos); set: además aplica.
+    function show(v){ value = clamp(+v, opt.min, opt.max); render(); }
+    function set(v){
+      v = clamp(+v, opt.min, opt.max);
+      if (opt.step) v = clamp(Math.round(v / opt.step) * opt.step, opt.min, opt.max);
+      value = v; render(); opt.onChange(value);
+      if (opt.key) syncKnobs(opt.key);
+      markDirty();
+    }
+    const api = { set, show, get:() => value, key:opt.key, def:opt.value };
+
+    function askValue(){
+      if (!(window.ZD && ZD.modal)) return;
+      const mul = UNIT_MUL[opt.unit] || 1, u = opt.unit ? " " + opt.unit : "";
+      const r = x => String(Math.round(x * mul * 100) / 100);
+      ZD.modal.prompt("Valor" + (opt.unit ? " en " + opt.unit : "") + ", entre " + r(opt.min) + " y " + r(opt.max) + u + ". Ahora: " + opt.format(value) + ".",
+        { title:opt.name, value:r(value), maxlength:12, label:opt.name, ok:"APLICAR" })
+        .then(txt => {
+          if (txt == null) return;
+          const n = parseFloat(String(txt).replace(",", "."));
+          if (!isFinite(n)) { ZD.toast("Ese valor no es un número", { kind:"error" }); return; }
+          set(n / mul);
+        });
+    }
+
+    // teclado (←→↑↓, Shift = fino, PgUp/PgDn, Home/End, Enter = valor numérico)
+    // sobre la fracción 0..1: los knobs logarítmicos avanzan parejo en todo el recorrido.
+    if (window.ZD && ZD.ui){
+      const st = opt.step ? opt.step / (opt.max - opt.min) : 0;
+      a11y = ZD.ui.a11ySlider(dial, {
+        min:0, max:1, step:st || 0.02, fineStep:st || 0.005, pageStep:Math.max(st, 0.1),
+        label:opt.name, get:() => clamp(toFrac(value), 0, 1), set:f => set(fromFrac(f)),
+        format:f => opt.format(fromFrac(f)), onEnter:askValue
+      });
+    }
     render();
 
-    // drag vertical
-    let dragging = false, startY = 0, startF = 0;
+    // arrastre vertical · doble tap = reset · long-press = entrada numérica (SPEC R1)
+    let dragging = false, startY = 0, startF = 0, moved = 0, lpTimer = null, lpFired = false, lastTap = 0;
+    const clearLP = () => { if (lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     dial.addEventListener("pointerdown", (e) => {
-      dragging = true; startY = e.clientY; startF = clamp(toFrac(value), 0, 1);
-      dial.setPointerCapture(e.pointerId); e.preventDefault();
+      dragging = true; moved = 0; lpFired = false; startY = e.clientY; startF = clamp(toFrac(value), 0, 1);
+      try { dial.setPointerCapture(e.pointerId); } catch(err){}
+      e.preventDefault();
+      clearLP(); lpTimer = setTimeout(() => { lpTimer = null; lpFired = true; dragging = false; askValue(); }, 550);
     });
     dial.addEventListener("pointermove", (e) => {
       if (!dragging) return;
-      const speed = e.shiftKey ? 480 : 180;             // shift = ajuste fino
-      const f = clamp(startF - (e.clientY - startY) / speed, 0, 1);
-      set(fromFrac(f));
+      const dy = Math.abs(e.clientY - startY);
+      if (dy > 6) clearLP();
+      moved = Math.max(moved, dy);
+      if (moved < 3) return;                              // zona muerta: el long-press no corre el valor
+      const speed = e.shiftKey ? 480 : 180;               // shift = ajuste fino
+      set(fromFrac(clamp(startF - (e.clientY - startY) / speed, 0, 1)));
     });
-    const end = () => { dragging = false; };
+    const end = (e) => {
+      clearLP();
+      if (!dragging) return;
+      dragging = false;
+      try { dial.releasePointerCapture(e.pointerId); } catch(err){}
+      if (lpFired || moved > 6) return;
+      const now = performance.now();
+      if (now - lastTap < 320){ set(opt.value); lastTap = 0; } else lastTap = now;
+    };
     dial.addEventListener("pointerup", end);
     dial.addEventListener("pointercancel", end);
-    dial.addEventListener("dblclick", () => set(opt.value)); // doble click = reset
     dial.addEventListener("wheel", (e) => {
       e.preventDefault();
-      const f = clamp(toFrac(value) - Math.sign(e.deltaY) * 0.03, 0, 1);
-      set(fromFrac(f));
+      const st = opt.step ? opt.step / (opt.max - opt.min) : 0.03;
+      set(fromFrac(clamp(toFrac(value) - Math.sign(e.deltaY) * st, 0, 1)));
     }, { passive:false });
-    dial.addEventListener("keydown", (e) => {
-      const stepF = (e.key === "PageUp" || e.key === "PageDown") ? 0.1 : 0.02;
-      if (e.key === "ArrowUp" || e.key === "ArrowRight" || e.key === "PageUp"){ e.preventDefault(); set(fromFrac(clamp(toFrac(value)+stepF,0,1))); }
-      else if (e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "PageDown"){ e.preventDefault(); set(fromFrac(clamp(toFrac(value)-stepF,0,1))); }
-    });
-    return { set, get:() => value };
+    sld.addEventListener("input", () => set(fromFrac(parseFloat(sld.value))));
+
+    if (opt.key) (KNOBS[opt.key] = KNOBS[opt.key] || []).push(api);
+    KNOB_LIST.push(api);
+    return api;
   }
 
   const fmtHz = v => v >= 1000 ? (v/1000).toFixed(v>=9500?0:1) + " kHz" : Math.round(v) + " Hz";
@@ -3158,24 +3281,24 @@ window.ZD_M = {
 
   // BPM (en el transporte)
   const bpmKnob = makeKnob(document.querySelector('[data-knob="bpm"]'), {
-    name:"BPM", min:40, max:200, value:state.bpm, color:"var(--peri)",
+    key:"bpm", step:1, name:"BPM", min:40, max:200, value:state.bpm, color:"var(--peri)",
     format:v => String(Math.round(v)), onChange:v => { state.bpm = Math.round(v); }
   });
   // Gate (panel arpegiador)
   makeKnob($("arpKnobs"), {
-    name:"Gate", min:0.05, max:1.5, value:state.gate, color:"var(--cyan)",
+    key:"gate", unit:"%", name:"Gate", min:0.05, max:1.5, value:state.gate, color:"var(--cyan)",
     format:v => Math.round(v*100) + "%", onChange:v => { state.gate = v; }
   });
-  makeKnob($("arpKnobs"), { name:"Swing", min:0, max:0.6, value:state.swing, color:"var(--cyan)", format:v => Math.round(v*100) + "%", onChange:v => state.swing = v });
-  makeKnob($("arpKnobs"), { name:"Humanize", min:0, max:0.03, value:state.humanize, color:"var(--peri)", format:v => Math.round(v*1000) + " ms", onChange:v => state.humanize = v });
-  makeKnob($("arpKnobs"), { name:"Prob", min:0, max:1, value:state.prob, color:"var(--peri)", format:v => Math.round(v*100) + "%", onChange:v => state.prob = v });
-  makeKnob($("arpKnobs"), { name:"Ratchet", min:0, max:1, value:state.ratchet, color:"var(--magenta)", format:v => Math.round(v*100) + "%", onChange:v => state.ratchet = v });
+  makeKnob($("arpKnobs"), { key:"swing", unit:"%", name:"Swing", min:0, max:0.6, value:state.swing, color:"var(--cyan)", format:v => Math.round(v*100) + "%", onChange:v => state.swing = v });
+  makeKnob($("arpKnobs"), { key:"humanize", unit:"ms", name:"Humanize", min:0, max:0.03, value:state.humanize, color:"var(--peri)", format:v => Math.round(v*1000) + " ms", onChange:v => state.humanize = v });
+  makeKnob($("arpKnobs"), { key:"prob", unit:"%", name:"Prob", min:0, max:1, value:state.prob, color:"var(--peri)", format:v => Math.round(v*100) + "%", onChange:v => state.prob = v });
+  makeKnob($("arpKnobs"), { key:"ratchet", unit:"%", name:"Ratchet", min:0, max:1, value:state.ratchet, color:"var(--magenta)", format:v => Math.round(v*100) + "%", onChange:v => state.ratchet = v });
   // Pad
-  makeKnob($("padKnobs"), { name:"Attack", min:0.005, max:2.0, value:state.attack, scale:"log", color:"var(--magenta)", format:fmtMs, onChange:v => state.attack = v });
-  makeKnob($("padKnobs"), { name:"Release", min:0.05, max:4.0, value:state.release, scale:"log", color:"var(--magenta)", format:fmtMs, onChange:v => state.release = v });
-  makeKnob($("padKnobs"), { name:"Cutoff", min:200, max:12000, value:state.cutoff, scale:"log", color:"var(--gold)", format:fmtHz, onChange:v => state.cutoff = v });
-  makeKnob($("padKnobs"), { name:"Detune", min:0, max:25, value:state.detune, color:"var(--gold)", format:v => v.toFixed(0) + " ¢", onChange:v => state.detune = v });
-  makeKnob($("padKnobs"), { name:"Level", min:0, max:1, value:state.level, color:"var(--peri)", format:v => Math.round(v*100) + "%", onChange:v => { state.level = v; if (masterGain) masterGain.gain.setTargetAtTime(v, ctx.currentTime, 0.02); } });
+  makeKnob($("padKnobs"), { key:"attack", unit:"ms", name:"Attack", min:0.005, max:2.0, value:state.attack, scale:"log", color:"var(--magenta)", format:fmtMs, onChange:v => state.attack = v });
+  makeKnob($("padKnobs"), { key:"release", unit:"ms", name:"Release", min:0.05, max:4.0, value:state.release, scale:"log", color:"var(--magenta)", format:fmtMs, onChange:v => state.release = v });
+  makeKnob($("padKnobs"), { key:"cutoff", unit:"Hz", name:"Cutoff", min:200, max:12000, value:state.cutoff, scale:"log", color:"var(--gold)", format:fmtHz, onChange:v => state.cutoff = v });
+  makeKnob($("padKnobs"), { key:"detune", unit:"¢", name:"Detune", min:0, max:25, value:state.detune, color:"var(--gold)", format:v => v.toFixed(0) + " ¢", onChange:v => state.detune = v });
+  makeKnob($("padKnobs"), { key:"level", unit:"%", name:"Level", min:0, max:1, value:state.level, color:"var(--peri)", format:v => Math.round(v*100) + "%", onChange:v => { state.level = v; if (masterGain) masterGain.gain.setTargetAtTime(v, ctx.currentTime, 0.02); } });
 
   // ---- Fase 3: helpers de efectos ----
   const fmtHz2 = v => v.toFixed(2) + " Hz";
@@ -3183,29 +3306,29 @@ window.ZD_M = {
   const setP = (p, v, tc = 0.03) => { if (p) p.setTargetAtTime(v, ctx.currentTime, tc); };
 
   // Voz cósmica (unísono + LFO de filtro)
-  makeKnob($("voiceKnobs"), { name:"Voces", min:1, max:7, value:state.voices, color:"var(--peri)", format:v => String(Math.round(v)), onChange:v => state.voices = Math.round(v) });
-  makeKnob($("voiceKnobs"), { name:"Spread", min:0, max:40, value:state.detune, color:"var(--peri)", format:v => Math.round(v) + " ¢", onChange:v => state.detune = v });
-  makeKnob($("voiceKnobs"), { name:"Ancho", min:0, max:1, value:state.width, color:"var(--peri)", format:fmtPct, onChange:v => state.width = v });
-  makeKnob($("voiceKnobs"), { name:"LFO filtro", min:0.02, max:2, value:state.flfoRate, scale:"log", color:"var(--cyan)", format:fmtHz2, onChange:v => { state.flfoRate = v; setP(fx.flfo && fx.flfo.frequency, v, 0.05); } });
-  makeKnob($("voiceKnobs"), { name:"Barrido", min:0, max:1, value:state.flfoDepth, color:"var(--cyan)", format:fmtPct, onChange:v => { state.flfoDepth = v; setP(fx.flfoDepth && fx.flfoDepth.gain, v * 7000, 0.05); } });
+  makeKnob($("voiceKnobs"), { key:"voices", step:1, name:"Voces", min:1, max:7, value:state.voices, color:"var(--peri)", format:v => String(Math.round(v)), onChange:v => state.voices = Math.round(v) });
+  makeKnob($("voiceKnobs"), { key:"detune", unit:"¢", name:"Spread", min:0, max:40, value:state.detune, color:"var(--peri)", format:v => Math.round(v) + " ¢", onChange:v => state.detune = v });
+  makeKnob($("voiceKnobs"), { key:"width", unit:"%", name:"Ancho", min:0, max:1, value:state.width, color:"var(--peri)", format:fmtPct, onChange:v => state.width = v });
+  makeKnob($("voiceKnobs"), { key:"flfoRate", unit:"Hz", name:"LFO filtro", min:0.02, max:2, value:state.flfoRate, scale:"log", color:"var(--cyan)", format:fmtHz2, onChange:v => { state.flfoRate = v; setP(fx.flfo && fx.flfo.frequency, v, 0.05); } });
+  makeKnob($("voiceKnobs"), { key:"flfoDepth", unit:"%", name:"Barrido", min:0, max:1, value:state.flfoDepth, color:"var(--cyan)", format:fmtPct, onChange:v => { state.flfoDepth = v; setP(fx.flfoDepth && fx.flfoDepth.gain, v * 7000, 0.05); } });
 
   // Espacio (reverb + delay)
-  makeKnob($("spaceKnobs"), { name:"Reverb", min:0, max:1, value:state.revMix, color:"var(--cyan)", format:fmtPct, onChange:v => { state.revMix = v; setP(fx.rIn && fx.rIn.gain, v); } });
-  makeKnob($("spaceKnobs"), { name:"Tamaño", min:1, max:7, value:state.revSize, color:"var(--cyan)", format:v => v.toFixed(1) + " s", onChange:v => { state.revSize = v; if (fx.conv) fx.conv.buffer = makeImpulse(ctx, v); } });
-  makeKnob($("spaceKnobs"), { name:"Brillo", min:0, max:1, value:state.revBright, color:"var(--gold)", format:fmtPct, onChange:v => { state.revBright = v; setP(fx.rBright && fx.rBright.gain, v * 14); } });
-  makeKnob($("spaceKnobs"), { name:"Delay", min:0, max:1, value:state.dlyMix, color:"var(--peri)", format:fmtPct, onChange:v => { state.dlyMix = v; setP(fx.dIn && fx.dIn.gain, v); } });
-  makeKnob($("spaceKnobs"), { name:"Tiempo", min:0.05, max:0.7, value:state.dlyTime, color:"var(--peri)", format:v => Math.round(v*1000) + " ms", onChange:v => { state.dlyTime = v; setP(fx.dL && fx.dL.delayTime, v, 0.05); setP(fx.dR && fx.dR.delayTime, v, 0.05); } });
-  makeKnob($("spaceKnobs"), { name:"Feedback", min:0, max:0.85, value:state.dlyFb, color:"var(--peri)", format:fmtPct, onChange:v => { state.dlyFb = v; setP(fx.dFb && fx.dFb.gain, v); } });
+  makeKnob($("spaceKnobs"), { key:"revMix", unit:"%", name:"Reverb", min:0, max:1, value:state.revMix, color:"var(--cyan)", format:fmtPct, onChange:v => { state.revMix = v; setP(fx.rIn && fx.rIn.gain, v); } });
+  makeKnob($("spaceKnobs"), { key:"revSize", unit:"s", name:"Tamaño", min:1, max:7, value:state.revSize, color:"var(--cyan)", format:v => v.toFixed(1) + " s", onChange:v => { state.revSize = v; if (fx.conv) fx.conv.buffer = makeImpulse(ctx, v); } });
+  makeKnob($("spaceKnobs"), { key:"revBright", unit:"%", name:"Brillo", min:0, max:1, value:state.revBright, color:"var(--gold)", format:fmtPct, onChange:v => { state.revBright = v; setP(fx.rBright && fx.rBright.gain, v * 14); } });
+  makeKnob($("spaceKnobs"), { key:"dlyMix", unit:"%", name:"Delay", min:0, max:1, value:state.dlyMix, color:"var(--peri)", format:fmtPct, onChange:v => { state.dlyMix = v; setP(fx.dIn && fx.dIn.gain, v); } });
+  makeKnob($("spaceKnobs"), { key:"dlyTime", unit:"ms", name:"Tiempo", min:0.05, max:0.7, value:state.dlyTime, color:"var(--peri)", format:v => Math.round(v*1000) + " ms", onChange:v => { state.dlyTime = v; setP(fx.dL && fx.dL.delayTime, v, 0.05); setP(fx.dR && fx.dR.delayTime, v, 0.05); } });
+  makeKnob($("spaceKnobs"), { key:"dlyFb", unit:"%", name:"Feedback", min:0, max:0.85, value:state.dlyFb, color:"var(--peri)", format:fmtPct, onChange:v => { state.dlyFb = v; setP(fx.dFb && fx.dFb.gain, v); } });
 
   // Modulación (chorus + auto-pan)
-  makeKnob($("modKnobs"), { name:"Chorus", min:0, max:1, value:state.chMix, color:"var(--gold)", format:fmtPct, onChange:v => { state.chMix = v; setP(fx.chorusWet && fx.chorusWet.gain, v); } });
-  makeKnob($("modKnobs"), { name:"Ch prof.", min:0, max:1, value:state.chDepth, color:"var(--gold)", format:fmtPct, onChange:v => { state.chDepth = v; if (fx.chDepth) fx.chDepth.forEach(g => setP(g.gain, v * 0.004)); } });
-  makeKnob($("modKnobs"), { name:"Ch rate", min:0.05, max:3, value:state.chRate, scale:"log", color:"var(--gold)", format:fmtHz2, onChange:v => { state.chRate = v; if (fx.chRate) fx.chRate.forEach((o,i) => setP(o.frequency, v * (i ? 1.32 : 1), 0.05)); } });
-  makeKnob($("modKnobs"), { name:"Auto-pan", min:0, max:1, value:state.panDepth, color:"var(--cyan)", format:fmtPct, onChange:v => { state.panDepth = v; setP(fx.panDepth && fx.panDepth.gain, v); } });
-  makeKnob($("modKnobs"), { name:"Pan rate", min:0.02, max:2, value:state.panRate, scale:"log", color:"var(--cyan)", format:fmtHz2, onChange:v => { state.panRate = v; setP(fx.panLFO && fx.panLFO.frequency, v, 0.05); } });
+  makeKnob($("modKnobs"), { key:"chMix", unit:"%", name:"Chorus", min:0, max:1, value:state.chMix, color:"var(--gold)", format:fmtPct, onChange:v => { state.chMix = v; setP(fx.chorusWet && fx.chorusWet.gain, v); } });
+  makeKnob($("modKnobs"), { key:"chDepth", unit:"%", name:"Ch prof.", min:0, max:1, value:state.chDepth, color:"var(--gold)", format:fmtPct, onChange:v => { state.chDepth = v; if (fx.chDepth) fx.chDepth.forEach(g => setP(g.gain, v * 0.004)); } });
+  makeKnob($("modKnobs"), { key:"chRate", unit:"Hz", name:"Ch rate", min:0.05, max:3, value:state.chRate, scale:"log", color:"var(--gold)", format:fmtHz2, onChange:v => { state.chRate = v; if (fx.chRate) fx.chRate.forEach((o,i) => setP(o.frequency, v * (i ? 1.32 : 1), 0.05)); } });
+  makeKnob($("modKnobs"), { key:"panDepth", unit:"%", name:"Auto-pan", min:0, max:1, value:state.panDepth, color:"var(--cyan)", format:fmtPct, onChange:v => { state.panDepth = v; setP(fx.panDepth && fx.panDepth.gain, v); } });
+  makeKnob($("modKnobs"), { key:"panRate", unit:"Hz", name:"Pan rate", min:0.02, max:2, value:state.panRate, scale:"log", color:"var(--cyan)", format:fmtHz2, onChange:v => { state.panRate = v; setP(fx.panLFO && fx.panLFO.frequency, v, 0.05); } });
 
   // Drone
-  makeKnob($("droneKnobs"), { name:"Drone", min:0, max:1, value:state.drone, color:"var(--magenta)", format:fmtPct, onChange:v => { state.drone = v; setDroneLevel(); } });
+  makeKnob($("droneKnobs"), { key:"drone", unit:"%", name:"Drone", min:0, max:1, value:state.drone, color:"var(--magenta)", format:fmtPct, onChange:v => { state.drone = v; setDroneLevel(); } });
 
   // Euclidiano
   const euclidReadout = $("euclidReadout"), euclidTgl = $("euclidTgl");
@@ -3220,8 +3343,8 @@ window.ZD_M = {
     updateEuclidReadout();
   }
   euclidTgl.addEventListener("click", () => { state.euclidOn = !state.euclidOn; updateEuclidUI(); });
-  makeKnob($("euclidKnobs"), { name:"Pulsos", min:1, max:16, value:state.euclidK, color:"var(--cyan)", format:v => String(Math.round(v)), onChange:v => { state.euclidK = clamp(Math.round(v), 1, state.euclidN); rebuildEuclid(); updateEuclidReadout(); } });
-  makeKnob($("euclidKnobs"), { name:"Pasos", min:2, max:16, value:state.euclidN, color:"var(--cyan)", format:v => String(Math.round(v)), onChange:v => { state.euclidN = Math.round(v); if (state.euclidK > state.euclidN) state.euclidK = state.euclidN; rebuildEuclid(); updateEuclidReadout(); } });
+  makeKnob($("euclidKnobs"), { key:"euclidK", step:1, name:"Pulsos", min:1, max:16, value:state.euclidK, color:"var(--cyan)", format:v => String(Math.round(v)), onChange:v => { state.euclidK = clamp(Math.round(v), 1, state.euclidN); rebuildEuclid(); updateEuclidReadout(); } });
+  makeKnob($("euclidKnobs"), { key:"euclidN", step:1, name:"Pasos", min:2, max:16, value:state.euclidN, color:"var(--cyan)", format:v => String(Math.round(v)), onChange:v => { state.euclidN = Math.round(v); if (state.euclidK > state.euclidN) state.euclidK = state.euclidN; rebuildEuclid(); updateEuclidReadout(); syncKnobs("euclidK"); } });
 
   // ---- Transporte ----
   const playBtn = $("play"), playLabel = $("playLabel"), playGlyph = $("playGlyph");
@@ -3313,6 +3436,7 @@ window.ZD_M = {
         const el = document.createElement("div");
         el.className = "pkey black"; el.dataset.midi = midi;
         el.style.left = ((o*whitesPerOct + BLACK[+semi]) * wUnit) + "%";
+        el.style.setProperty("--o", o); el.style.setProperty("--b", BLACK[+semi]);
         if (PC_HINT[off]) el.innerHTML = `<span class="kbhint">${PC_HINT[off]}</span>`;
         piano.appendChild(el); pianoKeys.set(midi, el);
       }
