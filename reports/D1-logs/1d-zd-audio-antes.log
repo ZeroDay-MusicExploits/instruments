@@ -5,7 +5,7 @@ not ok 1 - zd-audio v1 · onResumed solo en la transición a 'running', no en ca
   ---
   duration_ms: 2848.52796
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-audio-resumed.test.mjs:66:1'
+  location: '<repo>/tools/tests/zd-audio-resumed.test.mjs:66:1'
   failureType: 'testCodeFailure'
   error: |-
     onResumed: 1 en el primer destrabe, +0 con el contexto ya corriendo, +1 por cada vuelta desde suspended
@@ -47,7 +47,7 @@ not ok 1 - zd-audio v1 · onResumed solo en la transición a 'running', no en ca
     resumeDesdeSuspended: 32
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-audio-resumed.test.mjs:91:12)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-audio-resumed.test.mjs:91:12)
     async Test.run (node:internal/test_runner/test:1054:7)
     async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
   ...
@@ -57,7 +57,7 @@ not ok 2 - descargables/CronBeat-808.html (zd-audio v1) · el primer destrabe re
   ---
   duration_ms: 1894.385317
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-audio-resumed.test.mjs:123:1'
+  location: '<repo>/tools/tests/zd-audio-resumed.test.mjs:123:1'
   failureType: 'testCodeFailure'
   error: |-
     el primer destrabe llama una vez a resyncSamples y el sample queda a la frecuencia real; los clics siguientes no la vuelven a llamar
@@ -104,7 +104,7 @@ not ok 2 - descargables/CronBeat-808.html (zd-audio v1) · el primer destrabe re
     seisClicsMas: 14
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-audio-resumed.test.mjs:148:12)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-audio-resumed.test.mjs:148:12)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...

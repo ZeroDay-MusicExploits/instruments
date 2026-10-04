@@ -5,7 +5,7 @@ not ok 1 - zd-rec v1 · worklet · onLimit solo avisa y después el usuario toca
   ---
   duration_ms: 1741.786531
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:82:3'
+  location: '<repo>/tools/tests/zd-rec-limit.test.mjs:82:3'
   failureType: 'testCodeFailure'
   error: |-
     al llegar al tope la toma tiene que llegar a onLimit y al próximo stop()
@@ -44,7 +44,7 @@ not ok 1 - zd-rec v1 · worklet · onLimit solo avisa y después el usuario toca
     secondStop: ~
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:107:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-rec-limit.test.mjs:107:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
   ...
@@ -54,7 +54,7 @@ not ok 2 - zd-rec v1 · worklet · onLimit llama a stop() (patrón J4/MonoMoon):
   ---
   duration_ms: 1156.21703
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:118:3'
+  location: '<repo>/tools/tests/zd-rec-limit.test.mjs:118:3'
   failureType: 'testCodeFailure'
   error: |-
     el stop() de adentro de onLimit se queda con la toma, y es la misma que recibe onLimit
@@ -92,7 +92,7 @@ not ok 2 - zd-rec v1 · worklet · onLimit llama a stop() (patrón J4/MonoMoon):
     stopAfter: ~
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:147:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-rec-limit.test.mjs:147:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
@@ -102,7 +102,7 @@ not ok 3 - zd-rec v1 · mediarecorder · onLimit solo avisa y después el usuari
   ---
   duration_ms: 1329.910171
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:82:3'
+  location: '<repo>/tools/tests/zd-rec-limit.test.mjs:82:3'
   failureType: 'testCodeFailure'
   error: |-
     al llegar al tope la toma tiene que llegar a onLimit y al próximo stop()
@@ -141,7 +141,7 @@ not ok 3 - zd-rec v1 · mediarecorder · onLimit solo avisa y después el usuari
     secondStop: ~
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:107:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-rec-limit.test.mjs:107:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
@@ -151,7 +151,7 @@ not ok 4 - zd-rec v1 · mediarecorder · onLimit llama a stop() (patrón J4/Mono
   ---
   duration_ms: 1176.032
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:118:3'
+  location: '<repo>/tools/tests/zd-rec-limit.test.mjs:118:3'
   failureType: 'testCodeFailure'
   error: |-
     el stop() de adentro de onLimit se queda con la toma, y es la misma que recibe onLimit
@@ -189,7 +189,7 @@ not ok 4 - zd-rec v1 · mediarecorder · onLimit llama a stop() (patrón J4/Mono
     stopAfter: ~
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:147:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-rec-limit.test.mjs:147:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
@@ -206,7 +206,7 @@ not ok 6 - zd-rec v1 · mediarecorder · el temporizador del tope de una toma vi
   ---
   duration_ms: 1300.325325
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-rec-limit.test.mjs:184:1'
+  location: '<repo>/tools/tests/zd-rec-limit.test.mjs:184:1'
   failureType: 'testCodeFailure'
   error: |-
     la 2ª toma no puede cortarse con el temporizador de la 1ª
@@ -229,7 +229,7 @@ not ok 6 - zd-rec v1 · mediarecorder · el temporizador del tope de una toma vi
     limits: 1
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-rec-limit.test.mjs:200:12)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-rec-limit.test.mjs:200:12)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...

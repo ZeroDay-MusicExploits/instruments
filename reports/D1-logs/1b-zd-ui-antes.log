@@ -5,7 +5,7 @@ not ok 1 - zd-ui v1 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 
   ---
   duration_ms: 507.589103
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:59:1'
+  location: '<repo>/tools/tests/zd-ui-prompt.test.mjs:59:1'
   failureType: 'testCodeFailure'
   error: |-
     el valor inicial tiene que quedar seleccionado y lo tipeado lo reemplaza
@@ -38,7 +38,7 @@ not ok 1 - zd-ui v1 · ZD.modal.prompt selecciona el valor inicial: tipear 2500 
     value: '14002500'
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:65:12)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-ui-prompt.test.mjs:65:12)
     async Test.run (node:internal/test_runner/test:1054:7)
     async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
   ...
@@ -48,7 +48,7 @@ not ok 2 - Acid_Bass-303.html (zd-ui v1) · el prompt reemplaza el valor y el in
   ---
   duration_ms: 495.018622
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  location: '<repo>/tools/tests/zd-ui-prompt.test.mjs:82:3'
   failureType: 'testCodeFailure'
   error: |-
     Expected values to be strictly deep-equal:
@@ -81,7 +81,7 @@ not ok 2 - Acid_Bass-303.html (zd-ui v1) · el prompt reemplaza el valor y el in
     value: '14002500'
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-ui-prompt.test.mjs:92:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
@@ -91,7 +91,7 @@ not ok 3 - CronBeat-808.html (zd-ui v1) · el prompt reemplaza el valor y el ins
   ---
   duration_ms: 494.707372
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  location: '<repo>/tools/tests/zd-ui-prompt.test.mjs:82:3'
   failureType: 'testCodeFailure'
   error: |-
     Expected values to be strictly deep-equal:
@@ -124,7 +124,7 @@ not ok 3 - CronBeat-808.html (zd-ui v1) · el prompt reemplaza el valor y el ins
     value: '14002500'
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-ui-prompt.test.mjs:92:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
@@ -134,7 +134,7 @@ not ok 4 - J4-Sirens_Station.html (zd-ui v1) · el prompt reemplaza el valor y e
   ---
   duration_ms: 482.369389
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  location: '<repo>/tools/tests/zd-ui-prompt.test.mjs:82:3'
   failureType: 'testCodeFailure'
   error: |-
     Expected values to be strictly deep-equal:
@@ -167,7 +167,7 @@ not ok 4 - J4-Sirens_Station.html (zd-ui v1) · el prompt reemplaza el valor y e
     value: '14002500'
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-ui-prompt.test.mjs:92:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
@@ -177,7 +177,7 @@ not ok 5 - MonoMoon70.html (zd-ui v1) · el prompt reemplaza el valor y el instr
   ---
   duration_ms: 498.860586
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  location: '<repo>/tools/tests/zd-ui-prompt.test.mjs:82:3'
   failureType: 'testCodeFailure'
   error: |-
     Expected values to be strictly deep-equal:
@@ -210,7 +210,7 @@ not ok 5 - MonoMoon70.html (zd-ui v1) · el prompt reemplaza el valor y el instr
     value: '14002500'
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-ui-prompt.test.mjs:92:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
@@ -220,7 +220,7 @@ not ok 6 - Nebularp_2035.html (zd-ui v1) · el prompt reemplaza el valor y el in
   ---
   duration_ms: 525.142875
   type: 'test'
-  location: '/mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO DAY/tools/tests/zd-ui-prompt.test.mjs:82:3'
+  location: '<repo>/tools/tests/zd-ui-prompt.test.mjs:82:3'
   failureType: 'testCodeFailure'
   error: |-
     Expected values to be strictly deep-equal:
@@ -253,7 +253,7 @@ not ok 6 - Nebularp_2035.html (zd-ui v1) · el prompt reemplaza el valor y el in
     value: '14002500'
   operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///mnt/LADATA/MIS_PROYECTOS_PROGRAMACION/ZERO%20DAY/tools/tests/zd-ui-prompt.test.mjs:92:14)
+    TestContext.<anonymous> (file://<repo>/tools/tests/zd-ui-prompt.test.mjs:92:14)
     async Test.run (node:internal/test_runner/test:1054:7)
     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
