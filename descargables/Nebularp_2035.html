@@ -400,6 +400,10 @@
   .iobtn:disabled{opacity:.55; cursor:default}
   .io-note{margin:0; font-size:12px; line-height:1.5; color:var(--zd-ink-faint)}
   .rec-result{display:flex; flex-direction:column; gap:8px}
+  /* indicador de clip: mide la salida, no la toca */
+  .clip-led{font-family:var(--zd-mono); font-size:11px; font-weight:800; letter-spacing:.12em; padding:6px 8px; align-self:center;
+    border-radius:var(--zd-r); color:#12130f; background:var(--zd-alert); border:1px solid var(--zd-alert); box-shadow:0 0 14px -2px var(--zd-alert)}
+  .clip-led[hidden]{display:none}
   @media (max-width:560px){ .zd-logo{height:48px} }
 </style>
 <style id="zd-mobile-skin">
@@ -2455,6 +2459,7 @@ window.ZD_M = {
         <span class="glyph" id="playGlyph"></span><span id="playLabel">Iniciar</span>
       </button>
       <button class="recbtn" id="recBtn" type="button" aria-pressed="false" aria-label="Grabar (WAV y MIDI)"><span class="rdot" aria-hidden="true">●</span><span id="recLabel">REC</span></button>
+      <span id="clipLed" class="clip-led" role="status" hidden>CLIP</span>
       <div class="knob" data-knob="bpm"></div>
       <button class="tap" id="tap">tap tempo</button>
       <button class="latch" id="latch" aria-pressed="false"><span class="led"></span>Latch</button>
@@ -2584,6 +2589,13 @@ window.ZD_M = {
         <div id="recResult" class="rec-result" role="status" aria-live="polite"><p class="io-note" id="recEmpty">Todavía no grabaste nada. Tocá ● REC, tocá y después ■.</p></div>
       </div>
       <div class="field">
+        <span class="flabel">Visualizador</span>
+        <div class="tglrow">
+          <button class="tgl" id="vizTgl" type="button" aria-pressed="false"><span class="led"></span>Modo liviano</button>
+          <span class="hint" style="margin:0" id="vizNote">Estrellas quietas y órbita sin brillo: menos batería y CPU.</span>
+        </div>
+      </div>
+      <div class="field">
         <span class="flabel">Sesión completa (JSON)</span>
         <div class="iorow">
           <button class="iobtn" id="saveJson" type="button">↓ Guardar JSON</button>
@@ -2617,7 +2629,8 @@ window.ZD_M = {
     const _m=/^c2slot:(.+)$/.exec(window.name||'');
     if(_m) SLOT_ID=_m[1]; else { const _q=new URLSearchParams(location.search).get('slot'); if(_q) SLOT_ID=_q; }
   }catch(e){}
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduceMQ = matchMedia("(prefers-reduced-motion: reduce)");
+  let reduceMotion = reduceMQ.matches;
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
   const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
   const midiToFreq = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -2723,7 +2736,10 @@ window.ZD_M = {
   /* ===================================================================
      MOTOR DE AUDIO
   =================================================================== */
-  let ctx = null, preMaster, masterFilter, comp, masterGain;
+  let ctx = null, preMaster, masterFilter, comp, masterGain, meter = null;
+  // zd-audio (R5): desbloqueo en el gesto, audioSession, interrupciones y wake
+  // lock. Con el hub C2 el contexto es del host: no lo manejamos desde acá.
+  const ZA = (!HOST && window.ZD && ZD.audio) ? ZD.audio : null;
   const fx = {};   // nodos de efectos + drone
 
   function makeImpulse(a, seconds, decay = 2.6){
@@ -2740,7 +2756,7 @@ window.ZD_M = {
 
   function initAudio(){
     if (ctx) return;
-    ctx = HOST ? HOST.ctx : new (window.AudioContext || window.webkitAudioContext)();
+    ctx = HOST ? HOST.ctx : new (window.AudioContext || window.webkitAudioContext)(ZA ? ZA.options() : { latencyHint:"interactive" });
 
     // --- troncos ---
     preMaster  = ctx.createGain(); preMaster.gain.value = 1;      // suma de voces + drone
@@ -2824,6 +2840,12 @@ window.ZD_M = {
     masterFilter.connect(comp); comp.connect(masterGain); masterGain.connect(C2_OUT || ctx.destination);
 
     buildDrone();
+
+    // Indicador de clip (R5): un analizador en paralelo que solo mide la
+    // salida. No hay limitador: el compresor del master es el de siempre.
+    meter = ctx.createAnalyser(); meter.fftSize = 1024;
+    masterGain.connect(meter);
+    syncAudioActivity();
   }
 
   /* ---- Capa de DRONE (fundamental + quinta + octava sostenidas) ---- */
@@ -2855,6 +2877,14 @@ window.ZD_M = {
   function setDroneLevel(){
     if (fx.drone) fx.drone.g.gain.setTargetAtTime(state.drone, ctx.currentTime, 0.08);
   }
+
+  // En el handler del gesto: crea/reanuda el contexto (iOS lo exige ahí adentro).
+  function unlockAudio(){
+    if (ZA) return ZA.unlock();
+    resumeAudio(); return Promise.resolve(true);
+  }
+  // Wake lock y vigilancia de "interrupted" mientras algo suena (transporte o drone).
+  function syncAudioActivity(){ if (ZA && ctx) ZA.setPlaying(state.playing || state.drone > 0.001); }
 
   function resumeAudio(){
     initAudio();
@@ -3144,7 +3174,7 @@ window.ZD_M = {
   addEventListener("keydown", (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
-    if (k === " " || e.code === "Space"){ e.preventDefault(); resumeAudio(); toggleTransport(); return; }
+    if (k === " " || e.code === "Space"){ e.preventDefault(); unlockAudio(); toggleTransport(); return; }
     if (k === "z"){ e.preventDefault(); shiftOctave(-1); return; }
     if (k === "x"){ e.preventDefault(); shiftOctave(1); return; }
     if (!(k in KEYMAP)) return;
@@ -3153,7 +3183,7 @@ window.ZD_M = {
     const raw = keyRawMidi(k); if (raw === null) return;
     const m = quantize(raw);
     heldKeys.set(k, m);
-    resumeAudio(); noteOn(m);
+    unlockAudio(); noteOn(m);
   });
   addEventListener("keyup", (e) => {
     const k = e.key.toLowerCase();
@@ -3404,7 +3434,7 @@ window.ZD_M = {
   makeKnob($("modKnobs"), { key:"panRate", unit:"Hz", name:"Pan rate", min:0.02, max:2, value:state.panRate, scale:"log", color:"var(--cyan)", format:fmtHz2, onChange:v => { state.panRate = v; setP(fx.panLFO && fx.panLFO.frequency, v, 0.05); } });
 
   // Drone
-  makeKnob($("droneKnobs"), { key:"drone", unit:"%", name:"Drone", min:0, max:1, value:state.drone, color:"var(--magenta)", format:fmtPct, onChange:v => { state.drone = v; setDroneLevel(); } });
+  makeKnob($("droneKnobs"), { key:"drone", unit:"%", name:"Drone", min:0, max:1, value:state.drone, color:"var(--magenta)", format:fmtPct, onChange:v => { state.drone = v; setDroneLevel(); syncAudioActivity(); } });
 
   // Euclidiano
   const euclidReadout = $("euclidReadout"), euclidTgl = $("euclidTgl");
@@ -3437,8 +3467,9 @@ window.ZD_M = {
     playGlyph.innerHTML = state.playing ? STOP_SVG : PLAY_SVG;
     statusEl.classList.toggle("live", state.playing);
     statusText.textContent = state.playing ? "orbitando" : "motor listo";
+    syncAudioActivity();
   }
-  playBtn.addEventListener("click", () => { resumeAudio(); toggleTransport(); });
+  playBtn.addEventListener("click", () => { unlockAudio(); toggleTransport(); });
   $("octUp").addEventListener("click", () => shiftOctave(1));
   $("octDown").addEventListener("click", () => shiftOctave(-1));
 
@@ -3535,7 +3566,7 @@ window.ZD_M = {
   function pianoDown(e){
     const raw = midiUnderPointer(e.clientX, e.clientY);
     if (raw === null) return;
-    e.preventDefault(); resumeAudio();
+    e.preventDefault(); unlockAudio();
     try { piano.setPointerCapture(e.pointerId); } catch(err){}
     const m = quantize(raw);
     pointerMidi.set(e.pointerId, { raw, m }); noteOn(m);
@@ -3571,7 +3602,10 @@ window.ZD_M = {
 
   function sizeCanvas(cv){
     const r = cv.getBoundingClientRect();
-    cv.width = Math.max(1, r.width * DPR); cv.height = Math.max(1, r.height * DPR);
+    // asignar width/height realoca y borra el canvas: solo si cambió el tamaño
+    const w = Math.max(1, Math.round(r.width * DPR)), h = Math.max(1, Math.round(r.height * DPR));
+    if (cv.width !== w) cv.width = w;
+    if (cv.height !== h) cv.height = h;
   }
   function drawOrbit(){
     sizeCanvas(orbit);
@@ -3607,7 +3641,7 @@ window.ZD_M = {
       // color por rol
       const col = isActive ? "236,95,208" : "124,134,255";
       if (isActive){
-        octx.shadowColor = "rgba(236,95,208,.9)"; octx.shadowBlur = 22 * DPR;
+        if (!vizLow()){ octx.shadowColor = "rgba(236,95,208,.9)"; octx.shadowBlur = 22 * DPR; }
       } else { octx.shadowBlur = 0; }
       octx.beginPath(); octx.arc(px, py, rad, 0, Math.PI*2);
       octx.fillStyle = `rgba(${col},${isActive?1:0.55})`; octx.fill();
@@ -3630,7 +3664,7 @@ window.ZD_M = {
   function drawStars(time){
     sctx.clearRect(0,0,stars.width,stars.height);
     for (const s of starList){
-      const tw = reduceMotion ? 0.7 : (0.5 + 0.5*Math.sin(time*0.001*s.sp + s.tw));
+      const tw = vizLow() ? 0.7 : (0.5 + 0.5*Math.sin(time*0.001*s.sp + s.tw));
       const c = s.hue < 0.8 ? "236,238,255" : (s.hue < 0.92 ? "180,255,246" : "246,198,107");
       sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
       sctx.fillStyle = `rgba(${c},${0.25 + tw*0.65})`; sctx.fill();
@@ -3638,6 +3672,11 @@ window.ZD_M = {
   }
 
   // ---- Loop de dibujo + sincronía de UI con el audio ----
+  // Modo liviano (R5, "baja carga"): a pedido o con prefers-reduced-motion.
+  // Estrellas quietas, órbita redibujada solo cuando cambia algo y sin glow.
+  let vizPref = false, lastDraw = 0, orbitDirty = true;
+  const vizLow = () => vizPref || reduceMotion;
+
   function frame(time){
     // consumir eventos programados que ya "sonaron"
     if (ctx){
@@ -3649,7 +3688,7 @@ window.ZD_M = {
           ? ( (state.pattern==="chord"||state.pattern==="random") ? 0 : (latest.index % Math.max(1, Math.min(sequence.length,32))) )
           : -1;
         activeCount = latest.count;
-        pulse = 1;
+        pulse = 1; orbitDirty = true;
         // readout central
         if (latest.count > 0){
           if (state.pattern === "chord"){ orbitBig.textContent = "◆"; orbitSmall.textContent = "acorde"; }
@@ -3661,13 +3700,39 @@ window.ZD_M = {
         }
       }
     }
-    pulse *= reduceMotion ? 0 : 0.9;
-    drawStars(time);
-    drawOrbit();
+    if (meter) checkClip(time);
+    if (!vizLow()){
+      pulse *= 0.9;
+      drawStars(time);
+      drawOrbit();
+    } else {
+      // liviano: estrellas quietas (ya dibujadas), órbita solo si cambió algo, ~20 fps
+      pulse = 0;
+      if (orbitDirty && time - lastDraw > 50){ drawOrbit(); lastDraw = time; orbitDirty = false; }
+    }
     requestAnimationFrame(frame);
   }
 
-  addEventListener("resize", () => { initStars(); });
+  // ---- Indicador de clip: mide lo que ya está en el analizador ----
+  const clipLed = $("clipLed");
+  let meterBuf = null, clipUntil = 0, clipOn = false;
+  function checkClip(now){
+    let peak = 0;
+    if (meter.getFloatTimeDomainData){
+      if (!meterBuf) meterBuf = new Float32Array(meter.fftSize);
+      meter.getFloatTimeDomainData(meterBuf);
+      for (let i = 0; i < meterBuf.length; i++){ const a = Math.abs(meterBuf[i]); if (a > peak) peak = a; }
+    } else {
+      if (!meterBuf) meterBuf = new Uint8Array(meter.fftSize);
+      meter.getByteTimeDomainData(meterBuf);
+      for (let i = 0; i < meterBuf.length; i++){ const a = Math.abs(meterBuf[i] - 128) / 128; if (a > peak) peak = a; }
+    }
+    if (peak >= 0.98) clipUntil = now + 700;        // |muestra| >= ~0,98 de escala completa
+    const on = now < clipUntil;
+    if (on !== clipOn){ clipOn = on; clipLed.hidden = !on; }
+  }
+
+  addEventListener("resize", () => { initStars(); if (vizLow()) drawStars(0); orbitDirty = true; });
   // init
   updateTransportUI(); renderHeld(); octVal.textContent = "C" + state.baseOctave;
   renderPiano(); updateLatchUI(); updateEuclidUI();
@@ -3751,8 +3816,12 @@ window.ZD_M = {
     return n;
   }
 
-  function sessionData(){ return snapshot(); }
-  function applySession(d){ return applyState(d) > 0; }
+  function sessionData(){ return Object.assign(snapshot(), { prefs:{ vizLow:vizPref } }); }
+  function applySession(d){
+    let any = applyState(d) > 0;
+    if (d && d.prefs && typeof d.prefs.vizLow === "boolean"){ setVizPref(d.prefs.vizLow); any = true; }
+    return any;
+  }
 
   async function resetAll(){
     const ok = await ZD.modal.confirm("Se borran la escala, el arpegiador, el sonido y el acorde guardados en este navegador. No se puede deshacer.",
@@ -3760,7 +3829,7 @@ window.ZD_M = {
     if (!ok) return;
     sessionReady = false;
     if (session) await session.clear();
-    applyState(DEFAULTS);
+    applyState(DEFAULTS); setVizPref(false);
     // No volvemos a guardar: la sesión queda vacía hasta el próximo cambio, así
     // la siguiente carga arranca limpia y sin el toast de "sesión restaurada".
     sessionReady = true;
@@ -3883,7 +3952,7 @@ window.ZD_M = {
     if (recBusy || recOn || !recorder) return;
     recBusy = true; recBtn.disabled = true;
     try {
-      resumeAudio();
+      await unlockAudio();
       await recorder.start();
       take = { startAt:ctx.currentTime, t0:null, bpm:state.bpm, notes:[], open:new Map() };
       const T = take.startAt;
@@ -3949,6 +4018,34 @@ window.ZD_M = {
     note.textContent = "MIDI en vivo (Web MIDI) no disponible en este navegador: el MIDI de cada toma igual se descarga como archivo .mid.";
     note.hidden = false;
   })();
+
+  /* ===================================================================
+     AUDIO E iOS (SPEC R5) + VISUALIZADOR LIVIANO
+  =================================================================== */
+  if (ZA){
+    ZA.attach({ getContext:() => ctx, ensure:() => initAudio() });
+    // cualquier gesto destraba: audioSession + <audio> silencioso + resume
+    ZA.bindGesture(window);
+  }
+
+  const vizTgl = $("vizTgl"), vizNote = $("vizNote");
+  function updateVizUI(){
+    const on = vizLow();
+    vizTgl.classList.toggle("on", on);
+    vizTgl.setAttribute("aria-pressed", String(on));
+    vizTgl.disabled = reduceMotion;
+    vizNote.textContent = reduceMotion
+      ? "Tu sistema pide menos movimiento: el modo liviano queda fijo."
+      : "Estrellas quietas y órbita sin brillo: menos batería y CPU.";
+    if (on) drawStars(0);
+    orbitDirty = true; drawOrbit();
+  }
+  function setVizPref(on){ vizPref = !!on; updateVizUI(); }
+  vizTgl.addEventListener("click", () => { setVizPref(!vizPref); markDirty(); });
+  const onReduce = (e) => { reduceMotion = e.matches; updateVizUI(); };
+  if (reduceMQ.addEventListener) reduceMQ.addEventListener("change", onReduce);
+  else if (reduceMQ.addListener) reduceMQ.addListener(onReduce);
+  updateVizUI();
 
   /* ===================================================================
      ADAPTADOR C2 v1 — Nebularp 2035 (arpegiador). Inyectado DENTRO del IIFE
