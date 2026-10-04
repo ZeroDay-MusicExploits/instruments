@@ -3720,13 +3720,13 @@ function buildProject(){
       key:v.key, name:v.name,
       vol:vol[i], pan:pan[i], mute:muted[i], solo:soloed[i],
       revSend:revSend[i], dlySend:dlySend[i], driveMix:driveMix[i], phaserMix:phaserMix[i],
-      sample: sampleRaw[i] ? { name:sampleRaw[i].name, type:sampleRaw[i].type, data:bytesToB64(sampleRaw[i].bytes), edit: sampleEdit[i]||defaultEdit() } : null
+      sample: sampleRaw[i] ? { name:sampleRaw[i].name, type:sampleRaw[i].type, data:sampleRaw[i].b64 || (sampleRaw[i].b64=bytesToB64(sampleRaw[i].bytes)), edit: sampleEdit[i]||defaultEdit() } : null
     }))
   };
 }
-function loadProject(obj, silent){
+function loadProject(obj, silent, noAudio){
   if(!obj || obj.app!=='caja-de-ritmos'){ toast('Ese archivo no es un proyecto de la caja de ritmos.'); return; }
-  ensureAudio();
+  if(!noAudio) ensureAudio();
   tempo = obj.tempo ?? tempo; swing = obj.swing ?? swing; masterVol = obj.master ?? masterVol;
   if(obj.fx){ Object.assign(reverb, obj.fx.reverb||{}); Object.assign(delay, obj.fx.delay||{}); Object.assign(phaser, obj.fx.phaser||{}); Object.assign(drive, obj.fx.drive||{}); }
   if(Array.isArray(obj.patterns)){
@@ -3850,27 +3850,72 @@ const toastEl=document.getElementById('toast'); let toastT=null;
 function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),2400); }
 
 /* =========================================================================
-   PERSISTENCIA — IndexedDB (autoguardado local, privado a este navegador)
+   PERSISTENCIA — autoguardado (SPEC R3) con zd-store
+   Clave zd:cronbeat:session en IndexedDB (zd-sessions; fallback localStorage)
+   con el envoltorio {app, version, savedAt, data}. data es exactamente
+   buildProject(): lo mismo que guardaba el autoguardado anterior y lo mismo
+   que va dentro del JSON exportado, samples en base64 incluidos.
+   Migración sin pérdida: si la clave nueva está vacía se lee la DB anterior
+   'caja-ritmos-db' (projects/autosave), se restaura y se copia a la nueva; la
+   anterior queda intacta (solo "Empezar de cero" la borra).
+   Con el hub C2 (HOST) no se restaura ni se guarda: el dueño del estado es el
+   host (setState) y varias cajas en el rig pisarían la misma clave. Ver
+   docs/zd-blocks.md (zd-store).
    ========================================================================= */
-const DB_NAME='caja-ritmos-db', STORE='projects', KEY='autosave';
-function idbOpen(){ return new Promise((res,rej)=>{ let r; try{ r=indexedDB.open(DB_NAME,1); }catch(e){ return rej(e); }
-  r.onupgradeneeded=()=>{ if(!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE); };
-  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
-async function idbSave(obj){ try{ const db=await idbOpen(); return await new Promise(res=>{ const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(obj,KEY); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }catch(e){ return false; } }
-async function idbLoad(){ try{ const db=await idbOpen(); return await new Promise(res=>{ const tx=db.transaction(STORE,'readonly'); const rq=tx.objectStore(STORE).get(KEY); rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>res(null); }); }catch(e){ return null; } }
-async function idbClear(){ try{ const db=await idbOpen(); return await new Promise(res=>{ const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).delete(KEY); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }catch(e){ return false; } }
-let dirty=false, loading=false;
-function markDirty(){ if(!loading) dirty=true; }
-async function doAutosave(){ if(!dirty || loading) return; dirty=false; try{ await idbSave(buildProject()); }catch(e){} }
+const APP_ID='cronbeat-808', APP_VERSION=4, APP_SLUG='cronbeat';
+const OLD_DB='caja-ritmos-db', OLD_STORE='projects', OLD_KEY='autosave';
+/* Abre la DB anterior sin crearla: si no existía, se aborta la creación. */
+function oldDbOpen(){ return new Promise(res=>{ let r; try{ r=indexedDB.open(OLD_DB); }catch(e){ return res(null); }
+  r.onupgradeneeded=()=>{ try{ r.transaction.abort(); }catch(e){} };
+  r.onsuccess=()=>{ const db=r.result; if(!db.objectStoreNames.contains(OLD_STORE)){ db.close(); return res(null); } res(db); };
+  r.onerror=(e)=>{ if(e && e.preventDefault) e.preventDefault(); res(null); }; r.onblocked=()=>res(null); }); }
+async function oldDbGet(){ const db=await oldDbOpen(); if(!db) return null;
+  return new Promise(res=>{ try{ const rq=db.transaction(OLD_STORE,'readonly').objectStore(OLD_STORE).get(OLD_KEY);
+    rq.onsuccess=()=>{ db.close(); res(rq.result||null); }; rq.onerror=()=>{ db.close(); res(null); }; }catch(e){ db.close(); res(null); } }); }
+async function oldDbClear(){ const db=await oldDbOpen(); if(!db) return;
+  await new Promise(res=>{ try{ const tx=db.transaction(OLD_STORE,'readwrite'); tx.objectStore(OLD_STORE).delete(OLD_KEY);
+    tx.oncomplete=tx.onerror=tx.onabort=()=>{ db.close(); res(); }; }catch(e){ db.close(); res(); } }); }
+async function migrateOld(){ const p=await oldDbGet();
+  return (p && p.app==='caja-de-ritmos') ? { app:APP_ID, version:APP_VERSION, savedAt:null, data:p, migrated:true } : null; }
+
+let Session=null, sessionReady=false, loading=false;
+/* Cualquier interacción programa un guardado (debounce 1,5 s). zd-store además
+   hace flush en visibilitychange (hidden), pagehide y freeze. */
+function markDirty(){ if(!loading && sessionReady && Session) Session.save(); }
 ['pointerdown','keydown','change','input'].forEach(ev=> document.addEventListener(ev, markDirty, true));
-setInterval(doAutosave, 3000);
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') doAutosave(); });
-async function initPersistence(){
-  loading=true;
-  try{ const saved=await idbLoad(); if(saved){ ensureAudio(); loadProject(saved, true); toast('Proyecto recuperado del autoguardado.'); } }catch(e){}
-  loading=false;
+/* Restaura SIN arrancar el audio: loadProject(…, noAudio) no crea el
+   AudioContext y los samples se decodifican offline (ver decoder()). */
+async function initSession(){
+  if(HOST || !(window.ZD && ZD.store)) return;
+  Session=ZD.store.open({ slug:APP_SLUG, app:APP_ID, version:APP_VERSION, debounce:1500, getData:buildProject, migrate:migrateOld });
+  ZD.store.persist();
+  let env=null; try{ env=await Session.load(); }catch(e){ env=null; }
+  const r=env ? Session.unwrap(env) : null;
+  if(r && !r.ok){
+    // una sesión de una versión más nueva (u otra app) no se pisa con esta
+    Session.enabled=false;
+    ZD.toast('La sesión guardada es de una versión más nueva de CronBeat: no se restauró ni se va a sobrescribir.', { kind:'error', ms:8000 });
+    return;
+  }
+  if(r && r.data && r.data.app==='caja-de-ritmos'){
+    loading=true;
+    try{ loadProject(r.data, true, true); }
+    catch(e){ console.error(e); loading=false; Session.enabled=false; ZD.toast('No se pudo restaurar la sesión guardada.', { kind:'error' }); return; }
+    loading=false;
+    if(env.migrated) Session.saveNow();          // copia a la clave nueva; la DB anterior queda
+    ZD.toast('Sesión restaurada', { ms:9000, action:{ label:'Empezar de cero', onClick:resetProject } });
+  }
+  sessionReady=true;
 }
-async function resetProject(){ if(confirm('¿Borrar el proyecto guardado y volver a cero? No se puede deshacer.')){ loading=true; await idbClear(); location.reload(); } }
+async function resetProject(){
+  const ok = await ZD.modal.confirm('Se borran los patrones, la canción, los FX y los samples guardados en este navegador. No se puede deshacer: si querés conservarlo, guardá antes el JSON.',
+    { title:'EMPEZAR DE CERO', ok:'BORRAR TODO', cancel:'CANCELAR', danger:true });
+  if(!ok) return;
+  sessionReady=false; loading=true;
+  if(Session){ Session.enabled=false; await Session.clear(); }
+  await oldDbClear();
+  location.reload();
+}
 document.getElementById('resetAll').addEventListener('click', resetProject);
 
 /* =========================================================================
@@ -3893,7 +3938,7 @@ if(!HOST && window.ZD && ZD.audio){
 buildRuler(); buildTracks(); buildPads(); buildMatrix(); buildMixer(); bindTrackBar(); selectTrack(0); buildPatBar(); bindFX(); bindEditor(); seedPattern(); renderSong(); renderAll(); updatePatBar(); refreshFXControls(); refreshEditorPadList(); setTempo(tempo);
 const isTouch=(window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
 setView(isTouch ? 'pads' : 'seq');
-initPersistence();
+initSession();
 </script>
 <script>
 /* ============================================================================
