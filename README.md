@@ -22,6 +22,15 @@ Zero Day · Music Exploits es una suite de 5 instrumentos musicales que corren e
   <img src="docs/screenshots/landing-mobile.webp" alt="Landing de CronBeat-8:08 en mobile" width="260">
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/cronbeat-390x844.webp" alt="CronBeat-8:08 en vertical (390×844)" width="150">
+  <img src="docs/screenshots/monomoon-390x844.webp" alt="MonoMoon'70 en vertical (390×844)" width="150">
+  <img src="docs/screenshots/nebularp-390x844.webp" alt="NEBULARP 2035 en vertical (390×844)" width="150">
+  <img src="docs/screenshots/sirens-390x844.webp" alt="J4-Sirens Station en vertical (390×844)" width="150">
+  <img src="docs/screenshots/acid-390x844.webp" alt="ACID BASS-303 en vertical (390×844)" width="150">
+</p>
+<p align="center"><sub>Los 5 instrumentos en vertical (390×844). Se regeneran con <code>node tools/build-screenshots.mjs</code>.</sub></p>
+
 Los 5 instrumentos se pueden usar de forma independiente, y también se pueden sincronizar, mezclar y masterizar juntos desde **C2 · Sync Master Envelopment**, la plataforma central del proyecto (en desarrollo aparte; cada instrumento se abre ahí como una pestaña, con tempo compartido y encendido/apagado conjunto).
 
 | # | Instrumento | Archivo | Tipo |
