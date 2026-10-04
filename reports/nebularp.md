@@ -4,11 +4,67 @@ Rama `c-nebularp` · 2026-10-03 · archivo: `descargables/Nebularp_2035.html`
 (slug `nebularp`).
 
 Quedaron hechos R1 a R7 y el extra (autoplay generativo). Los 8 bloques ZD
-están pegados byte a byte desde el piloto. El adaptador C2 no cambió. Todo
+están pegados byte a byte desde `tools/blocks/`. El adaptador C2 no cambió. Todo
 se verificó en **Chromium (Playwright)**; nada se probó en un dispositivo real
-ni en WebKit o Firefox (sección 6). Encontré dos bugs en bloques compartidos que
-también afectan al piloto: los pedidos de cambio están en
-[`nebularp-block-request.md`](nebularp-block-request.md).
+ni en WebKit o Firefox (sección 6). Los dos bugs de bloques que encontré
+([`nebularp-block-request.md`](nebularp-block-request.md)) ya están arreglados
+en `main` (`zd-midi` v2, `zd-mobile` v3/v4) y Nebularp tiene esas versiones
+(sección 0).
+
+---
+
+## 0 · Actualización 2026-10-04: bloques corregidos
+
+`main` trajo `zd-midi` v2, `zd-mobile` v4, `tools/sync-blocks.mjs` y los tests
+genéricos. El merge (`a12efa9`) entró sin conflictos.
+
+**Qué cambió en Nebularp**
+
+- **Bloques.** `node tools/sync-blocks.mjs` repegó `zd-mobile` v2→v4 y
+  `zd-midi` v1→v2. El diff del HTML en esas dos regiones es idéntico al de
+  `tools/blocks/`. `check-blocks` y `sync-blocks --check` dan verde.
+- **Skin de la barra superior.** `html.zd-m #zd-top .play` y `.recbtn` fijaban
+  `min-height:40px` con especificidad (1,2,1), más alta que la del piso de 44 px
+  del bloque (1,0,1). Ganaba el skin, así que PLAY y REC medían 40 px. Pasaron a
+  44 (lo detectó el caso 7 del test). Medido con el ícono de instalar visible
+  a 360×640, 390×844, 640×360, 820×1180 y 844×390: barra de 48 px, PLAY de
+  45×44 (solo el glifo, por debajo de 430 px) o 104×44, REC de 63×44, ↓ y ⋯ de
+  44×44, sin recortes en `.zd-ttr` y sin scroll horizontal.
+- **`ZD_M`, pestaña Teclado.** `'.wrap > .note'` y `'.wrap > .credits'`
+  pasaron a `#usageNote` y `#credits` (los dos nodos tienen ids nuevos). Un
+  selector que depende de la posición deja de matchear en cuanto el bloque
+  mueve el nodo. El test lee `ZD_M` con el shell activo, así que esperaba solo
+  `[ioPanel, pcPanel]` y fallaban los casos 1 a 4. No cambia nada visible: son
+  los mismos 4 nodos, en el mismo orden.
+- **El hueco de 1,5 ticks de `endTake()` quedó como estaba.** Con v2 ya no
+  hace falta, pero no molesta: el hueco mínimo medido entre dos notas de la
+  misma altura es de 1 tick.
+
+**Tests**
+
+| Test | Resultado |
+| --- | --- |
+| `zd-mobile-cycle --file descargables/Nebularp_2035.html --cycles 4` | 6 de 7. Falla el caso 5 (foco) por un supuesto del test que no cumple este layout; el bloque está bien (ver abajo) |
+| `zd-midi-order` | 6 de 6 |
+| Re-verificación de Nebularp (Playwright) | 17 de 17 (detalle en el anexo) |
+
+**Caso 5 de `zd-mobile-cycle`: pedido para quien mantenga `tools/tests/`.**
+No lo toqué. El test enfoca el propio nodo de `keep[0]` con `tabindex="-1"`.
+En Nebularp `keep[0]` es `.hero`, que en el shell pasa a `display:contents`
+para que el orbit y la columna de transporte sean celdas de la grilla del stage.
+Un elemento sin caja no puede tener el foco: Chromium no lo enfoca ni con
+`focus()` directo dentro del shell, así que el foco cae en `BODY`. El bloque
+hace lo correcto:
+
+- Con una copia del test que enfoca el primer `button` de `keep[0]` (`#play`,
+  que además viaja a la barra), el caso 5 pasa entero:
+  `keep0 → keep0 → keep0 · scrollY 320 → (reflow 311) → 0 → 311`.
+- `#latch`, `#tap` y `#octDown` también conservan el foco al entrar y al salir.
+
+Propuesta: que el test elija el primer nodo de `keep` cuyo `display` dentro
+del shell no sea `contents`, o un descendiente enfocable. No cambié el layout
+para que pase. Sacar el `display:contents` obliga a rehacer la grilla del stage,
+y reordenar `keep` cambia el orden de foco y de lectura.
 
 ---
 
@@ -32,6 +88,8 @@ Para D:
   "export del patrón" como en Acid Bass. Sugiero "MIDI de lo que grabás".
 - **`sw.js`**: Nebularp ya está en `PRECACHE_URLS`. Como el HTML cambió,
   hay que subir `VERSION` para que las instalaciones reciban la actualización.
+  Hoy `main` está en `zd-v2` (hotfix de Acid), así que al publicar Nebularp
+  pasa a `zd-v3`.
 - El ZIP no lo toqué. Hay que regenerarlo con este HTML.
 
 ---
@@ -50,8 +108,11 @@ Para D:
 | `188a19d` | R2: manifest, canonical, theme-color y zd-pwa v2 |
 | `412c06b` | R7: copy y nombres |
 | `fe812b0` | Extra: autoplay generativo (después de verificar el core) |
+| `81f7105` | Este reporte |
+| `a12efa9` | Merge de `main` (`zd-midi` v2, `zd-mobile` v4, sync-blocks, tests) |
+| siguiente | Bloques repegados, skin de la barra a 44 px, ids en `ZD_M` y la actualización de este reporte (sección 0) |
 
-El HTML pasó de 132 KB a 252 KB: ~86 KB son los 8 bloques y el resto es el
+El HTML pasó de 132 KB a 256 KB: ~88 KB son los 8 bloques y el resto es el
 código nuevo y la piel.
 
 ### Decisiones
@@ -101,7 +162,8 @@ código nuevo y la piel.
   sostenido con el transporte parado. El archivo se ancla al primer paso de
   la grilla, así cae en la grilla del DAW, y lleva el tempo que había al
   arrancar la toma. Cada altura suena de a una nota por vez, con 1,5 ticks
-  entre repeticiones (es el workaround del bug de zd-midi de la sección 3).
+  entre repeticiones (era el workaround del bug de zd-midi de la sección 3;
+  con v2 sobra, pero queda).
 - **El JSON solo acepta el envoltorio completo.** Sin envoltorio, de otra
   app, de una versión más nueva, sin versión, sin datos o sin ninguna clave
   reconocible: cada caso sale en un modal con un mensaje humano.
@@ -142,19 +204,23 @@ código nuevo y la piel.
 
 Detalle, reproducción y arreglo propuesto en
 [`nebularp-block-request.md`](nebularp-block-request.md). No toqué ningún
-bloque.
+bloque. **Los dos están arreglados en `main` y verificados en Nebularp
+(sección 0).**
 
-1. **zd-midi v1**: con off y on en el mismo tick, `write()` escribe el
-   note-off **después** del note-on, porque `ORDER.off` vale `0` y
-   `(ORDER[x] || 9)` lo convierte en 9. La segunda nota queda de largo 0 o
-   cerrada mal. **Afecta al piloto** (Acid Bass, `0 ~ 0`). Arreglo de una
-   línea. En Nebularp lo esquivé con el hueco de 1,5 ticks.
-2. **zd-mobile v2**: después de `exit()`, volver a `enter()` deja barra,
-   stage y tabs vacíos, porque `moveNodes` vive dentro de `build()`, que
-   corre una sola vez. Pasa al redimensionar una ventana de escritorio de un
-   lado al otro de 820 px y, sin probar, al rotar una tablet cuyo ancho
-   cruza 1024 px (iPad Pro de 12,9"). Reproducido en el piloto y en
-   Nebularp.
+1. **zd-midi v1** → **arreglado en v2**: con off y on en el mismo tick,
+   `write()` escribía el note-off **después** del note-on, porque
+   `ORDER.off` valía `0` y `(ORDER[x] || 9)` lo convertía en 9. La segunda
+   nota quedaba de largo 0 o cerrada mal. Afectaba al piloto (Acid Bass,
+   `0 ~ 0`). En Nebularp lo esquivé con el hueco de 1,5 ticks, que sigue ahí.
+   El caso de prueba de la doc da `00 90 3c 64 · 30 80 3c 00 · 00 90 3c 64 ·
+   30 80 3c 00` con el bloque embebido en Nebularp.
+2. **zd-mobile v2** → **arreglado en v3**: después de `exit()`, volver a
+   `enter()` dejaba barra, stage y tabs vacíos, porque `moveNodes` vivía
+   dentro de `build()`, que corre una sola vez. Pasaba al redimensionar una
+   ventana de escritorio de un lado al otro de 820 px y al rotar una tablet
+   cuyo ancho cruza 1024 px (iPad Pro de 12,9"). Con v4, los tres pares de
+   viewport del test dan 4 ciclos con el DOM idéntico, y la rotación
+   1180×820 ↔ 820×1180 con el arpegio sonando no corta nada.
 
 ---
 
@@ -180,8 +246,6 @@ bloque.
   en una fila de teclas de ~25 px. Sin `dvh` se usa `vh`.
 - **Memoria de REC.** La captura guarda Int16 en memoria: ~115 MB en
   10 minutos. Hay tope y aviso.
-- **Bug de zd-mobile** (sección 3): en un iPad Pro, rotar puede dejar el
-  stage vacío hasta recargar.
 - **REC dentro del hub C2.** El tap cuelga de `masterGain` y debería
   funcionar, pero lo probé solo con un hub falso (registro, tempo,
   onTransport y onTick) y sin grabar.
@@ -196,45 +260,65 @@ bloque.
 
 ## 5 · Hallazgos que aplican a los otros instrumentos
 
-1. **zd-midi** (sección 3): el MIDI de Acid ya está afectado. MonoMoon y J4
-   lo van a estar cuando usen el recorder.
-2. **zd-mobile** (sección 3): afecta a los 5.
-3. **Peek y superficie de tocar abajo.** El sheet en modo peek tapa la
+1. **zd-midi** (sección 3): arreglado en v2. MonoMoon y J4 tienen que pegar
+   v2 antes de usar el recorder.
+2. **zd-mobile** (sección 3): arreglado en v3; v4 suma el piso de 44 px en
+   la barra. Lo que sigue aplica a las sesiones C que todavía no lo pegaron.
+   **Revisar el skin:** cualquier `min-height` menor a 44 sobre un control
+   de `#zd-top` con más especificidad que `#zd-top button` le gana al piso
+   del bloque. En Nebularp pasaba con PLAY y REC.
+3. **Selectores de `ZD_M` que no dependan de la posición.** Un selector como
+   `.wrap > .note` deja de matchear en cuanto el bloque mueve el nodo. Hoy el
+   bloque solo resuelve los selectores fuera del shell, así que funciona, pero
+   el test genérico los resuelve con el shell activo y falla. Mejor usar ids.
+4. **`display:contents` en un nodo de `keep`.** Si el skin hace eso (en
+   Nebularp, `.hero`), ese nodo no puede tener el foco y el caso 5 de
+   `zd-mobile-cycle` falla aunque el bloque esté bien (sección 0).
+5. **Peek y superficie de tocar abajo.** El sheet en modo peek tapa la
    superficie de tocar cuando está abajo. En el piloto, a 360×640, el sheet
    peek de 45dvh también tapa el pad XY. La receta de Nebularp es solo CSS
    y se puede reusar en J4 y MonoMoon:
    `html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{height:calc(var(--zd-stage-h) - 45dvh)}`
    y esconder lo que no hace falta mientras se ajusta. En landscape, sheet
    peek a media pantalla.
-4. **Banner de zd-pwa con un stage en grilla.** Si un instrumento pone
+6. **Banner de zd-pwa con un stage en grilla.** Si un instrumento pone
    `#zd-stage` en grid, tiene que darle fila propia al banner
    (`.zd-pwa-banner, .zd-pwa-local { grid-area: banner }`).
-5. **Teclados en pantalla.** La container query de dos filas sirve para el
+7. **Teclados en pantalla.** La container query de dos filas sirve para el
    teclado de MonoMoon.
-6. **Teclado global.** Si un instrumento escucha `keydown` en `window`
+8. **Teclado global.** Si un instrumento escucha `keydown` en `window`
    (MonoMoon, CronBeat), tiene que ignorar inputs y modales abiertos:
    `ZD.modal.prompt` deja escribir y cada letra tocaría una nota. También
    tiene que mirar `e.defaultPrevented`: `ZD.ui.a11ySlider` usa Espacio y
    Enter para `onEnter`.
-7. **Knobs logarítmicos.** Con `a11ySlider` conviene operar sobre la
+9. **Knobs logarítmicos.** Con `a11ySlider` conviene operar sobre la
    fracción 0..1: el paso lineal en el dominio del valor queda muy grueso en
    la parte baja.
-8. **Canvas por cuadro.** Asignar `canvas.width/height` en cada cuadro
+10. **Canvas por cuadro.** Asignar `canvas.width/height` en cada cuadro
    realoca el buffer. Conviene revisarlo en el visualizador de J4.
-9. **zd-pwa offline.** Sin red, el `HEAD` al manifest falla y Chrome lo
+11. **zd-pwa offline.** Sin red, el `HEAD` al manifest falla y Chrome lo
    loguea en consola. Opciones: que sw.js responda HEAD desde la cache o que
    zd-pwa lo saltee con `navigator.onLine === false`. Lo decide D, porque
    toca sw.js o el bloque.
-10. **Contraste.** `--zd-phosphor-dim` como texto da 3,4:1. El token AA
+12. **Contraste.** `--zd-phosphor-dim` como texto da 3,4:1. El token AA
     `--zd-phosphor-txt` del piloto conviene llevarlo a los 5 skins.
-11. **Para testear:**
+13. **Para testear:**
     - **Multitáctil por CDP.** En `Input.dispatchTouchEvent`, `touchEnd`
       suelta **los puntos que se le pasan**; mandar `touchMove` sin un punto
       no lo suelta.
     - **Standalone.** `Emulation.setEmulatedMedia` con `display-mode` no
       tuvo efecto en esta versión de Chromium. Sirven un `matchMedia` falso
       o `navigator.standalone`.
-12. **Git en este disco.** El worktree está en un disco montado con dueño
+    - **Playwright en un worktree.** Los tests de `tools/tests/` importan
+      `playwright` y el worktree no tiene `node_modules/`. Sin instalar
+      nada: un `node_modules/` con symlinks a `playwright` y
+      `playwright-core` del checkout principal. Como es un directorio, lo
+      cubre el `.gitignore`.
+    - **Un instrumento sin globales.** Para saber si suena, un
+      `addInitScript` que envuelve `AudioContext` (guarda las instancias) y
+      cuenta los `start()` de `AudioScheduledSourceNode`. Si el contador
+      sube, el arpegio está programando voces.
+14. **Git en este disco.** El worktree está en un disco montado con dueño
     `root`, así que git pide `safe.directory`. Usé
     `git -c safe.directory=<ruta>` por comando, sin tocar la config global.
 
@@ -287,8 +371,10 @@ Lighthouse no corrió (no estaba disponible).
 
 - [ ] Vertical 768×1024: piano en una fila (54 px por tecla) y sheets de
       dos columnas.
-- [ ] iPad Pro 12,9": rotar vertical ↔ horizontal. Es probable que dispare
-      el bug de zd-mobile (stage vacío).
+- [ ] iPad Pro 12,9": rotar vertical ↔ horizontal con el arpegio sonando.
+      Con zd-mobile v4 el stage ya no queda vacío: en Chromium, 1180×820 ↔
+      820×1180 da 8 rotaciones sin corte. Falta confirmarlo en el
+      dispositivo.
 - [ ] Teclado físico: mapeo A–;, Z/X y Espacio; que no toque notas mientras
       se escribe en un modal.
 
@@ -309,7 +395,9 @@ Lighthouse no corrió (no estaba disponible).
       AudioWorklet debería estar), MIDI, JSON, sesión y modo liviano.
 - [ ] Botón "↓ Instalar" de escritorio en Chrome/Edge real, y que
       desaparezca al instalar desde la barra de direcciones.
-- [ ] Ventana que cruza 820 px de ancho: hoy dispara el bug de zd-mobile.
+- [ ] Ventana que cruza 820 px de ancho, arrastrando el borde a mano en
+      Chrome, Safari y Firefox. Con zd-mobile v4 el shell se vuelve a armar
+      bien (lo cubre `zd-mobile-cycle` con 1440×900 ↔ 390×844).
 
 ### Service worker y archivo local
 
@@ -392,3 +480,80 @@ worktree bajo `/instruments/`, como GitHub Pages.
     arpegio, sin zd-audio, sin sesión guardada y con zd-pwa inerte.
 - **Bloques:** `node tools/check-blocks.mjs` → 8 bloques, 2/5 idénticos,
   sin diferencias con `tools/blocks/`.
+
+### Re-verificación 2026-10-04 (zd-mobile v4 y zd-midi v2)
+
+Playwright 1.63 (Chromium), mismo servidor de `tools/tests/lib/serve.mjs`.
+El script es una copia adaptada de `tools/tests/acid-verify.test.mjs` y quedó
+fuera del repo porque `tools/` lo maneja D. Si D lo quiere en
+`tools/tests/nebularp-verify.test.mjs`, lo paso tal cual. Los 17 casos pasan:
+
+- **Viewports** 360×640, 390×844, 430×932, 768×1024 y 844×390 (táctil) y
+  1440×900:
+  - Shell donde corresponde, stage `[.hero, .octctl, .kbwrap]` y 5 tabs de
+    54 px.
+  - Barra de 48 px con todos sus controles de 44 px o más y sin recortes.
+  - Teclas blancas de 49×128 px a 360×640 y de 53×201 px a 390×844.
+  - Sin scroll horizontal, sin `#zd-rotate`, 0 `AudioContext` antes del
+    primer gesto y 0 errores o warnings de consola.
+- **Banner de zd-pwa** (`beforeinstallprompt` sintético) a 360×640 y
+  390×844:
+  - Mide 82 px y es el primer hijo del stage.
+  - No se superpone con PLAY, REC, latch, tap, orbit, octava, piano, tabs
+    ni barra.
+  - Ninguna tecla queda debajo de las tabs: miden 87 px a 360×640 y 176 px a
+    390×844.
+  - "Ahora no" lo descarta.
+- **Autoguardado** a 390×844, desde los sheets:
+  - 5 knobs (Gate, Ratchet, Swing, Cutoff y Detune, que también mueve
+    Spread) + patrón Chord + octava + latch con acorde → recargar → los
+    mismos valores de los knobs, `aria-pressed`, octava y acorde (`C5 E5`).
+  - Envoltorio `nebularp-2035` v1, toast "Sesión restaurada", 0
+    `AudioContext` al restaurar y PLAY en false.
+- **JSON** (escritorio):
+  - `nebularp-YYYYMMDD-HHmm.json` con el envoltorio, `gate: 1.5` y
+    `ratchet: 1`.
+  - Ida y vuelta: con Gate y Ratchet en el mínimo, abrir ese JSON los devuelve
+    a 150 % y 100 %.
+  - Un JSON de `acid-bass-303` sale en un modal: "Ese JSON es de otro
+    instrumento".
+- **MIDI** (parseado como SMF con `tools/tests/lib/smf.mjs`, 0 defectos en
+  todos los casos: ningún off después de un on del mismo tick, sin solapes,
+  sin notas colgadas, sin duración cero y sin off huérfanos):
+  - **Gate 150 % y ratchet 100 %**, acorde de 3 notas, toma de 4 s: formato
+    0, 96 ppq, 92 bpm (el del knob), track `ZERO DAY NEBULARP 2035`. Salen
+    37 notas con 31 repeticiones de la misma altura y el hueco mínimo entre
+    ellas es de 1 tick (los 1,5 ticks de `endTake()`, redondeados).
+  - **Chord** con gate 150 %: 42 notas.
+  - **Pad** con el transporte parado: 2 notas. La tecla que sigue apretada
+    al cortar cierra justo en el End of Track (tick 164 de 164).
+  - **Autoplay**: 10 notas.
+  - **`ZD.midi.write` embebido** con el caso de prueba de la doc de v2:
+    `00 90 3c 64 · 30 80 3c 00 · 00 90 3c 64 · 30 80 3c 00`.
+- **REC → WAV**, la misma toma de 4 s: RIFF/WAVE, PCM de 16 bits, estéreo, a
+  44,1 kHz (igual que el contexto), 4,05 s y pico de 0,344 (no está en
+  silencio).
+- **Audio** a 390×844:
+  - 1 contexto con `latencyHint: 'interactive'`, `running` después del
+    primer toque y `ZD.audio.unlocked`.
+  - El arpegio programa voces (12 → 20 → 28 `start()`).
+  - `suspend()` → overlay "Tocá para reanudar" → toque → `running`, y el
+    arpegio sigue.
+  - `suspend()` + `visibilitychange` → `running`.
+  - Con el transporte parado, `suspend()` no muestra el overlay.
+- **Rotación de tablet con el arpegio sonando:** 1180×820 ↔ 820×1180, 4
+  vueltas (8 rotaciones):
+  - El contexto sigue en `running` (`currentTime` 0,86 → 3,74 s), el
+    transporte en play y el contador de voces sube en cada rotación (64 en
+    total).
+  - La órbita recorre G4, C5, E5, G5 y E4, y el acorde del latch
+    (`C4 E4 G4`) sobrevive.
+  - Shell solo a 820 de ancho, con el stage armado en cada entrada y vacío
+    afuera; PLAY ≥44 y piano visibles; sin scroll horizontal ni errores.
+- **`file://`:** sin SW, aviso local con link al canonical, 0 pedidos de
+  red, el aviso no tapa PLAY, piano ni octava, 0 errores.
+- **Hosted:** un solo SW (`/sw.js`, scope de la raíz),
+  `manifests/nebularp.webmanifest`, `theme-color #9a8cff` y canonical
+  absoluto.
+- **iframe de 360 px:** zd-pwa inerte (sin banner, sin CSS, sin SW), shell
+  activo, el audio llega a `running` al tocar PLAY y 0 errores.

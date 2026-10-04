@@ -423,7 +423,7 @@
   @media (max-width:560px){ .zd-logo{height:48px} }
 </style>
 <style id="zd-mobile-skin">
-  /* ===== NEBULARP 2035 · piel del shell portrait (zd-mobile v2) =====
+  /* ===== NEBULARP 2035 · piel del shell portrait (zd-mobile v4) =====
      Solo presentación: qué nodo ocupa qué lugar lo decide window.ZD_M y el
      reparto de alto lo decide este archivo. Nada de esto es parte del bloque. */
 
@@ -486,10 +486,13 @@
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) .hero .transport{flex-direction:row; justify-content:flex-end; min-width:0;}
   }
 
-  /* ---- barra superior: transporte compacto ---- */
-  html.zd-m #zd-top .play{min-height:40px; padding:0 12px; font-size:12px; letter-spacing:.06em; gap:7px;
+  /* ---- barra superior: transporte compacto ----
+     44 px de alto: el piso de SPEC R1 que pone zd-mobile v4. Esta regla le
+     gana a la del bloque por especificidad: con menos de 44, PLAY y REC
+     quedarían cortos. */
+  html.zd-m #zd-top .play{min-height:44px; padding:0 12px; font-size:12px; letter-spacing:.06em; gap:7px;
     box-shadow:0 0 0 1px var(--edge-glow), var(--zd-hard-sm);}
-  html.zd-m #zd-top .recbtn{min-height:40px; padding:0 10px; box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm);}
+  html.zd-m #zd-top .recbtn{min-height:44px; padding:0 10px; box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm);}
   @media (max-width:560px){ html.zd-m #zd-top .zd-ttitle{display:none;} }
   /* a <430px el botón queda en el glifo; el texto sigue para lectores de pantalla */
   @media (max-width:429px){
@@ -1260,7 +1263,7 @@
 /* /ZD-BLOCK:zd-dl */
 </script>
 <script>
-/* ZD-BLOCK:zd-midi v1 */
+/* ZD-BLOCK:zd-midi v2 */
 /* Escritor de Standard MIDI File formato 0 y grabador de performance
    (notas con timestamps, pitch bend, CC). Tambien reporta si Web MIDI
    existe en este navegador (no existe en ningun navegador de iOS). */
@@ -1288,7 +1291,18 @@
   }
   function clamp7(v) { v = Math.round(v); return v < 0 ? 0 : v > 127 ? 127 : v; }
 
-  var ORDER = { off: 0, cc: 1, bend: 2, on: 3 };
+  /* A igual tick: off -> cc -> bend -> on, nunca un note-off despues del
+     note-on del mismo tick. Ningun valor puede ser 0: el comparador cae a 9
+     para los tipos que no conoce y un 0 falsy mandaria los off al final
+     (bug v1: la nota repetida en la misma altura quedaba de largo 0). */
+  var ORDER = { off: 1, cc: 2, bend: 3, on: 4 };
+  function rank(e) { var r = ORDER[e.type]; return r ? r : 9; }
+  /* Entre note-off del mismo tick, por altura: orden estable y reproducible
+     sin importar como los haya empujado el instrumento. */
+  function offByPitch(a, b) {
+    if (a.type !== 'off' || b.type !== 'off') return 0;
+    return (+a.pitch || 0) - (+b.pitch || 0);
+  }
   /* write({ppq, bpm, trackName, events}) -> Blob audio/midi
      events: {t:<ticks>, type:'on'|'off'|'cc'|'bend', pitch, vel, cc, val, ch} */
   function write(cfg) {
@@ -1298,7 +1312,7 @@
     var evs = (cfg.events || []).slice();
     evs.forEach(function (e, i) { e.__i = i; });
     evs.sort(function (a, b) {
-      return (a.t - b.t) || ((ORDER[a.type] || 9) - (ORDER[b.type] || 9)) || (a.__i - b.__i);
+      return (a.t - b.t) || (rank(a) - rank(b)) || offByPitch(a, b) || (a.__i - b.__i);
     });
 
     var track = [];
@@ -1707,7 +1721,7 @@ window.ZD_M = {
     { id:'esp', label:'ESPACIO', title:'ESPACIO · MODULACIÓN', peek:true,
       nodes:['#spacePanel', '#modPanel'] },
     { id:'kb',  label:'TECLADO', title:'SESIÓN · TECLADO DE PC',
-      nodes:['#ioPanel', '#pcPanel', '.wrap > .note', '.wrap > .credits'] }
+      nodes:['#ioPanel', '#pcPanel', '#usageNote', '#credits'] }
   ],
   menuTitle: 'MENÚ',
   menu: [
@@ -1724,12 +1738,17 @@ window.ZD_M = {
 };
 </script>
 <script>
-/* ZD-BLOCK:zd-mobile v2 */
+/* ZD-BLOCK:zd-mobile v4 */
 /* Shell portrait-first: barra superior 48px + zona de tocar + tabs 56px +
    bottom sheets. Se configura entero por window.ZD_M (ningun selector ni
-   texto del instrumento vive aca). Un solo movimiento de nodos al activarse:
+   texto del instrumento vive aca). Un solo movimiento de nodos por activacion:
    la media query de activacion no menciona la orientacion, asi que rotar el
-   telefono no vuelve a mover nada. */
+   telefono no vuelve a mover nada.
+   v3: entrar y salir son idempotentes y reversibles. El movimiento de nodos
+   salio de build() (que corre una sola vez) y vive en enter(), asi que volver
+   a entrar despues de un exit() vuelve a armar el shell en vez de dejar el
+   stage vacio. Ademas el ciclo conserva el foco y el scroll de la pagina.
+   v4: los controles de la barra superior miden 44px en los dos ejes (SPEC R1). */
 (function () {
   'use strict';
   var ZD = window.ZD || (window.ZD = {});
@@ -1760,7 +1779,15 @@ window.ZD_M = {
     '#zd-top .zd-ttitle b{color:var(--inst-accent,var(--zd-phosphor,#7fdc5c))}',
     '#zd-top .zd-ttr{display:flex;align-items:center;gap:6px;margin-left:auto;min-width:0;overflow:hidden}',
     '#zd-top .zd-ttr>*{margin:0!important}',
-    '#zd-tmenu{flex:none;width:44px;height:40px;cursor:pointer;font:700 15px var(--zd-mono,monospace);',
+    /* SPEC R1: target tactil >=44px en el eje corto. La barra mide 48, asi que
+       44 entra. Es un piso generico para cualquier control que termine en la
+       barra: los del transporte (del instrumento), el icono de instalar (que
+       inyecta zd-pwa con 40x40 fijos) y el de menu de aca. min-width/min-height
+       ganan sobre un width/height fijo sin importar la especificidad, y van sin
+       !important para que el skin de un instrumento pueda decidir otra cosa a
+       sabiendas (lo chequea tools/tests/zd-mobile-cycle.test.mjs). */
+    '#zd-top button,#zd-top a,#zd-top input,#zd-top select{min-width:44px;min-height:44px}',
+    '#zd-tmenu{flex:none;width:44px;height:44px;cursor:pointer;font:700 15px var(--zd-mono,monospace);',
     'color:var(--zd-ink,#e9ebef);background:var(--zd-panel-2,#1c2430);border:1px solid var(--zd-outline,#000);',
     'border-radius:var(--zd-r,4px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24),0 2px 0 var(--zd-outline,#000);touch-action:manipulation}',
     '#zd-tmenu:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--zd-line,#2a3f24)}',
@@ -1848,6 +1875,9 @@ window.ZD_M = {
 
   var built = false, active = false, moves = [], open = null;
   var top, stage, tabsBar, scrim, sheet, sheetBody, sheetTitle, panes = {}, tabBtns = {}, cfgTabs = [], C = null;
+  /* trRef: la columna de transporte de la barra superior. build() corre una sola
+     vez, pero moveNodes() corre en cada enter(), asi que el destino se guarda. */
+  var trRef = null, savedFocus = null, savedScroll = null;
 
   function build() {
     if (built) return;
@@ -1867,6 +1897,7 @@ window.ZD_M = {
     buildTitle(ttl, C.titleParts || C.name || '');
     top.appendChild(ttl);
     var tr = mk('div', 'zd-ttr');
+    trRef = tr;
     top.appendChild(tr);
     var menuBtn = mk('button', null, '⋯');
     menuBtn.id = 'zd-tmenu'; menuBtn.type = 'button';
@@ -1947,8 +1978,6 @@ window.ZD_M = {
     window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && open) { e.stopPropagation(); close_(); } });
     dragToClose(handle);
     dragToClose(head);
-
-    moveNodes(tr);
   }
 
   /* El titulo acepta ['ACID ','BASS-303'] -> el 2do tramo va en <b>. */
@@ -2039,20 +2068,50 @@ window.ZD_M = {
     el.addEventListener('pointercancel', end);
   }
 
+  /* Mover un nodo lo saca y lo vuelve a insertar: eso borra el foco y, al
+     entrar, el body pasa a overflow:hidden y se pierde el scroll de la pagina.
+     Se guardan antes y se devuelven despues, asi el ciclo es reversible. */
+  function focusable(el) {
+    return el && el !== document.body && el !== document.documentElement &&
+      typeof el.focus === 'function' ? el : null;
+  }
+  function restoreFocus() {
+    var el = savedFocus;
+    savedFocus = null;
+    if (!el || !document.contains(el) || document.activeElement === el) return;
+    try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (_) {} }
+  }
+
   function enter() {
     if (active) return;
+    savedFocus = focusable(document.activeElement);
+    savedScroll = [window.pageXOffset || 0, window.pageYOffset || 0];
     build();
+    /* restoreNodes() vacia moves, asi que esto cubre el primer enter() y
+       cualquier reentrada posterior sin mover nada dos veces. */
+    if (!moves.length) moveNodes(trRef);
     active = true;
     document.documentElement.classList.add('zd-m');
+    restoreFocus();
     if (C && C.onEnter) try { C.onEnter(); } catch (e) {}
     fire();
   }
   function exit() {
     if (!active) return;
+    savedFocus = focusable(document.activeElement);
     active = false;
     close_();
     restoreNodes();
     document.documentElement.classList.remove('zd-m');
+    restoreFocus();
+    if (savedScroll) {
+      /* leer una metrica fuerza el reflow ya sin la clase zd-m: si no, scrollTo
+         clampea contra el alto del shell (una pantalla) y queda en 0, y despues
+         el scroll anchoring del navegador lo deja en cualquier lado */
+      void document.documentElement.scrollHeight;
+      try { window.scrollTo(savedScroll[0], savedScroll[1]); } catch (e) {}
+      savedScroll = null;
+    }
     if (C && C.onExit) try { C.onExit(); } catch (e) {}
     fire();
   }
@@ -2633,12 +2692,12 @@ window.ZD_M = {
 
   </section>
 
-  <p class="note">
+  <p class="note" id="usageNote">
     Con el transporte <b>detenido</b>, las teclas suenan como pad sostenido para probar el sonido.<br>
     Con el transporte <b>en marcha</b>, sostené un acorde y el arpegiador lo recorre.<br>
     Activá <b>Latch</b> y el acorde queda sonando manos libres — tocá uno nuevo para reemplazarlo.
   </p>
-    <div class="hint credits">
+    <div class="hint credits" id="credits">
       <span class="note">NEBULARP 2035 //</span>
       <span class="note">Desarrollado por <b><a href="https://zeroday-musicexploits.github.io/instruments/" target="_blank" rel="noopener">Zero Day - Music Exploits</a></b> · Argentina 2026</span>
     </div>
