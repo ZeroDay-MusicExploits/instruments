@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MonoMoon'70</title>
 <meta name="theme-color" content="#070b06">
 <meta name="mobile-web-app-capable" content="yes">
@@ -50,14 +50,14 @@
     text-shadow:0 1px 0 #000, 0 0 18px rgba(200,64,44,.25); }
   .brand .mark b{ color:var(--accent); }
   .brand .sub{ font-size:11px; letter-spacing:.32em; color:var(--silk-faint); text-transform:uppercase; }
-  .phase-tag{ font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--silk-faint);
+  .phase-tag{ font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--silk-faint);
     border:1px solid #3a3733; border-radius:3px; padding:5px 9px; }
 
   .rack{ display:grid; grid-template-columns:1.18fr 0.9fr 0.95fr 0.97fr; gap:12px; }
   .rack2{ display:grid; grid-template-columns:1fr 1.18fr 0.72fr 1.05fr; gap:12px; margin-top:12px; }
   .section{ background:linear-gradient(180deg, rgba(255,255,255,.018), rgba(0,0,0,.14));
     border:1px solid #000; border-radius:4px; box-shadow:0 1px 0 rgba(255,255,255,.04) inset; padding:10px 10px 12px; position:relative; }
-  .section > h2{ margin:0 0 10px; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--silk-dim); font-weight:600;
+  .section > h2{ margin:0 0 10px; font-size:11.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--silk-dim); font-weight:600;
     display:flex; align-items:center; gap:8px; }
   .section > h2::before{ content:""; width:8px; height:8px; border-radius:1px; background:var(--accent); box-shadow:0 0 8px rgba(200,64,44,.6); }
   .section > h2::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg,#4a453e,transparent); }
@@ -65,13 +65,13 @@
   .osc-rows{ display:flex; flex-direction:column; gap:9px; }
   .osc-row{ display:grid; grid-template-columns: 30px 1fr; gap:8px; align-items:center;
     padding:7px 6px; border-radius:3px; background:rgba(0,0,0,.16); border:1px solid #000; }
-  .osc-row .osc-id{ font-size:9px; letter-spacing:.15em; color:var(--silk-faint); text-align:center;
+  .osc-row .osc-id{ font-size:11px; letter-spacing:.15em; color:var(--silk-faint); text-align:center;
     writing-mode:vertical-rl; transform:rotate(180deg); text-transform:uppercase; }
-  .osc-controls{ display:grid; grid-template-columns:auto auto 1fr; gap:8px 10px; align-items:center; }
+  .osc-controls{ display:grid; grid-template-columns:auto auto minmax(0,1fr); gap:8px 10px; align-items:center; }
 
   .ctl{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; }
-  .ctl .lab{ font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--silk-faint); white-space:nowrap; }
-  .ctl .val{ font-size:9px; color:var(--silk-dim); font-variant-numeric:tabular-nums; min-height:11px; letter-spacing:.02em;}
+  .ctl .lab{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--silk-faint); white-space:nowrap; }
+  .ctl .val{ font-size:12px; color:var(--silk-dim); font-variant-numeric:tabular-nums; min-height:11px; letter-spacing:.02em;}
 
   .knob{ --sz:44px; width:var(--sz); height:var(--sz); border-radius:50%; position:relative;
     cursor:ns-resize; touch-action:none; outline:none; flex:none;
@@ -87,10 +87,10 @@
   .knob.active .pointer{ background:var(--accent-2); box-shadow:0 0 8px rgba(230,102,63,.7); }
   .dial{ position:relative; }
 
-  .waves{ display:grid; grid-template-columns:repeat(6, 1fr); gap:3px; }
-  .wave-btn{ background:#0c0b0a; border:1px solid #000; border-radius:3px; padding:4px 2px; cursor:pointer;
+  .waves{ display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:3px; }
+  .wave-btn{ background:#0c0b0a; border:1px solid #000; border-radius:3px; padding:4px 2px; cursor:pointer; min-width:0;
     display:flex; align-items:center; justify-content:center; transition:background .08s, box-shadow .08s; }
-  .wave-btn svg{ display:block; width:22px; height:12px; }
+  .wave-btn svg{ display:block; width:100%; max-width:22px; height:12px; }
   .wave-btn svg path{ stroke:var(--silk-faint); stroke-width:1.5; fill:none; }
   .wave-btn:hover{ background:#161412; }
   .wave-btn.on{ background:linear-gradient(180deg,#3a1a13,#1c0d0a); box-shadow:0 0 0 1px var(--accent) inset, 0 0 10px rgba(200,64,44,.35); }
@@ -98,7 +98,7 @@
 
   .seg{ display:inline-flex; border:1px solid #000; border-radius:3px; overflow:hidden; background:#0c0b0a; }
   .seg button{ background:transparent; color:var(--silk-faint); border:0; cursor:pointer;
-    font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; padding:5px 8px; font-weight:600; }
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:5px 8px; font-weight:600; }
   .seg button.on{ background:linear-gradient(180deg,#3a1a13,#1c0d0a); color:var(--silk); box-shadow:0 0 0 1px var(--accent) inset; }
 
   .toggle{ width:34px; height:18px; border-radius:10px; background:#0a0908; border:1px solid #000; position:relative;
@@ -118,9 +118,19 @@
   .led{ width:8px; height:14px; border-radius:2px; background:var(--led-off); box-shadow:0 0 0 1px #000 inset; }
   .led.on{ background:var(--led-on); box-shadow:0 0 6px rgba(255,90,60,.7),0 0 0 1px #000 inset; }
 
-  .row-sw{ display:flex; align-items:center; gap:8px; margin:8px 0; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--silk-dim); }
+  .grid-knobs.one{ grid-template-columns:1fr; }
+  .grid-knobs.five{ grid-template-columns:repeat(5,1fr); gap:8px 4px; }
+  .grid-knobs.out-knobs{ margin-top:12px; }
+  .mix-name{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--silk-dim); }
+  .seg-row{ display:flex; justify-content:center; margin-top:8px; }
+  .seg-row.top{ margin:0 0 10px; }
+  .filt-note{ font-size:12px; color:var(--silk-faint); text-align:center; margin-top:12px; line-height:1.5; }
+  .kb-mode{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--silk-faint); }
+  .wave-ctl{ align-items:stretch; }
+  .wave-ctl .wave-lab{ text-align:center; margin-top:2px; }
+  .row-sw{ display:flex; align-items:center; gap:8px; margin:8px 0; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--silk-dim); }
   .row-sw .lbl2{ flex:1; }
-  .mod-note{ font-size:9.5px; color:var(--silk-faint); line-height:1.45; margin-top:8px; }
+  .mod-note{ font-size:13px; color:var(--silk-faint); line-height:1.45; margin-top:8px; }
   .mod-note b{ color:var(--silk-dim); }
 
   .scope-screen{ width:100%; height:150px; border-radius:4px; border:1px solid #000; background:#060a07;
@@ -128,16 +138,34 @@
 
   .controllers{ margin-top:12px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.14));
     border:1px solid #000; border-radius:4px; padding:9px 14px; display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-  .cg-title{ font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--silk-dim); display:flex; align-items:center; gap:8px; }
+  .cg-title{ font-size:11.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--silk-dim); display:flex; align-items:center; gap:8px; }
   .cg-title::before{ content:""; width:8px; height:8px; border-radius:1px; background:var(--accent); box-shadow:0 0 8px rgba(200,64,44,.6); }
   .cg-items{ display:flex; align-items:center; gap:22px; flex-wrap:wrap; }
-  .cg-sw{ display:flex; align-items:center; gap:8px; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--silk-dim); }
-  .cg-note{ font-size:9.5px; color:var(--silk-faint); max-width:280px; line-height:1.45; }
+  .cg-sw{ display:flex; align-items:center; gap:8px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--silk-dim); }
+  .cg-note{ font-size:13px; color:var(--silk-faint); max-width:280px; line-height:1.45; }
   .cg-note b{ color:var(--silk-dim); }
 
+  .perf-row{ display:grid; grid-template-columns:1.4fr 1fr; gap:12px; margin-top:12px; }
+  .macros{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px 6px; }
+  .macros .ctl .val{ white-space:nowrap; }
+  .xypad{ position:relative; height:118px; border-radius:4px; border:2px solid var(--zd-outline,#000); background:#030602;
+    touch-action:none; cursor:crosshair; overflow:hidden; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+    background-image:linear-gradient(rgba(127,220,92,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127,220,92,.07) 1px, transparent 1px);
+    background-size:25% 25%; box-shadow:0 0 0 1px var(--zd-line,#2a3f24), inset 0 2px 10px #000; }
+  .xypad.hot{ box-shadow:0 0 0 1px var(--accent), inset 0 2px 10px #000; }
+  .xy-h, .xy-v{ position:absolute; pointer-events:none; background:rgba(242,166,60,.35); }
+  .xy-h{ left:0; right:0; height:1px; }
+  .xy-v{ top:0; bottom:0; width:1px; }
+  .xy-dot{ position:absolute; width:18px; height:18px; margin:-9px 0 0 -9px; border-radius:50%; pointer-events:none;
+    background:var(--accent); box-shadow:0 0 0 2px var(--zd-outline,#000), 0 0 14px rgba(242,166,60,.7); }
+  .xy-ax{ position:absolute; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--zd-ink-faint,#859a7b); pointer-events:none; }
+  .xy-ax.x{ right:7px; bottom:5px; }
+  .xy-ax.y{ left:7px; top:5px; }
+  /* slider alternativo de cada knob: solo en los sheets del shell móvil (SPEC R1) */
+  .kslider{ display:none; }
   .keybar{ margin-top:12px; background:linear-gradient(180deg,#211f1d,#141210); border:1px solid #000; border-radius:5px; padding:10px 12px; }
   .kbtop{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px; flex-wrap:wrap;}
-  .octave-ctl{ display:flex; align-items:center; gap:8px; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--silk-dim);}
+  .octave-ctl{ display:flex; align-items:center; gap:8px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--silk-dim);}
   .octave-ctl button{ width:26px; height:24px; border-radius:3px; border:1px solid #000; background:linear-gradient(180deg,#302c28,#1a1815); color:var(--silk); cursor:pointer; font-size:14px; line-height:1;}
   .octave-ctl button:active{ background:#2a0f0b; }
   .octave-ctl .oc-val{ min-width:44px; text-align:center; color:var(--silk); }
@@ -152,19 +180,26 @@
   .wheel .wthumb{ position:absolute; left:2px; right:2px; height:24px; border-radius:5px;
     background:linear-gradient(180deg,#4a443b,#201d19 60%,#0d0b0a); box-shadow:0 1px 2px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.06) inset; will-change:top; }
   .wheel.center::after{ content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:var(--accent); opacity:.45; }
-  .wheel-lab{ font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--silk-faint); }
+  .wheel-lab{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--silk-faint); }
 
-  .keys{ position:relative; height:132px; user-select:none; flex:1; min-width:340px; touch-action:none; }
-  .key{ position:absolute; bottom:0; border:1px solid #000; border-radius:0 0 4px 4px; cursor:pointer; touch-action:none; }
+  .keys{ position:relative; height:132px; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; flex:1; min-width:340px;
+    touch-action:none; overscroll-behavior:none; container-type:inline-size; container-name:keys; }
+  .key{ position:absolute; border:1px solid #000; border-radius:0 0 4px 4px; cursor:pointer; touch-action:none; }
+  /* 24 semitonos: --i = posición en blancas (0..13), --ri = posición dentro de la octava (0..6),
+     --row = 0 octava grave · 1 aguda. Los pone buildKeyboard(); la geometría vive acá. */
+  .key.white{ top:0; bottom:0; left:calc(var(--i) * 100% / 14); width:calc(100% / 14); }
+  .key.black{ top:0; height:62%; left:calc(var(--i) * 100% / 14 - 100% / 14 * .32); width:calc(100% / 14 * .64); }
+  .key .kn{ position:absolute; top:5px; left:0; right:0; text-align:center; font-size:11px; font-weight:700; pointer-events:none; color:#4d5e45; }
   .key.white{ background:linear-gradient(180deg,#f6f1e4,var(--key-w) 70%,#d8d0bd); box-shadow:0 -1px 0 rgba(0,0,0,.15) inset, 0 3px 4px rgba(0,0,0,.3);}
   .key.black{ background:linear-gradient(180deg,#2a2622,var(--key-b) 60%,#000); box-shadow:0 2px 3px rgba(0,0,0,.6); z-index:3; }
   .key.white.dn{ background:linear-gradient(180deg,#f0c9bd,var(--key-w-dn)); box-shadow:0 0 10px rgba(200,64,44,.35) inset; }
   .key.black.dn{ background:linear-gradient(180deg,#5a2a20,var(--key-b-dn)); }
-  .key .kc{ position:absolute; bottom:6px; left:0; right:0; text-align:center; font-size:9px; letter-spacing:.05em; pointer-events:none; }
+  .key .kc{ position:absolute; bottom:6px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.05em; pointer-events:none; }
+  .key.black .kn{ display:none; }
   .key.white .kc{ color:#8a836f; }
   .key.black .kc{ color:#b7b0a0; bottom:5px; }
 
-  .hint{ margin-top:10px; font-size:10.5px; color:var(--silk-faint); letter-spacing:.02em; line-height:1.5; }
+  .hint{ margin-top:10px; font-size:13px; color:var(--silk-faint); letter-spacing:.02em; line-height:1.5; }
   .hint b{ color:var(--silk-dim); font-weight:600; }
 
   .power-ovl{ position:fixed; inset:0; background:radial-gradient(circle at 50% 40%, #1a120c, #080503 70%);
@@ -181,18 +216,18 @@
 
   .toolbar{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:12px; padding:8px 10px;
     background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.18)); border:1px solid #000; border-radius:4px; }
-  .toolbar label{ font-size:8.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--silk-faint); }
+  .toolbar label{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--silk-faint); }
   .tb-group{ display:flex; align-items:center; gap:6px; }
-  .toolbar select, .toolbar button{ font-family:var(--zd-mono); font-size:10px; letter-spacing:.05em; color:var(--silk);
+  .toolbar select, .toolbar button{ font-family:var(--zd-mono); font-size:12px; letter-spacing:.05em; color:var(--silk);
     background:linear-gradient(180deg,#2c2926,#17150f); border:1px solid #000; border-radius:3px; padding:6px 9px; cursor:pointer; }
   .toolbar button:hover{ background:#2a0f0b; }
   .toolbar select{ padding:5px 7px; max-width:150px; }
   .toolbar .sep{ width:1px; height:22px; background:#000; margin:0 1px; }
   #btnRec.on{ background:linear-gradient(180deg,#c8402c,#7a1a10); color:#fff; box-shadow:0 0 10px rgba(200,64,44,.5); }
-  #recTime{ font-size:10px; font-variant-numeric:tabular-nums; color:var(--silk-dim); min-width:38px; }
+  #recTime{ font-size:12px; font-variant-numeric:tabular-nums; color:var(--silk-dim); min-width:38px; }
   .midi-dot{ width:9px; height:9px; border-radius:50%; background:#3a1512; box-shadow:0 0 0 1px #000 inset; }
   .midi-dot.on{ background:#37ff9e; box-shadow:0 0 8px rgba(55,255,158,.6); }
-  #midiTxt{ font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--silk-faint); }
+  #midiTxt{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--silk-faint); }
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
   @media (max-width:820px){ .rack, .rack2{ grid-template-columns:repeat(2,1fr); } }
 </style>
@@ -250,7 +285,7 @@
   .brand .mark{font-style:normal; letter-spacing:.02em; font-size:28px; text-shadow:0 0 16px rgba(242,166,60,.25)}
   .brand .mark::before{content:">_ "; color:var(--zd-phosphor); font-weight:800}
   .brand .mark b{color:var(--accent)}
-  .brand .sub{font-size:10.5px; letter-spacing:.24em; color:var(--zd-ink-faint)}
+  .brand .sub{font-size:11.5px; letter-spacing:.24em; color:var(--zd-ink-faint)}
   .phase-tag{color:var(--zd-phosphor); border:1px solid var(--zd-phosphor-dim); font-weight:700; letter-spacing:.2em; background:var(--zd-well)}
 
   .section, .controllers, .toolbar, .keybar{background:var(--zd-panel); border:1px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line-soft), 0 3px 0 var(--zd-outline), var(--zd-inset); border-radius:var(--zd-r-lg)}
@@ -258,9 +293,9 @@
   .section > h2::before, .cg-title::before{background:var(--accent); box-shadow:0 0 8px rgba(242,166,60,.6); border-radius:1px}
   .section > h2::after{background:repeating-linear-gradient(90deg, var(--zd-line) 0 4px, transparent 4px 7px); height:2px}
   .osc-row, .mix-line{background:var(--zd-well); border:1px solid var(--zd-line-soft)}
-  .ctl .lab{font-size:9px; color:var(--zd-ink-dim); font-weight:700; letter-spacing:.03em}
-  .ctl .val{font-size:10px; color:var(--accent)}
-  .osc-row .osc-id, .wheel-lab, .toolbar label, .row-sw, .cg-sw, .octave-ctl{font-size:10px}
+  .ctl .lab{font-size:11px; color:var(--zd-ink-dim); font-weight:700; letter-spacing:.03em}
+  .ctl .val{font-size:12px; color:var(--accent)}
+  .osc-row .osc-id, .wheel-lab, .toolbar label, .row-sw, .cg-sw, .octave-ctl{font-size:11px}
 
   .knob{box-shadow:0 0 0 2px var(--zd-outline), 0 0 0 3px var(--zd-line), 0 3px 0 3px var(--zd-outline)}
   .knob::before{background:conic-gradient(from 0deg, #070b06, #172414, #070b06, #172414, #070b06, #172414, #070b06, #172414, #070b06)}
@@ -272,7 +307,7 @@
   .wave-btn:hover{background:var(--zd-panel-3)}
   .wave-btn.on{background:#2a1c08; box-shadow:0 0 0 1px var(--accent) inset, 0 0 10px rgba(242,166,60,.35)}
   .seg{background:var(--zd-well); border:1px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line)}
-  .seg button{font-size:10px; padding:8px 10px; min-height:32px}
+  .seg button{font-size:11px; padding:8px 10px; min-height:32px}
   .seg button.on{background:var(--accent); color:var(--zd-void); box-shadow:none}
   .toggle{width:40px; height:22px; border-radius:3px; background:var(--zd-well); border:1px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), inset 0 1px 3px #000}
   .toggle .dot{width:16px; height:16px; border-radius:2px; background:linear-gradient(180deg,#3a5231,#172414); border:1px solid var(--zd-outline)}
@@ -282,10 +317,10 @@
   .env-graph, .scope-screen{background:#030602; border:2px solid var(--zd-outline); box-shadow:0 0 0 1px var(--zd-line), inset 0 2px 10px #000; border-radius:var(--zd-r)}
   .led{border-radius:1px}
   .led.on{box-shadow:0 0 6px var(--zd-phosphor-glow), 0 0 0 1px #000 inset}
-  .mod-note, .cg-note, .hint{font-size:10.5px; color:var(--zd-ink-faint)}
+  .mod-note, .cg-note, .hint{font-size:13px; color:var(--zd-ink-faint)}
   .mod-note b, .cg-note b, .hint b{color:var(--accent)}
 
-  .toolbar select, .toolbar button{font-size:11px; min-height:38px; padding:0 12px; background:var(--zd-panel-2); color:var(--zd-ink); border:1px solid var(--zd-outline);
+  .toolbar select, .toolbar button{font-size:12px; min-height:38px; padding:0 12px; background:var(--zd-panel-2); color:var(--zd-ink); border:1px solid var(--zd-outline);
     box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm); border-radius:var(--zd-r); touch-action:manipulation}
   .toolbar select{background:var(--zd-well); color:var(--zd-phosphor)}
   .toolbar button:hover{background:var(--zd-panel-3)}
@@ -325,6 +360,152 @@
   .toggle::after{content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:2px; background:linear-gradient(180deg,#3a5231,#172414); border:1px solid var(--zd-outline); transition:transform .12s, background-color .12s}
   .toggle.on::after{transform:translateX(18px); background:var(--accent); box-shadow:0 0 10px rgba(242,166,60,.7)}
   .toggle:has(.dot)::after{display:none}
+  .toggle::before{content:""; position:absolute; inset:-11px -6px}
+</style>
+<style id="zd-mobile-skin">
+  /* ===== MONOMOON'70 · piel del shell portrait (zd-mobile v4) =====
+     Solo presentación: qué nodo ocupa qué lugar lo decide window.ZD_M y el
+     reparto de alto lo decide este archivo. Nada de esto es parte del bloque. */
+
+  /* ---- zona de tocar: macros arriba, pad XY flexible, teclado + ruedas abajo ---- */
+  html.zd-m #zd-stage > .section,
+  html.zd-m #zd-stage > .keybar{padding:5px 6px; border-radius:var(--zd-r); box-shadow:0 0 0 1px var(--zd-line-soft);}
+  html.zd-m #zd-stage > .keybar{padding:4px;}
+  html.zd-m #zd-stage > .section > h2{display:none;}
+  html.zd-m #zd-stage > #macroPanel{flex:none;}
+  html.zd-m #zd-stage > #xyPanel{flex:1 1 0; min-height:72px; display:flex; flex-direction:column;}
+  html.zd-m #zd-stage > #kbPanel{flex:0 1 clamp(196px, 44%, 340px); min-height:176px; display:flex; flex-direction:column;}
+
+  /* macros: 6 en una fila; a 360px salen ~55px por columna */
+  html.zd-m #macroPanel .macros{gap:2px 3px;}
+  html.zd-m #macroPanel .ctl{gap:7px;}
+  html.zd-m #macroPanel .knob{--sz:40px;}
+  html.zd-m #macroPanel .ctl .lab{font-size:11px; letter-spacing:0;}
+  html.zd-m #macroPanel .ctl .val{font-size:12px; letter-spacing:-.02em; min-height:14px;}
+
+  html.zd-m #xyPanel .xypad{flex:1; height:auto; min-height:0;}
+
+  /* teclado: octava arriba, ruedas verticales al costado, teclas que llenan el resto */
+  html.zd-m #kbPanel .kbtop{margin:0 0 5px; flex:none;}
+  html.zd-m #kbPanel .kb-mode{display:none;}
+  html.zd-m #kbPanel .octave-ctl{gap:6px;}
+  html.zd-m #kbPanel .octave-ctl button{width:44px; height:44px; font-size:18px;}
+  html.zd-m #kbPanel .octave-ctl .oc-val{font-size:13px; min-width:40px;}
+  html.zd-m #kbPanel .kbmain{flex:1; min-height:0; gap:5px;}
+  html.zd-m #kbPanel .wheels{gap:4px; padding:0; align-items:stretch;}
+  html.zd-m #kbPanel .wheel-wrap{gap:3px; justify-content:flex-start;}
+  html.zd-m #kbPanel .wheel{width:30px; height:auto; flex:1; min-height:80px;}
+  html.zd-m #kbPanel .wheel-lab{font-size:11px; letter-spacing:.06em;}
+  html.zd-m #kbPanel .keys{height:auto; min-width:0;}
+  /* dos filas de una octava cuando no entran 14 blancas de ~44px (la grave abajo).
+     A 360px: blancas de ~38px × ~100px, como la grilla de 8 pasos que acepta SPEC R1. */
+  @container keys (max-width:639px){
+    html.zd-m .key.white{left:calc(var(--ri) * 100% / 7); width:calc(100% / 7);
+      top:calc((1 - var(--row)) * 50%); bottom:auto; height:calc(50% - 2px);}
+    html.zd-m .key.black{left:calc(var(--ri) * 100% / 7 - 100% / 7 * .32); width:calc(100% / 7 * .64);
+      top:calc((1 - var(--row)) * 50%); height:31%;}
+    html.zd-m .key .kc{display:none;}
+  }
+
+  /* ---- sheets en modo peek: el stage se achica encima y queda el teclado ---- */
+  html.zd-m #zd-sheet.peek{height:45dvh;}
+  @supports not (height:100dvh){ html.zd-m #zd-sheet.peek{height:45vh;} }
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{height:calc(var(--zd-stage-h) - 45dvh);}
+  @supports not (height:100dvh){ html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{height:calc(var(--zd-stage-h) - 45vh);} }
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #macroPanel,
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #xyPanel,
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > .zd-pwa-banner,
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > .zd-pwa-local{display:none;}
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #kbPanel{flex:1 1 auto; min-height:0;}
+
+  /* ---- barra superior: REC + tiempo y el LED de clip ---- */
+  html.zd-m #zd-top #recBox{gap:5px;}
+  html.zd-m #zd-top #btnRec{min-height:44px; padding:0 10px; font:700 12px var(--zd-mono); letter-spacing:.04em; cursor:pointer;
+    color:var(--zd-ink); background:var(--zd-panel-2); border:1px solid var(--zd-outline); border-radius:var(--zd-r);
+    box-shadow:0 0 0 1px var(--zd-line), var(--zd-hard-sm); touch-action:manipulation;}
+  html.zd-m #zd-top #btnRec.on{background:var(--zd-alert); color:var(--zd-void); box-shadow:0 0 0 1px var(--zd-alert), 0 0 14px rgba(255,92,58,.5);}
+  html.zd-m #zd-top #btnRec:active{transform:translateY(2px); box-shadow:0 0 0 1px var(--zd-line);}
+  html.zd-m #zd-top #recTime{font-size:12px; min-width:0;}
+  @media (max-width:430px){ html.zd-m #zd-top .zd-ttitle{display:none;} }
+
+  /* ---- secciones dentro de los sheets ---- */
+  html.zd-m #zd-sheet .section,
+  html.zd-m #zd-sheet .controllers,
+  html.zd-m #zd-sheet .toolbar{padding:8px 9px; border-radius:var(--zd-r); box-shadow:0 0 0 1px var(--zd-line-soft);}
+  html.zd-m #zd-sheet .section > h2{margin:0 0 8px; font-size:11.5px;}
+  html.zd-m #zd-sheet .grid-knobs{grid-template-columns:1fr; gap:6px;}
+  /* knob en fila: knob · nombre · slider alternativo · valor (SPEC R1) */
+  html.zd-m #zd-sheet .ctl{display:grid; grid-template-columns:44px minmax(62px,auto) minmax(60px,1fr) 58px;
+    grid-template-areas:"k l s v"; align-items:center; gap:8px; padding:2px 8px;
+    background:var(--zd-well); border:1px solid var(--zd-line-soft); border-radius:var(--zd-r);}
+  html.zd-m #zd-sheet .ctl > .knob{grid-area:k; --sz:40px;}
+  html.zd-m #zd-sheet .ctl > .lab{grid-area:l; font-size:11.5px; text-align:left; white-space:normal; line-height:1.2;}
+  html.zd-m #zd-sheet .ctl > .kslider{grid-area:s; display:block; width:100%; min-width:0; height:44px; margin:0; accent-color:var(--accent);}
+  html.zd-m #zd-sheet .ctl > .val{grid-area:v; text-align:right; font-size:12.5px; min-height:0;}
+  html.zd-m #zd-sheet .ctl.wave-ctl{display:flex; flex-direction:column; align-items:stretch; padding:6px 8px;}
+  html.zd-m #zd-sheet .wave-ctl .wave-lab{grid-area:auto; text-align:center; margin:4px 0 0;}
+
+  html.zd-m #zd-sheet .osc-rows{gap:8px;}
+  html.zd-m #zd-sheet .osc-row{grid-template-columns:1fr; gap:6px; padding:6px;}
+  html.zd-m #zd-sheet .osc-row .osc-id{writing-mode:horizontal-tb; transform:none; text-align:left; font-size:11.5px; font-weight:700; letter-spacing:.14em;}
+  html.zd-m #zd-sheet .osc-controls{grid-template-columns:1fr; gap:6px;}
+  html.zd-m #zd-sheet .wave-btn{min-height:44px;}
+  html.zd-m #zd-sheet .wave-btn svg{width:26px; height:14px;}
+
+  html.zd-m #zd-sheet .mix-line{display:flex; flex-direction:column; align-items:stretch; gap:6px; padding:6px;}
+  html.zd-m #zd-sheet .mix-line .mk{min-height:36px; gap:12px; padding-left:4px;}
+  html.zd-m #zd-sheet .seg{display:flex; width:100%;}
+  html.zd-m #zd-sheet .seg button{flex:1; min-height:44px; font-size:12px;}
+  html.zd-m #zd-sheet .seg-row{margin-top:8px;}
+  html.zd-m #zd-sheet .seg-row.top{margin:0 0 8px;}
+  html.zd-m #zd-sheet .row-sw{min-height:44px; margin:2px 0; font-size:12px; padding:0 4px;}
+  html.zd-m #zd-sheet .toggle{width:48px; height:28px;}
+  html.zd-m #zd-sheet .toggle::after{width:22px; height:22px;}
+  html.zd-m #zd-sheet .toggle.on::after{transform:translateX(20px);}
+  html.zd-m #zd-sheet .mod-note,
+  html.zd-m #zd-sheet .cg-note,
+  html.zd-m #zd-sheet .hint{font-size:14px; line-height:1.5; max-width:none;}
+  html.zd-m #zd-sheet .filt-note{font-size:13px;}
+  html.zd-m #zd-sheet .env-graph{height:46px;}
+  html.zd-m #zd-sheet .scope-screen{height:110px;}
+
+  html.zd-m #zd-sheet .controllers{flex-direction:column; align-items:stretch; gap:8px;}
+  html.zd-m #zd-sheet .cg-items{flex-direction:column; align-items:stretch; gap:8px;}
+  html.zd-m #zd-sheet .cg-sw{min-height:44px; font-size:12px; gap:12px; padding:0 4px;}
+  html.zd-m #zd-sheet .cg-sw .seg{flex:1; width:auto;}
+
+  /* patches / export: una columna de controles de 44px */
+  html.zd-m #zd-sheet .toolbar{flex-direction:column; align-items:stretch; gap:8px; margin:0;}
+  html.zd-m #zd-sheet .toolbar .sep{display:none;}
+  html.zd-m #zd-sheet .toolbar .tb-group{gap:8px;}
+  html.zd-m #zd-sheet .toolbar .tb-group > label{width:86px; flex:none; letter-spacing:.06em;}
+  html.zd-m #zd-sheet .toolbar select{flex:1; max-width:none; min-height:44px; font-size:13px;}
+  html.zd-m #zd-sheet .toolbar button{min-height:44px; font-size:12.5px;}
+  html.zd-m #zd-sheet #kbHint,
+  html.zd-m #zd-sheet #credits{margin:0;}
+
+  /* ---- tablets: una fila de 14 blancas, teclado más bajo, pad grande ---- */
+  @media (min-width:600px){
+    html.zd-m #zd-stage > #kbPanel{flex-basis:clamp(200px, 32%, 300px);}
+    html.zd-m #macroPanel .knob{--sz:46px;}
+    html.zd-m #zd-sheet .grid-knobs{grid-template-columns:1fr 1fr;}
+  }
+
+  /* ---- landscape de teléfono: macros y pad arriba en una fila, teclado abajo ---- */
+  @media (orientation:landscape) and (max-height:600px){
+    html.zd-m #zd-stage{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+      grid-template-rows:auto auto minmax(0,1fr); grid-template-areas:"banner banner" "macro xy" "kb kb";}
+    html.zd-m #zd-stage > .zd-pwa-banner, html.zd-m #zd-stage > .zd-pwa-local{grid-area:banner;}
+    html.zd-m #zd-stage > #macroPanel{grid-area:macro;}
+    html.zd-m #zd-stage > #xyPanel{grid-area:xy; min-height:0;}
+    html.zd-m #zd-stage > #kbPanel{grid-area:kb; min-height:0;}
+    html.zd-m #macroPanel .knob{--sz:36px;}
+    /* el sheet peek ocupa la mitad izquierda y el teclado sigue a la derecha */
+    html.zd-m #zd-sheet.peek{right:50%; height:auto; max-height:none; top:calc(var(--zd-top-h) + var(--zd-sat));}
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{left:50%; height:var(--zd-stage-h);
+      grid-template-columns:minmax(0,1fr); grid-template-areas:"kb"; grid-template-rows:minmax(0,1fr);}
+    html.zd-m #zd-sheet{max-height:80dvh;}
+  }
 </style>
 
 <!-- ===== bloques ZD compartidos · ver docs/zd-blocks.md =====
@@ -1501,7 +1682,7 @@ window.ZD_M = {
   name: "MonoMoon'70",
   titleParts: ['Mono', 'Moon', "'70"],
   transport: ['#recBox'],
-  keep: ['#kbPanel'],
+  keep: ['#macroPanel', '#xyPanel', '#kbPanel'],
   tabs: [
     { id:'osc',  label:'OSC',     title:'OSCILADORES · MEZCLADOR', peek:true,
       nodes:['#oscSection', '#mixSection'] },
@@ -2342,12 +2523,12 @@ window.ZD_M = {
       <div class="section" id="mixSection">
         <h2>Mezclador</h2>
         <div id="mixLines"></div>
-        <div class="mix-line" style="margin-top:2px;">
+        <div class="mix-line">
           <div class="mk"><div class="toggle" id="noiseTog" data-on="0"></div>
-            <div style="font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--silk-dim);">Ruido</div></div>
+            <div class="mix-name">Ruido</div></div>
           <div class="ctl"><div class="knob sm" id="k_noise"></div><div class="lab">Nivel</div><div class="val" id="v_noise"></div></div>
         </div>
-        <div style="display:flex; justify-content:center; margin-top:8px;">
+        <div class="seg-row">
           <div class="seg" id="noiseType"><button data-t="white" class="on">Blanco</button><button data-t="pink">Rosa</button></div>
         </div>
       </div>
@@ -2359,7 +2540,7 @@ window.ZD_M = {
           <div class="ctl"><div class="knob" id="k_res"></div><div class="lab">Énfasis</div><div class="val" id="v_res"></div></div>
           <div class="ctl"><div class="knob" id="k_track"></div><div class="lab">Seguim.</div><div class="val" id="v_track"></div></div>
         </div>
-        <div style="font-size:9.5px; color:var(--silk-faint); text-align:center; margin-top:12px; line-height:1.5;">
+        <div class="filt-note">
           24&nbsp;dB/oct · resonancia con auto-oscilación<br><span id="filtMode"></span>
         </div>
       </div>
@@ -2373,7 +2554,7 @@ window.ZD_M = {
           <div class="ctl"><div class="knob sm" id="k_rel"></div><div class="lab">Relaj.</div><div class="val" id="v_rel"></div></div>
         </div>
         <canvas class="env-graph" id="envGraph" width="230" height="42"></canvas>
-        <div class="grid-knobs" style="margin-top:12px;">
+        <div class="grid-knobs out-knobs">
           <div class="ctl"><div class="knob" id="k_vol"></div><div class="lab">Volumen</div><div class="val" id="v_vol"></div></div>
           <div class="ctl"><div class="knob sm" id="k_tune"></div><div class="lab">Afinación</div><div class="val" id="v_tune"></div></div>
         </div>
@@ -2385,7 +2566,7 @@ window.ZD_M = {
       <!-- MODULACIÓN -->
       <div class="section" id="modSection">
         <h2>Modulación</h2>
-        <div class="grid-knobs" style="grid-template-columns:1fr;">
+        <div class="grid-knobs one">
           <div class="ctl"><div class="knob sm" id="k_modmix"></div><div class="lab">Osc3 · Ruido</div><div class="val" id="v_modmix"></div></div>
         </div>
         <div class="row-sw"><span class="lbl2">Osc3 → teclado</span><div class="toggle on" id="osc3KbdTog" data-on="1"></div></div>
@@ -2397,7 +2578,7 @@ window.ZD_M = {
       <!-- CONTORNO DE FILTRO -->
       <div class="section" id="fenvSection">
         <h2>Contorno de filtro · 2ª envolvente</h2>
-        <div class="grid-knobs" style="grid-template-columns:repeat(5,1fr); gap:8px 4px;">
+        <div class="grid-knobs five">
           <div class="ctl"><div class="knob sm" id="k_camt"></div><div class="lab">Cantidad</div><div class="val" id="v_camt"></div></div>
           <div class="ctl"><div class="knob sm" id="k_fatk"></div><div class="lab">Ataque</div><div class="val" id="v_fatk"></div></div>
           <div class="ctl"><div class="knob sm" id="k_fdec"></div><div class="lab">Caída</div><div class="val" id="v_fdec"></div></div>
@@ -2411,14 +2592,14 @@ window.ZD_M = {
       <!-- VOZ -->
       <div class="section" id="voiceSection">
         <h2>Voz</h2>
-        <div style="display:flex; justify-content:center; margin-bottom:10px;">
+        <div class="seg-row top">
           <div class="seg" id="voiceSeg">
             <button data-m="mono" class="on">Mono</button>
             <button data-m="unison">Unison</button>
             <button data-m="duo">Duo</button>
           </div>
         </div>
-        <div class="grid-knobs" style="grid-template-columns:1fr;">
+        <div class="grid-knobs one">
           <div class="ctl"><div class="knob sm" id="k_unidet"></div><div class="lab">Detune unison</div><div class="val" id="v_unidet"></div></div>
         </div>
         <div class="mod-note"><b>Unison</b>: voces detuneadas apiladas. <b>Duo</b>: tocá 2 teclas y suena el intervalo (osc1 = aguda, osc2/3 = grave).</div>
@@ -2444,6 +2625,29 @@ window.ZD_M = {
       </div>
     </div>
 
+    <!-- PERFORMANCE: macros + pad XY -->
+    <div class="perf-row">
+      <div class="section" id="macroPanel">
+        <h2>Macros</h2>
+        <div class="macros">
+          <div class="ctl"><div class="knob" id="m_cutoff"></div><div class="lab">Cutoff</div><div class="val" id="mv_cutoff"></div></div>
+          <div class="ctl"><div class="knob" id="m_res"></div><div class="lab">Reso</div><div class="val" id="mv_res"></div></div>
+          <div class="ctl"><div class="knob" id="m_env"></div><div class="lab">Env Amt</div><div class="val" id="mv_env"></div></div>
+          <div class="ctl"><div class="knob" id="m_ar"></div><div class="lab">A/R</div><div class="val" id="mv_ar"></div></div>
+          <div class="ctl"><div class="knob" id="m_glide"></div><div class="lab">Glide</div><div class="val" id="mv_glide"></div></div>
+          <div class="ctl"><div class="knob" id="m_vol"></div><div class="lab">Volumen</div><div class="val" id="mv_vol"></div></div>
+        </div>
+      </div>
+      <div class="section" id="xyPanel">
+        <h2>Pad XY · corte / énfasis</h2>
+        <div class="xypad" id="xypad" role="group" tabindex="0"
+          aria-label="Pad XY: eje X corte del filtro, eje Y énfasis. Flechas para mover, Inicio y Fin para los extremos.">
+          <div class="xy-h" id="xyH"></div><div class="xy-v" id="xyV"></div><div class="xy-dot" id="xyDot"></div>
+          <span class="xy-ax x">Corte →</span><span class="xy-ax y">↑ Énfasis</span>
+        </div>
+      </div>
+    </div>
+
     <!-- TECLADO -->
     <div class="keybar" id="kbPanel">
       <div class="kbtop">
@@ -2453,9 +2657,7 @@ window.ZD_M = {
           <span class="oc-val" id="octVal">C4</span>
           <button id="octUp" title="Subir octava (X)">+</button>
         </div>
-        <div style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--silk-faint);">
-          Monofónico / duofónico
-        </div>
+        <div class="kb-mode">Monofónico / duofónico</div>
       </div>
       <div class="kbmain">
         <div class="wheels">
@@ -2864,32 +3066,70 @@ const REG={ knob:{}, tog:{}, oscWave:[null,null,null], wheels:{} };
 function setTog(el,on){ if(!el) return; el.dataset.on=on?'1':'0'; el.classList.toggle('on',!!on); }
 function setSegActive(id,attr,val){ document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on', b.dataset[attr]===String(val))); }
 
+/* Entrada numérica: lo que se escribe está en la unidad que se ve (Hz, ms, %, ¢). */
+const numIn=t=>{ const m=String(t).replace(',','.').match(/-?\d*\.?\d+/); return m?parseFloat(m[0]):NaN; };
+const PARSE={
+  num: t=>numIn(t),
+  pct: t=>numIn(t)/100,
+  hz:  t=>{ const n=numIn(t); return /k/i.test(t)? n*1000 : n; },
+  time:t=>{ const x=String(t).toLowerCase(), n=numIn(x); return /ms/.test(x)? n/1000 : (/s/.test(x)? n : n/1000); },
+  foot:feet=>t=>{ const x=String(t).trim().toUpperCase(); if(x.startsWith('LO')) return feet.indexOf('LO');
+    const i=feet.indexOf(Math.round(numIn(x))); return i>=0? i : NaN; },
+};
+const PARSE_HINT={ time:'En ms (o en segundos con s: 1.5s).', pct:'De 0 a 100.' };
+
+/* Knob: arrastre vertical, doble tap = valor de fábrica, long-press = valor numérico,
+   rueda del mouse, flechas y un slider alternativo que solo se ve en los sheets móviles. */
 class Knob{
-  constructor(el, {min,max,value,curve='lin',step=0,format,onChange}){
+  constructor(el, {min,max,value,curve='lin',step=0,format,parse,hint,label,onChange}){
     this.el=el; this.min=min; this.max=max; this.curve=curve; this.step=step;
-    this.format=format||(v=>v.toFixed(2)); this.onChange=onChange; this.default=value; this.value=value;
+    this.format=format||(v=>v.toFixed(2)); this.parse=parse||PARSE.num; this.hint=hint||'';
+    this.onChange=onChange; this.default=value; this.value=value;
+    const ctl=el.closest('.ctl'), lab=ctl&&ctl.querySelector('.lab');
+    this.label=label||(lab?lab.textContent.trim():'Valor');
     el.classList.add('dial'); el.tabIndex=0; el.setAttribute('role','slider');
-    el.innerHTML='<div class="pointer"></div>'; this.pointer=el.querySelector('.pointer'); this._bind(); this.set(value,true);
+    el.innerHTML='<div class="pointer"></div>'; this.pointer=el.querySelector('.pointer');
+    if(ctl){ const sl=document.createElement('input'); sl.type='range'; sl.className='kslider';
+      sl.min='0'; sl.max='1'; sl.step='0.001'; sl.tabIndex=-1; sl.setAttribute('aria-label', this.label+' (slider)');
+      sl.addEventListener('input',()=>this.set(this._denorm(parseFloat(sl.value)))); ctl.appendChild(sl); this.slider=sl; }
+    this._bind(); this.set(value,true);
   }
   _norm(v){ if(this.curve==='exp'){ return Math.log(v/this.min)/Math.log(this.max/this.min); } return (v-this.min)/(this.max-this.min); }
   _denorm(n){ n=clamp(n,0,1); if(this.curve==='exp'){ return this.min*Math.pow(this.max/this.min,n); } return this.min+(this.max-this.min)*n; }
   set(v,silent){ if(this.step) v=Math.round(v/this.step)*this.step; v=clamp(v,this.min,this.max); this.value=v;
     const n=this._norm(v); this.pointer.style.transform=`translateX(-50%) rotate(${-135+n*270}deg)`;
     this.el.setAttribute('aria-valuenow', v.toFixed(3)); this.el.setAttribute('aria-valuetext', this.format(v));
-    if(this.valEl) this.valEl.textContent=this.format(v); if(!silent && this.onChange) this.onChange(v); }
+    if(this.slider && document.activeElement!==this.slider) this.slider.value=String(n);
+    if(this.valEl) this.valEl.textContent=this.format(v);
+    if(!silent){ if(this.onChange) this.onChange(v); if(Knob.changed) Knob.changed(this); } }
+  reset(){ this.set(this.default); }
+  ask(){ if(!(window.ZD&&ZD.modal)) return; const f=this.format;
+    ZD.modal.prompt('Entre '+f(this.min)+' y '+f(this.max)+'. Valor actual: '+f(this.value)+'.'+(this.hint?' '+this.hint:''),
+      { title:this.label.toUpperCase(), value:f(this.value), maxlength:16, label:this.label, ok:'APLICAR' })
+    .then(t=>{ if(t==null||!String(t).trim()) return; const v=this.parse(String(t));
+      if(!isFinite(v)) ZD.toast('Ese valor no se entiende: '+String(t).slice(0,24), {kind:'error'}); else this.set(v); }); }
   _bind(){
-    let startY=0, startN=0, dragging=false;
-    const move=(e)=>{ if(!dragging) return; const y=e.touches?e.touches[0].clientY:e.clientY;
-      const fine=e.shiftKey?0.25:1; this.set(this._denorm(startN+(startY-y)/240*fine)); e.preventDefault(); };
-    const up=()=>{ dragging=false; this.el.classList.remove('active'); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); };
-    this.el.addEventListener('pointerdown',(e)=>{ dragging=true; this.el.classList.add('active'); this.el.focus();
-      startY=e.clientY; startN=this._norm(this.value); window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); e.preventDefault(); });
-    this.el.addEventListener('wheel',(e)=>{ const fine=e.shiftKey?0.2:1;
+    const el=this.el; let startY=0, startN=0, dragging=false, moved=0, lp=null, lpFired=false, lastTap=0;
+    const clearLP=()=>{ if(lp){ clearTimeout(lp); lp=null; } };
+    el.addEventListener('pointerdown',(e)=>{ if(e.button>0) return; e.preventDefault();
+      dragging=true; moved=0; lpFired=false; startY=e.clientY; startN=this._norm(this.value);
+      el.classList.add('active'); try{ el.setPointerCapture(e.pointerId); }catch(_){}
+      try{ el.focus({preventScroll:true}); }catch(_){ el.focus(); }
+      clearLP(); lp=setTimeout(()=>{ lp=null; lpFired=true; dragging=false; el.classList.remove('active'); this.ask(); }, 550); });
+    el.addEventListener('pointermove',(e)=>{ if(!dragging) return; const dy=startY-e.clientY;
+      if(Math.abs(dy)>5) clearLP(); moved=Math.max(moved,Math.abs(dy));
+      const fine=e.shiftKey?0.25:1; this.set(this._denorm(startN+dy/240*fine)); });
+    const end=(e)=>{ clearLP(); if(!dragging) return; dragging=false; el.classList.remove('active');
+      try{ el.releasePointerCapture(e.pointerId); }catch(_){}
+      if(lpFired || moved>5 || e.type==='pointercancel') return;
+      const now=performance.now(); if(now-lastTap<320){ lastTap=0; this.reset(); } else lastTap=now; };
+    el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+    el.addEventListener('wheel',(e)=>{ const fine=e.shiftKey?0.2:1;
       this.set(this._denorm(this._norm(this.value) - Math.sign(e.deltaY)*0.03*fine)); e.preventDefault(); },{passive:false});
-    this.el.addEventListener('dblclick',()=>this.set(this.default));
-    this.el.addEventListener('keydown',(e)=>{ const s=e.shiftKey?0.005:0.02;
+    el.addEventListener('keydown',(e)=>{ const s=e.shiftKey?0.005:0.02;
       if(e.key==='ArrowUp'||e.key==='ArrowRight'){ this.set(this._denorm(this._norm(this.value)+s)); e.preventDefault(); }
-      else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ this.set(this._denorm(this._norm(this.value)-s)); e.preventDefault(); } });
+      else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ this.set(this._denorm(this._norm(this.value)-s)); e.preventDefault(); }
+      else if(e.key==='Enter'){ e.preventDefault(); this.ask(); } });
   }
 }
 
@@ -2906,8 +3146,12 @@ class Wheel{
     let dragging=false;
     const val=(y)=>{ const r=this.el.getBoundingClientRect(); const n=1-clamp((y-r.top)/r.height,0,1); return this.center? n*2-1 : n; };
     const move=(e)=>{ if(!dragging) return; this.set(val(e.clientY)); e.preventDefault(); };
-    const up=()=>{ if(!dragging) return; dragging=false; window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); if(this.center) this._snap(); };
-    this.el.addEventListener('pointerdown',(e)=>{ dragging=true; this.set(val(e.clientY)); window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); e.preventDefault(); });
+    const up=(e)=>{ if(!dragging) return; dragging=false; try{ this.el.releasePointerCapture(e.pointerId); }catch(_){}
+      this.el.classList.remove('active'); if(this.center) this._snap(); };
+    this.el.addEventListener('pointerdown',(e)=>{ if(e.button>0) return; dragging=true; this.el.classList.add('active');
+      try{ this.el.setPointerCapture(e.pointerId); }catch(_){} this.set(val(e.clientY)); e.preventDefault(); });
+    this.el.addEventListener('pointermove',move);
+    this.el.addEventListener('pointerup',up); this.el.addEventListener('pointercancel',up);
   }
   _snap(){ if(REDUCED_MOTION){ this.set(0); return; } const start=this.value, t0=performance.now(), dur=130;
     const step=(t)=>{ const k=clamp((t-t0)/dur,0,1); const e=1-Math.pow(1-k,3); this.set(start*(1-e)); if(k<1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
@@ -2935,16 +3179,16 @@ function buildOscRows(){
       <div class="osc-controls">
         <div class="ctl"><div class="knob sm" data-foot></div><div class="lab">Rango</div><div class="val" data-footval></div></div>
         <div class="ctl"><div class="knob sm" data-det></div><div class="lab">${i===0?'Afinación':'Detune'}</div><div class="val" data-detval></div></div>
-        <div class="ctl" style="align-items:stretch;"><div class="waves" data-waves></div>
-          <div class="lab" style="text-align:center; margin-top:2px;" data-wavelab>${WAVE_LABEL[st.wave]}</div></div>
+        <div class="ctl wave-ctl"><div class="waves" data-waves></div>
+          <div class="lab wave-lab" data-wavelab>${WAVE_LABEL[st.wave]}</div></div>
       </div>`;
     cont.appendChild(row);
     const footK=new Knob(row.querySelector('[data-foot]'),{min:0,max:feet.length-1,value:feet.indexOf(st.foot),step:1,
-      format:v=>footFmt(feet[Math.round(v)]), onChange:v=>engine.setOscFoot(i,feet[Math.round(v)])});
+      format:v=>footFmt(feet[Math.round(v)]), parse:PARSE.foot(feet), label:'Osc '+(i+1)+' · Rango', onChange:v=>engine.setOscFoot(i,feet[Math.round(v)])});
     footK.valEl=row.querySelector('[data-footval]'); footK.set(footK.value,true); footK.feet=feet; REG.knob['f'+i]=footK;
     const detRange=i===0?50:700;
     const detK=new Knob(row.querySelector('[data-det]'),{min:-detRange,max:detRange,value:st.detune,
-      format:v=>(v>0?'+':'')+v.toFixed(0)+'¢', onChange:v=>engine.setOscDetune(i,v)});
+      format:v=>(v>0?'+':'')+v.toFixed(0)+'¢', label:'Osc '+(i+1)+' · '+(i===0?'Afinación':'Detune'), onChange:v=>engine.setOscDetune(i,v)});
     detK.valEl=row.querySelector('[data-detval]'); detK.set(detK.value,true); REG.knob['d'+i]=detK;
     const wc=row.querySelector('[data-waves]'), lab=row.querySelector('[data-wavelab]');
     WAVE_TYPES.forEach(t=>{ const b=document.createElement('button'); b.className='wave-btn'+(t===st.wave?' on':''); b.title=WAVE_LABEL[t]; b.dataset.t=t;
@@ -2958,11 +3202,11 @@ function buildMixer(){
   const cont=document.getElementById('mixLines');
   for(let i=0;i<3;i++){ const st=engine.state.osc[i]; const line=document.createElement('div'); line.className='mix-line';
     line.innerHTML=`<div class="mk"><div class="toggle ${st.on?'on':''}" data-tog></div>
-        <div style="font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--silk-dim);">Osc ${i+1}</div></div>
+        <div class="mix-name">Osc ${i+1}</div></div>
       <div class="ctl"><div class="knob sm" data-lvl></div><div class="lab">Nivel</div><div class="val" data-lvlval></div></div>`;
     cont.appendChild(line);
     const tog=line.querySelector('[data-tog]'); tog.dataset.on=st.on?'1':'0'; tog.addEventListener('click',()=>{ const on=!(tog.dataset.on==='1'); tog.dataset.on=on?'1':'0'; tog.classList.toggle('on',on); engine.setOscOn(i,on); }); REG.tog['on'+i]=tog;
-    const k=new Knob(line.querySelector('[data-lvl]'),{min:0,max:1,value:st.level,format:v=>Math.round(v*100)+'',onChange:v=>engine.setOscLevel(i,v)});
+    const k=new Knob(line.querySelector('[data-lvl]'),{min:0,max:1,value:st.level,format:v=>Math.round(v*100)+'',parse:PARSE.pct,hint:PARSE_HINT.pct,label:'Osc '+(i+1)+' · Nivel',onChange:v=>engine.setOscLevel(i,v)});
     k.valEl=line.querySelector('[data-lvlval]'); k.set(k.value,true); REG.knob['l'+i]=k; }
 }
 function bindKnob(id,valId,opts){ const k=new Knob(document.getElementById(id),opts); k.valEl=document.getElementById(valId); k.set(k.value,true); REG.knob[id]=k; return k; }
@@ -2971,39 +3215,39 @@ function bindSeg(id,attr,cb){ document.getElementById(id).addEventListener('clic
   document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); cb(b.dataset[attr]); }); }
 
 function buildFixedControls(){
-  bindKnob('k_noise','v_noise',{min:0,max:1,value:engine.state.noise.level,format:v=>Math.round(v*100)+'',onChange:v=>engine.setNoiseLevel(v)});
+  bindKnob('k_noise','v_noise',{min:0,max:1,value:engine.state.noise.level,format:v=>Math.round(v*100)+'',parse:PARSE.pct,hint:PARSE_HINT.pct,onChange:v=>engine.setNoiseLevel(v)});
   bindTog('noiseTog',on=>engine.setNoiseOn(on));
   bindSeg('noiseType','t',t=>engine.setNoiseType(t));
 
   bindKnob('k_cutoff','v_cutoff',{min:20,max:18000,value:engine.state.filter.cutoff,curve:'exp',
-    format:v=>v>=1000?(v/1000).toFixed(1)+'k':Math.round(v)+'',onChange:v=>engine.setCutoff(v)});
-  bindKnob('k_res','v_res',{min:0,max:1,value:engine.state.filter.res,format:v=>Math.round(v*100)+'',onChange:v=>engine.setResonance(v)});
-  bindKnob('k_track','v_track',{min:0,max:1,value:engine.state.filter.track,format:v=>Math.round(v*100)+'%',onChange:v=>engine.setTrack(v)});
+    format:v=>v>=1000?(v/1000).toFixed(1)+'k':Math.round(v)+'',parse:PARSE.hz,hint:'En Hz (1.2k = 1200).',onChange:v=>engine.setCutoff(v)});
+  bindKnob('k_res','v_res',{min:0,max:1,value:engine.state.filter.res,format:v=>Math.round(v*100)+'',parse:PARSE.pct,hint:PARSE_HINT.pct,onChange:v=>engine.setResonance(v)});
+  bindKnob('k_track','v_track',{min:0,max:1,value:engine.state.filter.track,format:v=>Math.round(v*100)+'%',parse:PARSE.pct,hint:PARSE_HINT.pct,onChange:v=>engine.setTrack(v)});
 
   const fmtT=v=>v<1?Math.round(v*1000)+'ms':v.toFixed(2)+'s';
-  bindKnob('k_atk','v_atk',{min:0.001,max:5,value:engine.state.env.a,curve:'exp',format:fmtT,onChange:v=>{engine.setEnv('a',v);drawEnv('envGraph',engine.state.env);}});
-  bindKnob('k_dec','v_dec',{min:0.002,max:8,value:engine.state.env.d,curve:'exp',format:fmtT,onChange:v=>{engine.setEnv('d',v);drawEnv('envGraph',engine.state.env);}});
-  bindKnob('k_sus','v_sus',{min:0,max:1,value:engine.state.env.s,format:v=>Math.round(v*100)+'',onChange:v=>{engine.setEnv('s',v);drawEnv('envGraph',engine.state.env);}});
-  bindKnob('k_rel','v_rel',{min:0.002,max:8,value:engine.state.env.r,curve:'exp',format:fmtT,onChange:v=>{engine.setEnv('r',v);drawEnv('envGraph',engine.state.env);}});
+  bindKnob('k_atk','v_atk',{min:0.001,max:5,value:engine.state.env.a,curve:'exp',format:fmtT,parse:PARSE.time,hint:PARSE_HINT.time,onChange:v=>{engine.setEnv('a',v);drawEnv('envGraph',engine.state.env);}});
+  bindKnob('k_dec','v_dec',{min:0.002,max:8,value:engine.state.env.d,curve:'exp',format:fmtT,parse:PARSE.time,hint:PARSE_HINT.time,onChange:v=>{engine.setEnv('d',v);drawEnv('envGraph',engine.state.env);}});
+  bindKnob('k_sus','v_sus',{min:0,max:1,value:engine.state.env.s,format:v=>Math.round(v*100)+'',parse:PARSE.pct,hint:PARSE_HINT.pct,onChange:v=>{engine.setEnv('s',v);drawEnv('envGraph',engine.state.env);}});
+  bindKnob('k_rel','v_rel',{min:0.002,max:8,value:engine.state.env.r,curve:'exp',format:fmtT,parse:PARSE.time,hint:PARSE_HINT.time,onChange:v=>{engine.setEnv('r',v);drawEnv('envGraph',engine.state.env);}});
 
-  bindKnob('k_vol','v_vol',{min:0,max:1,value:engine.state.master.vol,format:v=>Math.round(v*100)+'',onChange:v=>engine.setMasterVol(v)});
+  bindKnob('k_vol','v_vol',{min:0,max:1,value:engine.state.master.vol,format:v=>Math.round(v*100)+'',parse:PARSE.pct,hint:PARSE_HINT.pct,onChange:v=>engine.setMasterVol(v)});
   bindKnob('k_tune','v_tune',{min:-100,max:100,value:engine.state.master.tune,format:v=>(v>0?'+':'')+v.toFixed(0)+'¢',onChange:v=>engine.setMasterTune(v)});
 }
 
 function buildMod(){
   bindKnob('k_modmix','v_modmix',{min:0,max:1,value:engine.state.mod.mix,
-    format:v=>v<=0.02?'Osc3':(v>=0.98?'Ruido':Math.round((1-v)*100)+'/'+Math.round(v*100)),onChange:v=>engine.setModMix(v)});
+    format:v=>v<=0.02?'Osc3':(v>=0.98?'Ruido':Math.round((1-v)*100)+'/'+Math.round(v*100)),parse:PARSE.pct,hint:'Porcentaje de ruido: 0 = solo Osc3, 100 = solo ruido.',onChange:v=>engine.setModMix(v)});
   bindTog('osc3KbdTog',on=>engine.setOsc3Kbd(on));
   bindTog('oscModTog',on=>engine.setModOsc(on));
   bindTog('filtModTog',on=>engine.setModFilt(on));
 }
 function buildContour(){
-  bindKnob('k_camt','v_camt',{min:-1,max:1,value:engine.state.contour,format:v=>(v>0?'+':'')+Math.round(v*100)+'',onChange:v=>{engine.setContour(v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
+  bindKnob('k_camt','v_camt',{min:-1,max:1,value:engine.state.contour,format:v=>(v>0?'+':'')+Math.round(v*100)+'',parse:PARSE.pct,hint:'De -100 a +100.',onChange:v=>{engine.setContour(v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
   const fmtT=v=>v<1?Math.round(v*1000)+'ms':v.toFixed(2)+'s';
-  bindKnob('k_fatk','v_fatk',{min:0.001,max:5,value:engine.state.filtEnv.a,curve:'exp',format:fmtT,onChange:v=>{engine.setFiltEnv('a',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
-  bindKnob('k_fdec','v_fdec',{min:0.002,max:8,value:engine.state.filtEnv.d,curve:'exp',format:fmtT,onChange:v=>{engine.setFiltEnv('d',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
-  bindKnob('k_fsus','v_fsus',{min:0,max:1,value:engine.state.filtEnv.s,format:v=>Math.round(v*100)+'',onChange:v=>{engine.setFiltEnv('s',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
-  bindKnob('k_frel','v_frel',{min:0.002,max:8,value:engine.state.filtEnv.r,curve:'exp',format:fmtT,onChange:v=>{engine.setFiltEnv('r',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
+  bindKnob('k_fatk','v_fatk',{min:0.001,max:5,value:engine.state.filtEnv.a,curve:'exp',format:fmtT,parse:PARSE.time,hint:PARSE_HINT.time,onChange:v=>{engine.setFiltEnv('a',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
+  bindKnob('k_fdec','v_fdec',{min:0.002,max:8,value:engine.state.filtEnv.d,curve:'exp',format:fmtT,parse:PARSE.time,hint:PARSE_HINT.time,onChange:v=>{engine.setFiltEnv('d',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
+  bindKnob('k_fsus','v_fsus',{min:0,max:1,value:engine.state.filtEnv.s,format:v=>Math.round(v*100)+'',parse:PARSE.pct,hint:PARSE_HINT.pct,onChange:v=>{engine.setFiltEnv('s',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
+  bindKnob('k_frel','v_frel',{min:0.002,max:8,value:engine.state.filtEnv.r,curve:'exp',format:fmtT,parse:PARSE.time,hint:PARSE_HINT.time,onChange:v=>{engine.setFiltEnv('r',v);drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour);}});
 }
 function buildVoice(){
   bindSeg('voiceSeg','m',m=>engine.setVoiceMode(m));
@@ -3011,8 +3255,8 @@ function buildVoice(){
 }
 function buildControllers(){
   bindKnob('k_glide','v_glide',{min:0.001,max:2,value:engine.state.glide.time,curve:'exp',
-    format:v=>v<1?Math.round(v*1000)+'ms':v.toFixed(2)+'s',onChange:v=>engine.setGlideTime(v)});
-  bindTog('glideTog',on=>engine.setGlide(on));
+    format:v=>v<1?Math.round(v*1000)+'ms':v.toFixed(2)+'s',parse:PARSE.time,hint:PARSE_HINT.time,onChange:v=>engine.setGlideTime(v)});
+  bindTog('glideTog',on=>{ engine.setGlide(on); perfSync(); });
   bindSeg('trigSeg','t',t=>engine.setTrigger(t));
 }
 
@@ -3034,25 +3278,30 @@ function drawEnv(id, e, amount){
    ================================================================ */
 const KEYMAP={'a':0,'w':1,'s':2,'e':3,'d':4,'f':5,'t':6,'g':7,'y':8,'h':9,'u':10,'j':11,
   'k':12,'o':13,'l':14,'p':15,'ñ':16,';':16,'\'':17};
-const WHITE_SEMI=[0,2,4,5,7,9,11,12,14,16];
 const WHITE_KEY ={0:'A',2:'S',4:'D',5:'F',7:'G',9:'H',11:'J',12:'K',14:'L',16:'Ñ'};
-const BLACK_SEMI=[1,3,6,8,10,13,15];
 const BLACK_KEY ={1:'W',3:'E',6:'T',8:'Y',10:'U',13:'O',15:'P'};
+const KB_SEMIS=24, WHITE_PC=[0,2,4,5,7,9,11];
 let baseOctave=4; const baseMidi=()=>12*(baseOctave+1); const keyEls={};
 
+/* 2 octavas: en escritorio y tablet una fila de 14 blancas; en el shell angosto, dos
+   filas de una octava (la grave abajo). Solo se ponen variables CSS (--i, --ri, --row):
+   el reparto lo hace el CSS por container query, sin mover nodos al rotar. */
 function buildKeyboard(){
-  const cont=document.getElementById('keys'); cont.innerHTML=''; Object.keys(keyEls).forEach(k=>delete keyEls[k]);
-  const whiteW=100/WHITE_SEMI.length;
-  WHITE_SEMI.forEach((semi,idx)=>{ const k=document.createElement('div'); k.className='key white';
-    k.style.left=(idx*whiteW)+'%'; k.style.width=whiteW+'%'; k.style.height='132px';
-    k.innerHTML=`<div class="kc">${WHITE_KEY[semi]||''}</div>`; k.dataset.semi=semi; cont.appendChild(k); keyEls[semi]=k; });
-  const blackPos={1:0,3:1,6:3,8:4,10:5,13:7,15:8};
-  BLACK_SEMI.forEach(semi=>{ const wi=blackPos[semi]; const k=document.createElement('div'); k.className='key black';
-    k.style.left=`calc(${(wi+1)*whiteW}% - ${whiteW*0.32}%)`; k.style.width=(whiteW*0.64)+'%'; k.style.height='82px';
-    k.innerHTML=`<div class="kc">${BLACK_KEY[semi]||''}</div>`; k.dataset.semi=semi; cont.appendChild(k); keyEls[semi]=k; });
+  const cont=document.getElementById('keys'); cont.textContent=''; Object.keys(keyEls).forEach(k=>delete keyEls[k]);
+  for(let semi=0; semi<KB_SEMIS; semi++){
+    const oct=Math.floor(semi/12), pc=semi%12, wi=WHITE_PC.indexOf(pc), white=wi>=0;
+    const ri=white? wi : WHITE_PC.filter(x=>x<pc).length;
+    const k=document.createElement('div'); k.className='key '+(white?'white':'black'); k.dataset.semi=semi;
+    k.style.setProperty('--i', oct*7+ri); k.style.setProperty('--ri', ri); k.style.setProperty('--row', oct);
+    const pcKey=(white?WHITE_KEY:BLACK_KEY)[semi];
+    if(pcKey){ const kc=document.createElement('div'); kc.className='kc'; kc.textContent=pcKey; k.appendChild(kc); }
+    if(pc===0){ const kn=document.createElement('div'); kn.className='kn'; k.appendChild(kn); }
+    cont.appendChild(k); keyEls[semi]=k;
+  }
   updateOctaveLabel();
 }
-function updateOctaveLabel(){ document.getElementById('octVal').textContent='C'+baseOctave; }
+function updateOctaveLabel(){ document.getElementById('octVal').textContent='C'+baseOctave;
+  for(const sm of [0,12]){ const kn=keyEls[sm]&&keyEls[sm].querySelector('.kn'); if(kn) kn.textContent='C'+(baseOctave+sm/12); } }
 
 const noteCount=new Map(); const elCount=new Map();
 const kbd={
@@ -3081,7 +3330,14 @@ const ptrUp=(e)=>{ const id='p:'+e.pointerId; ptrDown.delete(id); kbd.release(id
 keysEl.addEventListener('pointerup',ptrUp); keysEl.addEventListener('pointercancel',ptrUp);
 
 const pcDown=new Set();
-window.addEventListener('keydown',(e)=>{ if(e.repeat) return; const key=e.key.toLowerCase();
+/* Un modal con input (valor numérico, nombre del patch) deja escribir: cada letra tocaría
+   una nota o cambiaría la octava. Lo que ya resolvió un control (preventDefault) se respeta. */
+function pcKeysOff(e){ const t=e.target;
+  if(e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return true;
+  if(t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return true;
+  return !!document.querySelector('.zd-scrim'); }
+window.addEventListener('keydown',(e)=>{ if(e.repeat || pcKeysOff(e)) return; const key=e.key.toLowerCase();
+  if(key===' ' && e.target && e.target.closest && e.target.closest('button,a,[role=button],[role=switch]')) return;
   if(key==='z'){ shiftOctave(-1); return; } if(key==='x'){ shiftOctave(1); return; }
   if(key===' '){ clearAllKeys(); e.preventDefault(); return; }
   if(key in KEYMAP){ e.preventDefault(); if(pcDown.has(key)) return; pcDown.add(key); const semi=KEYMAP[key];
@@ -3091,6 +3347,78 @@ window.addEventListener('blur',clearAllKeys);
 function shiftOctave(d){ baseOctave=clamp(baseOctave+d,0,8); updateOctaveLabel(); }
 document.getElementById('octUp').addEventListener('click',()=>shiftOctave(1));
 document.getElementById('octDn').addEventListener('click',()=>shiftOctave(-1));
+
+/* ================================================================
+   PERFORMANCE — 6 macros + pad XY (zona de tocar del shell móvil)
+   Las macros no agregan parámetros: manejan los mismos valores de los knobs
+   de las secciones, que se mantienen sincronizados en las dos direcciones.
+   ================================================================ */
+const MAC={};
+/* A/R mueve juntos ataque y relajación de los dos contornos (amplitud y filtro),
+   de forma relativa: arrastrar suma el mismo desplazamiento a los 4 y conserva
+   la relación entre ellos. Muestra el ataque/relajación de la amplitud. */
+const AR_KNOBS=['k_atk','k_rel','k_fatk','k_frel'];
+let arLast=0, arDriving=false;
+const arNorm=()=>AR_KNOBS.reduce((a,id)=>a+REG.knob[id]._norm(REG.knob[id].value),0)/AR_KNOBS.length;
+const tShort=t=>t<1? Math.round(t*1000)+'' : t.toFixed(1)+'s';
+function buildMacros(){
+  const mk=(id,opts)=>{ const k=new Knob(document.getElementById(id),opts); k.isMacro=true;
+    k.valEl=document.getElementById(id.replace('m_','mv_')); k.set(k.value,true); MAC[id.slice(2)]=k; return k; };
+  const mirror=(id,src,label,setter)=>mk(id,{ min:src.min, max:src.max, curve:src.curve, value:src.default,
+    format:src.format, parse:src.parse, hint:src.hint, label,
+    onChange:v=>{ setter(v); src.set(v,true); } });
+  mirror('m_cutoff', REG.knob.k_cutoff, 'Cutoff', v=>engine.setCutoff(v));
+  mirror('m_res',    REG.knob.k_res,    'Reso',   v=>engine.setResonance(v));
+  mirror('m_env',    REG.knob.k_camt,   'Env Amt',v=>{ engine.setContour(v); drawEnv('envGraphF',engine.state.filtEnv,engine.state.contour); });
+  mirror('m_vol',    REG.knob.k_vol,    'Volumen',v=>engine.setMasterVol(v));
+  mk('m_ar',{ min:0, max:1, value:arNorm(), label:'A/R',
+    format:()=>tShort(engine.state.env.a)+'/'+tShort(engine.state.env.r), parse:PARSE.pct,
+    hint:'Posición de 0 a 100 de ataque y relajación de los dos contornos.',
+    onChange:v=>{ const d=v-arLast; arLast=v; arDriving=true;
+      for(const id of AR_KNOBS){ const k=REG.knob[id]; k.set(k._denorm(k._norm(k.value)+d)); }
+      arDriving=false; MAC.ar.set(v,true); } });
+  MAC.ar.default=arNorm(); arLast=MAC.ar.value;
+  const gk=REG.knob.k_glide;
+  mk('m_glide',{ min:0, max:1, value:0, label:'Glide',
+    format:v=>v<0.01?'OFF':gk.format(gk._denorm(v)),
+    parse:t=>/off/i.test(t)? 0 : gk._norm(clamp(PARSE.time(t),gk.min,gk.max)),
+    hint:'En ms (OFF o 0 lo apaga).',
+    onChange:v=>{ const on=v>=0.01; engine.setGlide(on); setTog(REG.tog.glideTog,on);
+      if(on){ const t=gk._denorm(v); engine.setGlideTime(t); gk.set(t,true); } } });
+  Knob.changed=(k)=>{ if(k.isMacro) xyRender(); else perfSync(); };
+  perfSync();
+}
+/* refleja el estado en las macros y el pad, sin disparar nada */
+function perfSync(){
+  if(!MAC.cutoff) return; const st=engine.state;
+  MAC.cutoff.set(st.filter.cutoff,true); MAC.res.set(st.filter.res,true); MAC.env.set(st.contour,true); MAC.vol.set(st.master.vol,true);
+  MAC.glide.set(st.glide.on? Math.max(0.01,REG.knob.k_glide._norm(st.glide.time)) : 0, true);
+  if(!arDriving){ arLast=arNorm(); MAC.ar.set(arLast,true); }
+  xyRender();
+}
+
+const xypad=document.getElementById('xypad'), xyDot=document.getElementById('xyDot'),
+      xyH=document.getElementById('xyH'), xyV=document.getElementById('xyV');
+function xyRender(){ const kc=REG.knob.k_cutoff; if(!kc) return;
+  const x=clamp(kc._norm(engine.state.filter.cutoff),0,1), y=clamp(engine.state.filter.res,0,1);
+  xyDot.style.left=xyV.style.left=(x*100)+'%'; xyDot.style.top=xyH.style.top=((1-y)*100)+'%';
+  xypad.setAttribute('aria-valuetext','Corte '+kc.format(engine.state.filter.cutoff)+' Hz, énfasis '+Math.round(y*100)); }
+function xySet(x,y){ const kc=REG.knob.k_cutoff, kr=REG.knob.k_res;
+  kc.set(kc._denorm(clamp(x,0,1))); kr.set(clamp(y,0,1)); }
+(function(){ let drag=false;
+  const at=(e)=>{ const r=xypad.getBoundingClientRect(); xySet((e.clientX-r.left)/r.width, 1-(e.clientY-r.top)/r.height); };
+  xypad.addEventListener('pointerdown',(e)=>{ if(e.button>0) return; e.preventDefault(); drag=true; xypad.classList.add('hot');
+    try{ xypad.setPointerCapture(e.pointerId); }catch(_){} at(e); });
+  xypad.addEventListener('pointermove',(e)=>{ if(drag) at(e); });
+  const end=(e)=>{ drag=false; xypad.classList.remove('hot'); try{ xypad.releasePointerCapture(e.pointerId); }catch(_){} };
+  xypad.addEventListener('pointerup',end); xypad.addEventListener('pointercancel',end);
+  xypad.addEventListener('keydown',(e)=>{ const kc=REG.knob.k_cutoff, d=e.shiftKey?0.01:0.04;
+    const x=kc._norm(engine.state.filter.cutoff), y=engine.state.filter.res;
+    if(e.key==='ArrowRight') xySet(x+d,y); else if(e.key==='ArrowLeft') xySet(x-d,y);
+    else if(e.key==='ArrowUp') xySet(x,y+d); else if(e.key==='ArrowDown') xySet(x,y-d);
+    else if(e.key==='Home') xySet(0,0); else if(e.key==='End') xySet(1,1); else return;
+    e.preventDefault(); });
+})();
 
 /* ---------- Medidor + osciloscopio ---------- */
 let meterLeds=[];
@@ -3151,6 +3479,7 @@ function syncUI(){
   if(REG.wheels.mod) REG.wheels.mod.set(s.mod.wheel,true);
   if(REG.wheels.pitch) REG.wheels.pitch.set(0,true);
   drawEnv('envGraph', s.env); drawEnv('envGraphF', s.filtEnv, s.contour);
+  perfSync();
 }
 function currentPatch(name){ return { app:'hackwave-minimoog', version:4, name:name||'patch', octave:baseOctave, state: JSON.parse(JSON.stringify(engine.state)) }; }
 function loadPatch(patch){ if(!patch) return; const st=patch.state||patch;
@@ -3294,6 +3623,8 @@ buildOscRows(); buildMixer(); buildFixedControls(); buildMod(); buildContour(); 
 buildKeyboard();
 REG.wheels.pitch=new Wheel(document.getElementById('pitchWheel'),{center:true, onChange:v=>{ if(engine.ready) engine.setBend(v*200); }});
 REG.wheels.mod=new Wheel(document.getElementById('modWheel'),{center:false, onChange:v=>{ if(engine.ready) engine.setModWheel(v); }});
+buildMacros();
+window.addEventListener('resize',()=>{ REG.wheels.pitch._render(); REG.wheels.mod._render(); });
 buildMeter();
 drawEnv('envGraph', engine.state.env);
 drawEnv('envGraphF', engine.state.filtEnv, engine.state.contour);
