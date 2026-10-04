@@ -484,9 +484,10 @@ worktree bajo `/instruments/`, como GitHub Pages.
 ### Re-verificación 2026-10-04 (zd-mobile v4 y zd-midi v2)
 
 Playwright 1.63 (Chromium), mismo servidor de `tools/tests/lib/serve.mjs`.
-El script es una copia adaptada de `tools/tests/acid-verify.test.mjs` y quedó
-fuera del repo porque `tools/` lo maneja D. Si D lo quiere en
-`tools/tests/nebularp-verify.test.mjs`, lo paso tal cual. Los 17 casos pasan:
+El script es una copia adaptada de `tools/tests/acid-verify.test.mjs`. Estuvo en
+`reports/nebularp-verify.mjs`; la sesión D lo promovió a
+`tools/tests/nebularp-verify.test.mjs` (`node tools/tests/nebularp-verify.test.mjs`
+o `node tools/tests/run.mjs --only nebularp`; ver `docs/tests.md`). Los 17 casos pasan:
 
 - **Viewports** 360×640, 390×844, 430×932, 768×1024 y 844×390 (táctil) y
   1440×900:

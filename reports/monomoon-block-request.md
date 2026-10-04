@@ -44,7 +44,7 @@ await rec.stop();   // → null: el WAV de 1 s ya no existe
 **Workaround en MonoMoon** (`startTake()`): `onLimit` llama a `stopTake()`,
 que llama a `wavRec.stop()` de forma sincrónica. Ese `stop()` gana, toma los
 chunks y el `stop()` interno encuentra `state !== 'rec'` y devuelve `null`. Lo
-cubre `reports/monomoon-verify.mjs` («al llegar al tope la toma no se pierde»,
+cubre `tools/tests/monomoon-verify.test.mjs` («al llegar al tope la toma no se pierde»,
 con `maxSec` forzado a 1 s).
 
 **Arreglo propuesto** (cualquiera de los dos, sin romper la API):

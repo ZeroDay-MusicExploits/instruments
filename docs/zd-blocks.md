@@ -612,11 +612,15 @@ bloques pegados: `sync-blocks` no debería mostrar ningún "pendiente".
 ## Tests
 
 ```
-node tools/tests/run.mjs            # todo
+node tools/tests/run.mjs            # todo (incluye los *-verify de los 5 instrumentos)
+node tools/tests/run.mjs --quick    # modo corto: sin los *-verify
 node tools/tests/zd-midi-order.test.mjs     # Node puro
 node tools/tests/zd-mobile-cycle.test.mjs   # necesita Playwright + Chromium
 node tools/tests/acid-verify.test.mjs       # idem
 ```
+
+La lista completa (incluidos `cronbeat-verify`, `monomoon-verify`,
+`nebularp-verify` y `j4-verify`) y los filtros están en `docs/tests.md`.
 
 - `zd-midi-order` · el orden de eventos a igual tick en `write()` y en
   `recorder()`, y el MIDI del patrón de Acid parseado como SMF.

@@ -39,7 +39,7 @@ Para el manual y el roadmap de esa misma entrada (sugerencia, no lo toqué):
 | `569840f` | R6 | ARIA, `innerHTML`, atajos de teclado, errores en modal, tipografía y contraste. |
 | `e983231` | R7 | Marca y copy. |
 | `efc5da9` | R5 | Indicador de clip (solo mide). Quedó después de los extras porque lo detecté al revisar R5 contra el piloto. |
-| `132c2f7`, `79e8d6e` | verificación | `reports/cronbeat-verify.mjs`. |
+| `132c2f7`, `79e8d6e` | verificación | `tools/tests/cronbeat-verify.test.mjs`. |
 | `3fb0cb4` | extra | Deshacer / rehacer. |
 | `4856d1f`, `137eba6` | extra | Velocidad por altura del dedo y note repeat (+ ajuste de timing). |
 | `59c0786` | extra | Choke de hats. |
@@ -155,10 +155,10 @@ node tools/check-blocks.mjs                       # sin diferencias (Acid y Cron
 node tools/sync-blocks.mjs --check                # 16 idénticos, 0 diferencias
 node tools/tests/run.mjs                          # 3 archivos en verde (Acid sin cambios)
 node tools/tests/zd-mobile-cycle.test.mjs --file descargables/CronBeat-808.html --cycles 4   # 7/7
-node reports/cronbeat-verify.mjs [--shots <dir>]  # 24/24, tres corridas seguidas en verde
+node tools/tests/cronbeat-verify.test.mjs [--shots <dir>]  # 24/24, tres corridas seguidas en verde
 ```
 
-Lo que cubre `reports/cronbeat-verify.mjs` (molde: `acid-verify`, helpers de
+Lo que cubre `tools/tests/cronbeat-verify.test.mjs` (molde: `acid-verify`, helpers de
 `tools/tests/lib/` sin modificar):
 
 - **R1.** 360×640, 390×844, 430×932, 768×1024, 844×390, 1440×900 y 1024×768:

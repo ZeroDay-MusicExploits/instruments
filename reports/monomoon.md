@@ -11,7 +11,7 @@ dispositivo real ni en WebKit o Firefox (sección 6). Lighthouse no corrió.
 
 | Test | Resultado |
 | --- | --- |
-| `node reports/monomoon-verify.mjs` (propio, 23 casos) | 23 de 23 |
+| `node tools/tests/monomoon-verify.test.mjs` (propio, 23 casos) | 23 de 23 |
 | `node tools/tests/zd-mobile-cycle.test.mjs --file descargables/MonoMoon70.html --cycles 4` | 7 de 7 |
 | `node tools/tests/run.mjs` (zd-midi-order, zd-mobile-cycle y acid-verify sobre Acid) | 3 de 3 archivos |
 | `node tools/check-blocks.mjs` / `node tools/sync-blocks.mjs --check` | sin diferencias / MonoMoon al día |
@@ -98,7 +98,7 @@ Para D:
 | `ee5b279` | R6: diálogos a zd-ui, accesibilidad y robustez |
 | `2761297` | R2: manifest estático, canonical, theme-color y zd-pwa v2 |
 | `a0ec227` | R7: copy y nombres |
-| siguiente | `reports/` (este reporte, el pedido a bloques y `monomoon-verify.mjs`) |
+| siguiente | `reports/` (este reporte, el pedido a bloques y `monomoon-verify.test.mjs`) |
 
 El HTML pasó de 190 KB a 314 KB. ~90 KB son los 8 bloques; el resto es la
 piel portrait y el código nuevo. ~80 KB del total siguen siendo el logo JPEG
@@ -524,7 +524,7 @@ corrió.
 
 Playwright 1.63 (Chromium) contra `tools/tests/lib/serve.mjs`, que sirve el
 worktree bajo `/` como GitHub Pages. El script es
-[`monomoon-verify.mjs`](monomoon-verify.mjs) (23 casos); las capturas se
+[`monomoon-verify.test.mjs`](../tools/tests/monomoon-verify.test.mjs) (23 casos); las capturas se
 miraron a mano y no van en el repo.
 
 - **Viewports** 360×640, 390×844, 430×932, 768×1024 y 844×390 (táctil) y

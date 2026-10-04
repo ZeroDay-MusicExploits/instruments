@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-// reports/monomoon-verify.mjs
+// tools/tests/monomoon-verify.test.mjs
 //
 // Verificación completa de MONOMOON'70 (sesión C, rama c-monomoon). Copia
-// adaptada de tools/tests/acid-verify.test.mjs; vive en reports/ porque tools/
-// lo maneja la sesión de integración (D). Si D lo quiere en tools/tests/, va
-// tal cual con los imports de ./lib/.
+// adaptada de tools/tests/acid-verify.test.mjs. Promovida desde reports/ a
+// tools/tests/ por la sesión de integración (D).
 //
-//   node reports/monomoon-verify.mjs
+//   node tools/tests/monomoon-verify.test.mjs
 //
 // Cubre: viewports de SPEC R1 (y el toque: glissando entre las dos filas,
 // multitáctil, ruedas, macros, doble tap, long-press), banner de instalación
@@ -25,9 +24,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { serveRoot, loadPlaywright } from '../tools/tests/lib/serve.mjs';
-import { ROOT } from '../tools/tests/lib/load-block.mjs';
-import { parseSMF, analyzeNotes, defects } from '../tools/tests/lib/smf.mjs';
+import { serveRoot, loadPlaywright } from './lib/serve.mjs';
+import { ROOT } from './lib/load-block.mjs';
+import { parseSMF, analyzeNotes, defects } from './lib/smf.mjs';
 
 const FILE = 'descargables/MonoMoon70.html';
 const URL_PATH = '/' + FILE;

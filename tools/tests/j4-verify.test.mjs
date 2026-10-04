@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// reports/j4-verify.mjs
+// tools/tests/j4-verify.test.mjs
 //
 // Verificación completa de J4-Sirens Station (reports/j4.md). Es una
 // adaptación de tools/tests/acid-verify.test.mjs más lo propio de J4:
@@ -11,11 +11,11 @@
 // dedos a la vez, scroll táctil donde corresponde, service worker sobre http y
 // un hub C2 falso (el adaptador sigue registrando y arrancando sin gesto).
 //
-// Vive en reports/ y no en tools/tests/ porque tools/ lo maneja la sesión D.
-// Usa sin modificar el servidor y el parser SMF de tools/tests/lib/.
+// Vive en tools/tests/ (promovido desde reports/ por la sesión D).
+// Usa el servidor y el parser SMF de ./lib/.
 //
-//   node reports/j4-verify.mjs
-//   node reports/j4-verify.mjs --shots <carpeta>    # además guarda capturas
+//   node tools/tests/j4-verify.test.mjs
+//   node tools/tests/j4-verify.test.mjs --shots <carpeta>    # además guarda capturas
 //
 // Necesita Playwright + Chromium (no es dependencia del runtime):
 //   npm i -D playwright && npx playwright install chromium
@@ -25,9 +25,9 @@ import { readFileSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { serveRoot, loadPlaywright } from '../tools/tests/lib/serve.mjs';
-import { ROOT } from '../tools/tests/lib/load-block.mjs';
-import { parseSMF, analyzeNotes, defects } from '../tools/tests/lib/smf.mjs';
+import { serveRoot, loadPlaywright } from './lib/serve.mjs';
+import { ROOT } from './lib/load-block.mjs';
+import { parseSMF, analyzeNotes, defects } from './lib/smf.mjs';
 
 const FILE = 'descargables/J4-Sirens_Station.html';
 const URL_PATH = '/' + FILE;

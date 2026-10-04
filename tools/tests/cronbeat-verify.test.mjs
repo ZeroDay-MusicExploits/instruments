@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// reports/cronbeat-verify.mjs
+// tools/tests/cronbeat-verify.test.mjs
 //
 // Verificación completa de CronBeat-8:08 (sesión C de cronbeat), con el mismo
 // alcance que tools/tests/acid-verify.test.mjs para el piloto: viewports de
@@ -9,10 +9,10 @@
 // con wake lock y suspend/resume (R5), rotación de tablet 1180×820 ↔ 820×1180
 // sonando, un hub C2 simulado y el diff del adaptador C2.
 //
-//   node reports/cronbeat-verify.mjs
-//   node reports/cronbeat-verify.mjs --shots /tmp/cronbeat-shots   # guarda capturas
+//   node tools/tests/cronbeat-verify.test.mjs
+//   node tools/tests/cronbeat-verify.test.mjs --shots /tmp/cronbeat-shots   # guarda capturas
 //
-// Vive en reports/ (no en tools/) a propósito: es de esta sesión. Usa los
+// Vive en tools/tests/ (promovido desde reports/). Usa los
 // helpers de tools/tests/lib/ sin modificarlos. Necesita Playwright + Chromium:
 //   npm i -D playwright && npx playwright install chromium
 import test from 'node:test';
@@ -21,9 +21,9 @@ import { readFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { execSync } from 'node:child_process';
-import { serveRoot, loadPlaywright } from '../tools/tests/lib/serve.mjs';
-import { ROOT } from '../tools/tests/lib/load-block.mjs';
-import { parseSMF, analyzeNotes, defects } from '../tools/tests/lib/smf.mjs';
+import { serveRoot, loadPlaywright } from './lib/serve.mjs';
+import { ROOT } from './lib/load-block.mjs';
+import { parseSMF, analyzeNotes, defects } from './lib/smf.mjs';
 
 const FILE = 'descargables/CronBeat-808.html';
 const URL_PATH = '/' + FILE;

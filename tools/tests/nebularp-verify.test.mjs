@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// reports/nebularp-verify.mjs
+// tools/tests/nebularp-verify.test.mjs
 //
 // Re-verificación completa de NEBULARP 2035, la que se corrió después de pegar
 // zd-mobile v4 y zd-midi v2 (reports/nebularp.md, sección 0 y anexo). Es una
@@ -9,10 +9,10 @@
 // (R5), rotación de tablet 1180×820 ↔ 820×1180 con el arpegio sonando,
 // `file://`, service worker sobre http e iframe.
 //
-// Vive en reports/ y no en tools/tests/ porque tools/ lo maneja la sesión D.
-// Usa sin modificar el servidor y el parser SMF de tools/tests/lib/.
+// Vive en tools/tests/ (promovido desde reports/ por la sesión D).
+// Usa el servidor y el parser SMF de ./lib/.
 //
-//   node reports/nebularp-verify.mjs
+//   node tools/tests/nebularp-verify.test.mjs
 //
 // Necesita Playwright + Chromium (no es dependencia del runtime):
 //   npm i -D playwright && npx playwright install chromium
@@ -30,9 +30,9 @@ import { readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { serveRoot, loadPlaywright } from '../tools/tests/lib/serve.mjs';
-import { ROOT } from '../tools/tests/lib/load-block.mjs';
-import { parseSMF, analyzeNotes, defects } from '../tools/tests/lib/smf.mjs';
+import { serveRoot, loadPlaywright } from './lib/serve.mjs';
+import { ROOT } from './lib/load-block.mjs';
+import { parseSMF, analyzeNotes, defects } from './lib/smf.mjs';
 
 const FILE = 'descargables/Nebularp_2035.html';
 const URL_PATH = '/' + FILE;
