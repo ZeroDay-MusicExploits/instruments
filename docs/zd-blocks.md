@@ -135,7 +135,7 @@ hacer flush — no hace falta repetirlo en el instrumento.
 autoguardado va **apagado** (`enabled: false`). El host es el dueño del estado
 y lo empuja por `setState`; si el instrumento restaurara encima, pelearían.
 
-## `zd-audio` v1 — iOS, interrupciones, wake lock
+## `zd-audio` v2 — iOS, interrupciones, wake lock
 
 No crea ni conoce el grafo: el instrumento le pasa cómo llegar al contexto.
 
@@ -143,7 +143,7 @@ No crea ni conoce el grafo: el instrumento le pasa cómo llegar al contexto.
 ZD.audio.attach({
   getContext: () => Engine.ctx,     // puede devolver null antes del primer gesto
   ensure:     () => Engine.ensure(),// sincrónico o Promise
-  onResumed:  () => {},
+  onResumed:  () => {},              // solo al pasar a 'running' (v2), ver abajo
   label: 'Tocá para reanudar'
 });
 
@@ -163,6 +163,13 @@ ZD.audio.unlocked                 // boolean
 'playback'` donde exista, arranca un `<audio loop>` silencioso (WAV armado en
 runtime como data URI, sin bytes extra en el archivo), llama a `ensure()` y
 después `ctx.resume()`.
+
+**`onResumed` corre solo en la transición a `'running'` (v2):** el primer
+destrabe, o cuando el contexto vuelve de `suspended`/`interrupted`, sea por un
+gesto (`unlock()`) o por `ZD.audio.resume()` (lo que corre en
+`visibilitychange`, `pageshow` y `focus`). Con el contexto ya corriendo, los
+gestos siguientes no lo vuelven a llamar. CronBeat lo usa para re-decodificar a
+la frecuencia real los samples restaurados antes del primer gesto.
 
 `setPlaying(true)` pide el Screen Wake Lock, lo re-pide en `visibilitychange` y
 empieza a vigilar el contexto: si queda en `suspended` o `interrupted` (estado
@@ -587,6 +594,9 @@ node tools/tests/acid-verify.test.mjs       # idem
   toma anda.
 - `zd-ui-prompt` · `ZD.modal.prompt` con valor inicial: tipear lo reemplaza, en
   el bloque y en los 5 instrumentos.
+- `zd-audio-resumed` · cuántas veces corre `onResumed`: primer destrabe, clics
+  con el contexto corriendo, vuelta desde `suspended`; y el re-decode de los
+  samples restaurados de CronBeat en el primer destrabe.
 - `zd-pwa-choice` · qué pasa con el banner, el `↓`, el ítem del menú y el botón
   de escritorio después de `userChoice` (`dismissed` / `accepted`) y de
   `appinstalled`, en 360×640 y 1440×900.
@@ -653,6 +663,31 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-04 · `zd-audio` v1 → v2
+
+Pedido de CronBeat (`reports/cronbeat-block-request.md` punto 2). `unlock()`
+llamaba a `onResumed` también con el contexto ya en `running`, y
+`bindGesture()` llama a `unlock()` en cada `pointerup`, `click`, `keydown` y
+`touchend`: `onResumed` corría dos veces por clic (CronBeat midió 12 llamadas en
+6 clics). Al de CronBeat (`resyncSamples()`) no le hacía daño porque es
+idempotente, pero un instrumento que hiciera ahí algo no idempotente (un toast,
+reiniciar un LFO) lo repetía en cada toque.
+
+- `onResumed` corre solo en la transición a `running`: el primer destrabe, o
+  volver de `suspended`/`interrupted` por un gesto o por `resume()`. Cualquier
+  estado distinto de `running` que el bloque vea (al empezar un `unlock()`, en
+  `resume()` o en un `statechange`) rearma el aviso; los dos eventos del mismo
+  clic (`pointerup` + `click`) cuentan como uno.
+- `unlock()` engancha el `statechange` del contexto apenas lo ve (antes solo lo
+  hacía `attach()` si el contexto ya existía, o `setPlaying(true)`). El overlay
+  "Tocá para reanudar" sigue apareciendo solo con `setPlaying(true)`.
+- Sin cambios en la API pública. CronBeat es el único que pasa `onResumed`.
+
+Lo verifica `node tools/tests/zd-audio-resumed.test.mjs`: el bloque solo
+(6 clics con el contexto corriendo → 0 llamadas más) y CronBeat publicado, con
+un sample restaurado sin contexto (48 kHz) que se re-decodifica a 44,1 kHz en el
+primer destrabe y en ningún clic después.
 
 ### 2026-10-04 · `zd-pwa` v2 → v3
 

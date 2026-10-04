@@ -1,5 +1,5 @@
 <script>
-/* ZD-BLOCK:zd-audio v1 */
+/* ZD-BLOCK:zd-audio v2 */
 /* Desbloqueo de audio en el gesto, audioSession, manejo de interrupted /
    suspended, Screen Wake Lock y decodeAudioData con fallback.
    No crea ni conoce el grafo: el instrumento le pasa getContext/ensure. */
@@ -10,6 +10,16 @@
 
   var cfg = { getContext: null, ensure: null, onResumed: null, label: 'Tocá para reanudar' };
   var unlocked = false, playing = false, silent = null, overlay = null, wakeLock = null, wakeWanted = false;
+  /* v2: onResumed solo en la transicion a 'running'. `awake` = ya se aviso y el
+     contexto no salio de 'running' desde entonces (lo baja cualquier estado
+     visto que no sea 'running': antes de un unlock, en resume() o en statechange). */
+  var awake = false;
+  function asleep(c) { if (!c || c.state !== 'running') awake = false; }
+  function resumed() {
+    if (awake) return;
+    awake = true;
+    if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {}
+  }
 
   /* ---------- contexto ---------- */
   function options(extra) {
@@ -86,16 +96,18 @@
   function unlock() {
     setSession();
     startSilentLoop();
+    asleep(ctx());
     var r;
     try { r = cfg.ensure ? cfg.ensure() : null; } catch (e) { r = null; }
     var p = (r && typeof r.then === 'function') ? r : Promise.resolve(r);
     return p.then(function () {
       var c = ctx();
       if (!c) return false;
-      if (c.state === 'running') { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} return true; }
+      watchContext(c);
+      if (c.state === 'running') { unlocked = true; hideResume(); resumed(); return true; }
       return c.resume().then(function () {
         var ok = c.state === 'running';
-        if (ok) { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+        if (ok) { unlocked = true; hideResume(); resumed(); }
         return ok;
       }, function () { return false; });
     }, function () { return false; });
@@ -120,9 +132,10 @@
     var c = ctx();
     if (!c) return;
     if (c.state === 'running') { hideResume(); return; }
+    awake = false;
     /* interrupted es estado propio de Safari; suspended es el estandar. */
     c.resume().then(function () {
-      if (c.state === 'running') { hideResume(); if (wakeWanted) requestWake(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+      if (c.state === 'running') { hideResume(); if (wakeWanted) requestWake(); resumed(); }
       else if (playing) showResume();
     }, function () { if (playing) showResume(); });
   }
@@ -131,6 +144,7 @@
     c.__zdWatched = true;
     try {
       c.addEventListener('statechange', function () {
+        asleep(c);
         if (c.state === 'running') hideResume();
         else if (playing && (c.state === 'suspended' || c.state === 'interrupted')) showResume();
       });
