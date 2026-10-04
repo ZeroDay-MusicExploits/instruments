@@ -48,7 +48,7 @@ Slugs y `apple-mobile-web-app-title`: ver `docs/pwa.md`.
 
 ---
 
-## `zd-ui` v1 — toasts, modales, accesibilidad
+## `zd-ui` v2 — toasts, modales, accesibilidad
 
 Reemplaza `alert`/`confirm`/`prompt`. Inyecta `<style id="zd-ui-css">`. Todo
 texto entra por `textContent`, nunca por `innerHTML`.
@@ -77,6 +77,10 @@ await ZD.modal.open({
 
 Escape cierra, Tab queda atrapado dentro del diálogo y el foco vuelve a donde
 estaba. En el shell móvil los toasts se levantan por encima de las tabs.
+
+Con `input`, el foco va al campo con el valor inicial **seleccionado** (v2):
+tipear reemplaza el valor. Es lo que esperan los knobs que abren
+`ZD.modal.prompt` con el valor actual para entrar un número.
 
 ```js
 ZD.ui.a11ySlider(el, {
@@ -573,6 +577,8 @@ node tools/tests/acid-verify.test.mjs       # idem
 - `zd-rec-instruments` · el mismo tope (1 s) en Nebularp, J4 y MonoMoon
   publicados: la toma llega a la tarjeta, el botón vuelve a REC y una segunda
   toma anda.
+- `zd-ui-prompt` · `ZD.modal.prompt` con valor inicial: tipear lo reemplaza, en
+  el bloque y en los 5 instrumentos.
 - `zd-mobile-cycle` · conformidad de `zd-mobile` para **cualquier** instrumento:
   el ciclo salir/entrar del shell en los tres pares de viewport, el cableado de
   eventos, el foco, el scroll, el banner de `zd-pwa` y los ≥44 px de los
@@ -636,6 +642,23 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-04 · `zd-ui` v1 → v2
+
+Pedido de J4 (`reports/j4-block-request.md` punto 2). `ZD.modal.prompt` (y
+`ZD.modal.open` con `input`) enfocaba el campo con el cursor al final del valor
+inicial. En una perilla con 1400, tipear 2500 dejaba `14002500` y el valor se
+iba al máximo. Lo sufrían los knobs de Acid, MonoMoon, Nebularp y J4 (que lo
+esquivaba con un doble `requestAnimationFrame`).
+
+- Al abrir, el input se enfoca y su valor queda seleccionado (`select()` más
+  `setSelectionRange(0, largo)`, que es lo que respeta Safari de iOS).
+- Sin cambios en la API pública. El workaround de J4 queda redundante e
+  inofensivo.
+
+Lo verifica `node tools/tests/zd-ui-prompt.test.mjs`: el bloque solo y los 5
+instrumentos publicados (1280×860), que además no tienen que robarse los
+dígitos ni el Enter con el modal abierto.
 
 ### 2026-10-04 · `zd-rec` v1 → v2
 
