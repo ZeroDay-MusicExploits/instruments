@@ -4099,8 +4099,9 @@ function buildStrip(){
   const play=cell=>{ [...strip.children].forEach(c=>c.classList.remove('on')); cell.classList.add('on');
     noteOn('strip', +cell.dataset.m); };
   strip.addEventListener('pointerdown',e=>{ const c=e.target.closest('.key'); if(!c)return;
-    downId=e.pointerId; play(c); e.preventDefault(); });
-  strip.addEventListener('pointermove',e=>{ if(downId!==e.pointerId)return; const c=cellFrom(e); if(c)play(c); });
+    const id=downId=e.pointerId; e.preventDefault();
+    whenRunning(()=>{ play(c); if(downId!==id) setTimeout(()=>{ if(downId==null){ [...strip.children].forEach(x=>x.classList.remove('on')); noteOff('strip'); } },400); }); });
+  strip.addEventListener('pointermove',e=>{ if(downId!==e.pointerId || !audioRunning())return; const c=cellFrom(e); if(c)play(c); });
   const rel=e=>{ if(downId!==e.pointerId&&e.pointerId!=null)return; downId=null;
     [...strip.children].forEach(c=>c.classList.remove('on')); noteOff('strip'); };
   strip.addEventListener('pointerup',rel); strip.addEventListener('pointercancel',rel);
@@ -4130,6 +4131,20 @@ function renderSiren(){
   if(l) l.setAttribute('aria-pressed',latchMode?'true':'false');
   if(h) h.textContent=latchMode?'TOCÁ: PRENDE / APAGA · [ESPACIO]':'MANTENÉ APRETADO · [ESPACIO]';
 }
+/* Golpe con el audio suspendido (iOS: una interrupción, segundo plano): el
+   destrabe real ocurre recién en pointerup/touchend, así que la sirena programada
+   en el pointerdown cae en un contexto suspendido y sale muda o muy corta. Se
+   guarda y se dispara apenas el contexto pasa a 'running' (al levantar el dedo,
+   por ZD.audio.bindGesture); si no destraba en 3 s, se descarta. Con el contexto
+   corriendo, sin contexto todavía o con el hub C2, corre en el acto como siempre. */
+const pendingHits=[]; let pendingCtx=null;
+function audioRunning(){ return !!HOST || !ctx || ctx.state==='running'; }
+function whenRunning(fn){
+  if(audioRunning()){ fn(); return; }
+  const c=ctx; c.resume().catch(()=>{});   // en iOS se cumple recién en el pointerup
+  pendingHits.push(fn); setTimeout(()=>{ const i=pendingHits.indexOf(fn); if(i>=0) pendingHits.splice(i,1); }, 3000);
+  if(pendingCtx!==c){ pendingCtx=c; c.addEventListener('statechange', ()=>{ if(audioRunning()) pendingHits.splice(0).forEach(f=>f()); }); }
+}
 function buildBigTrig(){
   const b=document.getElementById('bigTrig');
   b.addEventListener('pointerdown',e=>{
@@ -4137,7 +4152,8 @@ function buildBigTrig(){
     try{ b.setPointerCapture(e.pointerId); }catch(_){}
     sirenPtrs.add(e.pointerId);
     if(sirenPtrs.size>1) return;
-    if(latchMode) sirenToggle(); else noteOn('pad',57);
+    const id=e.pointerId;   // si ya se soltó cuando suena: el toque corto de Enter (400 ms)
+    whenRunning(()=>{ if(latchMode) sirenToggle(); else { noteOn('pad',57); if(!sirenPtrs.has(id)) setTimeout(()=>{ if(!sirenPtrs.size) noteOff('pad'); },400); } });
   });
   const up=e=>{
     if(!sirenPtrs.delete(e.pointerId) || sirenPtrs.size) return;

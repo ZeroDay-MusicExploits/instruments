@@ -3440,9 +3440,28 @@ function clearAllKeys(){ take.allOff(); kbd.sources.clear(); noteCount.clear(); 
 const keysEl=document.getElementById('keys'); const ptrDown=new Set();
 function keyFromPoint(x,y){ const t=document.elementFromPoint(x,y); return t?t.closest('.key'):null; }
 function elMidi(el){ return baseMidi()+Number(el.dataset.semi); }
+/* Golpe con el audio suspendido (iOS: una interrupción, segundo plano): el
+   destrabe real ocurre recién en pointerup/touchend, así que una nota programada
+   en el pointerdown cae en un contexto suspendido y sale muda o muy corta. Se
+   guarda y se dispara apenas el contexto pasa a 'running' (al levantar el dedo,
+   por ZD.audio.bindGesture); si no destraba en 3 s, se descarta. Con el contexto
+   corriendo, o con el hub C2, corre en el acto como siempre. */
+const pendingHits=[]; let pendingCtx=null;
+function audioRunning(){
+  if(HOST) return true;   // con el hub el contexto es del host: nada cambia
+  return !engine.ctx || engine.ctx.state==='running'; }
+function whenRunning(fn){
+  if(audioRunning()){ fn(); return; }
+  const c=engine.ctx; c.resume().catch(()=>{});   // en iOS se cumple recién en el pointerup
+  pendingHits.push(fn); setTimeout(()=>{ const i=pendingHits.indexOf(fn); if(i>=0) pendingHits.splice(i,1); }, 3000);
+  if(pendingCtx!==c){ pendingCtx=c; c.addEventListener('statechange', ()=>{ if(audioRunning()) pendingHits.splice(0).forEach(f=>f()); }); }
+}
 keysEl.addEventListener('pointerdown',(e)=>{ e.preventDefault(); const id='p:'+e.pointerId; ptrDown.add(id);
   try{ keysEl.setPointerCapture(e.pointerId); }catch(_){}
-  startAudioThen(()=>{ if(!ptrDown.has(id)) return; const el=keyFromPoint(e.clientX,e.clientY); if(el) kbd.press(id, elMidi(el), el); }); });
+  /* sostenida si el dedo sigue apoyado cuando suena; si ya se levantó, nota corta (180 ms) */
+  startAudioThen(()=>whenRunning(()=>{ const el=keyFromPoint(e.clientX,e.clientY); if(!el) return;
+    if(ptrDown.has(id)){ kbd.press(id, elMidi(el), el); return; }
+    const sid=id+':corta'; kbd.press(sid, elMidi(el), el); setTimeout(()=>kbd.release(sid), 180); })); });
 keysEl.addEventListener('pointermove',(e)=>{ const id='p:'+e.pointerId; if(!kbd.sources.has(id)) return;
   const el=keyFromPoint(e.clientX,e.clientY); if(el) kbd.move(id, elMidi(el), el); else kbd.release(id); });
 const ptrUp=(e)=>{ const id='p:'+e.pointerId; ptrDown.delete(id); kbd.release(id); };

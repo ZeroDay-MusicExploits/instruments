@@ -3745,12 +3745,33 @@ window.ZD_M = {
     const key = el && el.closest ? el.closest(".pkey") : null;
     return key ? +key.dataset.midi : null;
   }
+  /* Golpe con el audio sin destrabar o suspendido: iOS recién destraba en
+     pointerup/touchend, así que una nota programada en el pointerdown cae en un
+     contexto suspendido, con el reloj congelado, y su note-off en el mismo
+     instante: sale muda o muy corta. Se guarda y se dispara apenas el contexto
+     pasa a 'running' (al levantar el dedo, por ZD.audio.bindGesture): sostenida
+     si el dedo sigue apoyado, corta (180 ms) si ya se levantó. Si no destraba en
+     3 s, se descarta. Con el contexto corriendo, o con el hub C2, nada cambia. */
+  const pendingHits = []; let pendingCtx = null;
+  const audioRunning = () => !!HOST || !!(ctx && ctx.state === "running");
+  function whenRunning(fn){
+    if (audioRunning()){ fn(); return; }
+    pendingHits.push(fn); setTimeout(() => { const i = pendingHits.indexOf(fn); if (i >= 0) pendingHits.splice(i, 1); }, 3000);
+    if (ctx && pendingCtx !== ctx){ pendingCtx = ctx; ctx.addEventListener("statechange", () => { if (audioRunning()) pendingHits.splice(0).forEach(f => f()); }); }
+  }
+  const pendingPtr = new Map();         // pointerId -> nota que espera al destrabe
   function pianoDown(e){
     const raw = midiUnderPointer(e.clientX, e.clientY);
     if (raw === null) return;
-    e.preventDefault(); unlockAudio();
+    e.preventDefault(); unlockAudio(); pendingPtr.delete(e.pointerId);
     try { piano.setPointerCapture(e.pointerId); } catch(err){}
     const m = quantize(raw);
+    if (!audioRunning()){
+      const id = e.pointerId, p = { raw, m, up: false }; pendingPtr.set(id, p);
+      whenRunning(() => { if (pendingPtr.get(id) !== p) return; pendingPtr.delete(id);
+        noteOn(m); if (p.up) setTimeout(() => noteOff(m), 180); else pointerMidi.set(id, { raw, m }); });
+      return;
+    }
     pointerMidi.set(e.pointerId, { raw, m }); noteOn(m);
   }
   function pianoMove(e){
@@ -3764,6 +3785,9 @@ window.ZD_M = {
     p.raw = raw; p.m = m; noteOn(m);
   }
   function pianoUp(e){
+    const q = pendingPtr.get(e.pointerId);
+    if (q){ if (e.type === "pointercancel") pendingPtr.delete(e.pointerId); else q.up = true;
+      try { piano.releasePointerCapture(e.pointerId); } catch(err){} return; }
     const p = pointerMidi.get(e.pointerId); if (!p) return;
     if (p.raw !== null) noteOff(p.m);
     pointerMidi.delete(e.pointerId);

@@ -3261,7 +3261,7 @@ function buildTracks(){
     const row=document.createElement('div'); row.className='track'; row.dataset.track=t;
     const ctrl=document.createElement('div'); ctrl.className='track-ctrl';
     const pad=document.createElement('button'); pad.type='button'; pad.className='pad'; pad.textContent=voice.name; pad.title='Tocar ('+voice.key.toUpperCase()+')';
-    pad.addEventListener('pointerdown', e=>{ e.preventDefault(); livePlay(t, e.shiftKey); });
+    pad.addEventListener('pointerdown', e=>{ e.preventDefault(); const sh=e.shiftKey; whenRunning(()=>livePlay(t, sh)); });
     const cap=document.createElement('div'); cap.className='keycap'; cap.textContent=voice.key;
     const ms=document.createElement('div'); ms.className='ms';
     const mute=document.createElement('button'); mute.type='button'; mute.className='mute'; mute.textContent='M'; mute.title='Silenciar';
@@ -3309,7 +3309,10 @@ function buildPads(){
        shell, su pista es la que se edita en 2×8 arriba de los pads) */
     bp.setAttribute('role','button'); bp.tabIndex=0; bp.setAttribute('aria-label', voice.name+' (tecla '+voice.key.toUpperCase()+')'); pressed(bp,false);
     bp.addEventListener('pointerdown', e=>{ if(e.target.classList.contains('smp')) return; e.preventDefault();
-      const acc=e.shiftKey || accentMode, vel=padVel(bp, e), t0=livePlay(t, acc, vel); selectTrack(t); startRepeat(bp, t, e, vel, acc, t0); });
+      const acc=e.shiftKey || accentMode, vel=padVel(bp, e);
+      if(!audioRunning()) ensureAudio();
+      if(!audioRunning()){ selectTrack(t); whenRunning(()=>livePlay(t, acc, vel)); return; }   // primer golpe: al destrabar, sin note repeat
+      const t0=livePlay(t, acc, vel); selectTrack(t); startRepeat(bp, t, e, vel, acc, t0); });
     bp.addEventListener('pointermove', e=>{ const R=repeats.get(e.pointerId); if(R && perf.velPos){ const v=padVel(bp, e); if(v!=null) R.vel=v; } });
     ['pointerup','pointercancel','lostpointercapture'].forEach(ev=> bp.addEventListener(ev, e=> stopRepeat(e.pointerId)));
     bp.addEventListener('keydown', e=>{ if(e.target!==bp || (e.key!=='Enter' && e.key!==' ')) return; e.preventDefault(); e.stopPropagation(); if(e.repeat) return; livePlay(t, e.shiftKey || accentMode); selectTrack(t); });
@@ -3361,7 +3364,7 @@ function setAccentMode(on){ accentMode=!!on; if(accBtn) accBtn.setAttribute('ari
 function bindTrackBar(){
   Eg('trkPrev').addEventListener('click', ()=> selectTrack(selTrack-1));
   Eg('trkNext').addEventListener('click', ()=> selectTrack(selTrack+1));
-  trkNameEl.addEventListener('pointerdown', e=>{ e.preventDefault(); livePlay(selTrack, accentMode); });
+  trkNameEl.addEventListener('pointerdown', e=>{ e.preventDefault(); const tr=selTrack, acc=accentMode; whenRunning(()=>livePlay(tr, acc)); });
   trkNameEl.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); livePlay(selTrack, accentMode); } });
   patNowEl.addEventListener('click', ()=>{ if(window.ZD && ZD.mobile && ZD.mobile.active) ZD.mobile.open('seq'); });
   accBtn.addEventListener('click', ()=> setAccentMode(!accentMode));
@@ -3486,6 +3489,20 @@ document.getElementById('songAdd').addEventListener('click', addBlock);
 document.getElementById('patCopy').addEventListener('click', ()=>{ patternClipboard=patterns[activePattern].map(r=>r.slice()); toast('Patrón '+PAT_LABELS[activePattern]+' copiado.'); });
 document.getElementById('patPaste').addEventListener('click', ()=>{ if(!patternClipboard){ toast('No hay nada copiado.'); return; } recordUndo(); patterns[activePattern]=patternClipboard.map(r=>r.slice()); pattern=patterns[activePattern]; renderAll(); updatePatBar(); toast('Pegado en '+PAT_LABELS[activePattern]+'.'); });
 
+/* Golpe con el audio sin destrabar o suspendido: iOS recién destraba en
+   pointerup/touchend, así que lo que se programe en el pointerdown cae en un
+   contexto suspendido (sale tarde o en ráfaga). Se guarda y se dispara apenas el
+   contexto pasa a 'running' (al levantar el dedo, por ZD.audio.bindGesture); si
+   no destraba en 3 s, se descarta. Con el contexto corriendo, o con el hub C2,
+   corre en el acto como siempre. */
+const pendingHits=[]; let pendingCtx=null;
+function audioRunning(){ return !!HOST || !!(ctx && ctx.state==='running'); }
+function whenRunning(fn){
+  if(!audioRunning()) ensureAudio();
+  if(audioRunning()){ fn(); return; }
+  pendingHits.push(fn); setTimeout(()=>{ const i=pendingHits.indexOf(fn); if(i>=0) pendingHits.splice(i,1); }, 3000);
+  if(ctx && pendingCtx!==ctx){ pendingCtx=ctx; ctx.addEventListener('statechange', ()=>{ if(audioRunning()) pendingHits.splice(0).forEach(f=>f()); }); }
+}
 function livePlay(t, accent, vel){ ensureAudio(); const v = accent ? VEL_ACCENT : (vel!=null ? vel : VEL_ON), now=ctx.currentTime;
   trigger(AA, eng, t, now, v); flashVoice(t); clipWatch();
   if(recording && isPlaying){ recordUndo('rec'); const s=quantizedStep(); pattern[t][s]=(accent || v>=0.9)?2:Math.max(pattern[t][s],1); renderCell(t,s); }
