@@ -2818,8 +2818,13 @@ function makeFuzzCurve(a){ const n=1024, c=new Float32Array(n), pre=1+a*7, asym=
   for(let i=0;i<n;i++){ const x=(i/(n-1))*2-1; let y=Math.tanh((x+asym)*pre); if(a>0.5){ const f=(a-0.5)*2; y=y*(1-f)+Math.sin(y*Math.PI)*f*0.9; } y=(y-dc)/(1+a*0.3); c[i]=x*(1-a)+y*a; } return c; }
 
 // ---------- Motor online ----------
-const Engine={ ctx:null, oscU:null, filtU:null, vca:null, driveSh:null, fuzzSh:null, master:null, analyser:null, started:false,
+const Engine={ ctx:null, oscU:null, filtU:null, vca:null, driveSh:null, fuzzSh:null, master:null, analyser:null, started:false, booting:null,
   async ensure(){ if(this.started){ if(this.ctx.state==='suspended') await this.ctx.resume(); return; }
+    /* El primer gesto llama varias veces (tecla + zd-audio en pointerup/click/keydown)
+       mientras carga el worklet: todas esperan el mismo arranque, un solo AudioContext. */
+    if(this.booting) return this.booting;
+    this.booting=this.boot(); try{ await this.booting; } finally{ this.booting=null; } },
+  async boot(){
     const opts = (window.ZD&&ZD.audio) ? ZD.audio.options() : {latencyHint:'interactive'};
     const ctx = HOST ? HOST.ctx : new (window.AudioContext||window.webkitAudioContext)(opts); this.ctx=ctx; const ok=await loadWorklet(ctx);
     this.oscU=ok?makeOscWorklet(ctx):makeOscNative(ctx); this.filtU=ok?makeFiltWorklet(ctx):makeFiltBiquad(ctx);
@@ -3342,11 +3347,13 @@ buildKeyboard();
 function kbBaseMidi(){ return 12*(kbOct+1); }
 $('#kbOctUp').addEventListener('click',()=>{ kbOct=clamp(kbOct+1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); });
 $('#kbOctDown').addEventListener('click',()=>{ kbOct=clamp(kbOct-1,0,6); $('#kbOctVal').textContent=kbOct; markDirty(); });
-let activeSemi=null;
-async function keyDownSemi(semi,e){ if(window.ZD&&ZD.audio) await ZD.audio.unlock(); else await Engine.ensure();
-  const midi=kbBaseMidi()+semi; activeSemi=semi; if(e) e.classList.add('down');
-  if(selectedStep>=0){ const st=pattern[selectedStep]; st.gate=(st.gate==='rest')?'note':st.gate; st.note=midi-patternOct*12; refreshStep(selectedStep); } auditionNote(midi,false); }
-function keyUpSemi(e){ if(e) e.classList.remove('down'); if(activeSemi!==null){ if(Engine.started) Engine.releaseAmp(Engine.ctx.currentTime); activeSemi=null; } }
+let activeSemi=null, kbUps=0;   // kbUps: cuántas veces se soltó una tecla (ver keyDownSemi)
+async function keyDownSemi(semi,e){ const ups=kbUps; if(window.ZD&&ZD.audio) await ZD.audio.unlock(); else await Engine.ensure();
+  /* Si la tecla se soltó mientras arrancaba el audio (primer toque), keyUpSemi ya
+     corrió y no encontró nada que soltar: nota corta y nada queda abierto. */
+  const midi=kbBaseMidi()+semi, gone=ups!==kbUps; if(!gone){ activeSemi=semi; if(e) e.classList.add('down'); }
+  if(selectedStep>=0){ const st=pattern[selectedStep]; st.gate=(st.gate==='rest')?'note':st.gate; st.note=midi-patternOct*12; refreshStep(selectedStep); } auditionNote(midi,gone); }
+function keyUpSemi(e){ kbUps++; if(e) e.classList.remove('down'); if(activeSemi!==null){ if(Engine.started) Engine.releaseAmp(Engine.ctx.currentTime); activeSemi=null; } }
 function auditionNote(midi,short){ if(!Engine.started){ Engine.ensure().then(()=>auditionNote(midi,short)); return; }
   const t=Engine.ctx.currentTime+0.005, freq=midiToFreq(midi); Engine.setPitch(t,freq,null,0); Engine.triggerAmp(t,false); Engine.triggerFilter(t,false); if(short) Engine.releaseAmp(t+0.18); }
 const pcDown=new Set();
