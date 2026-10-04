@@ -2633,6 +2633,7 @@ window.ZD_M = {
           <span class="optlbl" aria-hidden="true">REPEAT</span>
           <button type="button" data-r="0" aria-label="Note repeat apagado">off</button><button type="button" data-r="8" aria-label="Note repeat en corcheas">1/8</button><button type="button" data-r="16" aria-label="Note repeat en semicorcheas">1/16</button><button type="button" data-r="32" aria-label="Note repeat en fusas">1/32</button>
         </div>
+        <button type="button" class="btn" id="chokeBtn" aria-pressed="false" title="El hat cerrado corta al abierto y al revés, como en una 808. Se guarda con el proyecto">Choke hats</button>
       </div>
       <div class="pads" id="pads"></div>
       <div class="padmix" id="padMix" role="group" aria-label="Mezcla por pad"></div>
@@ -3023,8 +3024,21 @@ function buildEngine(ac){
   return E;
 }
 
+/* Choke (extra, apagado por defecto): los dos hats comparten grupo, como en
+   una 808: un golpe nuevo corta, con una rampa de 8 ms, al que sigue sonando.
+   Apagado, trigger() conecta la voz directo a la pista, igual que siempre.
+   Las voces se siguen por motor (E), así el WAV offline hace lo mismo. */
+let chokeOn=false;
+const CHOKE_GROUP={4:'hats', 5:'hats'};   // Hat cerrado, Hat abierto
+function chokeDest(A, E, track, time){
+  const grp=CHOKE_GROUP[track], list=E.chokeVoices||(E.chokeVoices=[]);
+  for(let i=list.length-1;i>=0;i--){ const v=list[i];
+    if(v.start < time-4){ list.splice(i,1); continue; }
+    if(v.grp===grp && v.start < time && !v.cut){ v.g.gain.setValueAtTime(1, time); v.g.gain.linearRampToValueAtTime(0, time+0.008); v.cut=true; } }
+  const g=A.ac.createGain(); g.connect(E.trackInput[track]); list.push({grp, g, start:time, cut:false}); return g;
+}
 function trigger(A, E, track, time, vel){
-  const buf = sampleBuffers[track]; const dest = E.trackInput[track];
+  const buf = sampleBuffers[track]; const dest = (chokeOn && CHOKE_GROUP[track]) ? chokeDest(A, E, track, time) : E.trackInput[track];
   if(buf){ const s=A.ac.createBufferSource(); s.buffer=buf; const g=A.ac.createGain(); g.gain.value=vel; s.connect(g).connect(dest); s.start(time); }
   else { const v=KIT[track]; SYNTH[v.type](A, dest, time, vel, v.p); }
 }
@@ -3444,7 +3458,10 @@ function repeatTick(R){
 function stopRepeat(id){ const R=repeats.get(id); if(!R) return; clearInterval(R.timer); repeats.delete(id); }
 function stopAllRepeats(){ for(const id of [...repeats.keys()]) stopRepeat(id); }
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') stopAllRepeats(); });
+function refreshChokeUI(){ const b=document.getElementById('chokeBtn'); if(!b) return; b.classList.toggle('on', chokeOn); pressed(b, chokeOn); }
 function bindPadOpts(){
+  Eg('chokeBtn').addEventListener('click', ()=>{ chokeOn=!chokeOn; refreshChokeUI(); markDirty(); });
+  refreshChokeUI();
   const vb=Eg('velPos'), seg=document.querySelectorAll('#rptSeg button');
   const paint=()=>{ vb.classList.toggle('on', perf.velPos); pressed(vb, perf.velPos);
     seg.forEach(b=>{ const on=+b.dataset.r===perf.repeat; b.classList.toggle('on', on); pressed(b, on); });
@@ -3861,7 +3878,7 @@ function buildProject(){
     activePattern, songLoop,
     song: song.map(b=>({pattern:b.pattern, reps:b.reps})),
     patterns: patterns.map(grid=> grid.map(row=> row.slice())),
-    fx:{ reverb:{...reverb}, delay:{...delay}, phaser:{...phaser}, drive:{...drive} },
+    fx:{ reverb:{...reverb}, delay:{...delay}, phaser:{...phaser}, drive:{...drive} }, choke:chokeOn,
     tracks: KIT.map((v,i)=>({
       key:v.key, name:v.name,
       vol:vol[i], pan:pan[i], mute:muted[i], solo:soloed[i],
@@ -3884,6 +3901,7 @@ function loadProject(obj, silent, noAudio){
   activePattern = Math.min(N_PATTERNS-1, Math.max(0, obj.activePattern||0)); pattern=patterns[activePattern];
   song = (Array.isArray(obj.song) && obj.song.length) ? obj.song.map(b=>({ pattern:Math.min(N_PATTERNS-1,Math.max(0,b.pattern||0)), reps:Math.min(16,Math.max(1,b.reps||1)) })) : [{pattern:0,reps:2}];
   songLoop = (obj.songLoop!==undefined) ? !!obj.songLoop : true;
+  chokeOn = !!obj.choke; refreshChokeUI();
   (obj.tracks||[]).forEach((t,i)=>{
     if(i>=N_TRACKS) return;
     vol[i]=t.vol??vol[i]; pan[i]=t.pan??pan[i]; muted[i]=!!t.mute; soloed[i]=!!t.solo;
