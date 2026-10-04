@@ -4,13 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CronBeat-8:08</title>
-<meta name="theme-color" content="#070b06">
+<!-- Version web: la usa zd-pwa para el aviso de file:// (SPEC 3.2 / docs/pwa.md). -->
+<link rel="canonical" href="https://zeroday-musicexploits.github.io/instruments/descargables/CronBeat-808.html">
+<!-- PWA: el manifest y los iconos los sirve el sitio. En file:// o dentro de
+     un iframe el bloque zd-pwa no registra nada (SPEC 3.2). -->
+<link rel="manifest" href="../manifests/cronbeat.webmanifest">
+<link rel="apple-touch-icon" href="../icons/cronbeat-apple-touch-180.png">
+<meta name="theme-color" content="#fab72a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ritmos">
-<link id="manifest" rel="manifest">
-<link id="appleIcon" rel="apple-touch-icon">
+<meta name="apple-mobile-web-app-title" content="CronBeat">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style>
   /* ============ ZERO DAY · MUSIC EXPLOITS — sistema visual v1 ============ */
   :root{
@@ -3841,23 +3845,6 @@ async function resetProject(){ if(confirm('¿Borrar el proyecto guardado y volve
 document.getElementById('resetAll').addEventListener('click', resetProject);
 
 /* =========================================================================
-   PWA — manifest + iconos embebidos (instalable donde se hostee; ya corre offline)
-   ========================================================================= */
-function initPWA(){
-  try{
-    const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#201d1a"/><circle cx="176" cy="200" r="66" fill="#e6472e"/><circle cx="336" cy="200" r="66" fill="#ef8f37"/><circle cx="176" cy="332" r="66" fill="#ecc648"/><circle cx="336" cy="332" r="66" fill="#c9b89a"/></svg>';
-    const iconUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
-    const img=new Image();
-    img.onload=()=>{ try{ const cv=document.createElement('canvas'); cv.width=cv.height=180; cv.getContext('2d').drawImage(img,0,0,180,180); document.getElementById('appleIcon').href=cv.toDataURL('image/png'); }catch(e){} };
-    img.src=iconUrl;
-    const manifest={ name:'Caja de Ritmos', short_name:'Ritmos', description:'Caja de ritmos web: secuenciador, pads, FX y modo canción',
-      start_url:location.href.split('#')[0], scope:'.', display:'standalone', orientation:'any', background_color:'#201d1a', theme_color:'#201d1a',
-      icons:[{src:iconUrl, sizes:'any', type:'image/svg+xml', purpose:'any'},{src:iconUrl, sizes:'512x512', type:'image/svg+xml', purpose:'maskable'}] };
-    document.getElementById('manifest').href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
-  }catch(e){}
-}
-
-/* =========================================================================
    PATRÓN INICIAL + INIT
    ========================================================================= */
 function seedPattern(){
@@ -3867,7 +3854,6 @@ function seedPattern(){
 buildRuler(); buildTracks(); buildPads(); buildMatrix(); buildMixer(); bindTrackBar(); selectTrack(0); buildPatBar(); bindFX(); bindEditor(); seedPattern(); renderSong(); renderAll(); updatePatBar(); refreshFXControls(); refreshEditorPadList(); setTempo(tempo);
 const isTouch=(window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
 setView(isTouch ? 'pads' : 'seq');
-initPWA();
 initPersistence();
 </script>
 <script>
