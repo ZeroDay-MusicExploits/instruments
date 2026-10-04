@@ -224,6 +224,10 @@
   .toolbar select{ padding:5px 7px; max-width:150px; }
   .toolbar .sep{ width:1px; height:22px; background:#000; margin:0 1px; }
   #btnRec.on{ background:linear-gradient(180deg,#c8402c,#7a1a10); color:#fff; box-shadow:0 0 10px rgba(200,64,44,.5); }
+  /* indicador de clip: mide la salida, no la toca (SPEC R5) */
+  .clip-led{ font-family:var(--zd-mono); font-size:11px; font-weight:800; letter-spacing:.12em; padding:6px 9px; border-radius:3px;
+    color:#070b06; background:#ff5c3a; box-shadow:0 0 0 1px #000, 0 0 12px rgba(255,92,58,.6); }
+  .clip-led[hidden]{ display:none; }
   .take{ flex:1 1 100%; display:flex; flex-direction:column; gap:8px; }
   .take[hidden]{ display:none; }
   .take-head{ font-size:11.5px; font-weight:700; letter-spacing:.16em; color:var(--silk-dim); }
@@ -1685,7 +1689,7 @@
 window.ZD_M = {
   name: "MonoMoon'70",
   titleParts: ['Mono', 'Moon', "'70"],
-  transport: ['#recBox'],
+  transport: ['#recBox', '#clipLed'],
   keep: ['#macroPanel', '#xyPanel', '#kbPanel'],
   tabs: [
     { id:'osc',  label:'OSC',     title:'OSCILADORES · MEZCLADOR', peek:true,
@@ -2517,6 +2521,7 @@ window.ZD_M = {
       <button id="btnImport" title="Abrir un JSON de MonoMoon'70 (también los patches de la versión anterior)">↑ JSON</button>
       <span class="sep"></span>
       <div class="tb-group" id="recBox"><button id="btnRec" type="button" aria-pressed="false" title="Graba la salida (WAV) y lo que tocás (MIDI)">● REC</button><span id="recTime">0:00</span></div>
+      <span id="clipLed" class="clip-led" role="status" hidden title="La salida llegó al tope: bajá Volumen, Énfasis o los niveles">CLIP</span>
       <span class="sep"></span>
       <div class="tb-group"><span class="midi-dot" id="midiDot"></span><span id="midiTxt">MIDI —</span></div>
       <button id="btnInstall" class="hidden">Instalar app</button>
@@ -3319,9 +3324,9 @@ const kbd={
   move(id,midi,el){ const cur=this.sources.get(id); if(!cur||cur.midi===midi) return; this._eng(cur.midi,cur.el,false); this.sources.set(id,{midi,el}); this._eng(midi,el,true); },
   release(id){ const s=this.sources.get(id); if(!s) return; this.sources.delete(id); this._eng(s.midi,s.el,false); },
   _eng(midi,el,on,vel){ const c=noteCount.get(midi)||0;
-    if(on){ noteCount.set(midi,c+1); if(c===0){ engine.noteOn(midi); take.noteOn(midi,vel); }
+    if(on){ noteCount.set(midi,c+1); if(c===0){ engine.noteOn(midi); take.noteOn(midi,vel); activityOn(); }
       if(el){ const e=elCount.get(el)||0; elCount.set(el,e+1); if(e===0) el.classList.add('dn'); } }
-    else { if(c<=1){ noteCount.delete(midi); engine.noteOff(midi); take.noteOff(midi); } else noteCount.set(midi,c-1);
+    else { if(c<=1){ noteCount.delete(midi); engine.noteOff(midi); take.noteOff(midi); if(!noteCount.size) activityOff(); } else noteCount.set(midi,c-1);
       if(el){ const e=elCount.get(el)||0; if(e<=1){ elCount.delete(el); el.classList.remove('dn'); } else elCount.set(el,e-1); } } }
 };
 function clearAllKeys(){ take.allOff(); kbd.sources.clear(); noteCount.clear(); elCount.clear();
@@ -3432,37 +3437,84 @@ function xySet(x,y){ const kc=REG.knob.k_cutoff, kr=REG.knob.k_res;
 /* ---------- Medidor + osciloscopio ---------- */
 let meterLeds=[];
 function buildMeter(){ const m=document.getElementById('meter'); for(let i=0;i<10;i++){ const l=document.createElement('div'); l.className='led'; m.appendChild(l); meterLeds.push(l); } }
-const scopeCanvas=document.getElementById('scope');
-function visLoop(){
+const scopeCanvas=document.getElementById('scope'), meterEl=document.getElementById('meter');
+const visible=el=>el.getClientRects().length>0;
+const rmQuery=matchMedia('(prefers-reduced-motion: reduce)');
+let visBuf=null, scopeIdle=false;
+/* Indicador de clip (solo mide; no hay limitador). Dos puntos de medida:
+   · antes del WaveShaper (salida de master): por encima de ±1 la curva tanh queda
+     plana, o sea que recorta duro;
+   · la salida que se escucha (analyser): ≥ 0,999 de escala completa.
+   El tap es un AnalyserNode colgado en paralelo de master: no cambia el sonido. */
+let clipTap=null, clipBuf=null, clipUntil=0, clipOn=false;
+const clipLed=document.getElementById('clipLed');
+function attachClipTap(){ try{ clipTap=engine.ctx.createAnalyser(); clipTap.fftSize=1024; engine.master.connect(clipTap);
+  clipBuf=new Float32Array(clipTap.fftSize); }catch(e){ clipTap=null; } }
+function clipCheck(outPeak, now){
+  let pre=0; if(clipTap){ clipTap.getFloatTimeDomainData(clipBuf); for(let i=0;i<clipBuf.length;i++){ const a=Math.abs(clipBuf[i]); if(a>pre) pre=a; } }
+  if(pre>=1 || outPeak>=0.999) clipUntil=now+700;
+  const on=now<clipUntil; if(on!==clipOn){ clipOn=on; clipLed.hidden=!on; } }
+function visLoop(now){
   requestAnimationFrame(visLoop); if(!engine.ready) return;
-  const buf=new Float32Array(engine.analyser.fftSize); engine.analyser.getFloatTimeDomainData(buf);
-  // medidor
+  if(!visBuf || visBuf.length!==engine.analyser.fftSize) visBuf=new Float32Array(engine.analyser.fftSize);
+  const buf=visBuf; engine.analyser.getFloatTimeDomainData(buf);
   let peak=0; for(let i=0;i<buf.length;i++){ const a=Math.abs(buf[i]); if(a>peak)peak=a; }
-  const lit=Math.round(clamp(peak*1.4,0,1)*meterLeds.length); meterLeds.forEach((l,i)=>l.classList.toggle('on', i<lit));
-  // osciloscopio
-  const c=scopeCanvas, ctx=c.getContext('2d'), W=c.width, H=c.height; ctx.clearRect(0,0,W,H);
+  clipCheck(peak, now||performance.now());
+  // medidor: solo si se ve (en el shell vive dentro del sheet VOZ)
+  if(visible(meterEl)){ const lit=Math.round(clamp(peak*1.4,0,1)*meterLeds.length); meterLeds.forEach((l,i)=>l.classList.toggle('on', i<lit)); }
+  // osciloscopio: solo si se ve; con movimiento reducido queda apagado (línea quieta)
+  if(!visible(scopeCanvas)) return;
+  const c=scopeCanvas, ctx=c.getContext('2d'), W=c.width, H=c.height;
+  if(rmQuery.matches){ if(scopeIdle) return; scopeIdle=true; ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(55,255,158,.35)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke(); return; }
+  scopeIdle=false; ctx.clearRect(0,0,W,H);
   ctx.strokeStyle='rgba(55,255,158,.10)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
   let start=0; const half=(buf.length>>1);
   for(let i=1;i<half;i++){ if(buf[i-1]<0 && buf[i]>=0){ start=i; break; } }
   const n=Math.min(half, W*2); const step=W/(n-1);
-  ctx.strokeStyle='var(--scope)'; ctx.strokeStyle='#37ff9e'; ctx.lineWidth=1.7; ctx.lineJoin='round';
+  ctx.strokeStyle='#37ff9e'; ctx.lineWidth=1.7; ctx.lineJoin='round';
   ctx.shadowColor='rgba(55,255,158,.5)'; ctx.shadowBlur=6; ctx.beginPath();
   for(let i=0;i<n;i++){ const x=i*step; const y=H/2 - buf[start+i]*(H*0.42); if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
   ctx.stroke(); ctx.shadowBlur=0;
 }
 
-/* ---------- Arranque ---------- */
-let starting=false, started=false;
-function startAudioThen(cb){
-  if(started){ cb&&cb(); return; } if(starting) return; starting=true;
-  engine.init().then(()=>{ started=true; starting=false;
-    document.getElementById('powerOvl').classList.add('hidden');
-    document.getElementById('filtMode').textContent = engine.filterMode==='worklet' ? 'motor: ladder (AudioWorklet)' : 'motor: biquad (fallback)';
-    cb&&cb();
-  }).catch(err=>{ starting=false; console.error(err); alert('No se pudo iniciar el audio: '+err.message); });
+/* ---------- Arranque ----------
+   ensureAudio() crea el AudioContext de forma sincrónica al principio de engine.init(),
+   o sea DENTRO del gesto que lo pidió (SPEC R5). Lo usan el overlay de encendido, el
+   teclado, REC y zd-audio (unlock en cualquier gesto). */
+let starting=false, started=false, audioP=null;
+function ensureAudio(){
+  if(started) return Promise.resolve();
+  if(!audioP){ starting=true;
+    audioP=engine.init().then(()=>{ started=true; starting=false;
+      document.getElementById('powerOvl').classList.add('hidden');
+      document.getElementById('filtMode').textContent = engine.filterMode==='worklet' ? 'motor: ladder (AudioWorklet)' : 'motor: biquad (fallback)';
+      attachClipTap();
+    }).catch(err=>{ starting=false; audioP=null; console.error(err); alert('No se pudo iniciar el audio: '+err.message); throw err; });
+  }
+  return audioP;
 }
+function startAudioThen(cb){ if(started){ cb&&cb(); return; } ensureAudio().then(()=>{ cb&&cb(); }, ()=>{}); }
 document.getElementById('powerOvl').addEventListener('click',()=>startAudioThen());
+
+/* "Sonando" para zd-audio (wake lock + overlay "Tocá para reanudar" si el navegador
+   suspende o interrumpe el contexto): MonoMoon no tiene transporte, así que cuenta
+   como sonando mientras hay notas o REC, y hasta 60 s después de la última nota. */
+let audioActive=false, idleTimer=null;
+function activityOn(){ if(HOST || !(window.ZD && ZD.audio)) return;
+  if(idleTimer){ clearTimeout(idleTimer); idleTimer=null; }
+  if(!audioActive){ audioActive=true; ZD.audio.setPlaying(true); } }
+function activityOff(){ if(!audioActive) return; if(idleTimer) clearTimeout(idleTimer);
+  idleTimer=setTimeout(()=>{ idleTimer=null; if(noteCount.size || (wavRec && wavRec.state==='rec')) return;
+    audioActive=false; ZD.audio.setPlaying(false); }, 60000); }
+// Fuera del hub C2: zd-audio destraba con cualquier gesto (audioSession 'playback', <audio>
+// silencioso y resume) y vigila interrupted/suspended en visibilitychange/pageshow/focus.
+// Dentro del hub el contexto es del host.
+if(!HOST && window.ZD && ZD.audio){
+  ZD.audio.attach({ getContext:()=>engine.ctx, ensure:()=>ensureAudio() });
+  ZD.audio.bindGesture(window);
+}
 
 /* ================================================================
    FASE 4 — patches, presets, WAV, IndexedDB, MIDI, PWA
@@ -3644,14 +3696,14 @@ async function startTake(){
   // valores de arranque: rueda Mod, corte, énfasis, bend y las notas que ya suenan
   take.cc(ZD.midi.CC.mod, engine.state.mod.wheel); take.params(); take.bend(REG.wheels.pitch.value*2);
   noteCount.forEach((c,m)=>take.noteOn(m,100));
-  recUI(true);
+  recUI(true); activityOn();
 }
 async function stopTake(){
   if(!wavRec || wavRec.state!=='rec') return;
   const t=engine.ctx.currentTime; take.midi.stop(t);
   const midiBlob=take.midi.blob({ bpm:120, trackName:MIDI_TRACK }), notes=take.notes; take.midi=null;
   let res=null; try{ res=await wavRec.stop(); }catch(e){ console.error(e); }
-  recUI(false);
+  recUI(false); activityOff();
   if(!res){ ZD.modal.error('La toma no se pudo armar (no llegó audio). Probá de nuevo con el instrumento sonando.', { title:'ERROR AL GRABAR' }); return; }
   showTake(res, midiBlob, notes);
 }
@@ -3730,12 +3782,12 @@ function onMIDI(e){ const d=e.data, cmd=d[0]&0xf0;
 }
 function initMIDI(){ const dot=document.getElementById('midiDot'), txt=document.getElementById('midiTxt');
   if(HOST){ if(dot) dot.classList.add('on'); if(txt) txt.textContent='MIDI ← C2'; return; }   // embebido: el MIDI llega reenviado por el hub
-  if(!navigator.requestMIDIAccess){ txt.textContent='MIDI n/d'; return; }
+  const sup=ZD.midi.support(); if(!sup.available){ txt.textContent='MIDI no disponible en este navegador'; txt.title=sup.reason; return; }
   navigator.requestMIDIAccess().then(acc=>{
     const attach=()=>{ let c=0; acc.inputs.forEach(inp=>{ inp.onmidimessage=onMIDI; c++; });
       dot.classList.toggle('on', c>0); txt.textContent = c>0?('MIDI '+c):'MIDI —'; };
     attach(); acc.onstatechange=attach;
-  }).catch(()=>{ txt.textContent='MIDI ✕'; });
+  }).catch(()=>{ txt.textContent='MIDI bloqueado'; txt.title='El navegador no dio permiso para usar MIDI.'; });
 }
 
 /* --- PWA --- */
