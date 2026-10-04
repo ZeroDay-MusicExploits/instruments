@@ -324,6 +324,35 @@ Reglas del contrato:
 - El sheet cierra por tap afuera, botón ✕, Escape y swipe hacia abajo sobre el
   handle o la cabecera.
 
+### Reglas para los selectores de `ZD_M`
+
+`transport`, `keep` y `tabs[].nodes` son listas de selectores que el bloque
+resuelve con `document.querySelectorAll` y mueve **en el orden de la lista**. El
+nodo se mueve de lugar, así que el selector tiene que seguir encontrándolo desde
+`document`, esté donde esté.
+
+- **Un id o una clase estable, y nada más**: `'#seqPanel'`, `'.hero'`,
+  `'.tempo-box'`. Es lo único que sobrevive a que el nodo cambie de padre.
+- **Nada de combinadores que dependan del padre**: `'.wrap > .note'`,
+  `'#stage .panel'`, `'section:nth-child(3)'`. Funcionan la primera vez y dejan
+  de matchear apenas el nodo entra al shell — o peor, matchean otra cosa. El
+  bloque vuelve a resolver los selectores **en cada `enter()`** (v3), así que un
+  selector frágil no falla al cargar: falla al volver a entrar.
+- **Un selector, un nodo.** Si matchea varios, se mueven todos, en orden de
+  documento, y el contrato se vuelve difícil de leer. Para mover un grupo,
+  envolvelo y nombrá el envoltorio.
+- **Sin repetir un nodo en dos listas.** Un nodo que está en `keep` y en
+  `tabs[].nodes` termina en el último destino, no en los dos.
+- **Cuidado con `display:contents` en `keep[0]`.** Es útil para que los hijos de
+  un contenedor sean celdas de la grilla de `#zd-stage` (lo hace Nebularp con
+  `.hero`), pero ese nodo deja de tener caja: no se puede enfocar, no se puede
+  medir y no recibe eventos de puntero propios. Si lo usás, que no sea el primer
+  nodo de `keep`, o asumí que el nodo es puro contenedor. El test
+  `zd-mobile-cycle` lo detecta y elige otro blanco, avisando
+  `descartados: section.hero (sin caja en el shell)`.
+- **Un `<style id="zd-mobile-skin">` no debería bajar de 44 px** el alto de los
+  nodos de `transport`: pisa el piso que puso `zd-mobile` v4 (ver changelog).
+
 API:
 
 ```js
