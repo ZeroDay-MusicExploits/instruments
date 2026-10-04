@@ -1,9 +1,11 @@
 <script>
-/* ZD-BLOCK:zd-rec v1 */
+/* ZD-BLOCK:zd-rec v2 */
 /* Grabacion de la salida master a WAV y tarjeta de resultado.
    Captura por AudioWorklet (chunks Int16), fallback a MediaStreamDestination
    + MediaRecorder + decodeAudioData. PCM 16-bit a la frecuencia real del
-   AudioContext. Tope por defecto 10 min. Usa ZD.dl para descargar. */
+   AudioContext. Tope por defecto 10 min. Usa ZD.dl para descargar.
+   v2: el corte por tope entrega la toma (onLimit(max, result) y el proximo
+   stop()); ver docs/zd-blocks.md. */
 (function () {
   'use strict';
   var ZD = window.ZD || (window.ZD = {});
@@ -84,12 +86,20 @@
     var state = 'idle', chunks = [], frames = 0, sampleRate = 0;
     var node = null, sink = null, src = null, mode = null;
     var mrec = null, mdest = null, mparts = [], startedAt = 0, ticker = null;
+    /* Corte por tope (v2). `closing`: Promise de la toma que cerro el tope.
+       `ready`: su resultado mientras corre onLimit. `last`: la toma que nadie
+       pidio todavia; el proximo stop() la devuelve una vez. */
+    var limitTimer = null, limitHit = false, endedAt = 0, closing = null, ready = null, claimed = false, last = null;
 
     function ctx() { return cfg.getContext(); }
     function source() { return cfg.getSource(); }
 
-    function cleanup() {
+    function stopTimers() {
       if (ticker) { clearInterval(ticker); ticker = null; }
+      if (limitTimer) { clearTimeout(limitTimer); limitTimer = null; }
+    }
+    function cleanup() {
+      stopTimers();
       try { if (node && src) src.disconnect(node); } catch (e) {}
       try { if (node) node.disconnect(); } catch (e) {}
       try { if (sink) sink.disconnect(); } catch (e) {}
@@ -102,6 +112,7 @@
       ticker = setInterval(function () { cfg.onProgress(elapsed()); }, 250);
     }
     function elapsed() {
+      if (state === 'rec' && limitHit && mode !== 'worklet') return (endedAt - startedAt) / 1000;
       if (state !== 'rec') return frames && sampleRate ? frames / sampleRate : 0;
       if (mode === 'worklet') return sampleRate ? frames / sampleRate : 0;
       return (performance.now() - startedAt) / 1000;
@@ -112,6 +123,7 @@
       var c = ctx();
       if (!c) return Promise.reject(new Error('sin AudioContext'));
       chunks = []; frames = 0; sampleRate = c.sampleRate; mparts = [];
+      limitHit = false; closing = null; ready = null; claimed = false; last = null;
       src = source();
       if (!src) return Promise.reject(new Error('sin nodo de origen'));
       return loadTap(c).then(function (ok) {
@@ -127,9 +139,9 @@
           mode = 'worklet';
           node.port.onmessage = function (ev) {
             var d = ev.data;
-            if (!d || !d.pcm || state !== 'rec') return;
+            if (!d || !d.pcm || state !== 'rec' || limitHit) return;
             chunks.push(d.pcm); frames += d.n;
-            if (frames / sampleRate >= maxSec) { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); }
+            if (frames / sampleRate >= maxSec) limit();
           };
           sink = c.createGain(); sink.gain.value = 0;
           src.connect(node); node.connect(sink); sink.connect(c.destination);
@@ -146,41 +158,78 @@
         mrec.ondataavailable = function (e) { if (e.data && e.data.size) mparts.push(e.data); };
         mrec.start(500);
         state = 'rec'; startedAt = performance.now(); startTicker();
-        if (maxSec > 0) setTimeout(function () { if (state === 'rec') { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); } }, maxSec * 1000);
+        if (maxSec > 0) limitTimer = setTimeout(limit, maxSec * 1000);
         return mode;
       });
     }
 
-    function finish(blob, dur) {
-      var r = { blob: blob, duration: dur, bytes: blob.size, sampleRate: sampleRate, channels: channels, mode: mode };
-      state = 'idle';
-      return r;
+    function result(blob, dur) {
+      return { blob: blob, duration: dur, bytes: blob.size, sampleRate: sampleRate, channels: channels, mode: mode };
     }
 
-    function stop() {
-      if (state !== 'rec') return Promise.resolve(null);
-      state = 'stopping';
+    /* Corta la captura y arma el WAV -> Promise<resultado | null>. No toca `state`. */
+    function close() {
+      stopTimers();
       if (mode === 'worklet') {
         try { node.port.postMessage({ cmd: 'stop' }); } catch (e) {}
         var f = frames, sr = sampleRate, cs = chunks;
         cleanup(); chunks = [];
-        if (!f) { state = 'idle'; return Promise.resolve(null); }
-        return Promise.resolve(finish(wavFromInt16(cs, channels, sr), f / sr));
+        if (!f) return Promise.resolve(null);
+        try { return Promise.resolve(result(wavFromInt16(cs, channels, sr), f / sr)); } catch (e) { return Promise.reject(e); }
       }
       return new Promise(function (resolve, reject) {
         var rec = mrec, c = ctx();
         rec.onstop = function () {
           var blob = new Blob(mparts, { type: mparts.length && mparts[0].type ? mparts[0].type : 'audio/webm' });
-          cleanup(); mparts = [];
+          if (!mrec || mrec === rec) { cleanup(); mparts = []; }   /* no limpiar una toma nueva tras cancel() */
           blob.arrayBuffer().then(function (ab) {
             var dec = (ZD.audio && ZD.audio.decode) ? ZD.audio.decode(c, ab) : c.decodeAudioData(ab);
             return dec;
           }).then(function (buf) {
-            resolve(finish(wavFromBuffer(buf), buf.duration));
-          }).catch(function (err) { state = 'idle'; reject(err); });
+            resolve(result(wavFromBuffer(buf), buf.duration));
+          }).catch(reject);
         };
-        try { rec.stop(); } catch (e) { cleanup(); state = 'idle'; reject(e); }
+        try { rec.stop(); } catch (e) { cleanup(); reject(e); }
       });
+    }
+
+    /* Tope: la captura se corta ya, pero `state` sigue en 'rec' hasta que la
+       toma se entrega en onLimit(max, result), igual que en v1. Asi el patron
+       de llamar a rec.stop() de forma sincronica dentro de onLimit (J4,
+       MonoMoon, que ademas mira state === 'rec') se queda con esa misma toma.
+       Si nadie la pide, queda en `last` para el proximo stop(). */
+    function limit() {
+      if (state !== 'rec' || limitHit) return;
+      limitHit = true; endedAt = performance.now(); claimed = false;
+      var p = closing = close();
+      p.then(function (res) { deliver(p, res, null); }, function (err) { deliver(p, null, err); });
+    }
+    function deliver(p, res, err) {
+      if (closing !== p) return;                 /* cancel() en el medio */
+      closing = null;
+      if (!claimed) last = p;
+      ready = { res: res, err: err };
+      if (cfg.onLimit) try { cfg.onLimit(maxSec, res); } catch (e) {}
+      ready = null; limitHit = false; claimed = false;
+      if (state === 'rec') state = 'idle';
+    }
+
+    function stop() {
+      if (state === 'rec' && limitHit) {
+        /* el tope ya cerro (o esta cerrando) la toma: este stop() se la lleva */
+        claimed = true; last = null;
+        if (ready) {
+          state = 'idle';
+          return ready.err ? Promise.reject(ready.err) : Promise.resolve(ready.res);
+        }
+        state = 'stopping';
+        return closing.then(function (res) { state = 'idle'; return res; }, function (err) { state = 'idle'; throw err; });
+      }
+      if (state !== 'rec') { var q = last; last = null; return q || Promise.resolve(null); }
+      state = 'stopping';
+      var pr = close();
+      if (mode === 'worklet') { state = 'idle'; return pr; }   /* sincronico, como en v1 */
+      return pr.then(function (res) { state = 'idle'; return res; }, function (err) { state = 'idle'; throw err; });
     }
 
     return {
@@ -188,7 +237,10 @@
       get state() { return state; },
       get mode() { return mode; },
       elapsed: elapsed,
-      cancel: function () { if (state === 'rec') { try { if (mrec) mrec.stop(); } catch (e) {} cleanup(); chunks = []; mparts = []; state = 'idle'; } }
+      cancel: function () {
+        last = null;
+        if (state === 'rec') { try { if (mrec && mrec.state !== 'inactive') mrec.stop(); } catch (e) {} cleanup(); chunks = []; mparts = []; closing = null; ready = null; limitHit = false; state = 'idle'; }
+      }
     };
   }
 

@@ -239,7 +239,7 @@ Lo verifica `node tools/tests/zd-midi-order.test.mjs`.
 Acid Bass no usa el recorder: su MIDI sale del patrón de 16 pasos con
 `write()`. Lo usan MonoMoon, Nebularp y J4 (SPEC R4).
 
-## `zd-rec` v1 — REC posta y tarjeta de resultado
+## `zd-rec` v2 — REC posta y tarjeta de resultado
 
 ```js
 const rec = ZD.rec.create({
@@ -248,13 +248,30 @@ const rec = ZD.rec.create({
   channels: 2,
   maxSec: 600,                       // tope de 10 min (SPEC R4)
   onProgress: s => {},
-  onLimit: max => {}
+  onLimit: (max, result) => {}       // result: lo mismo que resuelve stop() (v2)
 });
 await rec.start();      // -> 'worklet' | 'mediarecorder'
 const res = await rec.stop();
 // res = { blob, duration, bytes, sampleRate, channels, mode }
 rec.cancel(); rec.elapsed(); rec.state; rec.mode;
 ```
+
+**El tope (`maxSec`) no pierde la toma (v2).** Al llegar al tope el bloque deja
+de capturar, arma el WAV y llama a `onLimit(max, result)` con el resultado
+(`null` si no se pudo armar). Mientras corre `onLimit`, `rec.state` sigue en
+`'rec'`, como en v1, así que hay dos formas de usarlo y las dos reciben la
+misma toma:
+
+- **Solo avisar** (un toast) y dejar que el usuario toque ■: el próximo
+  `stop()`, ya con `state === 'idle'`, devuelve esa toma **una sola vez**;
+  el siguiente vuelve a dar `null`. `start()` y `cancel()` la sueltan.
+- **Cerrar ahí mismo**: llamar a `rec.stop()` de forma sincrónica dentro de
+  `onLimit` (lo que hacen J4, MonoMoon y Nebularp, con o sin mirar
+  `rec.state === 'rec'` antes) devuelve esa toma y deja `state` en `'idle'`.
+
+En la rama MediaRecorder, si el usuario toca ■ mientras el bloque todavía
+decodifica la toma cortada por el tope, ese `stop()` se la lleva y `onLimit`
+se llama igual (con `state` en `'stopping'`).
 
 Captura por AudioWorklet en chunks `Int16` a la frecuencia real del
 `AudioContext`; el nodo va a un `GainNode` en 0 conectado al destino para que
@@ -278,7 +295,7 @@ ZD.rec.card(mount, {
 La tarjeta muestra duración, tamaño, kHz y mono/estéreo, un `<audio controls>`
 para escuchar y el botón de descarga (que pasa por `ZD.dl.save`). Acid Bass usa
 **solo la tarjeta**, para el resultado de su render offline; la captura en vivo
-es para Nebularp y J4.
+la usan Nebularp, J4 y MonoMoon.
 
 ## `zd-mobile` v4 — shell portrait-first
 
@@ -550,6 +567,12 @@ node tools/tests/acid-verify.test.mjs       # idem
 
 - `zd-midi-order` · el orden de eventos a igual tick en `write()` y en
   `recorder()`, y el MIDI del patrón de Acid parseado como SMF.
+- `zd-rec-limit` · el corte por `maxSec` sobre la copia canónica del bloque
+  (página mínima, sin instrumento): `onLimit(max, result)`, `stop()` después del
+  tope, `stop()` adentro de `onLimit`, en las ramas worklet y MediaRecorder.
+- `zd-rec-instruments` · el mismo tope (1 s) en Nebularp, J4 y MonoMoon
+  publicados: la toma llega a la tarjeta, el botón vuelve a REC y una segunda
+  toma anda.
 - `zd-mobile-cycle` · conformidad de `zd-mobile` para **cualquier** instrumento:
   el ciclo salir/entrar del shell en los tres pares de viewport, el cableado de
   eventos, el foco, el scroll, el banner de `zd-pwa` y los ≥44 px de los
@@ -613,6 +636,43 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-04 · `zd-rec` v1 → v2
+
+Pedido de J4 y MonoMoon (`reports/j4-block-request.md` punto 1,
+`reports/monomoon-block-request.md` punto 1). Al llegar a `maxSec`, v1 llamaba a
+`onLimit(max)` y enseguida a su propio `stop()`, y tiraba lo que resolvía: un
+`stop()` posterior daba `null`. Si `onLimit` solo avisaba (como mostraba esta
+doc), la toma de 10 minutos se perdía entera. J4, MonoMoon y Nebularp lo
+esquivaban llamando a su `stop()` de forma sincrónica dentro de `onLimit`, algo
+que dependía del orden de dos líneas del bloque.
+
+- `onLimit(max, result)`: el bloque corta la captura, arma el WAV y recién
+  después llama a `onLimit` con el resultado, con la misma forma que resuelve
+  `stop()` (`null` si no se pudo armar).
+- Mientras corre `onLimit`, `rec.state` sigue en `'rec'`, como en v1. El patrón
+  de llamar a `rec.stop()` adentro sigue andando, también con el guard
+  `rec.state !== 'rec'` de MonoMoon (`stopTake()`), y recibe el mismo objeto.
+- Si nadie la pide en `onLimit`, la toma queda guardada: el próximo `stop()`
+  (con `state === 'idle'`) la devuelve una sola vez. `start()` y `cancel()` la
+  sueltan, así no queda retenido un WAV de ~115 MB.
+- Arreglo de paso, en la misma ruta: en la rama MediaRecorder el `setTimeout`
+  del tope no se cancelaba al parar a mano, así que una toma que se arrancaba
+  enseguida se cortaba con el temporizador de la anterior (con 10 min: grabar 9,
+  parar, arrancar otra → la segunda se cortaba al minuto). Ahora se cancela al
+  cerrar cada toma.
+- Sin cambios en la API pública: mismas funciones, mismos campos del resultado;
+  `onLimit` recibe un argumento más. En la rama worklet `stop()` sigue dejando
+  `state` en `'idle'` de forma sincrónica.
+
+Los workarounds de J4, MonoMoon y Nebularp siguen siendo válidos y no hace falta
+sacarlos. Los comentarios de J4 (`getRecorder()`) y MonoMoon (`startTake()`) que
+dicen que el bloque descarta el resultado quedaron viejos; los actualiza la
+sesión C de cada uno.
+
+Lo verifican `node tools/tests/zd-rec-limit.test.mjs` (el bloque solo, ramas
+worklet y MediaRecorder) y `node tools/tests/zd-rec-instruments.test.mjs`
+(Nebularp, J4 y MonoMoon con `maxSec` forzado a 1 s, en el shell a 390×844).
 
 ### 2026-10-04 · `zd-mobile` v3 → v4
 
