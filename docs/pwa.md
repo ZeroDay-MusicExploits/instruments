@@ -206,17 +206,19 @@ registrado.
 
 ## 4 · Service worker y "nueva versión"
 
-`sw.js` (raíz, cache `zd-v2`) precachea los 5 instrumentos + manifests +
+`sw.js` (raíz, cache `zd-v3`) precachea los 5 instrumentos + manifests +
 íconos y sirve HTML con *stale-while-revalidate*. Al activar una versión
-nueva manda `postMessage({type:'zd-sw-updated', version:'zd-v2'})` a las
+nueva manda `postMessage({type:'zd-sw-updated', version:'zd-v3'})` a las
 pestañas abiertas; `zd-pwa` lo escucha y solo muestra el toast si
 `hadController` era `true` (evita mostrar "Nueva versión" en el primer
 install, cuando técnicamente no había nada previo que actualizar).
 
-Para forzar una nueva versión: subir `VERSION` en `sw.js` (`zd-v2` →
-`zd-v3`). El `activate` del SW nuevo borra los `zd-cache-*` viejos.
-Subió a `zd-v2` con el hotfix de `zd-mobile` v3 y `zd-midi` v2 (2026-10-03):
-es lo que hace que las copias cacheadas del instrumento se reemplacen.
+Para forzar una nueva versión: subir `VERSION` en `sw.js` (hoy `zd-v3`;
+la próxima, `zd-v4`). El `activate` del SW nuevo borra los `zd-cache-*` viejos.
+Subió a `zd-v2` con el hotfix de `zd-mobile` v3 y `zd-midi` v2 (2026-10-03) y a
+`zd-v3` con la versión mobile-first (`zd-ui` v2, `zd-audio` v2, `zd-rec` v2,
+`zd-pwa` v3 y los 5 instrumentos nuevos, 2026-10-04): es lo que hace que las
+copias cacheadas del instrumento se reemplacen.
 
 ## 5 · A verificar en dispositivo
 
