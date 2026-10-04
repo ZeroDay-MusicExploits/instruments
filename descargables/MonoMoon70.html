@@ -4,12 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MonoMoon'70</title>
-<meta name="theme-color" content="#070b06">
+<!-- Versión web: la usa zd-pwa para el aviso de file:// (SPEC 3.2 / docs/pwa.md). -->
+<link rel="canonical" href="https://zeroday-musicexploits.github.io/instruments/descargables/MonoMoon70.html">
+<!-- PWA: el manifest y los íconos los sirve el sitio. En file:// o dentro de
+     un iframe el bloque zd-pwa no registra nada (SPEC 3.2). -->
+<link rel="manifest" href="../manifests/monomoon.webmanifest">
+<link rel="apple-touch-icon" href="../icons/monomoon-apple-touch-180.png">
+<meta name="theme-color" content="#f2a63c">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Minimoog">
-<link id="manifestLink" rel="manifest">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="MonoMoon">
 <style>
   :root{
     --wood-1:#3c2415;   --wood-2:#5a3620;   --wood-3:#7a4a2c;
@@ -1710,7 +1715,8 @@ window.ZD_M = {
     { label: 'Empezar de cero', onClick(){ if (typeof resetAll === 'function') resetAll(); } }
   ],
   menuNotes: [
-    'El patch en edición y la biblioteca se guardan solos en este navegador. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá el JSON como backup.'
+    'El patch en edición y la biblioteca se guardan solos en este navegador. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá el JSON como backup.',
+    'Se instala desde la web. Un HTML abierto con doble clic (file://) funciona igual, pero el navegador no deja instalarlo.'
   ]
 };
 </script>
@@ -2524,7 +2530,6 @@ window.ZD_M = {
       <span id="clipLed" class="clip-led" role="status" hidden title="La salida llegó al tope: bajá Volumen, Énfasis o los niveles">CLIP</span>
       <span class="sep"></span>
       <div class="tb-group"><span class="midi-dot" id="midiDot"></span><span id="midiTxt">MIDI —</span></div>
-      <button id="btnInstall" class="hidden">Instalar app</button>
       <div class="take" id="takePanel" hidden>
         <div class="take-head">ÚLTIMA TOMA <span id="takeInfo"></span></div>
         <div id="takeCard"></div>
@@ -3818,17 +3823,6 @@ function initMIDI(){ const dot=document.getElementById('midiDot'), txt=document.
   }).catch(()=>{ txt.textContent='MIDI bloqueado'; txt.title='El navegador no dio permiso para usar MIDI.'; });
 }
 
-/* --- PWA --- */
-function initPWA(){
-  const icon='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" rx="96" fill="#17120c"/><text x="256" y="150" font-family="Arial" font-size="62" font-weight="bold" fill="#e9e3d4" text-anchor="middle">HACKWAVE</text><path d="M40 320 Q120 150 200 320 T360 320 T520 320" fill="none" stroke="#c8402c" stroke-width="26" stroke-linecap="round"/></svg>');
-  const manifest={ name:'HACKWAVE Minimoog', short_name:'Minimoog', start_url:'.', scope:'.', display:'standalone', orientation:'landscape',
-    background_color:'#0a0705', theme_color:'#120c08', icons:[{src:icon,sizes:'512x512',type:'image/svg+xml',purpose:'any'}] };
-  try{ document.getElementById('manifestLink').href='data:application/json,'+encodeURIComponent(JSON.stringify(manifest)); }catch(_){}
-  let deferred=null; const b=document.getElementById('btnInstall');
-  window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferred=e; b.classList.remove('hidden'); });
-  b.onclick=async ()=>{ if(!deferred) return; deferred.prompt(); try{ await deferred.userChoice; }catch(_){} deferred=null; b.classList.add('hidden'); };
-}
-
 /* --- barra de herramientas --- */
 function initToolbar(){
   const presetSel=document.getElementById('presetSel');
@@ -3875,7 +3869,7 @@ buildMeter();
 drawEnv('envGraph', engine.state.env);
 drawEnv('envGraphF', engine.state.filtEnv, engine.state.contour);
 visLoop();
-initToolbar(); refreshUserList(); initMIDI(); initPWA();
+initToolbar(); refreshUserList(); initMIDI();
 
 /* ================================================================
    AUTOGUARDADO (SPEC R3) — zd-store
