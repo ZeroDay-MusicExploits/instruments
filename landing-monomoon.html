@@ -76,10 +76,10 @@ gtag('config', 'G-ZNGM11BR5S');
       <dl class="spec">
         <div class="spec__row"><dt>ARCHIVO</dt><dd>./descargables/MonoMoon70.html</dd></div>
         <div class="spec__row"><dt>TIPO</dt><dd>Sintetizador monofónico</dd></div>
-        <div class="spec__row"><dt>SE TOCA CON</dt><dd>Teclado de PC, mouse, touch, Web MIDI</dd></div>
-        <div class="spec__row"><dt>EXPORTA</dt><dd>WAV · JSON</dd></div>
-        <div class="spec__row"><dt>GUARDA</dt><dd>Export/import JSON manual (autoguardado pendiente)</dd></div>
-        <div class="spec__row"><dt>APP</dt><dd>Instalable solo cuando se sirve por web (no en el HTML local)</dd></div>
+        <div class="spec__row"><dt>SE TOCA CON</dt><dd>Teléfono (vertical), tablet, teclado de PC, mouse, touch, Web MIDI (donde el navegador la soporte)</dd></div>
+        <div class="spec__row"><dt>EXPORTA</dt><dd>WAV · MIDI · JSON</dd></div>
+        <div class="spec__row"><dt>GUARDA</dt><dd>Autoguardado en el navegador</dd></div>
+        <div class="spec__row"><dt>APP</dt><dd>PWA instalable · sin conexión</dd></div>
       </dl>
     </div>
   </section>
@@ -108,88 +108,104 @@ gtag('config', 'G-ZNGM11BR5S');
   <section class="wrap block" id="manual">
     <div class="section-head">
       <h2 class="h2">Manual de usuario</h2>
-      <span class="label">9 SECCIONES</span>
+      <span class="label">11 SECCIONES</span>
     </div>
     <div class="manual-layout">
       <details class="manual-index manual-index--mobile">
-        <summary>Índice · 9 secciones</summary>
+        <summary>Índice · 11 secciones</summary>
         <nav class="manual-index__list" aria-label="Índice del manual">
-        <a href="#m-1"><span>01</span><span>Encendido y cabecera</span></a>
-        <a href="#m-2"><span>02</span><span>Banco de osciladores</span></a>
-        <a href="#m-3"><span>03</span><span>Filtro — Escalera Moog</span></a>
-        <a href="#m-4"><span>04</span><span>Amplitud — Contorno y salida</span></a>
-        <a href="#m-5"><span>05</span><span>Modulación</span></a>
-        <a href="#m-6"><span>06</span><span>Contorno de filtro (2ª envolvente)</span></a>
-        <a href="#m-7"><span>07</span><span>Voz</span></a>
-        <a href="#m-8"><span>08</span><span>Osciloscopio</span></a>
-        <a href="#m-9"><span>09</span><span>Controladores</span></a>
+        <a href="#m-1"><span>01</span><span>En el teléfono (vertical)</span></a>
+        <a href="#m-2"><span>02</span><span>Encendido y cabecera</span></a>
+        <a href="#m-3"><span>03</span><span>Banco de osciladores</span></a>
+        <a href="#m-4"><span>04</span><span>Filtro — Escalera Moog</span></a>
+        <a href="#m-5"><span>05</span><span>Amplitud — Contorno y salida</span></a>
+        <a href="#m-6"><span>06</span><span>Modulación</span></a>
+        <a href="#m-7"><span>07</span><span>Contorno de filtro (2ª envolvente)</span></a>
+        <a href="#m-8"><span>08</span><span>Voz</span></a>
+        <a href="#m-9"><span>09</span><span>Osciloscopio</span></a>
+        <a href="#m-10"><span>10</span><span>Controladores</span></a>
+        <a href="#m-11"><span>11</span><span>Guardado, exportación e instalación</span></a>
         </nav>
       </details>
       <nav class="manual-index manual-index--desktop" aria-label="Índice del manual">
-        <a href="#m-1"><span>01</span><span>Encendido y cabecera</span></a>
-        <a href="#m-2"><span>02</span><span>Banco de osciladores</span></a>
-        <a href="#m-3"><span>03</span><span>Filtro — Escalera Moog</span></a>
-        <a href="#m-4"><span>04</span><span>Amplitud — Contorno y salida</span></a>
-        <a href="#m-5"><span>05</span><span>Modulación</span></a>
-        <a href="#m-6"><span>06</span><span>Contorno de filtro (2ª envolvente)</span></a>
-        <a href="#m-7"><span>07</span><span>Voz</span></a>
-        <a href="#m-8"><span>08</span><span>Osciloscopio</span></a>
-        <a href="#m-9"><span>09</span><span>Controladores</span></a>
+        <a href="#m-1"><span>01</span><span>En el teléfono (vertical)</span></a>
+        <a href="#m-2"><span>02</span><span>Encendido y cabecera</span></a>
+        <a href="#m-3"><span>03</span><span>Banco de osciladores</span></a>
+        <a href="#m-4"><span>04</span><span>Filtro — Escalera Moog</span></a>
+        <a href="#m-5"><span>05</span><span>Amplitud — Contorno y salida</span></a>
+        <a href="#m-6"><span>06</span><span>Modulación</span></a>
+        <a href="#m-7"><span>07</span><span>Contorno de filtro (2ª envolvente)</span></a>
+        <a href="#m-8"><span>08</span><span>Voz</span></a>
+        <a href="#m-9"><span>09</span><span>Osciloscopio</span></a>
+        <a href="#m-10"><span>10</span><span>Controladores</span></a>
+        <a href="#m-11"><span>11</span><span>Guardado, exportación e instalación</span></a>
       </nav>
       <div class="manual-body">
       <article class="manual-article" id="m-1">
-        <h3><span>01</span>Encendido y cabecera</h3>
-        
-        <ul class="manual-items"><li><strong>Pulsá para encender</strong><span>desbloquea el audio al primer toque.</span></li><li><strong>Preset (selector)</strong><span>presets de fábrica listos para tocar.</span></li><li><strong>Biblioteca (selector)</strong><span>tus propios patches guardados; ícono 🗑 para borrar.</span></li><li><strong>Guardar…</strong><span>guarda el patch actual en la biblioteca del navegador.</span></li><li><strong>⭳ JSON / ⭱ JSON</strong><span>exportar / importar un patch como archivo.</span></li><li><strong>● Grabar (con contador 00:00)</strong><span>graba lo que tocás y lo deja listo para exportar.</span></li><li><strong>Indicador MIDI</strong><span>muestra conexión Web MIDI activa.</span></li><li><strong>Instalar app</strong><span>PWA instalable.</span></li></ul>
+        <h3><span>01</span>En el teléfono (vertical)</h3>
+        <p class="manual-p">Funciona en vertical y en horizontal. Arriba van REC (con tiempo y LED CLIP) y el pad XY; abajo, el teclado con las ruedas Pitch/Mod verticales al costado.</p>
+        <ul class="manual-items"><li><strong>Macros</strong><span>Cutoff, Reso, Env Amt, A/R, Glide y Volumen, sincronizadas con los knobs de cada sheet. Pad XY: X = corte, Y = énfasis.</span></li><li><strong>Teclado</strong><span>dos octavas; en pantallas angostas pasa a dos filas de una octava (la grave abajo). El glissando funciona entre filas.</span></li><li><strong>OSC · FILTRO · MOD · VOZ</strong><span>sheets de sonido; mientras están abiertos el teclado sigue disponible para tocar.</span></li><li><strong>PATCHES</strong><span>presets, biblioteca, JSON, la última toma de REC, MIDI de entrada y la ayuda del teclado de PC.</span></li><li><strong>Knobs</strong><span>arrastre vertical, doble tap = valor de fábrica, long-press (o Enter) = valor numérico.</span></li></ul>
         
       </article>
       <article class="manual-article" id="m-2">
-        <h3><span>02</span>Banco de osciladores</h3>
+        <h3><span>02</span>Encendido y cabecera</h3>
+        
+        <ul class="manual-items"><li><strong>Pulsá para encender</strong><span>desbloquea el audio al primer toque.</span></li><li><strong>Preset (selector)</strong><span>presets de fábrica listos para tocar.</span></li><li><strong>Biblioteca (selector)</strong><span>tus propios patches guardados; ícono 🗑 para borrar.</span></li><li><strong>Guardar…</strong><span>guarda el patch actual en la biblioteca del navegador.</span></li><li><strong>⭳ JSON / ⭱ JSON</strong><span>exportar / importar un patch como archivo.</span></li><li><strong>● REC (con contador)</strong><span>graba lo que tocás; al cortar aparece la toma con escuchar, ↓ DESCARGAR WAV y el MIDI de la toma (notas, pitch bend, CC1, CC74/CC71).</span></li><li><strong>Indicador MIDI</strong><span>muestra conexión Web MIDI activa.</span></li><li><strong>Instalar app</strong><span>PWA instalable (desde la web).</span></li></ul>
+        
+      </article>
+      <article class="manual-article" id="m-3">
+        <h3><span>03</span>Banco de osciladores</h3>
         <p class="manual-p">Mezclador de osciladores más Ruido (Nivel, tipo Blanco/Rosa).</p>
         
         
       </article>
-      <article class="manual-article" id="m-3">
-        <h3><span>03</span>Filtro — Escalera Moog</h3>
+      <article class="manual-article" id="m-4">
+        <h3><span>04</span>Filtro — Escalera Moog</h3>
         
         <ul class="manual-items"><li><strong>Corte (cutoff), Énfasis (resonancia), Seguim. (keyboard tracking).</strong></li></ul>
         <p class="manual-note"><span>▸</span><span>24 dB/oct, con resonancia hasta auto-oscilación (el filtro puede sonar como un oscilador propio al máximo).</span></p>
       </article>
-      <article class="manual-article" id="m-4">
-        <h3><span>04</span>Amplitud — Contorno y salida</h3>
+      <article class="manual-article" id="m-5">
+        <h3><span>05</span>Amplitud — Contorno y salida</h3>
         
         <ul class="manual-items"><li><strong>Volumen general y Afinación (tuning) del instrumento.</strong></li></ul>
         <p class="manual-note"><span>▸</span><span>Envolvente ADSR: Ataque, Caída, Sostén, Relaj.</span></p>
       </article>
-      <article class="manual-article" id="m-5">
-        <h3><span>05</span>Modulación</h3>
+      <article class="manual-article" id="m-6">
+        <h3><span>06</span>Modulación</h3>
         
         <ul class="manual-items"><li><strong>Osc3 → teclado (si el oscilador 3 sigue o no el teclado).</strong></li><li><strong>Mod → Osciladores / Mod → Filtro (destinos de la modulación).</strong></li></ul>
         <p class="manual-note"><span>▸</span><span>Fuente: mezcla de Osc3 · Ruido.</span></p>
         <p class="manual-note"><span>▸</span><span>Truco clásico: poné Osc3 en rango LO y sin seguimiento de teclado para que actúe como LFO, combinado con Ruido. La profundidad se controla con la rueda Mod.</span></p>
       </article>
-      <article class="manual-article" id="m-6">
-        <h3><span>06</span>Contorno de filtro (2ª envolvente)</h3>
+      <article class="manual-article" id="m-7">
+        <h3><span>07</span>Contorno de filtro (2ª envolvente)</h3>
         
         <ul class="manual-items"><li><strong>Cantidad, Ataque, Caída, Sostén, Relaj.</strong></li></ul>
         <p class="manual-note"><span>▸</span><span>Esta envolvente barre el corte del filtro en octavas. Cantidad negativa cierra el filtro en vez de abrirlo.</span></p>
       </article>
-      <article class="manual-article" id="m-7">
-        <h3><span>07</span>Voz</h3>
+      <article class="manual-article" id="m-8">
+        <h3><span>08</span>Voz</h3>
         
         <ul class="manual-items"><li><strong>Mono / Unison (voces detuneadas apiladas, con control de Detune unison) / Duo (tocás 2 teclas y suena el intervalo: osc1 = voz aguda, osc2/3 = voz grave).</strong></li></ul>
         
       </article>
-      <article class="manual-article" id="m-8">
-        <h3><span>08</span>Osciloscopio</h3>
+      <article class="manual-article" id="m-9">
+        <h3><span>09</span>Osciloscopio</h3>
         <p class="manual-p">Visualización en tiempo real de la forma de onda de salida.</p>
         
         
       </article>
-      <article class="manual-article" id="m-9">
-        <h3><span>09</span>Controladores</h3>
+      <article class="manual-article" id="m-10">
+        <h3><span>10</span>Controladores</h3>
         
         <ul class="manual-items"><li><strong>Glide (portamento).</strong></li><li><strong>Disparo: Single / Multi (retrigger de la envolvente en legato).</strong></li><li><strong>Rueda Pitch → bend de hasta ±2 semitonos, vuelve al centro al soltar.</strong></li><li><strong>Rueda Mod → profundidad de toda la matriz de modulación.</strong></li><li><strong>Octava (− / C4 / +).</strong></li></ul>
+        
+      </article>
+      <article class="manual-article" id="m-11">
+        <h3><span>11</span>Guardado, exportación e instalación</h3>
+        
+        <ul class="manual-items"><li><strong>El patch en edición y la biblioteca se autoguardan en este navegador. La biblioteca anterior (hackwave-minimoog) se migra sola y la vieja queda intacta. «Empezar de cero» vuelve al patch de fábrica (pide confirmación). Exportá un JSON de respaldo: Safari puede vaciar el almacenamiento de sitios no instalados.</strong></li><li><strong>Exportar: JSON (patch + biblioteca), MIDI y WAV de la toma de REC. En iPhone salen por Compartir.</strong></li><li><strong>Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.</strong></li></ul>
         
       </article>
       </div>
@@ -208,12 +224,13 @@ gtag('config', 'G-ZNGM11BR5S');
       <div class="key-card"><div class="key-card__chips"><span style="font-size:13px">Mouse / dedos</span></div><span class="key-card__action">Tocar directamente sobre el teclado en pantalla; deslizar = glissando</span></div>
       <div class="key-card"><div class="key-card__chips"><kbd>Z</kbd><kbd>X</kbd></div><span class="key-card__action">Bajar / subir octava</span></div>
       <div class="key-card"><div class="key-card__chips"><kbd>Espacio</kbd></div><span class="key-card__action">Pánico (corta todas las notas sonando)</span></div>
+      <div class="key-card"><div class="key-card__chips"><span style="font-size:13px">Barra superior: REC</span></div><span class="key-card__action">Grabar WAV y MIDI de la toma</span></div>
       </div>
       
     </details>
     <div class="roadmap">
       <span class="label">ESTADO DEL ROADMAP</span>
-      <p>Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); persistencia de patches (JSON + IndexedDB con biblioteca local), librería de presets clásicos, export WAV, Web MIDI y PWA instalable (F4). Roadmap cerrado.</p>
+      <p>Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); presets, biblioteca local, Web MIDI y PWA (F4). Versión mobile-first: layout vertical con 6 macros, pad XY y sheets, autoguardado del patch y de la biblioteca, REC → WAV y MIDI de la toma (notas, pitch bend, CC1, CC74/CC71) y JSON completo. Roadmap cerrado.</p>
     </div>
   </section>
 

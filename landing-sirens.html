@@ -76,10 +76,10 @@ gtag('config', 'G-ZNGM11BR5S');
       <dl class="spec">
         <div class="spec__row"><dt>ARCHIVO</dt><dd>./descargables/J4-Sirens_Station.html</dd></div>
         <div class="spec__row"><dt>TIPO</dt><dd>Dub siren</dd></div>
-        <div class="spec__row"><dt>SE TOCA CON</dt><dd>Teclado de PC, mouse, touch</dd></div>
-        <div class="spec__row"><dt>EXPORTA</dt><dd>JSON</dd></div>
-        <div class="spec__row"><dt>GUARDA</dt><dd>Export/import JSON manual (autoguardado pendiente)</dd></div>
-        <div class="spec__row"><dt>APP</dt><dd>Instalable solo cuando se sirve por web (no en el HTML local)</dd></div>
+        <div class="spec__row"><dt>SE TOCA CON</dt><dd>Teléfono (vertical), tablet, teclado de PC, mouse, multitáctil</dd></div>
+        <div class="spec__row"><dt>EXPORTA</dt><dd>WAV · MIDI · JSON</dd></div>
+        <div class="spec__row"><dt>GUARDA</dt><dd>Autoguardado en el navegador</dd></div>
+        <div class="spec__row"><dt>APP</dt><dd>PWA instalable · sin conexión</dd></div>
       </dl>
     </div>
   </section>
@@ -108,96 +108,120 @@ gtag('config', 'G-ZNGM11BR5S');
   <section class="wrap block" id="manual">
     <div class="section-head">
       <h2 class="h2">Manual de usuario</h2>
-      <span class="label">10 SECCIONES</span>
+      <span class="label">13 SECCIONES</span>
     </div>
     <div class="manual-layout">
       <details class="manual-index manual-index--mobile">
-        <summary>Índice · 10 secciones</summary>
+        <summary>Índice · 13 secciones</summary>
         <nav class="manual-index__list" aria-label="Índice del manual">
-        <a href="#m-1"><span>01</span><span>Encendido</span></a>
-        <a href="#m-2"><span>02</span><span>Motor de sirena</span></a>
-        <a href="#m-3"><span>03</span><span>Oscilador · Filtro · Movimiento</span></a>
-        <a href="#m-4"><span>04</span><span>Envolvente · Glide · Salida</span></a>
-        <a href="#m-5"><span>05</span><span>Modulación — 2 LFO</span></a>
-        <a href="#m-6"><span>06</span><span>Cadena de efectos dub</span></a>
-        <a href="#m-7"><span>07</span><span>Pad X-Y</span></a>
-        <a href="#m-8"><span>08</span><span>Disparo</span></a>
-        <a href="#m-9"><span>09</span><span>Patches · Presets</span></a>
-        <a href="#m-10"><span>10</span><span>Extras de la última fase</span></a>
+        <a href="#m-1"><span>01</span><span>En el teléfono (vertical)</span></a>
+        <a href="#m-2"><span>02</span><span>Encendido</span></a>
+        <a href="#m-3"><span>03</span><span>Motor de sirena</span></a>
+        <a href="#m-4"><span>04</span><span>Oscilador · Filtro · Movimiento</span></a>
+        <a href="#m-5"><span>05</span><span>Envolvente · Glide · Salida</span></a>
+        <a href="#m-6"><span>06</span><span>Modulación — 2 LFO</span></a>
+        <a href="#m-7"><span>07</span><span>Cadena de efectos dub</span></a>
+        <a href="#m-8"><span>08</span><span>Pad X-Y</span></a>
+        <a href="#m-9"><span>09</span><span>Disparo</span></a>
+        <a href="#m-10"><span>10</span><span>Patches · Presets</span></a>
+        <a href="#m-11"><span>11</span><span>Extras de la última fase</span></a>
+        <a href="#m-12"><span>12</span><span>REC y exportación</span></a>
+        <a href="#m-13"><span>13</span><span>Guardado, visualizador e instalación</span></a>
         </nav>
       </details>
       <nav class="manual-index manual-index--desktop" aria-label="Índice del manual">
-        <a href="#m-1"><span>01</span><span>Encendido</span></a>
-        <a href="#m-2"><span>02</span><span>Motor de sirena</span></a>
-        <a href="#m-3"><span>03</span><span>Oscilador · Filtro · Movimiento</span></a>
-        <a href="#m-4"><span>04</span><span>Envolvente · Glide · Salida</span></a>
-        <a href="#m-5"><span>05</span><span>Modulación — 2 LFO</span></a>
-        <a href="#m-6"><span>06</span><span>Cadena de efectos dub</span></a>
-        <a href="#m-7"><span>07</span><span>Pad X-Y</span></a>
-        <a href="#m-8"><span>08</span><span>Disparo</span></a>
-        <a href="#m-9"><span>09</span><span>Patches · Presets</span></a>
-        <a href="#m-10"><span>10</span><span>Extras de la última fase</span></a>
+        <a href="#m-1"><span>01</span><span>En el teléfono (vertical)</span></a>
+        <a href="#m-2"><span>02</span><span>Encendido</span></a>
+        <a href="#m-3"><span>03</span><span>Motor de sirena</span></a>
+        <a href="#m-4"><span>04</span><span>Oscilador · Filtro · Movimiento</span></a>
+        <a href="#m-5"><span>05</span><span>Envolvente · Glide · Salida</span></a>
+        <a href="#m-6"><span>06</span><span>Modulación — 2 LFO</span></a>
+        <a href="#m-7"><span>07</span><span>Cadena de efectos dub</span></a>
+        <a href="#m-8"><span>08</span><span>Pad X-Y</span></a>
+        <a href="#m-9"><span>09</span><span>Disparo</span></a>
+        <a href="#m-10"><span>10</span><span>Patches · Presets</span></a>
+        <a href="#m-11"><span>11</span><span>Extras de la última fase</span></a>
+        <a href="#m-12"><span>12</span><span>REC y exportación</span></a>
+        <a href="#m-13"><span>13</span><span>Guardado, visualizador e instalación</span></a>
       </nav>
       <div class="manual-body">
       <article class="manual-article" id="m-1">
-        <h3><span>01</span>Encendido</h3>
+        <h3><span>01</span>En el teléfono (vertical)</h3>
+        <p class="manual-p">Funciona en vertical y en horizontal. El pad XY ocupa gran parte de la pantalla y, debajo, el deck de performance al alcance del pulgar: SIREN grande (mantener o LATCH), ECHO THROW, FEEDBACK ∞ y KILL.</p>
+        <ul class="manual-items"><li><strong>SIRENA · ENV·LFO · FX · PAD</strong><span>sheets de ajuste; mientras están abiertos quedan el pad y una fila con SIREN y los throws para tocar.</span></li><li><strong>PAD</strong><span>ejes del pad, teclado de notas (en el teléfono, 4 filas de 5 en cuartas) y opciones del visualizador.</span></li><li><strong>SESIÓN</strong><span>grabación (REC), patches y archivos.</span></li><li><strong>Perillas</strong><span>arrastre vertical, doble tap = valor por defecto, long-press (o Enter) = valor numérico.</span></li><li><strong>Menú ⋯</strong><span>← Sitio, Instalar app y Empezar de cero.</span></li></ul>
+        
+      </article>
+      <article class="manual-article" id="m-2">
+        <h3><span>02</span>Encendido</h3>
         <p class="manual-p">Tocá para encender — activa el audio; subí un poco el volumen del sistema al empezar.</p>
         
         
       </article>
-      <article class="manual-article" id="m-2">
-        <h3><span>02</span>Motor de sirena</h3>
+      <article class="manual-article" id="m-3">
+        <h3><span>03</span>Motor de sirena</h3>
         
         <ul class="manual-items"><li><strong>WAIL (fase 1)</strong><span>modo de sirena activo.</span></li><li><strong>CH-A</strong><span>lectura en Hz de la frecuencia actual del canal.</span></li><li><strong>Ampliar</strong><span>expande el visualizador.</span></li><li><strong>Modo de sirena (selector)</strong><span>distintos comportamientos de barrido/oscilación.</span></li></ul>
         
       </article>
-      <article class="manual-article" id="m-3">
-        <h3><span>03</span>Oscilador · Filtro · Movimiento</h3>
+      <article class="manual-article" id="m-4">
+        <h3><span>04</span>Oscilador · Filtro · Movimiento</h3>
         
         <ul class="manual-items"><li><strong>Forma de onda del oscilador.</strong></li><li><strong>Shape del movimiento</strong><span>la curva con la que se mueve la sirena (barrido, salto, etc.).</span></li></ul>
         
       </article>
-      <article class="manual-article" id="m-4">
-        <h3><span>04</span>Envolvente · Glide · Salida</h3>
+      <article class="manual-article" id="m-5">
+        <h3><span>05</span>Envolvente · Glide · Salida</h3>
         <p class="manual-p">Controla el ataque/liberación del sonido y el portamento entre notas/frecuencias.</p>
         
         
       </article>
-      <article class="manual-article" id="m-5">
-        <h3><span>05</span>Modulación — 2 LFO</h3>
+      <article class="manual-article" id="m-6">
+        <h3><span>06</span>Modulación — 2 LFO</h3>
         <p class="manual-p">Dos LFOs independientes para modular parámetros del motor.</p>
         
         
       </article>
-      <article class="manual-article" id="m-6">
-        <h3><span>06</span>Cadena de efectos dub</h3>
+      <article class="manual-article" id="m-7">
+        <h3><span>07</span>Cadena de efectos dub</h3>
         
         <ul class="manual-items"><li><strong>Tape Echo</strong><span>delay a cinta, con eco repetible.</span></li><li><strong>Spring/Plate Reverb</strong><span>reverb de resorte o placa, con Carácter ajustable.</span></li><li><strong>Phaser Dub.</strong></li></ul>
         <p class="manual-note"><span>▸</span><span>De fábrica: echo throw / feedback infinito / kill switches para los cortes clásicos de dub en vivo.</span></p>
       </article>
-      <article class="manual-article" id="m-7">
-        <h3><span>07</span>Pad X-Y</h3>
+      <article class="manual-article" id="m-8">
+        <h3><span>08</span>Pad X-Y</h3>
         <p class="manual-p">Pad táctil asignable: Eje X y Eje Y se pueden mapear a distintos parámetros del motor para tocar en vivo con un dedo.</p>
         
         
       </article>
-      <article class="manual-article" id="m-8">
-        <h3><span>08</span>Disparo</h3>
+      <article class="manual-article" id="m-9">
+        <h3><span>09</span>Disparo</h3>
         
         <ul class="manual-items"><li><strong>SIREN</strong><span>botón de disparo; mantené apretado para sostener el sonido.</span></li><li><strong>[ESPACIO]</strong><span>mismo disparo desde el teclado.</span></li></ul>
         
       </article>
-      <article class="manual-article" id="m-9">
-        <h3><span>09</span>Patches · Presets</h3>
+      <article class="manual-article" id="m-10">
+        <h3><span>10</span>Patches · Presets</h3>
         
-        <ul class="manual-items"><li><strong>Banco de fábrica</strong><span>11 presets de fábrica (ampliado en la última fase).</span></li><li><strong>Guardar en este navegador.</strong></li><li><strong>Exportar / Importar JSON</strong><span>Exportar, Copiar (al portapapeles), Importar archivo, Aplicar JSON.</span></li></ul>
+        <ul class="manual-items"><li><strong>Banco de fábrica</strong><span>11 presets de fábrica (ampliado en la última fase).</span></li><li><strong>Guardar en este navegador</strong><span>slots de patches (localStorage), migrados desde la versión anterior.</span></li><li><strong>Exportar / Importar JSON</strong><span>Exportar, Copiar (al portapapeles), Importar archivo, Aplicar JSON.</span></li></ul>
         
       </article>
-      <article class="manual-article" id="m-10">
-        <h3><span>10</span>Extras de la última fase</h3>
+      <article class="manual-article" id="m-11">
+        <h3><span>11</span>Extras de la última fase</h3>
         
         <ul class="manual-items"><li><strong>Ring modulator.</strong></li><li><strong>Bitcrusher</strong><span>vía AudioWorklet, con fallback para navegadores sin soporte.</span></li><li><strong>Drift extra de tono en modo Drone.</strong></li></ul>
         <p class="manual-note"><span>▸</span><span>Visualizador CRT / psicodélico: osciloscopio, Lissajous y mandala, con pantalla completa.</span></p>
+      </article>
+      <article class="manual-article" id="m-12">
+        <h3><span>12</span>REC y exportación</h3>
+        
+        <ul class="manual-items"><li><strong>● REC</strong><span>graba la salida en vivo (WAV 16-bit estéreo, hasta 10 min). ■ cierra la toma y aparece la tarjeta con escuchar, ↓ DESCARGAR WAV y ↓ MIDI DE LA TOMA (notas, pitch bend ±24 st, CC74/CC71 del pad).</span></li><li><strong>JSON</strong><span>el estado completo más tus patches guardados (sirve de respaldo); también abre los dubsiren-patch.json de versiones anteriores.</span></li><li><strong>En iPhone, los archivos salen por Compartir.</strong></li></ul>
+        
+      </article>
+      <article class="manual-article" id="m-13">
+        <h3><span>13</span>Guardado, visualizador e instalación</h3>
+        
+        <ul class="manual-items"><li><strong>El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo. Los patches guardados van aparte y no los borra «Empezar de cero».</strong></li><li><strong>Visualizador: VISUAL ON/OFF y BAJA CARGA (~20 fps, sin glow); «reducir movimiento» del sistema lo deja en una línea fija.</strong></li><li><strong>Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.</strong></li></ul>
+        
       </article>
       </div>
     </div>
@@ -218,7 +242,7 @@ gtag('config', 'G-ZNGM11BR5S');
     </details>
     <div class="roadmap">
       <span class="label">ESTADO DEL ROADMAP</span>
-      <p>4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch básico · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y sistema de presets (fábrica + localStorage + export/import JSON) · F4 ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Entregado como artifact HTML.</p>
+      <p>4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y presets · F4 ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Versión mobile-first: layout vertical con pad XY protagonista, deck de performance con hold/latch, sheets, autoguardado del estado actual, REC → WAV, MIDI de performance, JSON completo, visualizador de baja carga y PWA instalable con uso sin conexión.</p>
     </div>
   </section>
 

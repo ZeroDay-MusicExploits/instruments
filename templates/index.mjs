@@ -25,7 +25,7 @@ const FAQ_ITEMS = [
   },
   {
     q: '¿Se guardan mis datos?',
-    a: 'Lo que tocás queda en tu propio navegador (localStorage / IndexedDB), nunca en un servidor. Hoy el autoguardado automático (tocar → recargar → mismo estado) funciona en CronBeat-8:08; en los otros 4, el respaldo es manual vía exportar/importar JSON — cada landing dice exactamente qué guarda.'
+    a: 'Lo que tocás queda en tu propio navegador (localStorage / IndexedDB), nunca en un servidor. Los 5 instrumentos autoguardan (tocar → recargar → mismo estado) y restauran sin arrancar el audio. Safari puede vaciar el almacenamiento de los sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo — cada landing dice exactamente qué guarda.'
   },
   {
     q: '¿Puedo instalar el HTML descargado?',

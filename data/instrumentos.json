@@ -24,20 +24,22 @@
       "type": "CAJA DE RITMOS",
       "tagline": "\"Machine Drum lab\"",
       "what": "Una caja de ritmos completa: secuenciador de patrones tocable en vivo, banco de pads con samples propios, editor de sample no destructivo, cadena de efectos por pista, modo canción y exportación a WAV/MIDI. Pensada para sonar bien desde el primer patrón y funcionar como laboratorio de sonido a la vez.",
-      "plays": "Teclado de PC, mouse, touch",
+      "plays": "Teléfono (vertical), tablet, teclado de PC, mouse, touch",
       "sections": [
+        { "t": "En el teléfono (vertical)", "p": "Funciona en vertical y en horizontal. En el teléfono, la barra superior lleva TOCAR/■, REC y el BPM editable, y abajo hay 5 pestañas que abren sheets.", "items": ["Zona de tocar — arriba, la pista elegida del secuenciador en 2 filas de 8 pasos; abajo, los 16 pads en 4×4. Tocar un pad lo hace sonar y elige su pista; ◀ ▶ cambian de pista sin sonar; ACENTO reemplaza al Shift.", "PADS — opciones de ejecución (velocidad por altura del dedo, note repeat 1/8·1/16·1/32) y mezcla por pad (M/S/VOL/PAN/sample).", "SEQ — patrones A–H, copiar/pegar, ↶ ↷ (deshacer/rehacer), metrónomo, aleatorio, limpiar, tempo ± / tap, swing y master.", "FX — las 4 tarjetas de efectos y los envíos por pista.", "SAMPLE — el editor de sample no destructivo.", "CANCIÓN — modo canción y archivo (JSON, abrir, MIDI, compases, WAV).", "Menú ⋯ — ← Sitio, Instalar app y Empezar de cero."] },
         { "t": "Pestañas principales", "items": ["Secuenciador — programación de patrones.", "Pads en vivo — tocar los pads en tiempo real (mouse, touch o teclado).", "FX — cadena de efectos (reverb, delay, phaser, drive) con envío por pista.", "Editor — editor de sample no destructivo.", "Canción — modo arreglo, encadenando patrones."] },
-        { "t": "Transporte y control general", "items": ["▶ Tocar — play/stop del patrón o la canción.", "REC — con el transporte sonando, tus golpes en los pads quedan grabados en el patrón.", "BPM (▲/▼ o flechas de teclado) y Tap tempo — tempo global.", "SWING — humaniza/desplaza los tiempos pares.", "MASTER — volumen general de salida.", "Metrónomo — click de referencia.", "Aleatorio — genera variación automática del patrón actual.", "Limpiar — vacía el patrón activo.", "Guardar JSON / Abrir — exporta/importa el proyecto completo (patrones, FX, samples, canción).", "Patrón→MIDI — exporta el patrón actual como archivo MIDI.", "×1 / ×2 / ×4 / ×8 — cantidad de compases al exportar a WAV.", "Exportar WAV — renderiza el audio a archivo descargable.", "Copiar / Pegar (dentro de Patrón) — clona un patrón a otro slot.", "Patrones A–H — 8 slots de patrón, encadenables en el modo Canción."] },
+        { "t": "Transporte y control general", "items": ["▶ Tocar — play/stop del patrón o la canción.", "REC — con el transporte sonando, tus golpes en los pads quedan grabados en el patrón.", "BPM (▲/▼ o flechas de teclado) y Tap tempo — tempo global.", "SWING — humaniza/desplaza los tiempos pares.", "MASTER — volumen general de salida.", "Metrónomo — click de referencia.", "Aleatorio — genera variación automática del patrón actual.", "Limpiar — vacía el patrón activo.", "Guardar JSON / Abrir — exporta/importa el proyecto completo (patrones, FX, samples, canción).", "Patrón→MIDI — exporta el patrón actual como archivo MIDI.", "×1 / ×2 / ×4 / ×8 — cantidad de compases al exportar a WAV.", "Exportar WAV — renderiza el audio a archivo descargable.", "Copiar / Pegar (dentro de Patrón) — clona un patrón a otro slot.", "Patrones A–H — 8 slots de patrón, encadenables en el modo Canción.", "↶ ↷ (o Ctrl+Z) — deshacer/rehacer pasos, operaciones de patrón, MIDI importado, REC y canción.", "LED CLIP — avisa si la salida satura (solo mide, no limita).", "Choke hats (opcional, apagado por defecto) — el hi-hat cerrado corta al abierto y viceversa; se guarda con el proyecto."] },
         { "t": "Editor de sample (no destructivo)", "p": "El original del sample nunca se pisa — todo lo que hacés ahí es reversible.", "notes": ["Cargá un sample desde el Secuenciador o desde Pads en vivo, y seleccionalo en \"Sample a editar\"."], "items": ["▶ Escuchar / Revertir / Cargar sample…", "Recorte y tono: Inicio (%), Fin (%), Tono (semitonos), Ganancia (dB).", "Envolvente: Ataque / fade-in (ms), Caída / fade-out (ms).", "Normalizar e Invertir.", "Compresor (on/off): Umbral (dB), Ratio (ej. 4:1)."] },
         { "t": "FX (por inserto/envío)", "items": ["Reverb (envío) — Tamaño (s), Cola, Nivel.", "Delay (envío) — Tiempo (ms), Repetición (feedback), Nivel.", "Phaser (inserto) — Velocidad (Hz), Profundidad, Realimentación.", "Drive (inserto) — Carácter: Overdrive / Distorsión / Fuzz, más Tono (Hz).", "Cantidad por pista: cada pista tiene sus propios envíos REV / DLY / PHS / DRV."] },
         { "t": "Modo Canción", "items": ["▶ Reproducir canción / Loop canción.", "+ Bloque — agrega un bloque que reproduce un patrón (A–H) durante N compases, en orden.", "Canción→MIDI — exporta el arreglo completo a MIDI."] },
-        { "t": "Mantenimiento", "items": ["Reiniciar proyecto — borra todo lo autoguardado en este navegador (usar con cuidado)."] }
+        { "t": "Mantenimiento", "items": ["Empezar de cero (menú ⋯ en el teléfono; «Reiniciar proyecto» en escritorio) — borra lo autoguardado en este navegador (pide confirmación)."] },
+        { "t": "Guardado, exportación e instalación", "items": ["El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo.", "Exportar: JSON del proyecto, MIDI del patrón o de la canción y WAV (el resultado queda en una tarjeta con escuchar y ↓ DESCARGAR WAV). En iPhone salen por Compartir.", "Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala."] }
       ],
-      "keys": [["Fila de pads (varias teclas)", "Tocar pads"], ["Espacio", "Tocar / parar transporte"], ["REC (botón)", "Graba tus golpes al patrón, con el transporte sonando"], ["Selección de patrón", "Cambia entre patrones A–H"], ["+", "Agregar bloque a la Canción"], ["← →", "Ajustan el tempo"], ["Shift (al tocar un pad)", "Golpe con acento"]],
-      "roadmap": "Fases 1 a 5 completas: modo canción, autoguardado, PWA, export JSON/WAV, editor de sample no destructivo, y export/import MIDI de patrones y canciones. Único punto pendiente (opcional): choke groups (silenciar un pad al disparar otro, ej. hi-hat abierto/cerrado).",
+      "keys": [["Fila de pads (varias teclas)", "Tocar pads"], ["Espacio", "Tocar / parar transporte"], ["REC (botón)", "Graba tus golpes al patrón, con el transporte sonando"], ["Selección de patrón", "Cambia entre patrones A–H"], ["+", "Agregar bloque a la Canción"], ["← →", "Ajustan el tempo"], ["Shift (al tocar un pad)", "Golpe con acento"], ["Ctrl+Z / Ctrl+Shift+Z", "Deshacer / rehacer"]],
+      "roadmap": "Fases 1 a 5 completas: modo canción, autoguardado, export JSON/WAV, editor de sample no destructivo y export/import MIDI de patrones y canciones. Versión mobile-first: layout vertical con pestañas y sheets, PWA instalable con uso sin conexión, WAV/MIDI/JSON por Compartir en iOS, deshacer/rehacer, velocidad por altura del dedo, note repeat y choke groups de hats (opcional). Sin puntos pendientes en el roadmap.",
       "exporta": ["WAV", "MIDI", "JSON"],
       "guarda": true,
-      "app": false
+      "app": true
     },
     "monomoon": {
       "num": "02",
@@ -52,9 +54,10 @@
       "type": "SINTETIZADOR MONOFÓNICO",
       "tagline": "\"Monophonic Synthesizer\"",
       "what": "Un sintetizador analógico virtual monofónico estilo Minimoog: banco de osciladores, filtro escalera (ladder) de 24 dB/oct con auto-oscilación, doble envolvente, matriz de modulación, modos de voz (Mono/Unison/Duo), osciloscopio en pantalla y gestión completa de patches.",
-      "plays": "Teclado de PC, mouse, touch, Web MIDI",
+      "plays": "Teléfono (vertical), tablet, teclado de PC, mouse, touch, Web MIDI (donde el navegador la soporte)",
       "sections": [
-        { "t": "Encendido y cabecera", "items": ["Pulsá para encender — desbloquea el audio al primer toque.", "Preset (selector) — presets de fábrica listos para tocar.", "Biblioteca (selector) — tus propios patches guardados; ícono 🗑 para borrar.", "Guardar… — guarda el patch actual en la biblioteca del navegador.", "⭳ JSON / ⭱ JSON — exportar / importar un patch como archivo.", "● Grabar (con contador 00:00) — graba lo que tocás y lo deja listo para exportar.", "Indicador MIDI — muestra conexión Web MIDI activa.", "Instalar app — PWA instalable."] },
+        { "t": "En el teléfono (vertical)", "p": "Funciona en vertical y en horizontal. Arriba van REC (con tiempo y LED CLIP) y el pad XY; abajo, el teclado con las ruedas Pitch/Mod verticales al costado.", "items": ["Macros — Cutoff, Reso, Env Amt, A/R, Glide y Volumen, sincronizadas con los knobs de cada sheet. Pad XY: X = corte, Y = énfasis.", "Teclado — dos octavas; en pantallas angostas pasa a dos filas de una octava (la grave abajo). El glissando funciona entre filas.", "OSC · FILTRO · MOD · VOZ — sheets de sonido; mientras están abiertos el teclado sigue disponible para tocar.", "PATCHES — presets, biblioteca, JSON, la última toma de REC, MIDI de entrada y la ayuda del teclado de PC.", "Knobs — arrastre vertical, doble tap = valor de fábrica, long-press (o Enter) = valor numérico."] },
+        { "t": "Encendido y cabecera", "items": ["Pulsá para encender — desbloquea el audio al primer toque.", "Preset (selector) — presets de fábrica listos para tocar.", "Biblioteca (selector) — tus propios patches guardados; ícono 🗑 para borrar.", "Guardar… — guarda el patch actual en la biblioteca del navegador.", "⭳ JSON / ⭱ JSON — exportar / importar un patch como archivo.", "● REC (con contador) — graba lo que tocás; al cortar aparece la toma con escuchar, ↓ DESCARGAR WAV y el MIDI de la toma (notas, pitch bend, CC1, CC74/CC71).", "Indicador MIDI — muestra conexión Web MIDI activa.", "Instalar app — PWA instalable (desde la web)."] },
         { "t": "Banco de osciladores", "p": "Mezclador de osciladores más Ruido (Nivel, tipo Blanco/Rosa)." },
         { "t": "Filtro — Escalera Moog", "items": ["Corte (cutoff), Énfasis (resonancia), Seguim. (keyboard tracking)."], "notes": ["24 dB/oct, con resonancia hasta auto-oscilación (el filtro puede sonar como un oscilador propio al máximo)."] },
         { "t": "Amplitud — Contorno y salida", "items": ["Volumen general y Afinación (tuning) del instrumento."], "notes": ["Envolvente ADSR: Ataque, Caída, Sostén, Relaj."] },
@@ -62,13 +65,14 @@
         { "t": "Contorno de filtro (2ª envolvente)", "items": ["Cantidad, Ataque, Caída, Sostén, Relaj."], "notes": ["Esta envolvente barre el corte del filtro en octavas. Cantidad negativa cierra el filtro en vez de abrirlo."] },
         { "t": "Voz", "items": ["Mono / Unison (voces detuneadas apiladas, con control de Detune unison) / Duo (tocás 2 teclas y suena el intervalo: osc1 = voz aguda, osc2/3 = voz grave)."] },
         { "t": "Osciloscopio", "p": "Visualización en tiempo real de la forma de onda de salida." },
-        { "t": "Controladores", "items": ["Glide (portamento).", "Disparo: Single / Multi (retrigger de la envolvente en legato).", "Rueda Pitch → bend de hasta ±2 semitonos, vuelve al centro al soltar.", "Rueda Mod → profundidad de toda la matriz de modulación.", "Octava (− / C4 / +)."] }
+        { "t": "Controladores", "items": ["Glide (portamento).", "Disparo: Single / Multi (retrigger de la envolvente en legato).", "Rueda Pitch → bend de hasta ±2 semitonos, vuelve al centro al soltar.", "Rueda Mod → profundidad de toda la matriz de modulación.", "Octava (− / C4 / +)."] },
+        { "t": "Guardado, exportación e instalación", "items": ["El patch en edición y la biblioteca se autoguardan en este navegador. La biblioteca anterior (hackwave-minimoog) se migra sola y la vieja queda intacta. «Empezar de cero» vuelve al patch de fábrica (pide confirmación). Exportá un JSON de respaldo: Safari puede vaciar el almacenamiento de sitios no instalados.", "Exportar: JSON (patch + biblioteca), MIDI y WAV de la toma de REC. En iPhone salen por Compartir.", "Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala."] }
       ],
-      "keys": [["A S D F G H J K L Ñ", "Teclas blancas"], ["W E T Y U O P", "Teclas negras"], ["Mouse / dedos", "Tocar directamente sobre el teclado en pantalla; deslizar = glissando"], ["Z / X", "Bajar / subir octava"], ["Espacio", "Pánico (corta todas las notas sonando)"]],
-      "roadmap": "Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); persistencia de patches (JSON + IndexedDB con biblioteca local), librería de presets clásicos, export WAV, Web MIDI y PWA instalable (F4). Roadmap cerrado.",
-      "exporta": ["WAV", "JSON"],
-      "guarda": false,
-      "app": false
+      "keys": [["A S D F G H J K L Ñ", "Teclas blancas"], ["W E T Y U O P", "Teclas negras"], ["Mouse / dedos", "Tocar directamente sobre el teclado en pantalla; deslizar = glissando"], ["Z / X", "Bajar / subir octava"], ["Espacio", "Pánico (corta todas las notas sonando)"], ["Barra superior: REC", "Grabar WAV y MIDI de la toma"]],
+      "roadmap": "Fases 1 a 4 completas: motor de síntesis monofónico + teclado táctil con glissando, ruedas Pitch/Mod y glide (F1–F2); contorno de filtro, matriz de modulación, unison/duo y osciloscopio (F3); presets, biblioteca local, Web MIDI y PWA (F4). Versión mobile-first: layout vertical con 6 macros, pad XY y sheets, autoguardado del patch y de la biblioteca, REC → WAV y MIDI de la toma (notas, pitch bend, CC1, CC74/CC71) y JSON completo. Roadmap cerrado.",
+      "exporta": ["WAV", "MIDI", "JSON"],
+      "guarda": true,
+      "app": true
     },
     "nebularp": {
       "num": "03",
@@ -83,8 +87,9 @@
       "type": "ARPEGIADOR CÓSMICO",
       "tagline": "\"motor dormido\" hasta que tocás un acorde",
       "what": "Un arpegiador ambiental y generativo: sostenés (o dejás en Latch) un acorde y el instrumento lo recorre solo, con una voz cósmica en unísono, espacio (reverb + delay ping-pong), modulación (chorus + auto-paneo) y una capa de drone grave. Todo cuantizado a una escala mística elegida.",
-      "plays": "Mouse, multitáctil, teclado de PC",
+      "plays": "Teléfono (vertical), tablet, multitáctil, mouse, teclado de PC",
       "sections": [
+        { "t": "En el teléfono (vertical)", "p": "Funciona en vertical y en horizontal. Arriba, el orbit y una columna con BPM, tap y latch; abajo, el piano multitáctil (en pantallas angostas, dos filas de una octava). La barra superior lleva PLAY y REC.", "items": ["ESCALA · ARP · SONIDO · ESPACIO — sheets de ajuste; con ellos abiertos el piano, el latch y la octava siguen a mano para tocar.", "TECLADO — panel Sesión: última toma de REC, guardar/abrir JSON, Empezar de cero, modo liviano del visualizador y ayuda del teclado de PC.", "Knobs — doble tap = reset, long-press (o Enter) = valor numérico, slider alternativo en los sheets.", "Menú ⋯ — ← Sitio, Instalar app, guardar/abrir sesión (JSON) y Empezar de cero."] },
         { "t": "Arranque", "items": ["Iniciar — arranca el motor de audio.", "Tap tempo — define el tempo del arpegio a golpes.", "Latch — el acorde sostenido queda sonando manos libres; tocar uno nuevo lo reemplaza."], "notes": ["Estado inicial: \"motor dormido — tocá un acorde\".", "Se toca con mouse o dedo; arrastrar = glissando; multitáctil = acordes con varios dedos a la vez."] },
         { "t": "Escala mística", "items": ["Escala y Tónica (root) — todo lo que tocás se cuantiza para sonar siempre dentro del clima elegido."] },
         { "t": "Arpegiador", "items": ["Patrón — orden en que se recorren las notas sostenidas.", "Subdivisión — velocidad rítmica del recorrido.", "Rango de octavas — cuánto se extiende hacia arriba/abajo.", "Movimiento — cómo evoluciona el recorrido en el tiempo.", "Ritmo euclidiano (Euclid) — activable, con contador propio para generar patrones rítmicos matemáticos en vez de un recorrido continuo."] },
@@ -93,15 +98,18 @@
         { "t": "Espacio", "p": "Reverb amplia + delay ping-pong: la profundidad y el \"eco galáctico\" del sonido." },
         { "t": "Modulación", "p": "Chorus + auto-paneo: anchura estéreo y movimiento que evolucionan solos, sin intervención manual constante." },
         { "t": "Drone", "p": "Capa grave sostenida en la tónica — el colchón de fondo, que sigue automáticamente a la Escala elegida." },
-        { "t": "Notas sostenidas", "p": "Panel que muestra en vivo qué notas está recorriendo el arpegiador en este momento (vacío cuando no hay nada sostenido)." }
+        { "t": "Notas sostenidas", "p": "Panel que muestra en vivo qué notas está recorriendo el arpegiador en este momento (vacío cuando no hay nada sostenido)." },
+        { "t": "REC y exportación", "items": ["● REC (barra superior) — graba la salida en vivo; al cortar, la toma ofrece escuchar, ↓ DESCARGAR WAV y el MIDI de las notas de esa toma (con el tempo del momento).", "JSON — la sesión completa (escala, arpegio, sonido, espacio, drone y acorde latcheado), con validación al abrir.", "En iPhone, los archivos salen por Compartir."] },
+        { "t": "Autoplay generativo", "items": ["Autoplay — el instrumento toca solo; tocar una tecla o detener el transporte lo apaga. No se guarda en la sesión."] },
+        { "t": "Guardado, modo liviano e instalación", "items": ["El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo.", "Modo liviano — el visualizador dibuja menos (se fuerza con «reducir movimiento» del sistema); es una preferencia del dispositivo.", "Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala."] }
       ],
       "keysNote": "MISMO MAPEO ESTILO PIANO QUE MONOMOON'70",
       "keys": [["Teclado tipo piano (igual que MonoMoon'70)", "Tocar notas / acordes"], ["Z", "Bajar octava"], ["X", "Subir octava"], ["− / C4 / +", "Selector de octava base"], ["Espacio", "Play / Stop del transporte"]],
       "behavior": ["Con el transporte detenido, las teclas suenan como un pad sostenido (para probar sonido).", "Con el transporte en marcha, sostener un acorde hace que el arpegiador lo recorra automáticamente.", "Con Latch activo, el acorde queda sonando solo, manos libres, hasta tocar uno nuevo."],
-      "roadmap": "Se completó el documento de planificación y el prompt de handoff para desarrollo (mismas condiciones que CronBeat-8:08 y MonoMoon'70: 100% client-side).",
-      "exporta": ["JSON"],
-      "guarda": false,
-      "app": false
+      "roadmap": "Planificación y desarrollo base completos (100% client-side, como CronBeat-8:08 y MonoMoon'70). Versión mobile-first: layout vertical con orbit, piano multitáctil y sheets, autoguardado de la sesión, REC → WAV, MIDI de las notas del arpegio, JSON completo, PWA instalable con uso sin conexión y autoplay generativo.",
+      "exporta": ["WAV", "MIDI", "JSON"],
+      "guarda": true,
+      "app": true
     },
     "sirens": {
       "num": "04",
@@ -116,8 +124,9 @@
       "type": "DUB SIREN",
       "tagline": "Dub siren web psicodélica",
       "what": "Una sirena dub completa: motor de síntesis con varios modos, cadena de efectos dub (tape echo, reverb spring/plate, phaser), un pad X-Y para performance en vivo, visualizador psicodélico en pantalla completa, y banco de presets con export/import JSON.",
-      "plays": "Teclado de PC, mouse, touch",
+      "plays": "Teléfono (vertical), tablet, teclado de PC, mouse, multitáctil",
       "sections": [
+        { "t": "En el teléfono (vertical)", "p": "Funciona en vertical y en horizontal. El pad XY ocupa gran parte de la pantalla y, debajo, el deck de performance al alcance del pulgar: SIREN grande (mantener o LATCH), ECHO THROW, FEEDBACK ∞ y KILL.", "items": ["SIRENA · ENV·LFO · FX · PAD — sheets de ajuste; mientras están abiertos quedan el pad y una fila con SIREN y los throws para tocar.", "PAD — ejes del pad, teclado de notas (en el teléfono, 4 filas de 5 en cuartas) y opciones del visualizador.", "SESIÓN — grabación (REC), patches y archivos.", "Perillas — arrastre vertical, doble tap = valor por defecto, long-press (o Enter) = valor numérico.", "Menú ⋯ — ← Sitio, Instalar app y Empezar de cero."] },
         { "t": "Encendido", "p": "Tocá para encender — activa el audio; subí un poco el volumen del sistema al empezar." },
         { "t": "Motor de sirena", "items": ["WAIL (fase 1) — modo de sirena activo.", "CH-A — lectura en Hz de la frecuencia actual del canal.", "Ampliar — expande el visualizador.", "Modo de sirena (selector) — distintos comportamientos de barrido/oscilación."] },
         { "t": "Oscilador · Filtro · Movimiento", "items": ["Forma de onda del oscilador.", "Shape del movimiento — la curva con la que se mueve la sirena (barrido, salto, etc.)."] },
@@ -126,15 +135,17 @@
         { "t": "Cadena de efectos dub", "items": ["Tape Echo — delay a cinta, con eco repetible.", "Spring/Plate Reverb — reverb de resorte o placa, con Carácter ajustable.", "Phaser Dub."], "notes": ["De fábrica: echo throw / feedback infinito / kill switches para los cortes clásicos de dub en vivo."] },
         { "t": "Pad X-Y", "p": "Pad táctil asignable: Eje X y Eje Y se pueden mapear a distintos parámetros del motor para tocar en vivo con un dedo." },
         { "t": "Disparo", "items": ["SIREN — botón de disparo; mantené apretado para sostener el sonido.", "[ESPACIO] — mismo disparo desde el teclado."] },
-        { "t": "Patches · Presets", "items": ["Banco de fábrica — 11 presets de fábrica (ampliado en la última fase).", "Guardar en este navegador.", "Exportar / Importar JSON — Exportar, Copiar (al portapapeles), Importar archivo, Aplicar JSON."] },
-        { "t": "Extras de la última fase", "items": ["Ring modulator.", "Bitcrusher — vía AudioWorklet, con fallback para navegadores sin soporte.", "Drift extra de tono en modo Drone."], "notes": ["Visualizador CRT / psicodélico: osciloscopio, Lissajous y mandala, con pantalla completa."] }
+        { "t": "Patches · Presets", "items": ["Banco de fábrica — 11 presets de fábrica (ampliado en la última fase).", "Guardar en este navegador — slots de patches (localStorage), migrados desde la versión anterior.", "Exportar / Importar JSON — Exportar, Copiar (al portapapeles), Importar archivo, Aplicar JSON."] },
+        { "t": "Extras de la última fase", "items": ["Ring modulator.", "Bitcrusher — vía AudioWorklet, con fallback para navegadores sin soporte.", "Drift extra de tono en modo Drone."], "notes": ["Visualizador CRT / psicodélico: osciloscopio, Lissajous y mandala, con pantalla completa."] },
+        { "t": "REC y exportación", "items": ["● REC — graba la salida en vivo (WAV 16-bit estéreo, hasta 10 min). ■ cierra la toma y aparece la tarjeta con escuchar, ↓ DESCARGAR WAV y ↓ MIDI DE LA TOMA (notas, pitch bend ±24 st, CC74/CC71 del pad).", "JSON — el estado completo más tus patches guardados (sirve de respaldo); también abre los dubsiren-patch.json de versiones anteriores.", "En iPhone, los archivos salen por Compartir."] },
+        { "t": "Guardado, visualizador e instalación", "items": ["El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo. Los patches guardados van aparte y no los borra «Empezar de cero».", "Visualizador: VISUAL ON/OFF y BAJA CARGA (~20 fps, sin glow); «reducir movimiento» del sistema lo deja en una línea fija.", "Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala."] }
       ],
       "keysNote": "MAPEO DE 2 OCTAVAS",
       "keys": [["Z S X D C …", "Primera octava"], ["Q 2 W …", "Segunda octava"], ["ESPACIO", "Disparo de sirena (mantener apretado)"]],
-      "roadmap": "4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch básico · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y sistema de presets (fábrica + localStorage + export/import JSON) · F4 ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Entregado como artifact HTML.",
-      "exporta": ["JSON"],
-      "guarda": false,
-      "app": false
+      "roadmap": "4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y presets · F4 ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Versión mobile-first: layout vertical con pad XY protagonista, deck de performance con hold/latch, sheets, autoguardado del estado actual, REC → WAV, MIDI de performance, JSON completo, visualizador de baja carga y PWA instalable con uso sin conexión.",
+      "exporta": ["WAV", "MIDI", "JSON"],
+      "guarda": true,
+      "app": true
     },
     "acid": {
       "num": "05",
@@ -149,8 +160,9 @@
       "type": "BAJO ÁCIDO",
       "tagline": "\"Sub-Zero Edition\"",
       "what": "Un bajo ácido tipo TB-303 modernizado: secuenciador clásico de 16 pasos con note/accent/slide/gate, filtro resonante con distorsión, generador de patrones por escala, pad X-Y de performance en vivo, y patches con export a JSON/MIDI/WAV.",
-      "plays": "Teclado de PC, mouse, touch / tablet",
+      "plays": "Teléfono (vertical), tablet, teclado de PC, mouse, touch",
       "sections": [
+        { "t": "En el teléfono (vertical)", "p": "Funciona en vertical y en horizontal. Arriba, los 16 pasos en 2 filas de 8 con el editor del paso (nota/accent/slide/gate) y el pad XY siempre visible; abajo, 5 pestañas que abren sheets.", "items": ["SEQ — secuenciador, tempo y teclado.", "SONIDO y FILTRO — oscilador, distorsión y filtro resonante; mientras están abiertos el pad XY y los pasos siguen disponibles.", "PATRÓN — generador de patrones y banco de fábrica.", "EXPORT — patches (JSON), MIDI y WAV.", "Knobs — arrastre vertical, doble tap = reset, long-press (o Enter) = valor numérico.", "Menú ⋯ — ← Sitio, Instalar app y Empezar de cero."] },
         { "t": "Encendido y transporte", "items": ["▶ PLAY — arranca el secuenciador.", "TAP — tap tempo."] },
         { "t": "Performance · Live tweak (pad X-Y)", "p": "El gesto acid clásico: arrastrá con el dedo mientras suena — X = Cutoff, Y = Resonance.", "items": ["Nota en curso — muestra la nota que está sonando.", "SLIDE — indicador de ligado entre pasos."] },
         { "t": "Oscilador", "items": ["Forma de onda — ◺ SAW · ⊓ SQR (cuadrada) · △ TRI (triangular) · ⊔ PULSE.", "SUB — −1 OCT / −2 OCT (oscilador sub una o dos octavas abajo)."] },
@@ -158,10 +170,11 @@
         { "t": "Secuenciador · 16 pasos", "items": ["Patrón — grilla de 16 pasos con nota/acento/slide/gate por paso.", "OCT (− / 0 / +) — transporte de octava del patrón.", "SWING — humaniza el groove.", "INIT ACID — resetea a un patrón acid básico.", "CLEAR — vacía el patrón."] },
         { "t": "Generador de patrones", "items": ["Escalas — Menor, Frigio, Pentatónica, Cromática.", "Densidad — cuántos pasos tienen nota activa (ej. 70%).", "⚡ RANDOM — genera un patrón nuevo al azar dentro de la escala/densidad elegidas.", "✦ MUTAR — muta ligeramente el patrón actual, sin regenerarlo desde cero."] },
         { "t": "Patches · Banco · Export", "items": ["⭳ Guardar JSON / ⭱ Cargar JSON — patch completo.", "♪ Exportar MIDI — el patrón como archivo MIDI.", "WAV — elegí 1 / 2 / 4 compases y ◉ Exportar WAV para renderizar el audio.", "Banco de fábrica — 8 patrones acid genéricos de referencia."] },
-        { "t": "Teclado · Tocar / Programar", "notes": ["Tocá para escuchar libremente.", "Con un paso seleccionado en el secuenciador (tocando su nota), la tecla del teclado programa esa nota en ese paso."] }
+        { "t": "Teclado · Tocar / Programar", "notes": ["Tocá para escuchar libremente.", "Con un paso seleccionado en el secuenciador (tocando su nota), la tecla del teclado programa esa nota en ese paso."] },
+        { "t": "Guardado e instalación", "items": ["Patrón, parámetros, banco de usuario, tempo y swing se autoguardan en este navegador y se restauran al volver, sin arrancar el audio. «Empezar de cero» lo borra (pide confirmación). Exportá un JSON de respaldo: Safari puede vaciar el almacenamiento de sitios no instalados.", "Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala."] }
       ],
       "keys": [["A W S E D F T G Y H U J K", "Notas (mapeo tipo piano)"], ["Z / X", "Octava del teclado (− / +)"], ["Espacio", "Play / Stop"]],
-      "roadmap": "4 fases completas: F1 motor de síntesis + secuenciador clásico de 16 pasos (note/accent/slide/gate) · F2 modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · F3 touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · F4 patches y banco de fábrica (guardar/cargar JSON, export MIDI y WAV, 8 patrones de fábrica).",
+      "roadmap": "4 fases completas: F1 motor de síntesis + secuenciador clásico de 16 pasos · F2 modernización: ondas extra, filtro HP/BP, unísono, distorsión multietapa, swing, generador de patrones · F3 touch/tablet y performance en vivo (knobs arrastrables, live tweak vía pad X-Y) · F4 patches y banco de fábrica (JSON, MIDI y WAV, 8 patrones). Versión mobile-first: layout vertical con pestañas y sheets, autoguardado, PWA instalable con uso sin conexión y exportación por Compartir en iOS.",
       "exporta": ["WAV", "MIDI", "JSON"],
       "guarda": true,
       "app": true

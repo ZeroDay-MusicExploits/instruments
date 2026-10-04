@@ -99,7 +99,7 @@ gtag('config', 'G-ZNGM11BR5S');
       <h3>MonoMoon&#39;70</h3>
       <p class="card__tag">&quot;Monophonic Synthesizer&quot;</p>
       <p class="card__desc">Un sintetizador analógico virtual monofónico estilo Minimoog: banco de osciladores, filtro escalera (ladder) de 24 dB/oct con auto-oscilación, doble envolvente, matriz de modulación, modos de voz (Mono/Unison/Duo), osciloscopio en pantalla y gestión completa de patches..</p>
-      <div class="card__chips"><span class="chip">WAV</span><span class="chip">JSON</span></div>
+      <div class="card__chips"><span class="chip">WAV</span><span class="chip">MIDI</span><span class="chip">JSON</span></div>
       <span class="card__go">MANUAL Y DESCARGA →</span>
     </a>
     <a class="card" href="landing-nebularp.html" style="--accent:#9a8cff">
@@ -107,7 +107,7 @@ gtag('config', 'G-ZNGM11BR5S');
       <h3>NEBULARP 2035</h3>
       <p class="card__tag">&quot;motor dormido&quot; hasta que tocás un acorde</p>
       <p class="card__desc">Un arpegiador ambiental y generativo: sostenés (o dejás en Latch) un acorde y el instrumento lo recorre solo, con una voz cósmica en unísono, espacio (reverb + delay ping-pong), modulación (chorus + auto-paneo) y una capa de drone grave.</p>
-      <div class="card__chips"><span class="chip">JSON</span></div>
+      <div class="card__chips"><span class="chip">WAV</span><span class="chip">MIDI</span><span class="chip">JSON</span></div>
       <span class="card__go">MANUAL Y DESCARGA →</span>
     </a>
     <a class="card" href="landing-sirens.html" style="--accent:#f06ad8">
@@ -115,7 +115,7 @@ gtag('config', 'G-ZNGM11BR5S');
       <h3>J4-Sirens Station</h3>
       <p class="card__tag">Dub siren web psicodélica</p>
       <p class="card__desc">Una sirena dub completa: motor de síntesis con varios modos, cadena de efectos dub (tape echo, reverb spring/plate, phaser), un pad X-Y para performance en vivo, visualizador psicodélico en pantalla completa, y banco de presets con export/import JSON..</p>
-      <div class="card__chips"><span class="chip">JSON</span></div>
+      <div class="card__chips"><span class="chip">WAV</span><span class="chip">MIDI</span><span class="chip">JSON</span></div>
       <span class="card__go">MANUAL Y DESCARGA →</span>
     </a>
     <a class="card" href="landing-acid.html" style="--accent:#dcef3a">
@@ -270,7 +270,7 @@ gtag('config', 'G-ZNGM11BR5S');
     <div class="section-head" style="margin-bottom:28px"><h2 class="h2">Preguntas frecuentes</h2></div>
     <div class="faq">
     <details><summary>¿Por qué no suena en iPhone?</summary><p>Todos los navegadores en iOS (Safari y también Chrome/Firefox, que ahí corren sobre el mismo motor) necesitan un toque para desbloquear el audio — es una política del navegador, no un bug. Con el switch de silencio físico activado, el comportamiento puede variar según el instrumento: no lo afirmamos como resuelto en los 5 sin probarlo en el dispositivo real.</p></details>
-    <details><summary>¿Se guardan mis datos?</summary><p>Lo que tocás queda en tu propio navegador (localStorage / IndexedDB), nunca en un servidor. Hoy el autoguardado automático (tocar → recargar → mismo estado) funciona en CronBeat-8:08; en los otros 4, el respaldo es manual vía exportar/importar JSON — cada landing dice exactamente qué guarda.</p></details>
+    <details><summary>¿Se guardan mis datos?</summary><p>Lo que tocás queda en tu propio navegador (localStorage / IndexedDB), nunca en un servidor. Los 5 instrumentos autoguardan (tocar → recargar → mismo estado) y restauran sin arrancar el audio. Safari puede vaciar el almacenamiento de los sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo — cada landing dice exactamente qué guarda.</p></details>
     <details><summary>¿Puedo instalar el HTML descargado?</summary><p>No directamente: un HTML abierto en file:// no puede registrar service worker ni manifest (los navegadores exigen https o localhost para eso). Instalá desde la web (PWA) o bajá el HTML para usarlo local — un HTML descargado no se instala como app.</p></details>
     <details><summary>¿Qué datos recopila el sitio?</summary><p>El formulario de descarga pide tu mail para un código de verificación (hoy se muestra en pantalla, modo demo) y manda el dominio de ese mail a dns.google para chequear que reciba correo. Las páginas del sitio (no los instrumentos) usan Google Analytics. Nada de esto sale de index.html/landing-*.html hacia los instrumentos. Detalle completo en privacidad.html.</p></details>
     </div>
