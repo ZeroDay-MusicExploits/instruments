@@ -109,6 +109,9 @@
   .rec-btn.armed{background:#34130c; box-shadow:0 0 0 1px #7a2a1a, var(--zd-hard), 0 0 22px -8px var(--rec)}
   .rec-btn.armed .led{background:var(--rec); box-shadow:0 0 10px var(--rec); animation:blink 1s steps(1) infinite}
   @keyframes blink{50%{opacity:.25}}
+  /* indicador de clip: mide la salida, no la toca */
+  .clip-led{font-weight:800; font-size:12px; letter-spacing:.12em; padding:7px 10px; border-radius:var(--zd-r);
+    color:#12130f; background:var(--zd-alert); border:1px solid var(--zd-alert); box-shadow:0 0 14px -2px var(--zd-alert); align-self:center}
 
   .tempo{display:flex; align-items:center; gap:10px}
   .readout{ display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;
@@ -433,6 +436,8 @@
 
   /* ---- barra superior: transporte compacto ---- */
   html.zd-m #zd-top .zd-ttr{gap:4px}
+  html.zd-m #zd-top #clipLed{position:absolute; left:calc(6px + var(--zd-sal)); top:calc(var(--zd-sat) + 9px); z-index:2;
+    padding:6px 8px; font-size:11px; pointer-events:none}
   html.zd-m #zd-top .run-btn, html.zd-m #zd-top .rec-btn{height:44px; min-height:44px; padding:0 9px; gap:6px;
     font-size:12px; letter-spacing:.06em; border-width:1px}
   html.zd-m #zd-top .run-btn .glyph{font-size:13px}
@@ -1742,7 +1747,7 @@
 window.ZD_M = {
   name: 'CronBeat-8:08',
   titleParts: ['CronBeat', '-8:08'],
-  transport: ['#run', '#rec', '#bpmBox'],
+  transport: ['#run', '#rec', '#bpmBox', '#clipLed'],
   keep: ['#seq', '#pads'],
   tabs: [
     { id:'pads', label:'PADS',    title:'PADS · MEZCLA · SAMPLES',
@@ -2557,6 +2562,7 @@ window.ZD_M = {
       <button id="rec" class="rec-btn" type="button" title="Grabar en el patrón los golpes que toques" aria-pressed="false">
         <span class="led"></span><span>REC</span>
       </button>
+      <span id="clipLed" class="clip-led" role="status" hidden>CLIP</span>
 
       <div class="tempo" id="tempoBox">
         <div class="readout" id="bpmBox">
@@ -2949,7 +2955,7 @@ function buildEngine(ac){
   const nd = nb.getChannelData(0); for(let i=0;i<len;i++) nd[i]=Math.random()*2-1; E.noise = nb;
 
   const master = ac.createGain(); master.gain.value = masterVol; E.master = master;
-  const comp = ac.createDynamicsCompressor();
+  const comp = ac.createDynamicsCompressor(); E.comp = comp;   // E.comp: para medir la salida (indicador de clip)
   comp.threshold.value=-6; comp.knee.value=6; comp.ratio.value=8; comp.attack.value=0.003; comp.release.value=0.12;
   master.connect(comp).connect(C2_OUT || ac.destination);   // embebido: sale al canal del hub
 
@@ -3407,7 +3413,7 @@ document.getElementById('patCopy').addEventListener('click', ()=>{ patternClipbo
 document.getElementById('patPaste').addEventListener('click', ()=>{ if(!patternClipboard){ toast('No hay nada copiado.'); return; } recordUndo(); patterns[activePattern]=patternClipboard.map(r=>r.slice()); pattern=patterns[activePattern]; renderAll(); updatePatBar(); toast('Pegado en '+PAT_LABELS[activePattern]+'.'); });
 
 function livePlay(t, accent, vel){ ensureAudio(); const v = accent ? VEL_ACCENT : (vel!=null ? vel : VEL_ON), now=ctx.currentTime;
-  trigger(AA, eng, t, now, v); flashVoice(t);
+  trigger(AA, eng, t, now, v); flashVoice(t); clipWatch();
   if(recording && isPlaying){ recordUndo('rec'); const s=quantizedStep(); pattern[t][s]=(accent || v>=0.9)?2:Math.max(pattern[t][s],1); renderCell(t,s); }
   return now; }
 
@@ -3804,8 +3810,27 @@ function refreshTrackControls(){
    TRANSPORT
    ========================================================================= */
 const runBtn=document.getElementById('run'), runGlyph=document.getElementById('runGlyph'), runLabel=document.getElementById('runLabel');
+/* Indicador de clip (SPEC R5): un AnalyserNode colgado de la salida del
+   compresor del master (lo que va al parlante o al canal del hub). Solo mide:
+   no hay limitador. Corre mientras suena y 2 s después de cada golpe en vivo. */
+const clipLed=document.getElementById('clipLed'); let clipAn=null, clipBuf=null, clipUntil=0, clipOn=false, clipAwake=0, clipRAF=0;
+function clipWatch(){
+  if(!eng || !eng.comp || !ctx) return;
+  if(!clipAn){ clipAn=ctx.createAnalyser(); clipAn.fftSize=1024; clipBuf=new Float32Array(clipAn.fftSize); eng.comp.connect(clipAn);
+    // standalone: rama muda al destino para que el grafo la procese (WebKit); con hub, no se toca su destino
+    if(!HOST){ const z=ctx.createGain(); z.gain.value=0; clipAn.connect(z); z.connect(ctx.destination); } }
+  clipAwake=performance.now()+2000;
+  if(!clipRAF) clipRAF=requestAnimationFrame(clipTick);
+}
+function clipTick(){
+  clipRAF=0; clipAn.getFloatTimeDomainData(clipBuf);
+  let peak=0; for(let i=0;i<clipBuf.length;i++){ const a=Math.abs(clipBuf[i]); if(a>peak) peak=a; }
+  const now=performance.now(); if(peak>=0.99) clipUntil=now+700;
+  const on=now<clipUntil; if(on!==clipOn){ clipOn=on; clipLed.hidden=!on; }
+  if(isPlaying || now<clipAwake || clipOn) clipRAF=requestAnimationFrame(clipTick);
+}
 function setRunUI(p){ runBtn.classList.toggle('playing',p); runGlyph.textContent=p?'■':'▶'; runLabel.textContent=p?'Parar':'Tocar';
-  runBtn.setAttribute('aria-pressed', p?'true':'false');
+  runBtn.setAttribute('aria-pressed', p?'true':'false'); if(p) clipWatch();
   if(!HOST && window.ZD && ZD.audio) ZD.audio.setPlaying(p); }
 runBtn.addEventListener('click', ()=>{ ensureAudio(); togglePlay('pattern'); });
 
