@@ -495,7 +495,7 @@
      Orden: zd-ui · zd-store · zd-audio · zd-dl · zd-midi · zd-rec ·
             config window.ZD_M · zd-mobile · zd-pwa                     ===== -->
 <script>
-/* ZD-BLOCK:zd-ui v1 */
+/* ZD-BLOCK:zd-ui v2 */
 /* Toasts, modales con Promise y accesibilidad de controles continuos.
    Reemplaza alert/confirm/prompt. Sin dependencias, sin referencias al
    instrumento: inyecta su propio CSS y usa los tokens --zd-* del skin. */
@@ -670,6 +670,8 @@
         scrim.classList.add('in');
         var target = input || dlg.querySelector('.zd-dact button.pri') || dlg.querySelector('.zd-dact button');
         if (target) try { target.focus(); } catch (e) {}
+        /* v2: tipear reemplaza el valor inicial (1400 -> 2500, no 14002500) */
+        if (input) try { input.select(); input.setSelectionRange(0, input.value.length); } catch (e) {}
       });
     });
   }
@@ -894,7 +896,7 @@
 /* /ZD-BLOCK:zd-store */
 </script>
 <script>
-/* ZD-BLOCK:zd-audio v1 */
+/* ZD-BLOCK:zd-audio v2 */
 /* Desbloqueo de audio en el gesto, audioSession, manejo de interrupted /
    suspended, Screen Wake Lock y decodeAudioData con fallback.
    No crea ni conoce el grafo: el instrumento le pasa getContext/ensure. */
@@ -905,6 +907,16 @@
 
   var cfg = { getContext: null, ensure: null, onResumed: null, label: 'Tocá para reanudar' };
   var unlocked = false, playing = false, silent = null, overlay = null, wakeLock = null, wakeWanted = false;
+  /* v2: onResumed solo en la transicion a 'running'. `awake` = ya se aviso y el
+     contexto no salio de 'running' desde entonces (lo baja cualquier estado
+     visto que no sea 'running': antes de un unlock, en resume() o en statechange). */
+  var awake = false;
+  function asleep(c) { if (!c || c.state !== 'running') awake = false; }
+  function resumed() {
+    if (awake) return;
+    awake = true;
+    if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {}
+  }
 
   /* ---------- contexto ---------- */
   function options(extra) {
@@ -981,16 +993,18 @@
   function unlock() {
     setSession();
     startSilentLoop();
+    asleep(ctx());
     var r;
     try { r = cfg.ensure ? cfg.ensure() : null; } catch (e) { r = null; }
     var p = (r && typeof r.then === 'function') ? r : Promise.resolve(r);
     return p.then(function () {
       var c = ctx();
       if (!c) return false;
-      if (c.state === 'running') { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} return true; }
+      watchContext(c);
+      if (c.state === 'running') { unlocked = true; hideResume(); resumed(); return true; }
       return c.resume().then(function () {
         var ok = c.state === 'running';
-        if (ok) { unlocked = true; hideResume(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+        if (ok) { unlocked = true; hideResume(); resumed(); }
         return ok;
       }, function () { return false; });
     }, function () { return false; });
@@ -1015,9 +1029,10 @@
     var c = ctx();
     if (!c) return;
     if (c.state === 'running') { hideResume(); return; }
+    awake = false;
     /* interrupted es estado propio de Safari; suspended es el estandar. */
     c.resume().then(function () {
-      if (c.state === 'running') { hideResume(); if (wakeWanted) requestWake(); if (cfg.onResumed) try { cfg.onResumed(); } catch (e) {} }
+      if (c.state === 'running') { hideResume(); if (wakeWanted) requestWake(); resumed(); }
       else if (playing) showResume();
     }, function () { if (playing) showResume(); });
   }
@@ -1026,6 +1041,7 @@
     c.__zdWatched = true;
     try {
       c.addEventListener('statechange', function () {
+        asleep(c);
         if (c.state === 'running') hideResume();
         else if (playing && (c.state === 'suspended' || c.state === 'interrupted')) showResume();
       });
@@ -1374,11 +1390,13 @@
 /* /ZD-BLOCK:zd-midi */
 </script>
 <script>
-/* ZD-BLOCK:zd-rec v1 */
+/* ZD-BLOCK:zd-rec v2 */
 /* Grabacion de la salida master a WAV y tarjeta de resultado.
    Captura por AudioWorklet (chunks Int16), fallback a MediaStreamDestination
    + MediaRecorder + decodeAudioData. PCM 16-bit a la frecuencia real del
-   AudioContext. Tope por defecto 10 min. Usa ZD.dl para descargar. */
+   AudioContext. Tope por defecto 10 min. Usa ZD.dl para descargar.
+   v2: el corte por tope entrega la toma (onLimit(max, result) y el proximo
+   stop()); ver docs/zd-blocks.md. */
 (function () {
   'use strict';
   var ZD = window.ZD || (window.ZD = {});
@@ -1459,12 +1477,20 @@
     var state = 'idle', chunks = [], frames = 0, sampleRate = 0;
     var node = null, sink = null, src = null, mode = null;
     var mrec = null, mdest = null, mparts = [], startedAt = 0, ticker = null;
+    /* Corte por tope (v2). `closing`: Promise de la toma que cerro el tope.
+       `ready`: su resultado mientras corre onLimit. `last`: la toma que nadie
+       pidio todavia; el proximo stop() la devuelve una vez. */
+    var limitTimer = null, limitHit = false, endedAt = 0, closing = null, ready = null, claimed = false, last = null;
 
     function ctx() { return cfg.getContext(); }
     function source() { return cfg.getSource(); }
 
-    function cleanup() {
+    function stopTimers() {
       if (ticker) { clearInterval(ticker); ticker = null; }
+      if (limitTimer) { clearTimeout(limitTimer); limitTimer = null; }
+    }
+    function cleanup() {
+      stopTimers();
       try { if (node && src) src.disconnect(node); } catch (e) {}
       try { if (node) node.disconnect(); } catch (e) {}
       try { if (sink) sink.disconnect(); } catch (e) {}
@@ -1477,6 +1503,7 @@
       ticker = setInterval(function () { cfg.onProgress(elapsed()); }, 250);
     }
     function elapsed() {
+      if (state === 'rec' && limitHit && mode !== 'worklet') return (endedAt - startedAt) / 1000;
       if (state !== 'rec') return frames && sampleRate ? frames / sampleRate : 0;
       if (mode === 'worklet') return sampleRate ? frames / sampleRate : 0;
       return (performance.now() - startedAt) / 1000;
@@ -1487,6 +1514,7 @@
       var c = ctx();
       if (!c) return Promise.reject(new Error('sin AudioContext'));
       chunks = []; frames = 0; sampleRate = c.sampleRate; mparts = [];
+      limitHit = false; closing = null; ready = null; claimed = false; last = null;
       src = source();
       if (!src) return Promise.reject(new Error('sin nodo de origen'));
       return loadTap(c).then(function (ok) {
@@ -1502,9 +1530,9 @@
           mode = 'worklet';
           node.port.onmessage = function (ev) {
             var d = ev.data;
-            if (!d || !d.pcm || state !== 'rec') return;
+            if (!d || !d.pcm || state !== 'rec' || limitHit) return;
             chunks.push(d.pcm); frames += d.n;
-            if (frames / sampleRate >= maxSec) { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); }
+            if (frames / sampleRate >= maxSec) limit();
           };
           sink = c.createGain(); sink.gain.value = 0;
           src.connect(node); node.connect(sink); sink.connect(c.destination);
@@ -1521,41 +1549,78 @@
         mrec.ondataavailable = function (e) { if (e.data && e.data.size) mparts.push(e.data); };
         mrec.start(500);
         state = 'rec'; startedAt = performance.now(); startTicker();
-        if (maxSec > 0) setTimeout(function () { if (state === 'rec') { if (cfg.onLimit) cfg.onLimit(maxSec); stop(); } }, maxSec * 1000);
+        if (maxSec > 0) limitTimer = setTimeout(limit, maxSec * 1000);
         return mode;
       });
     }
 
-    function finish(blob, dur) {
-      var r = { blob: blob, duration: dur, bytes: blob.size, sampleRate: sampleRate, channels: channels, mode: mode };
-      state = 'idle';
-      return r;
+    function result(blob, dur) {
+      return { blob: blob, duration: dur, bytes: blob.size, sampleRate: sampleRate, channels: channels, mode: mode };
     }
 
-    function stop() {
-      if (state !== 'rec') return Promise.resolve(null);
-      state = 'stopping';
+    /* Corta la captura y arma el WAV -> Promise<resultado | null>. No toca `state`. */
+    function close() {
+      stopTimers();
       if (mode === 'worklet') {
         try { node.port.postMessage({ cmd: 'stop' }); } catch (e) {}
         var f = frames, sr = sampleRate, cs = chunks;
         cleanup(); chunks = [];
-        if (!f) { state = 'idle'; return Promise.resolve(null); }
-        return Promise.resolve(finish(wavFromInt16(cs, channels, sr), f / sr));
+        if (!f) return Promise.resolve(null);
+        try { return Promise.resolve(result(wavFromInt16(cs, channels, sr), f / sr)); } catch (e) { return Promise.reject(e); }
       }
       return new Promise(function (resolve, reject) {
         var rec = mrec, c = ctx();
         rec.onstop = function () {
           var blob = new Blob(mparts, { type: mparts.length && mparts[0].type ? mparts[0].type : 'audio/webm' });
-          cleanup(); mparts = [];
+          if (!mrec || mrec === rec) { cleanup(); mparts = []; }   /* no limpiar una toma nueva tras cancel() */
           blob.arrayBuffer().then(function (ab) {
             var dec = (ZD.audio && ZD.audio.decode) ? ZD.audio.decode(c, ab) : c.decodeAudioData(ab);
             return dec;
           }).then(function (buf) {
-            resolve(finish(wavFromBuffer(buf), buf.duration));
-          }).catch(function (err) { state = 'idle'; reject(err); });
+            resolve(result(wavFromBuffer(buf), buf.duration));
+          }).catch(reject);
         };
-        try { rec.stop(); } catch (e) { cleanup(); state = 'idle'; reject(e); }
+        try { rec.stop(); } catch (e) { cleanup(); reject(e); }
       });
+    }
+
+    /* Tope: la captura se corta ya, pero `state` sigue en 'rec' hasta que la
+       toma se entrega en onLimit(max, result), igual que en v1. Asi el patron
+       de llamar a rec.stop() de forma sincronica dentro de onLimit (J4,
+       MonoMoon, que ademas mira state === 'rec') se queda con esa misma toma.
+       Si nadie la pide, queda en `last` para el proximo stop(). */
+    function limit() {
+      if (state !== 'rec' || limitHit) return;
+      limitHit = true; endedAt = performance.now(); claimed = false;
+      var p = closing = close();
+      p.then(function (res) { deliver(p, res, null); }, function (err) { deliver(p, null, err); });
+    }
+    function deliver(p, res, err) {
+      if (closing !== p) return;                 /* cancel() en el medio */
+      closing = null;
+      if (!claimed) last = p;
+      ready = { res: res, err: err };
+      if (cfg.onLimit) try { cfg.onLimit(maxSec, res); } catch (e) {}
+      ready = null; limitHit = false; claimed = false;
+      if (state === 'rec') state = 'idle';
+    }
+
+    function stop() {
+      if (state === 'rec' && limitHit) {
+        /* el tope ya cerro (o esta cerrando) la toma: este stop() se la lleva */
+        claimed = true; last = null;
+        if (ready) {
+          state = 'idle';
+          return ready.err ? Promise.reject(ready.err) : Promise.resolve(ready.res);
+        }
+        state = 'stopping';
+        return closing.then(function (res) { state = 'idle'; return res; }, function (err) { state = 'idle'; throw err; });
+      }
+      if (state !== 'rec') { var q = last; last = null; return q || Promise.resolve(null); }
+      state = 'stopping';
+      var pr = close();
+      if (mode === 'worklet') { state = 'idle'; return pr; }   /* sincronico, como en v1 */
+      return pr.then(function (res) { state = 'idle'; return res; }, function (err) { state = 'idle'; throw err; });
     }
 
     return {
@@ -1563,7 +1628,10 @@
       get state() { return state; },
       get mode() { return mode; },
       elapsed: elapsed,
-      cancel: function () { if (state === 'rec') { try { if (mrec) mrec.stop(); } catch (e) {} cleanup(); chunks = []; mparts = []; state = 'idle'; } }
+      cancel: function () {
+        last = null;
+        if (state === 'rec') { try { if (mrec && mrec.state !== 'inactive') mrec.stop(); } catch (e) {} cleanup(); chunks = []; mparts = []; closing = null; ready = null; limitHit = false; state = 'idle'; }
+      }
     };
   }
 
@@ -2090,7 +2158,7 @@ window.ZD_M = {
 /* /ZD-BLOCK:zd-mobile */
 </script>
 <script>
-/* ZD-BLOCK:zd-pwa v2 */
+/* ZD-BLOCK:zd-pwa v3 */
 /* Instalacion de la PWA: banner propio al abrir (independiente del menu y
    del shell), boton en el header en escritorio, hint de iOS, aviso de
    navegador embebido (Instagram/Facebook/TikTok) y aviso de archivo local.
@@ -2155,7 +2223,7 @@ window.ZD_M = {
   function installMenuBtn() { return document.getElementById('zd-install-btn'); }
 
   function variant() {
-    if (isFile() || isStandalone()) return null;
+    if (installed || isFile() || isStandalone()) return null;
     if (isEmbedded()) return 'embedded';
     if (deferredPrompt) return 'install';
     if (isIOS()) return 'ios';
@@ -2174,7 +2242,7 @@ window.ZD_M = {
     mountTopIcon();
   }
   function updateDesktopBtn() {
-    if ((ZD.mobile && ZD.mobile.active) || isStandalone() || !deferredPrompt) { removeDesktopBtn(); return; }
+    if ((ZD.mobile && ZD.mobile.active) || isStandalone() || installed || !deferredPrompt) { removeDesktopBtn(); return; }
     mountDesktopBtn();
   }
   function refreshAll() { updateMenuItem(); updateTopIcon(); updateDesktopBtn(); }
@@ -2290,8 +2358,10 @@ window.ZD_M = {
     showBanner(v, false);
   }
 
+  /* userChoice 'accepted' y appinstalled llegan los dos: un solo aviso (v3) */
   function onInstalled() {
-    installed = true;
+    if (installed) return;
+    installed = true; deferredPrompt = null;
     removeBanner();
     refreshAll();
     if (ZD.toast) ZD.toast('App instalada');
@@ -2303,7 +2373,11 @@ window.ZD_M = {
       var p = deferredPrompt;
       p.prompt();
       var done = p.userChoice || Promise.resolve({ outcome: 'dismissed' });
-      done.then(function (res) { if (res && res.outcome === 'accepted') onInstalled(); }).catch(function () {});
+      done.then(function (res) {
+        if (res && res.outcome === 'accepted') onInstalled();
+        /* v3: rechazar el dialogo nativo es lo mismo que "Ahora no" */
+        else if (res && res.outcome === 'dismissed') { dismiss(DISMISS_KEY); removeBanner(); }
+      }).catch(function () {});
       (done.finally ? done.finally.bind(done) : done.then.bind(done))(function () {
         deferredPrompt = null; refreshAll();
       });

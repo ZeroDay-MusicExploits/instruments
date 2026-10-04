@@ -586,8 +586,8 @@ Reglas:
 - Después de sincronizar, `node tools/check-blocks.mjs` tiene que quedar en verde:
   `sync-blocks` pega y `check-blocks` verifica. Son dos pasos a propósito.
 
-Hoy en `main` solo `descargables/Acid_Bass-303.html` tiene bloques pegados; los
-otros 4 instrumentos salen como "pendiente" hasta que su sesión C los integre.
+Desde el merge de las sesiones C (2026-10-04) los 5 instrumentos tienen los 8
+bloques pegados: `sync-blocks` no debería mostrar ningún "pendiente".
 
 ---
 
