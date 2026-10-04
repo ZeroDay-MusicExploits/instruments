@@ -521,8 +521,10 @@ node tools/tests/acid-verify.test.mjs       # idem
 
 - `zd-midi-order` · el orden de eventos a igual tick en `write()` y en
   `recorder()`, y el MIDI del patrón de Acid parseado como SMF.
-- `zd-mobile-cycle` · el ciclo salir/entrar del shell en los tres pares de
-  viewport, el cableado de eventos, el foco, el scroll y el banner de `zd-pwa`.
+- `zd-mobile-cycle` · conformidad de `zd-mobile` para **cualquier** instrumento:
+  el ciclo salir/entrar del shell en los tres pares de viewport, el cableado de
+  eventos, el foco, el scroll, el banner de `zd-pwa` y los ≥44 px de los
+  controles de la barra superior. No sabe nada de un instrumento en particular.
 - `acid-verify` · la verificación completa del piloto, la que hay que volver a
   pasar después de tocar un bloque: viewports 360×640 / 390×844 / 768×1024 /
   844×390 / 1440×900, autoguardado, export JSON+MIDI+WAV (con ida y vuelta del
@@ -530,10 +532,46 @@ node tools/tests/acid-verify.test.mjs       # idem
   pad XY), rotación de tablet 1180×820 ↔ 820×1180 **con el instrumento sonando**,
   `file://`, iframe y registro del service worker sobre http.
 
-`zd-mobile-cycle` levanta un servidor estático propio, abre
-`descargables/Acid_Bass-303.html` con `has_touch`/`is_mobile` y alterna el
-viewport para cubrir el ciclo salir/entrar del shell. Playwright no es
-dependencia del runtime ni del build:
+### `zd-mobile-cycle` en otro instrumento
+
+Es el test que una sesión C tiene que correr sobre lo suyo después de pegar o
+actualizar `zd-mobile`, **sin tocar nada de `tools/`**:
+
+```
+node tools/tests/zd-mobile-cycle.test.mjs --file descargables/Nebularp_2035.html
+node tools/tests/zd-mobile-cycle.test.mjs --file descargables/J4-Sirens_Station.html --cycles 6
+```
+
+Sin `--file` corre sobre el piloto, `descargables/Acid_Bass-303.html`.
+
+No hay nada del instrumento escrito en el test: al arrancar lee el
+`window.ZD_M` de la propia página y resuelve `keep`, `transport` y
+`tabs[].nodes` con `querySelectorAll`, igual que el bloque, así que las
+expectativas salen de la config. Después exige, en cada ciclo, que `#zd-stage`,
+`.zd-ttr` y cada pane tengan **exactamente** esos nodos con el shell activo, y
+que queden **vacíos** al salir. Imprime lo que resolvió, así se ve de entrada si
+un selector de `ZD_M` no matchea nada:
+
+```
+  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v4 · 4 ciclos
+  keep=[seqPanel, stepEditPanel, perfPanel] transport=[playBtn, .tempo-box, clipLed]
+  tab seq (SEQ) = [tempoKnob, tapBtn, scope, .seq-top, kbPanel]
+```
+
+Detalles que conviene saber antes de leer una falla:
+
+- Un instrumento sin el bloque pegado falla con "`window.ZD_M.keep` no resolvió
+  ningún nodo". Primero `node tools/sync-blocks.mjs`.
+- Los selectores de `ZD_M` que no son strings (una función que devuelve nodos)
+  no se pueden predecir: el test los avisa y no los exige.
+- El foco se prueba sobre el propio nodo de `keep[0]` (con `tabindex="-1"`), no
+  sobre un descendiente: un re-render del instrumento se llevaría puesto al
+  descendiente y la falla no sería del bloque.
+- El cableado de eventos se prueba con un listener propio enganchado **antes**
+  del ciclo, más la identidad del objeto DOM. No depende de ningún control del
+  instrumento.
+
+Playwright no es dependencia del runtime ni del build:
 
 ```
 npm i -D playwright && npx playwright install chromium
