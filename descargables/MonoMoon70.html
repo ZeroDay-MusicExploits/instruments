@@ -224,6 +224,10 @@
   .toolbar select{ padding:5px 7px; max-width:150px; }
   .toolbar .sep{ width:1px; height:22px; background:#000; margin:0 1px; }
   #btnRec.on{ background:linear-gradient(180deg,#c8402c,#7a1a10); color:#fff; box-shadow:0 0 10px rgba(200,64,44,.5); }
+  .take{ flex:1 1 100%; display:flex; flex-direction:column; gap:8px; }
+  .take[hidden]{ display:none; }
+  .take-head{ font-size:11.5px; font-weight:700; letter-spacing:.16em; color:var(--silk-dim); }
+  .take-head span{ color:var(--accent); letter-spacing:.04em; }
   #recTime{ font-size:12px; font-variant-numeric:tabular-nums; color:var(--silk-dim); min-width:38px; }
   .midi-dot{ width:9px; height:9px; border-radius:50%; background:#3a1512; box-shadow:0 0 0 1px #000 inset; }
   .midi-dot.on{ background:#37ff9e; box-shadow:0 0 8px rgba(55,255,158,.6); }
@@ -2509,14 +2513,18 @@ window.ZD_M = {
       <button id="btnSave">Guardar…</button>
       <button id="btnReset" title="Volver al patch de fábrica">Empezar de cero</button>
       <span class="sep"></span>
-      <button id="btnExport">⭳ JSON</button>
-      <button id="btnImport">⭱ JSON</button>
-      <input type="file" id="fileImport" accept="application/json,.json" hidden>
+      <button id="btnExport" title="Descargar el patch en edición y la biblioteca">↓ JSON</button>
+      <button id="btnImport" title="Abrir un JSON de MonoMoon'70 (también los patches de la versión anterior)">↑ JSON</button>
       <span class="sep"></span>
-      <div class="tb-group" id="recBox"><button id="btnRec">● Grabar</button><span id="recTime">00:00</span></div>
+      <div class="tb-group" id="recBox"><button id="btnRec" type="button" aria-pressed="false" title="Graba la salida (WAV) y lo que tocás (MIDI)">● REC</button><span id="recTime">0:00</span></div>
       <span class="sep"></span>
       <div class="tb-group"><span class="midi-dot" id="midiDot"></span><span id="midiTxt">MIDI —</span></div>
       <button id="btnInstall" class="hidden">Instalar app</button>
+      <div class="take" id="takePanel" hidden>
+        <div class="take-head">ÚLTIMA TOMA <span id="takeInfo"></span></div>
+        <div id="takeCard"></div>
+        <button id="btnMidi" type="button">↓ MIDI DE LA TOMA</button>
+      </div>
     </div>
 
     <div class="rack">
@@ -2737,11 +2745,6 @@ class MoogLadder extends AudioWorkletProcessor {
 }
 registerProcessor('moog-ladder', MoogLadder);
 
-class RecorderProcessor extends AudioWorkletProcessor {
-  constructor(){ super(); this.rec=false; this.port.onmessage=(e)=>{ if(e.data==='start') this.rec=true; else if(e.data==='stop') this.rec=false; }; }
-  process(inputs){ const inp=inputs[0][0]; if(this.rec && inp) this.port.postMessage(inp.slice(0)); return true; }
-}
-registerProcessor('recorder', RecorderProcessor);
 `;
 
 const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
@@ -3312,16 +3315,16 @@ function updateOctaveLabel(){ document.getElementById('octVal').textContent='C'+
 const noteCount=new Map(); const elCount=new Map();
 const kbd={
   sources:new Map(),
-  press(id,midi,el){ if(this.sources.has(id)) return; this.sources.set(id,{midi,el}); this._eng(midi,el,true); },
+  press(id,midi,el,vel){ if(this.sources.has(id)) return; this.sources.set(id,{midi,el}); this._eng(midi,el,true,vel); },
   move(id,midi,el){ const cur=this.sources.get(id); if(!cur||cur.midi===midi) return; this._eng(cur.midi,cur.el,false); this.sources.set(id,{midi,el}); this._eng(midi,el,true); },
   release(id){ const s=this.sources.get(id); if(!s) return; this.sources.delete(id); this._eng(s.midi,s.el,false); },
-  _eng(midi,el,on){ const c=noteCount.get(midi)||0;
-    if(on){ noteCount.set(midi,c+1); if(c===0){ engine.noteOn(midi); }
+  _eng(midi,el,on,vel){ const c=noteCount.get(midi)||0;
+    if(on){ noteCount.set(midi,c+1); if(c===0){ engine.noteOn(midi); take.noteOn(midi,vel); }
       if(el){ const e=elCount.get(el)||0; elCount.set(el,e+1); if(e===0) el.classList.add('dn'); } }
-    else { if(c<=1){ noteCount.delete(midi); engine.noteOff(midi);} else noteCount.set(midi,c-1);
+    else { if(c<=1){ noteCount.delete(midi); engine.noteOff(midi); take.noteOff(midi); } else noteCount.set(midi,c-1);
       if(el){ const e=elCount.get(el)||0; if(e<=1){ elCount.delete(el); el.classList.remove('dn'); } else elCount.set(el,e-1); } } }
 };
-function clearAllKeys(){ kbd.sources.clear(); noteCount.clear(); elCount.clear();
+function clearAllKeys(){ take.allOff(); kbd.sources.clear(); noteCount.clear(); elCount.clear();
   document.querySelectorAll('.key.dn').forEach(k=>k.classList.remove('dn')); engine.panic(); }
 
 const keysEl=document.getElementById('keys'); const ptrDown=new Set();
@@ -3391,7 +3394,7 @@ function buildMacros(){
     hint:'En ms (OFF o 0 lo apaga).',
     onChange:v=>{ const on=v>=0.01; engine.setGlide(on); setTog(REG.tog.glideTog,on);
       if(on){ const t=gk._denorm(v); engine.setGlideTime(t); gk.set(t,true); } } });
-  Knob.changed=(k)=>{ if(k.isMacro) xyRender(); else perfSync(); markDirty(); };
+  Knob.changed=(k)=>{ if(k.isMacro) xyRender(); else perfSync(); take.params(); markDirty(); };
   perfSync();
 }
 /* refleja el estado en las macros y el pad, sin disparar nada */
@@ -3487,7 +3490,6 @@ function syncUI(){
   drawEnv('envGraph', s.env); drawEnv('envGraphF', s.filtEnv, s.contour);
   perfSync();
 }
-function currentPatch(name){ return { app:'hackwave-minimoog', version:4, name:name||'patch', octave:baseOctave, state: JSON.parse(JSON.stringify(engine.state)) }; }
 let currentName='';     // nombre del último preset/patch cargado o guardado ('' = sin nombre)
 function loadPatch(patch){ if(!patch) return; const st=patch.state||patch;
   engine.loadState(sanitizeState(st));
@@ -3609,50 +3611,121 @@ async function migrateLegacy(){
            data:{ bank:list, migrated:{ from:LEGACY_DB, count:list.length } } };
 }
 
-/* --- WAV --- */
-function encodeWAV(samples, sr){
-  const n=samples.length, buf=new ArrayBuffer(44+n*2), view=new DataView(buf);
-  const wr=(off,s)=>{ for(let i=0;i<s.length;i++) view.setUint8(off+i, s.charCodeAt(i)); };
-  wr(0,'RIFF'); view.setUint32(4,36+n*2,true); wr(8,'WAVE'); wr(12,'fmt '); view.setUint32(16,16,true);
-  view.setUint16(20,1,true); view.setUint16(22,1,true); view.setUint32(24,sr,true); view.setUint32(28,sr*2,true);
-  view.setUint16(32,2,true); view.setUint16(34,16,true); wr(36,'data'); view.setUint32(40,n*2,true);
-  let off=44; for(let i=0;i<n;i++){ let s=clamp(samples[i],-1,1); view.setInt16(off, s<0?s*0x8000:s*0x7FFF, true); off+=2; }
-  return new Blob([view],{type:'audio/wav'}); }
-function download(blob, filename){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
-  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000); }
-function tstamp(){ const d=new Date(), p=n=>String(n).padStart(2,'0');
-  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds()); }
-function fmtClock(ms){ const s=Math.floor(ms/1000); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
-
-class Recorder{
-  constructor(eng){ this.eng=eng; this.chunks=[]; this.recording=false; this.node=null; this.mode=''; }
-  _ensure(){ if(this.node) return; const ctx=this.eng.ctx;
-    if(this.eng.filterMode==='worklet'){
-      this.node=new AudioWorkletNode(ctx,'recorder',{numberOfInputs:1,numberOfOutputs:1,channelCount:1,channelCountMode:'explicit'});
-      this.node.port.onmessage=(e)=>{ if(this.recording) this.chunks.push(e.data); }; this.mode='worklet';
-    } else {
-      this.node=ctx.createScriptProcessor(4096,1,1);
-      this.node.onaudioprocess=(ev)=>{ if(this.recording) this.chunks.push(ev.inputBuffer.getChannelData(0).slice(0)); }; this.mode='script';
-    }
-    this.mute=ctx.createGain(); this.mute.gain.value=0;
-    this.eng.dcBlock.connect(this.node); this.node.connect(this.mute); this.mute.connect(ctx.destination);
-  }
-  start(){ this._ensure(); this.chunks=[]; this.recording=true; if(this.mode==='worklet') this.node.port.postMessage('start'); }
-  stop(){ this.recording=false; if(this.mode==='worklet') this.node.port.postMessage('stop');
-    let total=0; for(const c of this.chunks) total+=c.length; const out=new Float32Array(total); let o=0;
-    for(const c of this.chunks){ out.set(c,o); o+=c.length; } this.chunks=[];
-    return encodeWAV(out, this.eng.ctx.sampleRate); }
+/* --- Toma: REC graba la salida (zd-rec → WAV) y lo que se toca (zd-midi → MIDI) ---
+   MIDI de performance (SPEC R4): notas on/off con su tiempo real, pitch bend de la
+   rueda (±2 semitonos, igual que el motor), CC1 de la rueda Mod, CC74/CC71 de corte y
+   énfasis (pad XY, macros o knobs). Tempo fijo de 120 bpm: MonoMoon no tiene reloj,
+   los tiempos son exactos en segundos. El glide no se codifica como bend (±2 no alcanza). */
+const MIDI_TRACK="ZERO DAY MONOMOON'70";
+const take={ midi:null, notes:0, lastCC:{}, lastBend:null,
+  active(){ return !!(this.midi && this.midi.recording); },
+  t(){ return engine.ctx? engine.ctx.currentTime : 0; },
+  noteOn(m,vel){ if(!this.active()) return; this.midi.noteOn(m, vel||100, this.t()); this.notes++; },
+  noteOff(m){ if(this.active()) this.midi.noteOff(m, this.t()); },
+  allOff(){ if(this.active()) this.midi.allOff(this.t()); },
+  bend(semi){ if(!this.active()) return; const v=ZD.midi.bendValue(semi,2); if(v===this.lastBend) return; this.lastBend=v; this.midi.bend(semi, this.t()); },
+  cc(num,norm){ if(!this.active()) return; const v=Math.round(clamp(norm,0,1)*127); if(this.lastCC[num]===v) return; this.lastCC[num]=v; this.midi.cc(num, v, this.t()); },
+  params(){ if(!this.active()) return; this.cc(ZD.midi.CC.cutoff, REG.knob.k_cutoff._norm(engine.state.filter.cutoff)); this.cc(ZD.midi.CC.reso, engine.state.filter.res); }
+};
+let wavRec=null, recBusy=false, lastTake=null, takeCardUI=null;
+const mmss=sec=>{ sec=Math.max(0,Math.floor(sec)); return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); };
+function recUI(on){ const b=document.getElementById('btnRec'); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false');
+  b.textContent=on? '■ STOP' : '● REC'; if(!on) document.getElementById('recTime').textContent='0:00'; }
+async function startTake(){
+  wavRec=ZD.rec.create({ getContext:()=>engine.ctx, getSource:()=>engine.analyser, channels:2, maxSec:600,
+    onProgress:sec=>{ document.getElementById('recTime').textContent=mmss(sec); },
+    // el bloque corta solo al llegar al tope; hay que pedirle el resultado acá mismo
+    // (si no, el stop() interno lo descarta — ver reports/monomoon-block-request.md)
+    onLimit:()=>{ ZD.toast('Llegaste al tope de 10 minutos: la toma se cortó ahí.', { ms:7000 }); stopTake(); } });
+  await wavRec.start();
+  take.midi=ZD.midi.recorder({ ppq:96, bpm:120, trackName:MIDI_TRACK, bendRange:2 });
+  take.notes=0; take.lastCC={}; take.lastBend=null;
+  take.midi.start(engine.ctx.currentTime);
+  // valores de arranque: rueda Mod, corte, énfasis, bend y las notas que ya suenan
+  take.cc(ZD.midi.CC.mod, engine.state.mod.wheel); take.params(); take.bend(REG.wheels.pitch.value*2);
+  noteCount.forEach((c,m)=>take.noteOn(m,100));
+  recUI(true);
 }
-let recorder=null, recTimer=null, recT0=0;
-function updRec(){ document.getElementById('recTime').textContent=fmtClock(performance.now()-recT0); }
+async function stopTake(){
+  if(!wavRec || wavRec.state!=='rec') return;
+  const t=engine.ctx.currentTime; take.midi.stop(t);
+  const midiBlob=take.midi.blob({ bpm:120, trackName:MIDI_TRACK }), notes=take.notes; take.midi=null;
+  let res=null; try{ res=await wavRec.stop(); }catch(e){ console.error(e); }
+  recUI(false);
+  if(!res){ ZD.modal.error('La toma no se pudo armar (no llegó audio). Probá de nuevo con el instrumento sonando.', { title:'ERROR AL GRABAR' }); return; }
+  showTake(res, midiBlob, notes);
+}
+function showTake(res, midiBlob, notes){
+  lastTake={ midiBlob, notes };
+  const panel=document.getElementById('takePanel');
+  if(takeCardUI) takeCardUI.destroy();
+  takeCardUI=ZD.rec.card(document.getElementById('takeCard'), { blob:res.blob, duration:res.duration, bytes:res.bytes,
+    sampleRate:res.sampleRate, channels:res.channels, filename:ZD.dl.name('monomoon','wav'),
+    onDiscard:()=>{ takeCardUI=null; lastTake=null; panel.hidden=true; } });
+  document.getElementById('takeInfo').textContent='· '+notes+' nota'+(notes===1?'':'s')+' en el MIDI';
+  panel.hidden=false;
+  if(window.ZD && ZD.mobile && ZD.mobile.active) ZD.mobile.open('pat');
+  else panel.scrollIntoView({ block:'nearest', behavior:REDUCED_MOTION?'auto':'smooth' });
+  ZD.toast('Toma lista: '+ZD.rec.secs(res.duration)+' · WAV y MIDI en PATCHES', { ms:5000 });
+}
+function toggleRec(){
+  if(recBusy) return; recBusy=true;
+  const done=()=>{ recBusy=false; };
+  if(wavRec && wavRec.state==='rec'){ stopTake().then(done, done); return; }
+  startAudioThen(()=>{ startTake().catch(err=>{ console.error(err); recUI(false);
+    ZD.modal.error('No se pudo empezar a grabar en este navegador.', { title:'ERROR AL GRABAR' }); }).then(done, done); });
+  if(!started) setTimeout(()=>{ if(!started) done(); }, 4000);
+}
+
+/* --- JSON: estado completo (patch en edición + biblioteca) --- */
+const JSON_APP='monomoon-70', JSON_VERSION=1;
+function exportEnvelope(){ return { app:JSON_APP, version:JSON_VERSION, savedAt:new Date().toISOString(),
+  data:{ patch:{ name:currentName, octave:baseOctave, state:JSON.parse(JSON.stringify(engine.state)) },
+         bank:bank.map(p=>({ name:p.name, octave:p.octave, ts:p.ts, state:p.state })) } }; }
+/* Valida un JSON importado. Acepta el envoltorio de ahora y el patch suelto que
+   exportaba la versión anterior ('hackwave-minimoog'). Devuelve {ok, …} o {ok:false, reason}. */
+function parseImport(o){
+  const MM="MonoMoon'70";
+  if(!isObj(o)) return { ok:false, reason:'El archivo no tiene un patch ni una sesión de '+MM+'.' };
+  if(o.app===JSON_APP){
+    if(typeof o.version!=='number') return { ok:false, reason:'Al JSON le falta la versión: no se puede saber cómo leerlo.' };
+    if(o.version>JSON_VERSION) return { ok:false, reason:'Ese JSON es de una versión más nueva de '+MM+' (v'+o.version+'). Recargá la página para tener la última versión e intentá de nuevo.' };
+    const d=o.data; if(!isObj(d)) return { ok:false, reason:'El JSON no trae datos.' };
+    const patch=d.patch!=null? normPatch(d.patch) : null, list=sanitizeBank(d.bank);
+    if(!patch && !list.length) return { ok:false, reason:'El JSON no trae ni un patch ni patches de biblioteca que se puedan leer.' };
+    return { ok:true, kind:'full', patch, bank:list };
+  }
+  if(o.app==='hackwave-minimoog'){ const p=normPatch(o);
+    if(!p) return { ok:false, reason:'Es un patch de la versión anterior, pero no trae los parámetros (falta «state»).' };
+    return { ok:true, kind:'legacy', patch:p, bank:[] }; }
+  if(typeof o.app==='string') return { ok:false, reason:'Ese JSON es de otro instrumento («'+o.app.slice(0,40)+'»), no de '+MM+'.' };
+  return { ok:false, reason:'El archivo no tiene el formato de '+MM+' (le falta «app»).' };
+}
+async function importJSON(){
+  let f=null; try{ f=await ZD.dl.pick({ accept:'.json,application/json' }); }catch(e){ f=null; }
+  if(!f) return;
+  const fname=String(f.name||'el archivo').slice(0,80), T={ title:'ERROR AL IMPORTAR' };
+  let txt; try{ txt=await ZD.dl.readText(f); }catch(e){ ZD.modal.error('No se pudo leer «'+fname+'».', T); return; }
+  let obj; try{ obj=JSON.parse(txt); }catch(e){ ZD.modal.error('«'+fname+'» no es un JSON válido.', T); return; }
+  const r=parseImport(obj);
+  if(!r.ok){ ZD.modal.error(r.reason, T); return; }
+  if(r.patch) loadPatch(r.patch);
+  let added=0;
+  if(r.bank.length){ r.bank.forEach(p=>{ const i=bankFind(p.name); if(i>=0) bank[i]=p; else bank.push(p); added++; }); libSave(); }
+  refreshUserList(r.patch && bankFind(r.patch.name)>=0 ? r.patch.name : '');
+  document.getElementById('presetSel').value='';
+  const who=r.patch? 'patch «'+(r.patch.name||'sin nombre')+'»' : '';
+  ZD.toast(r.kind==='legacy'? 'Patch de la versión anterior cargado: «'+(r.patch.name||'sin nombre')+'»'
+    : 'JSON cargado: '+[who, added? added+' patch'+(added===1?'':'es')+' en la biblioteca' : ''].filter(Boolean).join(' · '));
+}
 
 /* --- Web MIDI --- */
 function midiKeyEl(midi){ return keyEls[midi-baseMidi()]||null; }
 function onMIDI(e){ const d=e.data, cmd=d[0]&0xf0;
-  if(cmd===0x90 && d[2]>0){ startAudioThen(()=>kbd.press('m:'+d[1], d[1], midiKeyEl(d[1]))); }
+  if(cmd===0x90 && d[2]>0){ startAudioThen(()=>kbd.press('m:'+d[1], d[1], midiKeyEl(d[1]), d[2])); }
   else if(cmd===0x80 || (cmd===0x90 && d[2]===0)){ kbd.release('m:'+d[1]); }
-  else if(cmd===0xE0){ const b=(((d[2]<<7)|d[1])-8192)/8192; if(engine.ready) engine.setBend(b*200); if(REG.wheels.pitch) REG.wheels.pitch.set(b,true); }
-  else if(cmd===0xB0 && d[1]===1){ const v=d[2]/127; engine.setModWheel(v); if(REG.wheels.mod) REG.wheels.mod.set(v,true); markDirty(); }
+  else if(cmd===0xE0){ const b=(((d[2]<<7)|d[1])-8192)/8192; if(engine.ready) engine.setBend(b*200); if(REG.wheels.pitch) REG.wheels.pitch.set(b,true); take.bend(b*2); }
+  else if(cmd===0xB0 && d[1]===1){ const v=d[2]/127; engine.setModWheel(v); if(REG.wheels.mod) REG.wheels.mod.set(v,true); take.cc(1,v); markDirty(); }
   else if(cmd===0xB0 && d[1]===123){ clearAllKeys(); }
 }
 function initMIDI(){ const dot=document.getElementById('midiDot'), txt=document.getElementById('midiTxt');
@@ -3690,25 +3763,21 @@ function initToolbar(){
     currentName=n; markDirty(); refreshUserList(n); if(!how && Library) alert('No se pudo guardar en este navegador (almacenamiento no disponible).'); };
   document.getElementById('btnReset').onclick=()=>resetAll();
 
-  document.getElementById('btnExport').onclick=()=>{ const n=userSel.value||'patch';
-    download(new Blob([JSON.stringify(currentPatch(n),null,2)],{type:'application/json'}), 'hackwave-'+n.replace(/\s+/g,'_')+'.json'); };
-  const fileImport=document.getElementById('fileImport');
-  document.getElementById('btnImport').onclick=()=>fileImport.click();
-  fileImport.onchange=()=>{ const f=fileImport.files[0]; if(!f) return; const r=new FileReader();
-    r.onload=()=>{ try{ loadPatch(JSON.parse(r.result)); }catch(e){ alert('JSON inválido'); } fileImport.value=''; }; r.readAsText(f); };
+  document.getElementById('btnExport').onclick=()=>{
+    const blob=new Blob([JSON.stringify(exportEnvelope(),null,2)],{type:'application/json'});
+    ZD.dl.save(blob, ZD.dl.name('monomoon','json')).then(how=>ZD.toast(how==='share'?'JSON listo para compartir':'JSON descargado: patch + '+bank.length+' de la biblioteca')); };
+  document.getElementById('btnImport').onclick=()=>importJSON();
+  document.getElementById('btnMidi').onclick=()=>{ if(!lastTake) return;
+    ZD.dl.save(lastTake.midiBlob, ZD.dl.name('monomoon','mid')).then(how=>ZD.toast(how==='share'?'MIDI listo para compartir':'MIDI descargado')); };
 
-  const btnRec=document.getElementById('btnRec');
-  btnRec.onclick=()=>{ startAudioThen(()=>{ if(!recorder) recorder=new Recorder(engine);
-    if(!recorder.recording){ recorder.start(); btnRec.classList.add('on'); btnRec.textContent='■ Detener'; recT0=performance.now(); recTimer=setInterval(updRec,200); }
-    else { const blob=recorder.stop(); clearInterval(recTimer); btnRec.classList.remove('on'); btnRec.textContent='● Grabar';
-      document.getElementById('recTime').textContent='00:00'; download(blob,'hackwave-'+tstamp()+'.wav'); } }); };
+  document.getElementById('btnRec').onclick=toggleRec;
 }
 
 /* ---------- Init UI ---------- */
 buildOscRows(); buildMixer(); buildFixedControls(); buildMod(); buildContour(); buildVoice(); buildControllers();
 buildKeyboard();
-REG.wheels.pitch=new Wheel(document.getElementById('pitchWheel'),{center:true, onChange:v=>{ if(engine.ready) engine.setBend(v*200); }});
-REG.wheels.mod=new Wheel(document.getElementById('modWheel'),{center:false, onChange:v=>{ engine.setModWheel(v); markDirty(); }});
+REG.wheels.pitch=new Wheel(document.getElementById('pitchWheel'),{center:true, onChange:v=>{ if(engine.ready) engine.setBend(v*200); take.bend(v*2); }});
+REG.wheels.mod=new Wheel(document.getElementById('modWheel'),{center:false, onChange:v=>{ engine.setModWheel(v); take.cc(1,v); markDirty(); }});
 buildMacros();
 window.addEventListener('resize',()=>{ REG.wheels.pitch._render(); REG.wheels.mod._render(); });
 buildMeter();
