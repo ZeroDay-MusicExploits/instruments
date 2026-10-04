@@ -65,7 +65,7 @@ sobra (SPEC R2, "Quitar el manifest armado con `blob:`").
 > ningún botón. v2 agrega un banner propio al abrir (independiente del menú y
 > del shell), un botón "↓ Instalar" en escritorio, hint real de iOS, aviso de
 > navegador embebido y aviso de `file://`. La API y el comportamiento
-> completo están en [`docs/zd-blocks.md`](zd-blocks.md#zd-pwa-v2--service-worker-instalar-y-la-oferta-proactiva);
+> completo están en [`docs/zd-blocks.md`](zd-blocks.md#zd-pwa-v3--service-worker-instalar-y-la-oferta-proactiva);
 > el código tal como quedó pegado en los instrumentos vive en
 > [`tools/blocks/zd-pwa.html`](../tools/blocks/zd-pwa.html). El borrador de
 > abajo (de la v1) se mantiene porque documenta las condiciones de activación
@@ -250,6 +250,8 @@ dispositivo físico ni en Safari/Firefox real: queda pendiente.
       ícono "↓" e ítem de menú se esconden (ya en standalone).
 - [ ] "Ahora no" en un dispositivo real: confirmar que el banner no vuelve
       durante 14 días de uso normal (no solo con el reloj adelantado).
+- [ ] Cerrar el diálogo nativo real sin instalar (`zd-pwa` v3): el banner se
+      va en el acto y no vuelve durante 14 días, como con "Ahora no".
 
 ### Edge/Chrome de escritorio
 

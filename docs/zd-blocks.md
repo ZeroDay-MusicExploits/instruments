@@ -423,7 +423,7 @@ El CSS instrumento por instrumento (qué tan alto va el pad, cuántas columnas
 tienen los steps, qué pasa en landscape) va en un `<style id="zd-mobile-skin">`
 propio, colgado de `html.zd-m`. Ese `<style>` **no** es parte del bloque.
 
-## `zd-pwa` v2 — service worker, Instalar y la oferta proactiva
+## `zd-pwa` v3 — service worker, Instalar y la oferta proactiva
 
 Sin configuración: el manifest sale del `<link rel="manifest">` del `<head>`,
 el nombre de `document.title` o `apple-mobile-web-app-title`, y — solo para el
@@ -468,9 +468,17 @@ reaparece durante 14 días. El ítem del menú (`#zd-install-btn`) y un ícono
 `↓` que el bloque inyecta en `#zd-top` (antes de `#zd-tmenu`, solo con el
 shell activo) **no** dependen de ese descarte: siguen disponibles y llaman al
 mismo `doInstall()`. `[↓ Instalar]` llama a `deferredPrompt.prompt()` desde el
-click (gesto del usuario); si el usuario acepta o dispara `appinstalled`, toast
-"App instalada" y el banner no vuelve (al quedar en standalone, `variant()`
-da `null` en la próxima carga).
+click (gesto del usuario) y mira `userChoice` (v3):
+
+- **`accepted`** o el evento **`appinstalled`** (Chrome manda los dos): se
+  desmonta el banner, el `↓`, el ítem del menú y el botón de escritorio, con
+  un solo toast "App instalada". En la próxima carga, ya en standalone,
+  `variant()` da `null`.
+- **`dismissed`** (el usuario cerró el diálogo nativo): es lo mismo que
+  `[Ahora no]`. Se desmonta el banner y se guarda `zd:pwa:dismissed` (14 días).
+  Como el evento ya se usó, el `↓` y el ítem del menú se esconden; si el
+  navegador vuelve a mandar `beforeinstallprompt`, vuelven (no dependen del
+  descarte) y el banner no.
 
 **Escritorio sin shell:** si hay `deferredPrompt`, un botón fijo
 `↓ Instalar` arriba a la derecha (propio del bloque, no toca el `<header>`
@@ -579,6 +587,9 @@ node tools/tests/acid-verify.test.mjs       # idem
   toma anda.
 - `zd-ui-prompt` · `ZD.modal.prompt` con valor inicial: tipear lo reemplaza, en
   el bloque y en los 5 instrumentos.
+- `zd-pwa-choice` · qué pasa con el banner, el `↓`, el ítem del menú y el botón
+  de escritorio después de `userChoice` (`dismissed` / `accepted`) y de
+  `appinstalled`, en 360×640 y 1440×900.
 - `zd-mobile-cycle` · conformidad de `zd-mobile` para **cualquier** instrumento:
   el ciclo salir/entrar del shell en los tres pares de viewport, el cableado de
   eventos, el foco, el scroll, el banner de `zd-pwa` y los ≥44 px de los
@@ -642,6 +653,28 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-04 · `zd-pwa` v2 → v3
+
+Pedido de CronBeat y MonoMoon (`reports/cronbeat-block-request.md` punto 3,
+`reports/monomoon-block-request.md` punto 2). Si el usuario cerraba el diálogo
+nativo (`userChoice.outcome === 'dismissed'`), el banner quedaba montado con un
+`↓ Instalar` que ya no instalaba (el `beforeinstallprompt` se había usado) y
+que, al tocarlo, mostraba "Usá el menú del navegador para instalar esta app".
+Ocupaba ~82 px de la zona de tocar hasta que se tocaba "Ahora no".
+
+- `dismissed` se trata como "Ahora no": se desmonta el banner y se guarda
+  `zd:pwa:dismissed` (14 días), también en escritorio (donde no hay banner).
+- De paso, en la misma ruta: `userChoice` `accepted` y `appinstalled` llegan
+  los dos en Chrome y salían **dos** toasts "App instalada"; ahora uno.
+  Y `appinstalled` sin pasar por el prompt (instalada desde el menú del
+  navegador) dejaba el `↓`, el ítem del menú y el botón de escritorio
+  ofreciendo instalar algo ya instalado: ahora se desmonta todo
+  (`deferredPrompt = null` y `variant()` da `null` una vez instalada).
+- Sin cambios en la API pública ni en las claves de `localStorage`.
+
+Lo verifica `node tools/tests/zd-pwa-choice.test.mjs` (`beforeinstallprompt`
+sintético, 360×640 con shell y 1440×900 sin shell).
 
 ### 2026-10-04 · `zd-ui` v1 → v2
 

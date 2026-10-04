@@ -1,5 +1,5 @@
 <script>
-/* ZD-BLOCK:zd-pwa v2 */
+/* ZD-BLOCK:zd-pwa v3 */
 /* Instalacion de la PWA: banner propio al abrir (independiente del menu y
    del shell), boton en el header en escritorio, hint de iOS, aviso de
    navegador embebido (Instagram/Facebook/TikTok) y aviso de archivo local.
@@ -64,7 +64,7 @@
   function installMenuBtn() { return document.getElementById('zd-install-btn'); }
 
   function variant() {
-    if (isFile() || isStandalone()) return null;
+    if (installed || isFile() || isStandalone()) return null;
     if (isEmbedded()) return 'embedded';
     if (deferredPrompt) return 'install';
     if (isIOS()) return 'ios';
@@ -83,7 +83,7 @@
     mountTopIcon();
   }
   function updateDesktopBtn() {
-    if ((ZD.mobile && ZD.mobile.active) || isStandalone() || !deferredPrompt) { removeDesktopBtn(); return; }
+    if ((ZD.mobile && ZD.mobile.active) || isStandalone() || installed || !deferredPrompt) { removeDesktopBtn(); return; }
     mountDesktopBtn();
   }
   function refreshAll() { updateMenuItem(); updateTopIcon(); updateDesktopBtn(); }
@@ -199,8 +199,10 @@
     showBanner(v, false);
   }
 
+  /* userChoice 'accepted' y appinstalled llegan los dos: un solo aviso (v3) */
   function onInstalled() {
-    installed = true;
+    if (installed) return;
+    installed = true; deferredPrompt = null;
     removeBanner();
     refreshAll();
     if (ZD.toast) ZD.toast('App instalada');
@@ -212,7 +214,11 @@
       var p = deferredPrompt;
       p.prompt();
       var done = p.userChoice || Promise.resolve({ outcome: 'dismissed' });
-      done.then(function (res) { if (res && res.outcome === 'accepted') onInstalled(); }).catch(function () {});
+      done.then(function (res) {
+        if (res && res.outcome === 'accepted') onInstalled();
+        /* v3: rechazar el dialogo nativo es lo mismo que "Ahora no" */
+        else if (res && res.outcome === 'dismissed') { dismiss(DISMISS_KEY); removeBanner(); }
+      }).catch(function () {});
       (done.finally ? done.finally.bind(done) : done.then.bind(done))(function () {
         deferredPrompt = null; refreshAll();
       });
