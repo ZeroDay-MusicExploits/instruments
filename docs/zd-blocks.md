@@ -106,7 +106,7 @@ const session = ZD.store.open({
   version: 1,
   debounce: 1500,
   getData: () => ({ ... }),   // lo que se guarda si se llama save() sin argumento
-  migrate: () => envoltorioViejo | null,  // solo si load() no encontró nada
+  migrate: () => envoltorioViejo | null | Promise<…>,  // solo si load() no encontró nada
   enabled: true
 });
 
@@ -128,8 +128,20 @@ valida `app` y rechaza versiones **más nuevas** que la del instrumento;
 El bloque ya engancha `visibilitychange` (hidden), `pagehide` y `freeze` para
 hacer flush — no hace falta repetirlo en el instrumento.
 
-**`migrate`** es el gancho para MonoMoon: leer la DB vieja
-(`hackwave-minimoog`), devolver un envoltorio y dejar la vieja intacta.
+**`migrate`** es el gancho para migrar desde una base vieja: leer la DB
+anterior, devolver un envoltorio y dejar la vieja intacta (CronBeat lo usa para
+`caja-ritmos-db`). Tres cosas que no son obvias:
+
+- **Puede devolver una Promise** (leer IndexedDB es asíncrono): `load()` la
+  espera y resuelve con lo que ella resuelva.
+- **Lo que devuelve `migrate` no se guarda solo** en la clave nueva. Después de
+  restaurar el envoltorio migrado, el instrumento tiene que llamar a
+  `session.saveNow()` (CronBeat: `if (env.migrated) Session.saveNow()`). Si no,
+  cada carga vuelve a migrar desde la base vieja y lo que se edite no queda
+  guardado hasta el primer `save()` con debounce.
+- **Que no rechace:** si no encuentra nada o falla, que resuelva `null`. Un
+  rechazo hace que `load()` caiga a su rama de error, que vuelve a llamar a
+  `migrate()` una vez más.
 
 **Decisión que afecta a los 5:** con el hub C2 presente (`window.HOST`) el
 autoguardado va **apagado** (`enabled: false`). El host es el dueño del estado
@@ -304,7 +316,19 @@ ZD.rec.card(mount, {
 ```
 
 La tarjeta muestra duración, tamaño, kHz y mono/estéreo, un `<audio controls>`
-para escuchar y el botón de descarga (que pasa por `ZD.dl.save`). Acid Bass usa
+para escuchar y **un solo** botón de descarga, el del WAV (que pasa por
+`ZD.dl.save`).
+
+> **Propuesta, no implementada: `extraActions`.** Los tres que graban en vivo
+> sacan también el MIDI de la misma toma y hoy agregan ese botón afuera de la
+> tarjeta, cada uno a su manera: MonoMoon lo pone debajo («↓ MIDI DE LA TOMA»,
+> en `#takePanel`), Nebularp lo cuelga de `recCard.el` y J4 tiene su propia
+> fila (`#takeMidiRow`). La idea es una opción
+> `extraActions: [{ label, onClick, primary }]` que agregue botones a la misma
+> fila que "Descargar WAV" y "Descartar", con el mismo estilo y los mismos
+> targets de 44 px, y que `destroy()` saque junto con la tarjeta. Es una
+> extensión compatible (sin la opción, la tarjeta queda igual), así que sería un
+> `zd-rec` v3. Queda para cuando una sesión lo pida con su caso de uso. Acid Bass usa
 **solo la tarjeta**, para el resultado de su render offline; la captura en vivo
 la usan Nebularp, J4 y MonoMoon.
 
@@ -341,6 +365,14 @@ window.ZD_M = {
 
 Reglas del contrato:
 
+- **El contenedor principal del instrumento tiene que llevar la clase
+  `.wrap`.** El bloque esconde ese selector fijo
+  (`html.zd-m .wrap{display:none!important}`) y `zd-mobile-cycle` verifica que
+  los nodos de `keep` vuelvan adentro de `.wrap` al salir. Si el chasis se llama
+  de otra forma, el shell no lo esconde: queda renderizado debajo y se ve por
+  los huecos de `#zd-stage`. CronBeat lo resolvió con
+  `<div class="machine wrap">`. Si el nombre `.wrap` ya se usa para otra cosa
+  en el skin, revisar esas reglas antes de agregarlo.
 - **Lo que no está en `transport`, `keep` ni `tabs[].nodes` no se ve**: el
   shell esconde `.wrap` entera (`display:none`). Los nodos que quedan ahí
   siguen existiendo y consultables por `querySelector` (un `<canvas>` oculto se
@@ -566,10 +598,12 @@ otros 4 instrumentos salen como "pendiente" hasta que su sesión C los integre.
 2. Agregar los 4 tags de `zd-pwa` al `<head>` (manifest, apple-touch-icon y los
    dos `apple-mobile-web-app-*`).
 3. Borrar el shell v1: `<style id="zd-mobile">`, `<script id="zd-mobile-js">`,
-   `#zd-rotate` y su media query de `orientation:portrait`.
+   `#zd-rotate` y su media query de `orientation:portrait`. Ponerle la clase
+   `.wrap` al contenedor principal del instrumento (el que el shell esconde).
 4. Escribir el `<style id="zd-mobile-skin">` del instrumento.
 5. Cablear: `ZD.audio.attach` + `unlock` en el gesto + `setPlaying`,
-   `ZD.store.open` + restauración sin arrancar el audio, los exports por
+   `ZD.store.open` + restauración sin arrancar el audio (y `saveNow()` después
+   de restaurar algo que vino de `migrate`), los exports por
    `ZD.dl.save`, los `alert/confirm/prompt` a `ZD.modal.*`, los knobs a
    `ZD.ui.a11ySlider`.
 6. `node tools/sync-blocks.mjs` (deja de salir como "pendiente"),
@@ -663,6 +697,18 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-04 · documentación (sin cambio de bloque)
+
+De los reportes de las sesiones C (CronBeat punto 1, notas de MonoMoon):
+
+- `zd-mobile`: el contenedor principal tiene que llevar la clase `.wrap` o el
+  shell no lo esconde (reglas del contrato y paso 3 del checklist).
+- `zd-store`: `migrate` puede devolver una Promise, lo que devuelve no se guarda
+  solo (el instrumento llama a `saveNow()` después de restaurar) y conviene que
+  no rechace.
+- `zd-rec`: la tarjeta tiene un solo botón de descarga; queda anotada la
+  propuesta `extraActions` para el MIDI de la toma, sin implementar.
 
 ### 2026-10-04 · `zd-audio` v1 → v2
 
