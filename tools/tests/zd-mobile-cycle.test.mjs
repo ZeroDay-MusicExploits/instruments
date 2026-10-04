@@ -176,22 +176,38 @@ test(`zd-mobile v${VERSION} · el cableado de eventos sigue vivo después de vol
 test(`zd-mobile v${VERSION} · el foco y el scroll sobreviven el ciclo`, async () => {
   const { ctx, page } = await openInstrument({ width: 1440, height: 900 });
   try {
-    await page.evaluate(() => { document.getElementById('playBtn').focus(); window.scrollTo(0, 320); });
+    // El scroll se registra evento por evento junto al estado del shell: al
+    // angostar el viewport el navegador reflowea ANTES de que corra el listener
+    // de la media query y su scroll anchoring ya mueve la página (320 → ~417),
+    // así que lo que el shell puede devolver es la última posición que tenía la
+    // página justo antes de entrar, no la que pidió el test.
+    await page.evaluate(() => {
+      window.__scrollLog = [];
+      addEventListener('scroll', () => window.__scrollLog.push({ y: Math.round(window.scrollY), active: !!(window.ZD && ZD.mobile && ZD.mobile.active) }), true);
+      document.getElementById('playBtn').focus();
+      window.scrollTo(0, 320);
+    });
     const before = await page.evaluate(PROBE);
     assert.equal(before.focus, 'playBtn');
     assert.ok(before.scrollY > 0, 'la página tiene que estar scrolleada antes de entrar');
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(120);
     const inside = await page.evaluate(PROBE);
     assert.equal(inside.focus, 'playBtn', 'el foco tiene que seguir en #playBtn dentro del shell');
+    assert.equal(inside.scrollY, 0, 'dentro del shell el body es overflow:hidden y el scroll queda en 0');
+    const preEnter = await page.evaluate(() => {
+      const off = window.__scrollLog.filter((r) => !r.active);
+      return off.length ? off[off.length - 1].y : null;
+    });
+    assert.ok(preEnter > 0, 'tiene que haber una posición de scroll anterior a entrar al shell');
 
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(140);
     const back = await page.evaluate(PROBE);
-    console.log(`  foco ${before.focus} → ${inside.focus} → ${back.focus} · scrollY ${before.scrollY} → ${inside.scrollY} → ${back.scrollY}`);
+    console.log(`  foco ${before.focus} → ${inside.focus} → ${back.focus} · scrollY ${before.scrollY} → (reflow a 390px: ${preEnter}) → ${inside.scrollY} en el shell → ${back.scrollY} al salir`);
     assert.equal(back.focus, 'playBtn', 'el foco tiene que volver a #playBtn al salir del shell');
-    assert.equal(back.scrollY, before.scrollY, 'el scroll de la página tiene que volver a donde estaba');
+    assert.equal(back.scrollY, preEnter, 'el scroll tiene que volver a donde estaba justo antes de entrar al shell');
   } finally { await ctx.close(); }
 });
 

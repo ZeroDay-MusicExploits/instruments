@@ -357,6 +357,10 @@
     document.documentElement.classList.remove('zd-m');
     restoreFocus();
     if (savedScroll) {
+      /* leer una metrica fuerza el reflow ya sin la clase zd-m: si no, scrollTo
+         clampea contra el alto del shell (una pantalla) y queda en 0, y despues
+         el scroll anchoring del navegador lo deja en cualquier lado */
+      void document.documentElement.scrollHeight;
       try { window.scrollTo(savedScroll[0], savedScroll[1]); } catch (e) {}
       savedScroll = null;
     }
