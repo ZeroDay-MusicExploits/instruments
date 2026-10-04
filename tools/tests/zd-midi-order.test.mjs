@@ -75,8 +75,10 @@ test(`zd-midi v${version} · note-off estable por altura a igual tick`, async ()
   const parsed = parseSMF(await blobBytes(ZD.midi.write({ ppq: 96, bpm: 120, events })));
   const at48 = parsed.events.filter((e) => e.tick === 48).map((e) => `${e.kind}${e.pitch}`);
   console.log(`\nacorde repetido en el tick 48: ${at48.join(' ')}`);
-  assert.deepEqual(at48, ['off60', 'off64', 'off67', 'on60', 'on64', 'on67'],
-    'offs antes que ons y, entre offs, por altura ascendente');
+  // los note-off se ordenan por altura; los note-on conservan el orden en que
+  // los empujó el instrumento (67, 60, 64) — el contrato solo pide los off
+  assert.deepEqual(at48, ['off60', 'off64', 'off67', 'on67', 'on60', 'on64'],
+    'offs antes que ons, entre offs por altura ascendente, y los on en el orden de entrada');
   assert.deepEqual(defects(analyzeNotes(parsed)), []);
 });
 

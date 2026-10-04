@@ -1,10 +1,14 @@
 <script>
-/* ZD-BLOCK:zd-mobile v2 */
+/* ZD-BLOCK:zd-mobile v3 */
 /* Shell portrait-first: barra superior 48px + zona de tocar + tabs 56px +
    bottom sheets. Se configura entero por window.ZD_M (ningun selector ni
-   texto del instrumento vive aca). Un solo movimiento de nodos al activarse:
+   texto del instrumento vive aca). Un solo movimiento de nodos por activacion:
    la media query de activacion no menciona la orientacion, asi que rotar el
-   telefono no vuelve a mover nada. */
+   telefono no vuelve a mover nada.
+   v3: entrar y salir son idempotentes y reversibles. El movimiento de nodos
+   salio de build() (que corre una sola vez) y vive en enter(), asi que volver
+   a entrar despues de un exit() vuelve a armar el shell en vez de dejar el
+   stage vacio. Ademas el ciclo conserva el foco y el scroll de la pagina. */
 (function () {
   'use strict';
   var ZD = window.ZD || (window.ZD = {});
@@ -123,6 +127,9 @@
 
   var built = false, active = false, moves = [], open = null;
   var top, stage, tabsBar, scrim, sheet, sheetBody, sheetTitle, panes = {}, tabBtns = {}, cfgTabs = [], C = null;
+  /* trRef: la columna de transporte de la barra superior. build() corre una sola
+     vez, pero moveNodes() corre en cada enter(), asi que el destino se guarda. */
+  var trRef = null, savedFocus = null, savedScroll = null;
 
   function build() {
     if (built) return;
@@ -142,6 +149,7 @@
     buildTitle(ttl, C.titleParts || C.name || '');
     top.appendChild(ttl);
     var tr = mk('div', 'zd-ttr');
+    trRef = tr;
     top.appendChild(tr);
     var menuBtn = mk('button', null, '⋯');
     menuBtn.id = 'zd-tmenu'; menuBtn.type = 'button';
@@ -222,8 +230,6 @@
     window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && open) { e.stopPropagation(); close_(); } });
     dragToClose(handle);
     dragToClose(head);
-
-    moveNodes(tr);
   }
 
   /* El titulo acepta ['ACID ','BASS-303'] -> el 2do tramo va en <b>. */
@@ -314,20 +320,46 @@
     el.addEventListener('pointercancel', end);
   }
 
+  /* Mover un nodo lo saca y lo vuelve a insertar: eso borra el foco y, al
+     entrar, el body pasa a overflow:hidden y se pierde el scroll de la pagina.
+     Se guardan antes y se devuelven despues, asi el ciclo es reversible. */
+  function focusable(el) {
+    return el && el !== document.body && el !== document.documentElement &&
+      typeof el.focus === 'function' ? el : null;
+  }
+  function restoreFocus() {
+    var el = savedFocus;
+    savedFocus = null;
+    if (!el || !document.contains(el) || document.activeElement === el) return;
+    try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (_) {} }
+  }
+
   function enter() {
     if (active) return;
+    savedFocus = focusable(document.activeElement);
+    savedScroll = [window.pageXOffset || 0, window.pageYOffset || 0];
     build();
+    /* restoreNodes() vacia moves, asi que esto cubre el primer enter() y
+       cualquier reentrada posterior sin mover nada dos veces. */
+    if (!moves.length) moveNodes(trRef);
     active = true;
     document.documentElement.classList.add('zd-m');
+    restoreFocus();
     if (C && C.onEnter) try { C.onEnter(); } catch (e) {}
     fire();
   }
   function exit() {
     if (!active) return;
+    savedFocus = focusable(document.activeElement);
     active = false;
     close_();
     restoreNodes();
     document.documentElement.classList.remove('zd-m');
+    restoreFocus();
+    if (savedScroll) {
+      try { window.scrollTo(savedScroll[0], savedScroll[1]); } catch (e) {}
+      savedScroll = null;
+    }
     if (C && C.onExit) try { C.onExit(); } catch (e) {}
     fire();
   }

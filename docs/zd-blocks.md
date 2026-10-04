@@ -187,7 +187,7 @@ no sea `AbortError`, cae al `<a download>`. `prefer` fuerza una u otra.
 `pick()` crea su propio `<input type=file>`: no hace falta el input oculto en
 el markup.
 
-## `zd-midi` v1 — SMF y captura de performance
+## `zd-midi` v2 — SMF y captura de performance
 
 ```js
 ZD.midi.write({ ppq: 96, bpm, trackName, events }) // -> Blob audio/midi (formato 0)
@@ -199,8 +199,10 @@ ZD.midi.support()                         // { available, ios, reason }
 ```
 
 `write()` ordena por tick y, a igual tick, resuelve `off → cc → bend → on`
-(nunca un note-off después del note-on del mismo tick). El nombre de track se
-pasa a ASCII imprimible. `support()` es lo que hay que mostrar como
+(nunca un note-off después del note-on del mismo tick). Entre varios note-off
+del mismo tick ordena por altura ascendente, así el archivo sale igual en cada
+corrida; los note-on conservan el orden en que los empujó el instrumento. El
+nombre de track se pasa a ASCII imprimible. `support()` es lo que hay que mostrar como
 "MIDI no disponible en este navegador": **Web MIDI no existe en Safari ni en
 ningún navegador de iOS** (el bloque no lo asume, lo detecta).
 
@@ -218,6 +220,20 @@ const blob = rec.blob({ bpm, trackName });
 
 Los tiempos entran en **segundos** (`ctx.currentTime` sirve directo) y se
 convierten a ticks al cerrar. `rec.allOff()` cierra las notas abiertas.
+`noteOn()` de una altura ya abierta cierra la anterior en el mismo instante: ese
+off y el on nuevo caen en el mismo tick y los resuelve el orden de `write()`.
+
+Caso de prueba del orden a igual tick (es el que estaba roto en v1):
+
+```js
+ZD.midi.write({ ppq:96, bpm:120, events:[
+  { t:0,  type:'on',  pitch:60, vel:100 }, { t:48, type:'off', pitch:60 },
+  { t:48, type:'on',  pitch:60, vel:100 }, { t:96, type:'off', pitch:60 } ] })
+// track: 00 90 3c 64 · 30 80 3c 00 · 00 90 3c 64 · 30 80 3c 00
+// dos notas de 48 ticks, sin solaparse ni quedar de largo 0
+```
+
+Lo verifica `node tools/tests/zd-midi-order.test.mjs`.
 Acid Bass no usa el recorder: su MIDI sale del patrón de 16 pasos con
 `write()`. Lo usan MonoMoon, Nebularp y J4 (SPEC R4).
 
@@ -262,7 +278,7 @@ para escuchar y el botón de descarga (que pasa por `ZD.dl.save`). Acid Bass usa
 **solo la tarjeta**, para el resultado de su render offline; la captura en vivo
 es para Nebularp y J4.
 
-## `zd-mobile` v2 — shell portrait-first
+## `zd-mobile` v3 — shell portrait-first
 
 Reemplaza al shell landscape v1 y a `#zd-rotate`. Barra superior de 48 px →
 zona de tocar → tabs de 56 px + `env(safe-area-inset-bottom)` → bottom sheets
@@ -315,6 +331,18 @@ ZD.mobile.open(id) / close() / toggle(id)   // id '__menu' para el menú
 ZD.mobile.stage() / pane(id)       // nodos del shell
 ZD.mobile.mq                       // la media query de activación
 ```
+
+**Entrar y salir son idempotentes y reversibles (v3).** El shell se arma una
+sola vez (`build()`), pero los nodos se mueven en cada `enter()` y vuelven a su
+lugar en cada `exit()`, con un comentario `<!--zd-m-->` de marcador por nodo: tras
+N ciclos el DOM queda idéntico, los nodos son los mismos objetos (el cableado de
+eventos y el estado de los `<canvas>` sobreviven) y no queda ningún marcador
+suelto. El ciclo además devuelve el foco al elemento que lo tenía y el scroll de
+la página a donde estaba antes de entrar. En v2 `moveNodes()` vivía adentro de
+`build()`, así que al volver a entrar la barra, el stage, las tabs y los sheets
+quedaban vacíos.
+
+Lo verifica `node tools/tests/zd-mobile-cycle.test.mjs`.
 
 **Decisión que afecta a los 5 — la activación no mira la orientación:**
 
@@ -435,3 +463,50 @@ cuadrado vacío.
    `ZD.dl.save`, los `alert/confirm/prompt` a `ZD.modal.*`, los knobs a
    `ZD.ui.a11ySlider`.
 6. `node tools/check-blocks.mjs` y `node tools/build-zip.mjs && node tools/check-zip.mjs`.
+
+---
+
+## Changelog de bloques
+
+Cuando sube un bloque, sube también el número del delimitador
+(`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
+que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-03 · `zd-midi` v1 → v2
+
+A igual tick, el note-off salía **después** del note-on, justo al revés de lo que
+promete la doc. El comparador usaba `(ORDER[a.type] || 9)` y `ORDER.off` valía
+`0`: por falsy, el off se iba a 9 y quedaba último.
+
+- `ORDER` pasa a `{ off:1, cc:2, bend:3, on:4 }` (ningún valor falsy) y el rango
+  se resuelve en `rank()`, que devuelve 9 solo para los tipos que no conoce.
+- Nuevo desempate: entre note-off del mismo tick, por **altura ascendente**. Los
+  note-on siguen en el orden en que los empujó el instrumento.
+- Sin cambios en la API pública ni en el formato de los eventos.
+
+Lo que arregla: una nota repetida en la misma altura cuyo off y on caen en el
+mismo tick quedaba de duración cero y dejaba la otra colgada hasta el off
+siguiente. Afectaba a Acid (`buildMIDI()` con un patrón tipo `0 ~ 0`), al
+`recorder()` de MonoMoon, Nebularp y J4 (re-trigger de la misma altura) y al
+patrón de fábrica de Acid (`0a 0s 12 ~ …`: `on` de 45 y `off` de 33 en el tick 96).
+
+### 2026-10-03 · `zd-mobile` v2 → v3
+
+Al volver a entrar al shell, `#zd-stage`, la barra superior, las tabs y los
+sheets quedaban vacíos: `enter()` llama a `build()`, que corre una sola vez
+(`if (built) return;`), y `moveNodes()` vivía adentro de `build()`. `exit()` sí
+devolvía los nodos con `restoreNodes()`.
+
+- `build()` guarda la columna de transporte en `trRef` y ya no mueve nodos.
+- `enter()` mueve los nodos cuando no hay ninguno movido
+  (`if (!moves.length) moveNodes(trRef)`): `restoreNodes()` vacía `moves`, así
+  que el ciclo queda simétrico y entrar dos veces seguidas no mueve nada dos veces.
+- El ciclo conserva el **foco** (el nodo que lo tenía se vuelve a enfocar con
+  `preventScroll`) y el **scroll de la página** (se guarda al entrar, porque el
+  shell pone `body{overflow:hidden}`, y se devuelve al salir).
+- Sin cambios en la API pública ni en el contrato de `window.ZD_M`.
+
+Lo que arregla: redimensionar una ventana de escritorio de un lado al otro de
+820 px, y rotar una tablet cuyo ancho cruza 1024 px (iPad Pro de 12,9": 1024 en
+vertical, 1366 en horizontal; en una de 1180×820 el shell entra en vertical y
+sale en horizontal).

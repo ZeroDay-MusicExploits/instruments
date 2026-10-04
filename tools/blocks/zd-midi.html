@@ -1,5 +1,5 @@
 <script>
-/* ZD-BLOCK:zd-midi v1 */
+/* ZD-BLOCK:zd-midi v2 */
 /* Escritor de Standard MIDI File formato 0 y grabador de performance
    (notas con timestamps, pitch bend, CC). Tambien reporta si Web MIDI
    existe en este navegador (no existe en ningun navegador de iOS). */
@@ -27,7 +27,18 @@
   }
   function clamp7(v) { v = Math.round(v); return v < 0 ? 0 : v > 127 ? 127 : v; }
 
-  var ORDER = { off: 0, cc: 1, bend: 2, on: 3 };
+  /* A igual tick: off -> cc -> bend -> on, nunca un note-off despues del
+     note-on del mismo tick. Ningun valor puede ser 0: el comparador cae a 9
+     para los tipos que no conoce y un 0 falsy mandaria los off al final
+     (bug v1: la nota repetida en la misma altura quedaba de largo 0). */
+  var ORDER = { off: 1, cc: 2, bend: 3, on: 4 };
+  function rank(e) { var r = ORDER[e.type]; return r ? r : 9; }
+  /* Entre note-off del mismo tick, por altura: orden estable y reproducible
+     sin importar como los haya empujado el instrumento. */
+  function offByPitch(a, b) {
+    if (a.type !== 'off' || b.type !== 'off') return 0;
+    return (+a.pitch || 0) - (+b.pitch || 0);
+  }
   /* write({ppq, bpm, trackName, events}) -> Blob audio/midi
      events: {t:<ticks>, type:'on'|'off'|'cc'|'bend', pitch, vel, cc, val, ch} */
   function write(cfg) {
@@ -37,7 +48,7 @@
     var evs = (cfg.events || []).slice();
     evs.forEach(function (e, i) { e.__i = i; });
     evs.sort(function (a, b) {
-      return (a.t - b.t) || ((ORDER[a.type] || 9) - (ORDER[b.type] || 9)) || (a.__i - b.__i);
+      return (a.t - b.t) || (rank(a) - rank(b)) || offByPitch(a, b) || (a.__i - b.__i);
     });
 
     var track = [];
