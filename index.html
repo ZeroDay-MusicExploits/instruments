@@ -253,7 +253,7 @@ gtag('config', 'G-ZNGM11BR5S');
     <ol class="how-grid">
       <li><span class="step-label">01 · ABRIR</span><p>Abrí el archivo .html directamente en el navegador (doble clic, o arrastrarlo a una pestaña). No requiere instalación ni servidor.</p></li>
       <li><span class="step-label">02 · ENCENDER</span><p>La primera interacción (clic, tap o tecla) desbloquea el audio del navegador. Es un requisito de los navegadores modernos, no un bug.</p></li>
-      <li><span class="step-label">03 · INSTALAR</span><p>Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.</p></li>
+      <li><span class="step-label">03 · INSTALAR</span><p>Cada instrumento se instala por separado desde la versión web: <a href="#instalar">mirá cómo, según tu sistema y navegador</a>. Un HTML descargado no se instala como app.</p></li>
       <li><span class="step-label">04 · GUARDAR Y EXPORTAR</span><p>El trabajo se autoguarda en el navegador y se exporta/importa a JSON. Cada instrumento muestra en su manual qué formatos exporta hoy.</p></li>
     </ol>
   </section>
@@ -281,11 +281,37 @@ gtag('config', 'G-ZNGM11BR5S');
     <p style="margin:14px 0 0;font-size:13px;line-height:1.6;color:var(--zd-dim)">Web MIDI no existe en Safari ni en ningún navegador de iOS (todos corren sobre WebKit ahí): MonoMoon'70 detecta que <code>navigator.requestMIDIAccess</code> no está y lo indica en pantalla en vez de fallar en silencio. El resto del audio (Web Audio API) funciona en los seis.</p>
   </section>
 
+  <section class="wrap block" id="instalar">
+    <div class="section-head" style="margin-bottom:28px">
+      <h2 class="h2">Instalar en la computadora y en el teléfono</h2>
+      <span class="label">VERIFICADO EN MDN, CANIUSE Y MOZILLA · OCT 2026</span>
+    </div>
+    <p class="install__rule">Cada instrumento se instala por separado y se abre en su propia ventana. Un HTML descargado no se instala: para instalar, abrí la versión web.</p>
+    <div class="table-wrap">
+      <table class="install">
+        <thead>
+          <tr><th scope="col">Sistema y navegador</th><th scope="col">Cómo se instala</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><span class="install__os">Windows · macOS · Linux</span><span class="install__browser">Chrome, Edge o Brave</span></th><td>Ícono de instalar en la barra de direcciones (un ⊕ o una pantalla con una flecha, según el navegador) o el botón «↓ Instalar» que aparece en el instrumento.</td></tr>
+          <tr><th scope="row"><span class="install__os">macOS</span><span class="install__browser">Safari 17 o más nuevo</span></th><td>Archivo → Agregar al Dock.</td></tr>
+          <tr><th scope="row"><span class="install__os">Windows</span><span class="install__browser">Firefox 143 o más nuevo</span></th><td>Botón «Agregar pestaña a la barra de tareas» (Add tab to taskbar) de la barra de direcciones: abre el sitio en una ventana propia, fijada a la barra de tareas. Es la función «aplicaciones web» de Firefox, no una instalación de PWA.</td></tr>
+          <tr><th scope="row"><span class="install__os">macOS · Linux</span><span class="install__browser">Firefox</span></th><td>Sin instalación de webs como app. Usá el HTML descargado: se abre con doble clic y no hace falta instalar nada.</td></tr>
+          <tr><th scope="row"><span class="install__os">Android</span><span class="install__browser">Chrome</span></th><td>Banner de instalar del instrumento, o ⋮ → Instalar app.</td></tr>
+          <tr><th scope="row"><span class="install__os">iPhone · iPad</span><span class="install__browser">Safari</span></th><td>Compartir → Agregar a inicio. Desde iOS 16.4 también se puede desde Chrome, Edge o Firefox.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="install__note">En Android, Firefox, Edge u Opera solo agregan un acceso directo que abre el sitio en el navegador; para instalar la app usá Chrome (con servicios de Google) o Samsung Internet.</p>
+    <p class="install__note">Una vez instalado funciona sin conexión. Si querés los cinco, se instala cada uno.</p>
+  </section>
+
   <section class="wrap block" id="faq">
     <div class="section-head" style="margin-bottom:28px"><h2 class="h2">Preguntas frecuentes</h2></div>
     <div class="faq">
     <details><summary>¿Por qué no suena en iPhone?</summary><p>Todos los navegadores en iOS (Safari y también Chrome/Firefox, que ahí corren sobre el mismo motor) necesitan un toque para desbloquear el audio — es una política del navegador, no un bug. Con el switch de silencio físico activado, el comportamiento puede variar según el instrumento: no lo afirmamos como resuelto en los 5 sin probarlo en el dispositivo real.</p></details>
     <details><summary>¿Se guardan mis datos?</summary><p>Lo que tocás queda en tu propio navegador (localStorage / IndexedDB), nunca en un servidor. Los 5 instrumentos autoguardan (tocar → recargar → mismo estado) y restauran sin arrancar el audio. Safari puede vaciar el almacenamiento de los sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo — cada landing dice exactamente qué guarda.</p></details>
+    <details><summary>¿Puedo instalarlo en mi computadora?</summary><p>Sí, desde la versión web (el HTML descargado no se instala). En Windows, macOS o Linux con Chrome, Edge o Brave: el ícono de instalar de la barra de direcciones o el botón «↓ Instalar» del instrumento. En macOS con Safari 17 o más nuevo: Archivo → Agregar al Dock. Firefox de escritorio no instala webs como app (en Windows, desde la 143, puede fijar el sitio a la barra de tareas): ahí usá el HTML descargado. Cada instrumento se instala por separado y se abre en su propia ventana.</p></details>
     <details><summary>¿Puedo instalar el HTML descargado?</summary><p>No directamente: un HTML abierto en file:// no puede registrar service worker ni manifest (los navegadores exigen https o localhost para eso). Instalá desde la web (PWA) o bajá el HTML para usarlo local — un HTML descargado no se instala como app.</p></details>
     <details><summary>¿Qué datos recopila el sitio?</summary><p>El formulario de descarga pide tu mail para un código de verificación (hoy se muestra en pantalla, modo demo) y manda el dominio de ese mail a dns.google para chequear que reciba correo. Las páginas del sitio (no los instrumentos) usan Google Analytics. Nada de esto sale de index.html/landing-*.html hacia los instrumentos. Detalle completo en privacidad.html.</p></details>
     </div>

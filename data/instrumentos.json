@@ -10,6 +10,32 @@
     "twitterSite": ""
   },
   "order": ["cronbeat", "monomoon", "nebularp", "sirens", "acid"],
+  "install": {
+    "title": "Instalar en la computadora y en el teléfono",
+    "verified": "VERIFICADO EN MDN, CANIUSE Y MOZILLA · OCT 2026",
+    "rule": "Cada instrumento se instala por separado y se abre en su propia ventana. Un HTML descargado no se instala: para instalar, abrí la versión web.",
+    "rows": [
+      { "os": "Windows · macOS · Linux", "browser": "Chrome, Edge o Brave", "how": "Ícono de instalar en la barra de direcciones (un ⊕ o una pantalla con una flecha, según el navegador) o el botón «↓ Instalar» que aparece en el instrumento." },
+      { "os": "macOS", "browser": "Safari 17 o más nuevo", "how": "Archivo → Agregar al Dock." },
+      { "os": "Windows", "browser": "Firefox 143 o más nuevo", "how": "Botón «Agregar pestaña a la barra de tareas» (Add tab to taskbar) de la barra de direcciones: abre el sitio en una ventana propia, fijada a la barra de tareas. Es la función «aplicaciones web» de Firefox, no una instalación de PWA." },
+      { "os": "macOS · Linux", "browser": "Firefox", "how": "Sin instalación de webs como app. Usá el HTML descargado: se abre con doble clic y no hace falta instalar nada." },
+      { "os": "Android", "browser": "Chrome", "how": "Banner de instalar del instrumento, o ⋮ → Instalar app." },
+      { "os": "iPhone · iPad", "browser": "Safari", "how": "Compartir → Agregar a inicio. Desde iOS 16.4 también se puede desde Chrome, Edge o Firefox." }
+    ],
+    "notes": [
+      "En Android, Firefox, Edge u Opera solo agregan un acceso directo que abre el sitio en el navegador; para instalar la app usá Chrome (con servicios de Google) o Samsung Internet.",
+      "Una vez instalado funciona sin conexión. Si querés los cinco, se instala cada uno."
+    ],
+    "summary": [
+      { "t": "En la computadora", "d": "Chrome, Edge o Brave: ícono de instalar en la barra de direcciones o botón «↓ Instalar». Safari 17 o más nuevo: Archivo → Agregar al Dock." },
+      { "t": "En el teléfono", "d": "Android con Chrome: banner o ⋮ → Instalar app. iPhone y iPad con Safari: Compartir → Agregar a inicio." },
+      { "t": "Firefox de escritorio", "d": "No instala webs como app (en Windows, desde la 143, fija el sitio a la barra de tareas): usá el HTML descargado." }
+    ],
+    "faq": {
+      "q": "¿Puedo instalarlo en mi computadora?",
+      "a": "Sí, desde la versión web (el HTML descargado no se instala). En Windows, macOS o Linux con Chrome, Edge o Brave: el ícono de instalar de la barra de direcciones o el botón «↓ Instalar» del instrumento. En macOS con Safari 17 o más nuevo: Archivo → Agregar al Dock. Firefox de escritorio no instala webs como app (en Windows, desde la 143, puede fijar el sitio a la barra de tareas): ahí usá el HTML descargado. Cada instrumento se instala por separado y se abre en su propia ventana."
+    }
+  },
   "instruments": {
     "cronbeat": {
       "num": "01",

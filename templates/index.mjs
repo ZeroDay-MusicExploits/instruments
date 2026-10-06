@@ -1,6 +1,7 @@
 import { esc, renderHead, gaSnippet, renderHeader, renderFooter, renderDoc } from './layout.mjs';
 import { renderGateForm } from './gate.mjs';
 import { renderPreviewTabs } from './preview.mjs';
+import { renderInstallSection } from './install.mjs';
 
 const NAV = [
   { href: '#instrumentos', label: 'INSTRUMENTOS' },
@@ -70,6 +71,8 @@ export function buildIndexPage(data) {
   });
 
   const cards = order.map((slug) => instrumentCard(slug, instruments[slug])).join('\n    ');
+  const at = FAQ_ITEMS.findIndex((f) => f.q.startsWith('¿Puedo instalar el HTML'));
+  const faqItems = [...FAQ_ITEMS.slice(0, at), data.install.faq, ...FAQ_ITEMS.slice(at)];
 
   const body = `${renderHeader({ site, nav: NAV })}
 <main class="page" id="top">
@@ -119,7 +122,7 @@ export function buildIndexPage(data) {
     <ol class="how-grid">
       <li><span class="step-label">01 · ABRIR</span><p>Abrí el archivo .html directamente en el navegador (doble clic, o arrastrarlo a una pestaña). No requiere instalación ni servidor.</p></li>
       <li><span class="step-label">02 · ENCENDER</span><p>La primera interacción (clic, tap o tecla) desbloquea el audio del navegador. Es un requisito de los navegadores modernos, no un bug.</p></li>
-      <li><span class="step-label">03 · INSTALAR</span><p>Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.</p></li>
+      <li><span class="step-label">03 · INSTALAR</span><p>Cada instrumento se instala por separado desde la versión web: <a href="#instalar">mirá cómo, según tu sistema y navegador</a>. Un HTML descargado no se instala como app.</p></li>
       <li><span class="step-label">04 · GUARDAR Y EXPORTAR</span><p>El trabajo se autoguarda en el navegador y se exporta/importa a JSON. Cada instrumento muestra en su manual qué formatos exporta hoy.</p></li>
     </ol>
   </section>
@@ -145,10 +148,12 @@ export function buildIndexPage(data) {
     <p style="margin:14px 0 0;font-size:13px;line-height:1.6;color:var(--zd-dim)">Web MIDI no existe en Safari ni en ningún navegador de iOS (todos corren sobre WebKit ahí): MonoMoon'70 detecta que <code>navigator.requestMIDIAccess</code> no está y lo indica en pantalla en vez de fallar en silencio. El resto del audio (Web Audio API) funciona en los seis.</p>
   </section>
 
+  ${renderInstallSection(data.install)}
+
   <section class="wrap block" id="faq">
     <div class="section-head" style="margin-bottom:28px"><h2 class="h2">Preguntas frecuentes</h2></div>
     <div class="faq">
-    ${FAQ_ITEMS.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n    ')}
+    ${faqItems.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n    ')}
     </div>
     <p style="margin:18px 0 0;font-size:13px;color:var(--zd-dim)">¿Encontraste un bug o te falta algo? <a href="https://github.com/ZeroDay-MusicExploits/instruments/issues">Abrí un issue en el repo</a>. <!-- TODO: sumar un contacto directo (mail/formulario) cuando el titular defina uno --></p>
   </section>

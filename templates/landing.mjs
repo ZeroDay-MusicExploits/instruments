@@ -1,6 +1,7 @@
 import { esc, renderHead, gaSnippet, renderHeader, renderFooter, renderDoc } from './layout.mjs';
 import { renderGateForm } from './gate.mjs';
 import { renderPreviewBlock } from './preview.mjs';
+import { renderInstallSummary } from './install.mjs';
 
 const NAV = [
   { href: '#probar', label: 'PROBAR' },
@@ -205,8 +206,8 @@ export function buildLandingPage(data, slug) {
         <div class="dl-box__points">
           <span>${esc(I.downloadName)}</span>
           <span>Un solo archivo HTML, funciona sin conexión</span>
-          <span>Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.</span>
         </div>
+        ${renderInstallSummary(data.install)}
       </div>
       ${renderGateForm({ idPrefix: `zd-${slug}`, mode: 'single', file: I.file, downloadName: I.downloadName, name: I.name })}
     </div>

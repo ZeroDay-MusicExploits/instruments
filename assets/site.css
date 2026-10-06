@@ -312,6 +312,25 @@ table.compat th, table.compat td { text-align: left; padding: 12px 14px; border-
 table.compat thead th { color: var(--zd-dim); font-size: 12px; letter-spacing: .1em; background: var(--zd-panel); }
 table.compat td.yes { color: var(--zd-green); }
 table.compat td.no { color: var(--zd-dim); }
+/* ---------- instalar como app (índice: tabla · landing: resumen) ---------- */
+.install__rule { max-width: 720px; margin-bottom: 20px; padding: 14px 16px; font-size: 14.5px; line-height: 1.65; color: var(--zd-ink); background: var(--zd-panel); border: 1px solid var(--zd-line2); border-left: 3px solid var(--zd-green); border-radius: 3px; text-wrap: pretty; }
+table.install { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.install th, table.install td { text-align: left; vertical-align: top; padding: 14px; border-bottom: 1px solid var(--zd-line); line-height: 1.6; }
+table.install tbody tr:last-child > * { border-bottom: 0; }
+table.install thead th { color: var(--zd-dim); font-size: 12px; font-weight: 400; letter-spacing: .1em; background: var(--zd-panel); }
+table.install tbody th { width: 34%; min-width: 120px; font-weight: 700; }
+table.install td { color: var(--zd-muted); text-wrap: pretty; }
+.install__os, .install__browser { display: block; }
+.install__browser { margin-top: 2px; font-weight: 400; color: var(--zd-green); }
+.install__note { margin-top: 14px; max-width: 720px; font-size: 13.5px; line-height: 1.6; color: var(--zd-dim); text-wrap: pretty; }
+@media (max-width: 479px) { table.install th, table.install td { padding: 12px 10px; font-size: 13.5px; } }
+
+.install-mini { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; padding-top: 18px; border-top: 1px solid var(--zd-line); }
+.install-mini ul { display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.6; color: var(--zd-muted); }
+.install-mini strong { color: var(--zd-ink); }
+.install-mini p { font-size: 14px; line-height: 1.6; color: var(--zd-ink); }
+.install-mini__more { align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; font-size: 13px; letter-spacing: .04em; }
+
 .faq { display: flex; flex-direction: column; gap: 2px; }
 .faq details { border-bottom: 1px solid var(--zd-line); padding: 14px 0; }
 .faq summary { cursor: pointer; list-style: none; font-size: 14.5px; color: var(--zd-ink); display: flex; justify-content: space-between; gap: 12px; align-items: center; min-height: 44px; }
