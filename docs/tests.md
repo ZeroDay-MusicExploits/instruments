@@ -57,6 +57,7 @@ Orden de uso:
 | `nebularp-verify.test.mjs` | Verificación completa de Nebularp 2035: 17 casos (incluye la rotación de tablet). | sí |
 | `j4-verify.test.mjs` | Verificación completa de J4-Sirens Station: 18 casos. | sí |
 | `j4-mute.test.mjs` | J4: MUTE (silencia la salida mientras se mantiene y deja las colas) y BURNOUT (silencio total; vacía el eco y la reverb): nivel de salida medido por bloque con un AudioWorklet, nada deja un MUTE colgado, REC, hub C2 falso, botones en 4 viewports y, con el mute apagado, la misma salida que el commit base. 15 casos. | sí |
+| `j4-reposo.test.mjs` | J4 en reposo: patch de fábrica, encender y 30 s sin tocar nada da < −80 dBFS RMS (antes el VCA quedaba en 0,0001, la fuga cebaba el lazo del eco y subía a −14). 1 caso. | sí |
 
 Los `*-verify` comparten el molde de `acid-verify`: viewports de SPEC R1
 (360×640, 390×844, 430×932, 768×1024, 844×390, desktop), banner de instalación
