@@ -24,6 +24,12 @@ dispositivo, sistema operativo, navegador y fecha al final de la línea.
 caniuse y las notas de Firefox 143; **ninguna fila se probó en el dispositivo**.
 Lo que falta mirar está en los apartados 2 (iPhone), 4 (Android) y 5 (escritorio).
 
+**Actualizado con MUTE y BURNOUT de J4 (2026-10-05).** Dos botones nuevos en el
+deck: MUTE (silencia la salida mientras se mantiene) y BURNOUT (silencio total
+hasta otro toque). Medidos en Chromium (`tools/tests/j4-mute.test.mjs`); falta
+el pulgar en el teléfono y el cambio de app (apartados 1 y 3; en Android, lo
+mismo que en el 1).
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -124,6 +130,16 @@ se marcan en cada lugar donde se ejecutan.
       no corta la sirena; throws con dos dedos. El sheet scrollea con el dedo y
       el pad y SIREN no mueven la página; pinch-zoom permitido fuera de las
       superficies.
+- [ ] **P1** · J4 · MUTE con el pulgar: mantener, correr el dedo fuera del
+      botón y soltar ahí; con SIREN apretada con el otro pulgar. Cambiar de app
+      (gesto de inicio, selector de apps), bloquear la pantalla o recibir una
+      llamada **con MUTE apretado**: al volver no queda muteado. En Chromium lo
+      sueltan `blur`, `visibilitychange`, `pagehide` y `pointercancel`; en iOS
+      falta ver cuál llega primero.
+- [ ] **P1** · J4 · BURNOUT: un toque silencia todo (también las colas de un
+      eco largo con FEEDBACK ∞), el aviso sobre el pad se lee, otro toque
+      vuelve y la nota siguiente suena; un toque largo no abre la lupa ni el
+      menú. VoiceOver: anuncia «BURNOUT, seleccionado» y el aviso.
 - [ ] **P1** · Todos los que tienen knobs · Arrastre, doble tap y long-press sin
       que iOS abra la lupa ni el menú contextual (`-webkit-touch-callout:none`).
 - [ ] **P1** · CB · AC · Sliders dentro de un sheet: un arrastre vertical que
@@ -192,7 +208,8 @@ se marcan en cada lugar donde se ejecutan.
       MM una fila de 14 blancas, J4 pad de ~754×688 con el deck debajo; sheets
       en dos columnas.
 - [ ] **P1** · Todos · Teclado físico: mapeos de cada instrumento (NB A–;, Z/X,
-      Espacio; MM A–Ñ / W–P; J4 filas Z y Q, Espacio = SIREN, 1/4/8 = throws);
+      Espacio; MM A–Ñ / W–P; J4 filas Z y Q, Espacio = SIREN, 1/4/8 = throws,
+      9 = MUTE mientras se mantiene, 0 = BURNOUT);
       que no toque notas mientras se escribe en un modal (nombre de patch/banco;
       E1 lo arregló en AC y CB, medido en Chromium).
 - [ ] **P2** · Todos · Ventana/tablet que cruza 820 px de ancho: el shell se

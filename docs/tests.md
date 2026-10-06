@@ -54,6 +54,7 @@ Orden de uso:
 | `monomoon-verify.test.mjs` | Verificación completa de MonoMoon'70: 23 casos. | sí |
 | `nebularp-verify.test.mjs` | Verificación completa de Nebularp 2035: 17 casos (incluye la rotación de tablet). | sí |
 | `j4-verify.test.mjs` | Verificación completa de J4-Sirens Station: 18 casos. | sí |
+| `j4-mute.test.mjs` | J4: MUTE (silencia la salida mientras se mantiene y deja las colas) y BURNOUT (silencio total; vacía el eco y la reverb): nivel de salida medido por bloque con un AudioWorklet, nada deja un MUTE colgado, REC, hub C2 falso, botones en 4 viewports y, con el mute apagado, la misma salida que el commit base. 15 casos. | sí |
 
 Los `*-verify` comparten el molde de `acid-verify`: viewports de SPEC R1
 (360×640, 390×844, 430×932, 768×1024, 844×390, desktop), banner de instalación
@@ -72,6 +73,9 @@ Los helpers están en `tools/tests/lib/` (`serve.mjs`: servidor estático bajo
 - Los `*-verify` de CronBeat y J4 comparan el adaptador C2 contra el commit
   `8bef265` con `git diff`, así que necesitan el historial completo (no sirven
   con un clon superficial).
+- `j4-mute` compara el adaptador C2 y el nivel de salida contra `3aceb34`
+  (main antes del mute) con `git show`; sin ese commit se saltean esas dos
+  comparaciones y el resto corre igual.
 - Chromium headless arranca todo `AudioContext` en `running`: lo que depende de
   la política de gestos de iOS se **emula** y **no reemplaza** la prueba en un
   iPhone (ver `docs/QA-dispositivos.md`). `first-hit` envuelve el
