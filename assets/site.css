@@ -151,6 +151,7 @@ section.block { padding-top: 36px; padding-bottom: 64px; }
 .cards-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 @media (min-width: 560px) { .cards-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); } }
 .card {
+  position: relative;
   color: inherit; text-decoration: none; background: var(--zd-panel);
   border: 1px solid var(--zd-line); border-top: 3px solid var(--accent); border-radius: 4px;
   padding: 22px; display: flex; flex-direction: column; gap: 12px;
@@ -163,7 +164,14 @@ section.block { padding-top: 36px; padding-bottom: 64px; }
 .card__desc { font-size: 14px; line-height: 1.6; color: var(--zd-muted); text-wrap: pretty; }
 .card__chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; font-size: 12px; letter-spacing: .06em; }
 .chip { border: 1px solid var(--zd-line2); padding: 4px 8px; border-radius: 2px; color: var(--zd-muted); }
-.card__go { font-size: 12px; letter-spacing: .1em; color: var(--zd-green); }
+.card__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 14px; }
+/* «▶ Probar» va por encima del link estirado de la card */
+.card__play { position: relative; z-index: 1; padding: 11px 16px; min-height: 44px; font-size: 13px; }
+.card__go { font-size: 12px; letter-spacing: .1em; color: var(--zd-green); min-height: 44px; display: inline-flex; align-items: center; gap: .5em; }
+/* Link estirado: toda la card lleva a la landing; el aro de foco rodea la card entera */
+.card__go::after { content: ""; position: absolute; inset: 0; }
+.card__go:focus-visible { outline: none; }
+.card__go:focus-visible::after { outline: 2px solid var(--zd-green); outline-offset: 2px; }
 .card--soon { background: transparent; border: 1px dashed var(--zd-line2); border-top: 1px dashed var(--zd-line2); }
 .card--soon h3 { color: var(--zd-muted); }
 .card--soon p { color: var(--zd-dim); }

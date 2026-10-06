@@ -39,14 +39,20 @@ const FAQ_ITEMS = [
 
 function instrumentCard(slug, I) {
   const chips = [...I.exporta, ...(slug === 'cronbeat' || slug === 'acid' ? ['8 PATRONES'] : [])];
-  return `<a class="card" href="${esc(I.page)}" style="--accent:${I.color}">
+  // Un <a> dentro de otro no es HTML válido: la card es un <article>. «▶ Probar» abre la HTML del
+  // instrumento; el link a la landing (manual y descarga) se estira sobre toda la card con ::after,
+  // así que hacer clic en cualquier parte de la card sigue llevando a la landing.
+  return `<article class="card" style="--accent:${I.color};--accent-dark:${I.dark}">
       <div class="card__top"><span>${esc(I.num)}</span><span>${esc(I.type)}</span></div>
       <h3>${esc(I.name)}</h3>
       <p class="card__tag">${esc(I.tagline)}</p>
       <p class="card__desc">${esc(I.what.split('. ')[0])}.</p>
       <div class="card__chips">${chips.map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</div>
-      <span class="card__go">MANUAL Y DESCARGA →</span>
-    </a>`;
+      <div class="card__actions">
+        <a class="btn btn--accent card__play" href="${esc(I.file)}"><span aria-hidden="true">▶</span> Probar<span class="visually-hidden"> ${esc(I.name)}</span></a>
+        <a class="card__go" href="${esc(I.page)}">MANUAL Y DESCARGA<span class="visually-hidden"> DE ${esc(I.name)}</span><span aria-hidden="true"> →</span></a>
+      </div>
+    </article>`;
 }
 
 export function buildIndexPage(data) {

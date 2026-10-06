@@ -24,6 +24,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { serveRoot, loadPlaywright } from './lib/serve.mjs';
 import { ROOT } from './lib/load-block.mjs';
+import { maxAnchorDepth } from './lib/anchors.mjs';
 import { buildLandingPage } from '../../templates/landing.mjs';
 
 const data = JSON.parse(readFileSync(join(ROOT, 'data/instrumentos.json'), 'utf8'));
@@ -31,17 +32,6 @@ const SLUGS = data.order;
 const VIEWPORTS = [{ width: 360, height: 640 }, { width: 1440, height: 900 }];
 const MIN_TARGET = 44;
 const MAX_HEADER = 72; // una fila: 48 px de barra + padding; dos filas pasan de 100
-
-/** Profundidad máxima de <a> abiertos a la vez (1 = sin anidar). */
-export function maxAnchorDepth(html) {
-  const body = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<script[\s\S]*?<\/script>/gi, '');
-  let depth = 0, max = 0;
-  for (const m of body.matchAll(/<a(?=[\s>])[^>]*>|<\/a\s*>/gi)) {
-    depth += m[0][1] === '/' ? -1 : 1;
-    max = Math.max(max, depth);
-  }
-  return max;
-}
 
 test('maxAnchorDepth detecta <a> anidados', () => {
   assert.equal(maxAnchorDepth('<a href="x">uno</a><a href="y">dos</a>'), 1);
