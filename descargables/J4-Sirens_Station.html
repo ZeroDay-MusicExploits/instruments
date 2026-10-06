@@ -3008,7 +3008,7 @@ let userLFO=[];                       // {osc, depthGain, dest}
 let sh=null;                          // scheduler de sample&hold / drift (timeout id)
 let scopeData=null;
 let fxIn=null, fxOut=null, comp=null;
-let echoIn=null, echoDelay=null, echoFB=null, echoLP=null, echoHP=null, echoSat=null, echoWet=null, echoDry=null, echoSum=null;
+let echoIn=null, echoDelay=null, echoFB=null, echoCap=null, echoLP=null, echoHP=null, echoSat=null, echoWet=null, echoDry=null, echoSum=null;
 let wowLFO=null, flutLFO=null, wowGain=null, flutGain=null;
 let revConv=null, revWet=null, revTone=null, revSum=null, revSend=null;
 let phStages=[], phLFO=null, phDepthG=null, phFB=null, phWet=null, phDry=null, phSum=null;
@@ -3372,6 +3372,50 @@ function buildFX(){
 
   fxOut=revSum;
 }
+/* Techo del lazo del eco (F2c, opción B de reports/F2b.md). La ganancia de
+   pequeña señal del lazo es FEEDBACK × pendiente de TAPE SAT (1,5·SAT) × el
+   pico de los filtros del lazo (highpass 170 Hz y lowpass TONE, Q de 1 dB:
+   ~+2 dB cada uno). Con FEEDBACK 0,42 y SAT 1,8 daba 1,41 y el eco se
+   autosostenía después de cada nota. Con ∞ apagado, el lazo no pasa de un
+   techo L = min(0,97; 10^(-1,8·TIME/20)): la misma caída de 1,8 dB/s en el pico
+   de los filtros con cualquier TIME. Se calibró con el delay más largo (2 s, el
+   del DelayNode) y la perilla al máximo: los 7 patches bajan de -60 dBFS en
+   28 s o menos; con delays más cortos el mismo techo cae antes. El 0,97 cuida
+   los delays muy cortos, donde 1,8 dB/s quedaría a centésimas de 1. La perilla
+   hace lo mismo que antes mientras el lazo queda por debajo del 93 % del techo
+   (la rodilla) y de ahí sube en línea recta hasta el techo, que es su máximo:
+   sin zona muerta. P.echo.fb sigue siendo la perilla (lo que se guarda no
+   cambia): echoFB lleva la perilla y echoCap el factor del techo. Con ∞,
+   echoFB = 1,06 y echoCap = 1: el lazo de siempre. */
+const ECHO_R=1.8, ECHO_CAP=0.97, ECHO_KNEE=0.93;
+/* |H| a la frecuencia f de un biquad lowpass/highpass de Web Audio (Q en dB, fórmulas de la spec) */
+function bqMag(lp,f0,qdb,f,sr){
+  const w0=2*Math.PI*f0/sr, cw=Math.cos(w0), al=Math.sin(w0)/(2*Math.pow(10,qdb/20));
+  const b0=lp?(1-cw)/2:(1+cw)/2, b1=lp?1-cw:-(1+cw), a0=1+al, a1=-2*cw, a2=1-al, w=2*Math.PI*f/sr;
+  const nr=b0+b1*Math.cos(w)+b0*Math.cos(2*w), ni=-(b1*Math.sin(w)+b0*Math.sin(2*w));
+  const dr=a0+a1*Math.cos(w)+a2*Math.cos(2*w), di=-(a1*Math.sin(w)+a2*Math.sin(2*w));
+  return Math.sqrt((nr*nr+ni*ni)/(dr*dr+di*di));
+}
+/* pico de |HP 170 Hz · LP TONE| entre 20 Hz y Nyquist (600 puntos logarítmicos; recuerda el último) */
+let echoPeakLast=null;
+function echoPeak(tone){
+  const sr=ctx.sampleRate;
+  if(echoPeakLast && echoPeakLast.tone===tone && echoPeakLast.sr===sr) return echoPeakLast.m;
+  let m=0;
+  for(let i=0;i<600;i++){ const f=20*Math.pow(1000,i/600); if(f>=sr/2) break;
+    m=Math.max(m, bqMag(false,170,1,f,sr)*bqMag(true,tone,1,f,sr)); }
+  echoPeakLast={ tone, sr, m };
+  return m;
+}
+function echoCeil(time){ return Math.min(ECHO_CAP, Math.pow(10,-ECHO_R*time/20)); }
+/* FEEDBACK efectivo (con ∞ apagado) para la perilla v */
+function echoFbEff(v){
+  const kH=1.5*P.echo.sat*echoPeak(P.echo.tone), L=echoCeil(P.echo.time), gk=ECHO_KNEE*L, vk=gk/kH, vmax=SPEC.efb.max;
+  if(v<=vk) return v;
+  if(vk>=vmax) return Math.min(v, L/kH);
+  return (gk+(L-gk)*(v-vk)/(vmax-vk))/kH;
+}
+function echoCapGain(){ const v=P.echo.fb; return v>0 ? echoFbEff(v)/v : 1; }
 /* El lazo del tape echo: delay, filtros y saturación de cinta adentro, y el
    feedback. Lo arma buildFX y lo vuelve a armar BURNOUT, con la memoria en cero. */
 function echoLoop(){
@@ -3380,16 +3424,17 @@ function echoLoop(){
   echoLP=ctx.createBiquadFilter(); echoLP.type='lowpass'; echoLP.frequency.value=P.echo.tone;
   echoSat=ctx.createWaveShaper(); setSat(echoSat,P.echo.sat);
   echoFB=ctx.createGain(); echoFB.gain.value=P.echo.fb;
+  echoCap=ctx.createGain(); echoCap.gain.value=fbInfOn?1:echoCapGain();
   echoIn.connect(echoDelay);
   echoDelay.connect(echoHP).connect(echoLP).connect(echoSat);   // filtros en el loop
   echoSat.connect(echoWet);                                     // hacia el retorno wet
-  echoSat.connect(echoFB).connect(echoDelay);                   // feedback (autooscila)
+  echoSat.connect(echoFB).connect(echoCap).connect(echoDelay);  // feedback y techo (autooscila solo con ∞)
 }
 
 function applyEcho(){
   if(!echoDelay)return; const t=ctx.currentTime;
   echoDelay.delayTime.setTargetAtTime(P.echo.time,t,.05);
-  if(!fbInfOn) echoFB.gain.setTargetAtTime(P.echo.fb,t,.02);
+  if(!fbInfOn){ echoFB.gain.setTargetAtTime(P.echo.fb,t,.02); echoCap.gain.setTargetAtTime(echoCapGain(),t,.02); }
   echoLP.frequency.setTargetAtTime(P.echo.tone,t,.02);
   setSat(echoSat,P.echo.sat); setWow(P.echo.wow);
   echoWet.gain.setTargetAtTime(P.echo.on?P.echo.mix:0,t,.02);
@@ -3408,7 +3453,8 @@ function applyPhaser(){
 }
 /* momentáneos de performance */
 function setThrow(on){ throwOn=on; if(!echoIn)return; echoIn.gain.setTargetAtTime(sendGain(),ctx.currentTime,on&&!burnOn?0.005:0.06); }
-function setFbInf(on){ fbInfOn=on; if(!echoFB)return; echoFB.gain.setTargetAtTime(on?1.06:P.echo.fb,ctx.currentTime,on?0.02:0.12); }
+function setFbInf(on){ fbInfOn=on; if(!echoFB)return; const t=ctx.currentTime, tau=on?0.02:0.12;
+  echoFB.gain.setTargetAtTime(on?1.06:P.echo.fb,t,tau); echoCap.gain.setTargetAtTime(on?1:echoCapGain(),t,tau); }
 function setKill(on){ killOn=on; if(!echoDry)return; echoDry.gain.setTargetAtTime(on?0:1,ctx.currentTime,0.008); }
 /* envío al eco: con BURNOUT queda cerrado aunque se apriete ECHO THROW */
 function sendGain(){ return burnOn?0:(throwOn?2.6:1); }
@@ -3480,7 +3526,7 @@ function burnExit(){
 }
 /* lazo del eco y convolver nuevos (buffers en cero); los viejos se desconectan */
 function freshTails(){
-  [echoDelay,echoHP,echoLP,echoSat,echoFB].forEach(n=>{ try{ n.disconnect(); }catch(e){} });
+  [echoDelay,echoHP,echoLP,echoSat,echoFB,echoCap].forEach(n=>{ try{ n.disconnect(); }catch(e){} });
   try{ echoIn.disconnect(echoDelay); }catch(e){}
   try{ wowGain.disconnect(echoDelay.delayTime); }catch(e){}
   try{ flutGain.disconnect(echoDelay.delayTime); }catch(e){}
