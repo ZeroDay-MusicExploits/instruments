@@ -4,7 +4,7 @@
   "id": "../descargables/J4-Sirens_Station.html",
   "description": "Dub siren psicodélica con pad XY, kill switches y echo throw.",
   "start_url": "../descargables/J4-Sirens_Station.html",
-  "scope": "../",
+  "scope": "../descargables/J4-Sirens_Station.html",
   "display": "standalone",
   "orientation": "any",
   "lang": "es",

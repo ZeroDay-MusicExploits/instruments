@@ -4,7 +4,7 @@
   "id": "../descargables/CronBeat-808.html",
   "description": "Caja de ritmos web: secuenciador, pads, FX y modo canción.",
   "start_url": "../descargables/CronBeat-808.html",
-  "scope": "../",
+  "scope": "../descargables/CronBeat-808.html",
   "display": "standalone",
   "orientation": "any",
   "lang": "es",

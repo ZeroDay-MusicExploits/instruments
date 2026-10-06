@@ -4,7 +4,7 @@
   "id": "../descargables/Acid_Bass-303.html",
   "description": "Bajo ácido tipo TB-303: secuenciador de 16 pasos, accent, slide y filtro.",
   "start_url": "../descargables/Acid_Bass-303.html",
-  "scope": "../",
+  "scope": "../descargables/Acid_Bass-303.html",
   "display": "standalone",
   "orientation": "any",
   "lang": "es",

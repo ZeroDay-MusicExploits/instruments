@@ -4,7 +4,7 @@
   "id": "../descargables/Nebularp_2035.html",
   "description": "Arpegiador cósmico y generativo con escalas, Euclid y espacio.",
   "start_url": "../descargables/Nebularp_2035.html",
-  "scope": "../",
+  "scope": "../descargables/Nebularp_2035.html",
   "display": "standalone",
   "orientation": "any",
   "lang": "es",

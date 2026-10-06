@@ -4,7 +4,7 @@
   "id": "../descargables/MonoMoon70.html",
   "description": "Sintetizador monofónico estilo Minimoog, con patches y MIDI de performance.",
   "start_url": "../descargables/MonoMoon70.html",
-  "scope": "../",
+  "scope": "../descargables/MonoMoon70.html",
   "display": "standalone",
   "orientation": "any",
   "lang": "es",
