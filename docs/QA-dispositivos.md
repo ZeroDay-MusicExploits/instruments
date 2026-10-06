@@ -19,6 +19,11 @@ varios `AudioContext` en el primer gesto. Todo eso está medido en Chromium,
 con la regla de gestos de iOS **emulada**: falta el dispositivo. Cuando alguien pruebe, marca la casilla y anota
 dispositivo, sistema operativo, navegador y fecha al final de la línea.
 
+**Actualizado con la tabla de instalación del sitio (2026-10-05).** La tabla de
+«Instalar en la computadora y en el teléfono» (índice y README) sale de MDN,
+caniuse y las notas de Firefox 143; **ninguna fila se probó en el dispositivo**.
+Lo que falta mirar está en los apartados 2 (iPhone), 4 (Android) y 5 (escritorio).
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -155,6 +160,10 @@ se marcan en cada lugar donde se ejecutan.
       ícono de Compartir real, ícono apple-touch correcto, nombre corto
       (CronBeat, MonoMoon, Nebularp, J4-Sirens, Acid), abre en *standalone* sin
       la barra de Safari. **Modo avión real:** abrir y tocar.
+- [ ] **P2** · Todos · iOS 16.4 o más nuevo: «Compartir → Agregar a inicio» también
+      desde Chrome, Edge y Firefox (lo dice MDN y la tabla del sitio lo repite;
+      sin probar). Instalar desde «▶ Probar» (ventana principal), no desde el
+      iframe de «Probalo acá».
 - [ ] **P1** · Todos · En *standalone* real (no emulado) no aparecen el banner,
       el "↓" ni el ítem de menú "Instalar app".
 - [ ] **P0-1** · Todos · Repetir el primer toque con el switch de silencio **en
@@ -197,6 +206,10 @@ se marcan en cada lugar donde se ejecutan.
       diálogo nativo con ícono y nombre correctos; aceptar → toast "App
       instalada" y no vuelve; el "↓" y el ítem de menú se esconden. **Abrir
       instalada en modo avión real.**
+- [ ] **P2** · Todos · Chrome ⋮ → «Instalar app» (WebAPK, con su entrada en el
+      cajón de apps) y, si se puede, Firefox, Edge u Opera: según MDN solo agregan
+      un acceso directo que abre el sitio en el navegador (la tabla del sitio lo
+      dice; sin probar).
 - [ ] **P1** · Todos · "Ahora no" en uso normal: el banner no vuelve durante 14
       días. Cerrar el diálogo nativo sin instalar (`zd-pwa` v3): el banner se va
       en el acto y no vuelve, como con "Ahora no" (las listas de MM y CB, de
@@ -241,6 +254,19 @@ se marcan en cada lugar donde se ejecutan.
       dispara el flujo nativo y desaparece al instalar desde la barra de
       direcciones (`appinstalled`). En Safari/Firefox de escritorio no debe
       aparecer ningún botón ni banner.
+- [ ] **P1** · Todos · Instalar desde el sitio con «▶ Probar» (ventana principal, no
+      el iframe): Chrome y Edge, ícono de la barra de direcciones y botón
+      «↓ Instalar»; **Brave** (MDN no lo nombra; la tabla lo da por Chromium).
+      Cada instrumento se instala por separado, con su ícono, y abre en su
+      ventana. **Safari 17+ en macOS:** Archivo → Agregar al Dock abre el
+      instrumento en su ventana (sin `beforeinstallprompt`: no hay botón).
+- [ ] **P1** · Todos · **Firefox 143+ en Windows**: «Agregar pestaña a la barra de
+      tareas» aparece en la barra de direcciones para un instrumento y abre una
+      ventana propia. Confirmar cómo se llama el botón en el Firefox en español
+      (la tabla pone el texto en inglés entre paréntesis) y que en macOS y Linux
+      no aparece (el sitio dice que ahí se use el HTML descargado).
+- [ ] **P2** · Todos · «← Sitio» de un instrumento abierto con «▶ Probar» vuelve
+      al **índice** (`../index.html`), no a la landing de donde se vino.
 - [ ] **P2** · Todos · Doble clic en el HTML descargado (`file://` real): solo el
       aviso "Estás usando el archivo local…", sin errores en consola ni SW.
 - [ ] **P2** · Todos · Iframe de "Probalo acá" del sitio: sin SW ni banner.

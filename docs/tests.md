@@ -46,6 +46,9 @@ Orden de uso:
 | `favicon.test.mjs` | Favicon inline (PNG 32×32, color de acento) en los 5, en http y `file://` (E1). | sí |
 | `monomoon-midi.test.mjs` | MonoMoon pide Web MIDI con el botón «Conectar MIDI», no al cargar; sin Web MIDI y con hub C2 (E1). | sí |
 | `monomoon-xypad-a11y.test.mjs` | MonoMoon: el pad XY sin `aria-valuetext`, con el valor descrito y anunciado (E1). | sí |
+| `landing-probar.test.mjs` | Las 5 landings: «▶ Probar ahora» → archivo de `descargables/` (misma pestaña); «DESCARGAR GRATIS» y «Probar ahora» visibles sin scroll y ≥44 px a 360×640 y 1440×900; header sticky en una fila; «Probalo acá» intacto; sin `<a>` anidados. | sí |
+| `index-cards.test.mjs` | Índice: cada card con «▶ Probar» (HTML) y el link al manual (landing), sin `<a>` anidados en las 8 páginas del sitio; 44 px; clics y Tab; el hero no cambia. | sí |
+| `install-info.test.mjs` | «Instalar en la computadora y en el teléfono»: tabla del índice, resumen en las 5 landings, FAQ; los textos «↓ Instalar» y «Compartir → Agregar a inicio» existen en `zd-pwa` y en los 5 instrumentos; header en una fila de 320 a 1440 px. | sí |
 | `acid-verify.test.mjs` | Verificación completa de Acid Bass-303 (el piloto). | sí |
 | `cronbeat-verify.test.mjs` | Verificación completa de CronBeat-8:08: 24 casos (R1–R5, C2 simulado, extras). | sí |
 | `monomoon-verify.test.mjs` | Verificación completa de MonoMoon'70: 23 casos. | sí |
@@ -62,7 +65,7 @@ adaptador C2. Cada instrumento suma lo propio (ver el encabezado de su archivo).
 
 Los helpers están en `tools/tests/lib/` (`serve.mjs`: servidor estático bajo
 `/instruments/` como GitHub Pages; `load-block.mjs`, `block-page.mjs`, `smf.mjs`,
-`acid-midi.mjs`).
+`acid-midi.mjs`, `anchors.mjs`: cuenta `<a>` anidados sobre el HTML generado).
 
 ## Notas
 
