@@ -44,7 +44,7 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 ## Índice
 
 - [Cómo usar](#cómo-usar)
-- [Instalación desde la web (PWA)](#instalación-desde-la-web-pwa)
+- [Instalar en la computadora y en el teléfono](#instalar-en-la-computadora-y-en-el-teléfono)
 - [El HTML descargable](#el-html-descargable)
 - [1 · CronBeat-8:08 — Caja de ritmos](#1--cronbeat-808--caja-de-ritmos)
 - [2 · MonoMoon'70 — Sintetizador monofónico](#2--monomoon70--sintetizador-monofónico)
@@ -59,20 +59,37 @@ Los 5 instrumentos se pueden usar de forma independiente, y también se pueden s
 
 ## Cómo usar
 
-1. **Entrá al sitio**: https://zeroday-musicexploits.github.io/instruments/. Desde "Probalo acá" podés tocar cualquiera de los 5 directo en el navegador, sin descargar nada.
+1. **Entrá al sitio**: https://zeroday-musicexploits.github.io/instruments/. Desde "Probalo acá" podés tocar cualquiera de los 5 directo en el navegador, sin descargar nada. Con «▶ Probar» (en cada card del índice) o «▶ Probar ahora» (en la landing de cada instrumento) lo abrís a pantalla completa, en la misma pestaña; el botón «← Sitio» del instrumento vuelve al índice.
 2. La primera interacción (clic, tap o tecla) desbloquea el audio del navegador — vas a ver un aviso tipo "Pulsá para encender". Es un requisito de los navegadores modernos, no un bug.
-3. Si lo vas a usar seguido, instalalo desde la web como PWA (ver abajo) o descargá el HTML de la landing del instrumento para abrirlo sin conexión.
+3. Si lo vas a usar seguido, instalalo desde la web como PWA (ver [abajo](#instalar-en-la-computadora-y-en-el-teléfono)) o descargá el HTML de la landing del instrumento para abrirlo sin conexión.
 4. El trabajo (patrones, patches, presets, arreglos) se guarda según el instrumento — los 5 autoguardan en el navegador y restauran al volver (sin arrancar el audio); «Empezar de cero» borra la sesión. Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso, así que conviene exportar un JSON de respaldo. Para llevarte el audio afuera, los 5 exportan WAV, MIDI y JSON (en iPhone salen por Compartir).
 
-## Instalación desde la web (PWA)
+## Instalar en la computadora y en el teléfono
 
-Instalado desde la web, cada instrumento queda como una app aparte, usable sin conexión. Para instalar: abrí el instrumento desde su landing (no el HTML descargado — ver por qué abajo) y usá "Instalar app" si el navegador lo ofrece, o el menú del navegador (en iOS: Compartir → Agregar a inicio). La web ofrece un banner descartable y un ícono ↓ en la barra superior; en navegadores embebidos (Instagram, Facebook, TikTok…) avisa que abras el link en Safari o Chrome.
+**Cada instrumento se instala por separado y se abre en su propia ventana. Un HTML descargado no se instala: para instalar, abrí la versión web.**
+
+| Sistema | Navegador | Cómo se instala |
+|---|---|---|
+| Windows · macOS · Linux | Chrome, Edge o Brave | Ícono de instalar en la barra de direcciones (un ⊕ o una pantalla con una flecha, según el navegador) o el botón «↓ Instalar» que aparece en el instrumento. |
+| macOS | Safari 17 o más nuevo | Archivo → Agregar al Dock. |
+| Windows | Firefox 143 o más nuevo | Botón «Agregar pestaña a la barra de tareas» (Add tab to taskbar) de la barra de direcciones: abre el sitio en una ventana propia, fijada a la barra de tareas. Es la función «aplicaciones web» de Firefox, no una instalación de PWA. |
+| macOS · Linux | Firefox | Sin instalación de webs como app. Usá el HTML descargado: se abre con doble clic y no hace falta instalar nada. |
+| Android | Chrome | Banner de instalar del instrumento, o ⋮ → Instalar app. |
+| iPhone · iPad | Safari | Compartir → Agregar a inicio. Desde iOS 16.4 también se puede desde Chrome, Edge o Firefox. |
+
+En Android, Firefox, Edge u Opera solo agregan un acceso directo que abre el sitio en el navegador; para instalar la app usá Chrome (con servicios de Google) o Samsung Internet.
+
+Una vez instalado funciona sin conexión. Si querés los cinco, se instala cada uno.
+
+Verificado en [MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable), [caniuse](https://caniuse.com/web-app-manifest) y las [notas de Firefox 143](https://www.firefox.com/en-US/firefox/143.0/releasenotes/) (oct 2026), no asumido. MDN y caniuse dicen que Firefox no instala PWAs con manifest; lo que existe desde la 143, solo en Windows, es la función «aplicaciones web» (fijar el sitio a la barra de tareas).
+
+La web ofrece un banner descartable y un ícono ↓ en la barra superior (en el teléfono), un botón «↓ Instalar» (en escritorio, donde el navegador lo permite) y, en navegadores embebidos (Instagram, Facebook, TikTok…), el aviso de que abras el link en Safari o Chrome. Para instalar, abrí el instrumento desde su landing o desde «▶ Probar», no el HTML descargado (ver abajo).
 
 ## El HTML descargable
 
 Cada landing permite verificar tu mail y bajar el HTML de ese instrumento — el mismo archivo autocontenido que corre en la web, también disponible como paquete único (`descargables-zeroday.zip`) con los 5 juntos. Abrís el archivo con doble clic o arrastrándolo a una pestaña: no requiere instalación ni servidor.
 
-**Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala como app.** Un archivo abierto en `file://` no puede registrar service worker ni manifest — los navegadores exigen `https` o `localhost` para eso. Si querés el ícono aparte y uso offline, instalalo desde la web; si solo querés el archivo para vos, bajalo y listo.
+**Instalá desde la web (PWA) o bajá el HTML para usarlo local. Un HTML descargado no se instala: para instalar, abrí la versión web.** Un archivo abierto en `file://` no puede registrar service worker ni manifest — los navegadores exigen `https` o `localhost` para eso. Si querés el ícono aparte y uso offline, instalalo desde la web; si solo querés el archivo para vos, bajalo y listo.
 
 ---
 
@@ -158,7 +175,7 @@ El original del sample **nunca se pisa** — todo lo que hacés ahí es reversib
 ### Guardado, exportación e instalación
 - El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo.
 - Exportar: JSON del proyecto, MIDI del patrón o de la canción y WAV (el resultado queda en una tarjeta con escuchar y ↓ DESCARGAR WAV). En iPhone salen por Compartir.
-- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+- Instalar (desde la versión web): en la computadora, el ícono de instalar de la barra de direcciones o el botón «↓ Instalar» (Chrome, Edge, Brave), o Archivo → Agregar al Dock en Safari 17 o más nuevo; en el teléfono, el banner y el ícono ↓ de la barra superior (en iPhone y iPad, Compartir → Agregar a inicio). Cada instrumento se instala por separado y se abre en su propia ventana; una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
 
 ### Estado real (export / guardado)
 Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
@@ -246,7 +263,7 @@ Visualización en tiempo real de la forma de onda de salida.
 ### Guardado, exportación e instalación
 - El patch en edición y la biblioteca se autoguardan en este navegador. La biblioteca anterior (hackwave-minimoog) se migra sola y la vieja queda intacta. «Empezar de cero» vuelve al patch de fábrica (pide confirmación). Exportá un JSON de respaldo: Safari puede vaciar el almacenamiento de sitios no instalados.
 - Exportar: JSON (patch + biblioteca), MIDI y WAV de la toma de REC. En iPhone salen por Compartir.
-- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+- Instalar (desde la versión web): en la computadora, el ícono de instalar de la barra de direcciones o el botón «↓ Instalar» (Chrome, Edge, Brave), o Archivo → Agregar al Dock en Safari 17 o más nuevo; en el teléfono, el banner y el ícono ↓ de la barra superior (en iPhone y iPad, Compartir → Agregar a inicio). Cada instrumento se instala por separado y se abre en su propia ventana; una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
 
 ### Estado real (export / guardado)
 Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
@@ -338,7 +355,7 @@ Mismo mapeo estilo piano que MonoMoon'70.
 ### Guardado, modo liviano e instalación
 - El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo.
 - Modo liviano — el visualizador dibuja menos (se fuerza con «reducir movimiento» del sistema); es una preferencia del dispositivo.
-- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+- Instalar (desde la versión web): en la computadora, el ícono de instalar de la barra de direcciones o el botón «↓ Instalar» (Chrome, Edge, Brave), o Archivo → Agregar al Dock en Safari 17 o más nuevo; en el teléfono, el banner y el ícono ↓ de la barra superior (en iPhone y iPad, Compartir → Agregar a inicio). Cada instrumento se instala por separado y se abre en su propia ventana; una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
 
 ### Estado real (export / guardado)
 Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
@@ -429,7 +446,7 @@ Mapeo de 2 octavas.
 ### Guardado, visualizador e instalación
 - El trabajo se autoguarda en este navegador (IndexedDB) y se restaura al volver, sin arrancar el audio. «Empezar de cero» borra la sesión (pide confirmación). Safari puede vaciar el almacenamiento de sitios no instalados tras ~7 días sin uso: exportá un JSON de respaldo. Los patches guardados van aparte y no los borra «Empezar de cero».
 - Visualizador: VISUAL ON/OFF y BAJA CARGA (~20 fps, sin glow); «reducir movimiento» del sistema lo deja en una línea fija.
-- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+- Instalar (desde la versión web): en la computadora, el ícono de instalar de la barra de direcciones o el botón «↓ Instalar» (Chrome, Edge, Brave), o Archivo → Agregar al Dock en Safari 17 o más nuevo; en el teléfono, el banner y el ícono ↓ de la barra superior (en iPhone y iPad, Compartir → Agregar a inicio). Cada instrumento se instala por separado y se abre en su propia ventana; una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
 
 ### Estado real (export / guardado)
 Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
@@ -509,7 +526,7 @@ El gesto acid clásico: arrastrá con el dedo mientras suena — **X = Cutoff**,
 
 ### Guardado e instalación
 - Patrón, parámetros, banco de usuario, tempo y swing se autoguardan en este navegador y se restauran al volver, sin arrancar el audio. «Empezar de cero» lo borra (pide confirmación). Exportá un JSON de respaldo: Safari puede vaciar el almacenamiento de sitios no instalados.
-- Instalar: la web ofrece un banner y un ícono ↓ en la barra superior (en iPhone, Compartir → Agregar a inicio). Una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
+- Instalar (desde la versión web): en la computadora, el ícono de instalar de la barra de direcciones o el botón «↓ Instalar» (Chrome, Edge, Brave), o Archivo → Agregar al Dock en Safari 17 o más nuevo; en el teléfono, el banner y el ícono ↓ de la barra superior (en iPhone y iPad, Compartir → Agregar a inicio). Cada instrumento se instala por separado y se abre en su propia ventana; una vez instalado funciona sin conexión. El HTML descargado se usa local pero no se instala.
 
 ### Estado real (export / guardado)
 Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
