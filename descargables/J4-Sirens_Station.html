@@ -3122,7 +3122,7 @@ async function initAudio(){
 
   // VCA + tremolo
   tremGain=ctx.createGain(); tremGain.gain.value=1;
-  vca=ctx.createGain(); vca.gain.value=0.0001;
+  vca=ctx.createGain(); vca.gain.value=0;   // en reposo, 0 exacto (ver ampGate)
 
   // 2 LFOs de usuario
   userLFO=[0,1].map(()=>{
@@ -3423,9 +3423,9 @@ function sendGain(){ return burnOn?0:(throwOn?2.6:1); }
    la reverb siguen corriendo por dentro y al soltar se oyen sus colas, como
    el mute de un canal en la mesa. Con BURNOUT puesto no hace nada.
    BURNOUT: un toque (o la tecla 0) y queda así hasta otro toque. Silencio
-   total: corta las voces y deja el VCA en 0 exacto (en reposo queda en
-   0,0001, y esa fuga alcanza para que el lazo del eco se vuelva a cebar),
-   apaga FEEDBACK ∞ y ECHO THROW, cierra los envíos al eco y a la reverb y, con
+   total: corta las voces y deja el VCA en 0 exacto ya, sin esperar el
+   release (en reposo también queda en 0: ver ampGate), apaga FEEDBACK ∞ y
+   ECHO THROW, cierra los envíos al eco y a la reverb y, con
    la salida ya en silencio, cambia el lazo del eco y el convolver por nodos
    nuevos, con la memoria en cero (freshTails). Al volver no queda ninguna
    cola. Lo que se toque durante el BURNOUT no llega al eco ni a la reverb.
@@ -4073,17 +4073,33 @@ function glideTo(midi){
     osc.frequency.setTargetAtTime(mtof(midi), t, g*0.5);
   }
 }
+/* El VCA queda en 0 exacto en reposo. Con un piso de 0,0001 se colaba el
+   oscilador (~-70 dBFS) y esa fuga cebaba el lazo del eco, que con TAPE SAT
+   tiene ganancia > 1: J4 encendido y sin tocar nada subía solo a -14 dBFS.
+   El release es la exponencial de siempre (setTargetAtTime, τ = rel/3) hasta
+   REL_KNEE (-80 dB) y de ahí una recta a 0 en otra τ, con la misma pendiente:
+   no hay escalón. El setTarget no se deja seguir más abajo porque Chromium lo
+   da por terminado cuando pasa ~4,5e-5 (-87 dB) y salta a 0 (medido en
+   tools/tests/j4-reposo.test.mjs). Una nota nueva cancela todo eso
+   (cancelScheduledValues) y arranca desde donde esté. */
+const REL_KNEE=1e-4;
 function ampGate(on){
   const t=ctx.currentTime, g=vca.gain;
   g.cancelScheduledValues(t);
-  const now=Math.max(g.value,0.0001);
+  const now=g.value;
   if(on){
     g.setValueAtTime(now,t);
     g.linearRampToValueAtTime(1.0, t+P.atk/1000);
     g.setTargetAtTime(P.sus, t+P.atk/1000, Math.max(.005,P.dec/1000/3));
   }else{
-    g.setValueAtTime(Math.max(g.value,0.0001),t);
-    g.setTargetAtTime(0.0001, t, Math.max(.005,P.rel/1000/3));
+    const tau=Math.max(.005,P.rel/1000/3);
+    g.setValueAtTime(now,t);
+    if(now>REL_KNEE){
+      const tk=t+tau*Math.log(now/REL_KNEE);
+      g.setTargetAtTime(0, t, tau);
+      g.setValueAtTime(REL_KNEE, tk);
+      g.linearRampToValueAtTime(0, tk+tau);
+    } else g.linearRampToValueAtTime(0, t+tau*now/REL_KNEE);
   }
 }
 function filterGate(on){

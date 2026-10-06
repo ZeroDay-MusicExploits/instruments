@@ -57,7 +57,7 @@ Orden de uso:
 | `nebularp-verify.test.mjs` | Verificación completa de Nebularp 2035: 17 casos (incluye la rotación de tablet). | sí |
 | `j4-verify.test.mjs` | Verificación completa de J4-Sirens Station: 18 casos. | sí |
 | `j4-mute.test.mjs` | J4: MUTE (silencia la salida mientras se mantiene y deja las colas) y BURNOUT (silencio total; vacía el eco y la reverb): nivel de salida medido por bloque con un AudioWorklet, nada deja un MUTE colgado, REC, hub C2 falso, botones en 4 viewports y, con el mute apagado, la misma salida que el commit base. 15 casos. | sí |
-| `j4-reposo.test.mjs` | J4 en reposo: patch de fábrica, encender y 30 s sin tocar nada da < −80 dBFS RMS (antes el VCA quedaba en 0,0001, la fuga cebaba el lazo del eco y subía a −14). 1 caso. | sí |
+| `j4-reposo.test.mjs` | J4 en reposo: patch de fábrica, encender y 30 s sin tocar nada da < −80 dBFS RMS (antes el VCA quedaba en 0,0001, la fuga cebaba el lazo del eco y subía a −14). El release sin clics: una sonda repite la automatización de `vca.gain` y la graba muestra a muestra (mayor escalón < −120 dB, 0 exacto al final; en la salida < −100 dBFS con DRIVE 8), con el commit base de control (el salto de Chromium a las 10 τ); una nota durante el release no queda cortada. 4 casos. | sí |
 
 Los `*-verify` comparten el molde de `acid-verify`: viewports de SPEC R1
 (360×640, 390×844, 430×932, 768×1024, 844×390, desktop), banner de instalación
@@ -83,6 +83,8 @@ un swipe scrollea).
 - `j4-mute` compara el adaptador C2 y el nivel de salida contra `3aceb34`
   (main antes del mute) con `git show`; sin ese commit se saltean esas dos
   comparaciones y el resto corre igual.
+- `j4-reposo` usa `224763d` (main antes del VCA en 0) de control, con
+  `git show`; sin ese commit se saltea el control y el resto corre igual.
 - Chromium headless arranca todo `AudioContext` en `running`: lo que depende de
   la política de gestos de iOS se **emula** y **no reemplaza** la prueba en un
   iPhone (ver `docs/QA-dispositivos.md`). `first-hit` envuelve el
