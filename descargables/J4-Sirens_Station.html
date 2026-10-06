@@ -178,12 +178,28 @@ body::after{
   background:radial-gradient(closest-side,rgba(255,120,160,.7),transparent);transition:opacity .12s}
 .bigtrig.on .halo{opacity:1}
 
-/* ---------- deck de performance: SIREN (hold/latch) + throws ---------- */
-.perfdeck{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto;
-  grid-template-areas:"siren latch" "throws throws";gap:10px;min-width:0}
+/* ---------- deck de performance: SIREN (hold/latch) + throws + MUTE/BURNOUT ---------- */
+.perfdeck{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto auto;
+  grid-template-areas:"siren latch" "throws throws" "mutes mutes";gap:10px;min-width:0}
 .perfdeck>.bigtrig{grid-area:siren;width:100%;font:inherit;-webkit-appearance:none;appearance:none}
 .perfdeck>.latchbtn{grid-area:latch}
 .perfdeck>.throws{grid-area:throws;margin:0}
+.perfdeck>.mutes{grid-area:mutes}
+/* MUTE (mientras se mantiene) y BURNOUT (silencio total hasta otro toque) */
+.mutes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0}
+.perfdeck .mutebtn{touch-action:none}
+.mutebtn .ss{font-family:var(--zd-mono);font-size:11px;letter-spacing:.08em;line-height:1.2;color:var(--cream-dim);margin-top:3px}
+.mutebtn[aria-disabled="true"]{opacity:.45}
+.burnbtn .lled{width:11px;height:11px;border-radius:2px;background:#1b2a15;box-shadow:inset 0 0 3px #000;margin-bottom:5px}
+.burnbtn.on{background:#3a0e08;color:#fff}
+.burnbtn.on .lled{background:var(--led-red);box-shadow:0 0 10px var(--led-red)}
+.burnbtn.on .ss,.perfdeck .burnbtn.on .tt{color:#fff}
+.perfdeck .burnbtn.on .tt{text-shadow:0 0 10px rgba(224,73,47,.9)}
+/* aviso de BURNOUT sobre el pad XY: que nadie crea que el instrumento se rompió */
+.burnnote{position:absolute;left:10px;right:10px;top:50%;transform:translateY(-50%);z-index:3;pointer-events:none;
+  padding:10px 12px;text-align:center;font:800 13px/1.4 var(--zd-mono);letter-spacing:.1em;color:#fff;
+  background:rgba(58,14,8,.9);border:1px solid var(--led-red);border-radius:var(--zd-r,4px);box-shadow:0 0 24px -4px var(--led-red)}
+.burnnote:empty{display:none}
 .latchbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
   min-width:68px;min-height:44px;padding:8px 6px;cursor:pointer;touch-action:manipulation;
   font:700 11px var(--zd-mono);letter-spacing:.14em;color:var(--cream-dim);
@@ -490,26 +506,35 @@ body::after{
 
   /* ---- zona de tocar: pad XY arriba, SIREN y throws abajo (al alcance del pulgar) ---- */
   html.zd-m #zd-stage > #xypad{flex:1 1 auto; width:auto; min-width:0; min-height:96px; aspect-ratio:auto;}
+  /* fila de arriba: SIREN · LATCH · MUTE · BURNOUT (los dos de silencio a la
+     derecha, para el pulgar); abajo, los throws como siempre */
   html.zd-m #zd-stage > #perfDeck{flex:none; height:var(--j4-deck); gap:6px;
-    grid-template-columns:minmax(0,1fr) 72px; grid-template-rows:minmax(0,1fr) var(--j4-throw-h);}
+    --j4-mutes:clamp(150px, 43vw, 262px);
+    grid-template-columns:minmax(0,1fr) clamp(56px, 16vw, 96px) var(--j4-mutes);
+    grid-template-rows:minmax(0,1fr) var(--j4-throw-h);
+    grid-template-areas:"siren latch mutes" "throws throws throws";}
   html.zd-m #perfDeck > .bigtrig{min-height:0; height:100%; padding:4px;}
   html.zd-m #perfDeck .bigtrig .t{font-size:clamp(20px, 6.5vw, 32px);}
+  html.zd-m #perfDeck .bigtrig .s{text-align:center;}
   html.zd-m #perfDeck > .latchbtn{min-width:0; height:100%;}
   html.zd-m #perfDeck > .throws{gap:6px; grid-template-columns:repeat(3,minmax(0,1fr));}
+  html.zd-m #perfDeck > .mutes{gap:6px;}
   html.zd-m #perfDeck .throwbtn{min-height:0; height:100%; padding:2px 4px;}
   html.zd-m #perfDeck .throwbtn .tt{font-size:12.5px; letter-spacing:.03em; white-space:nowrap;}
   html.zd-m #perfDeck .throwbtn .kk{display:none;}
 
   /* ---- sheet en modo peek (SPEC R1): la zona de tocar se achica por encima
-     del sheet y queda pad + SIREN + throws en una fila. El banner de
-     instalar se esconde mientras haya un sheet abierto. ---- */
+     del sheet y queda pad + SIREN, MUTE y BURNOUT en una fila y los throws
+     en otra (sin LATCH). El banner de instalar se esconde mientras haya un
+     sheet abierto. ---- */
   html.zd-m #zd-sheet.peek{height:var(--j4-peek);}
   html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{height:calc(var(--zd-stage-h) - var(--j4-peek));}
   html.zd-m.zd-sheet-open #zd-stage > .zd-pwa-in-stage{display:none;}
-  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #perfDeck{height:58px;
-    grid-template-columns:minmax(0,1.25fr) minmax(0,3fr); grid-template-rows:minmax(0,1fr);
-    grid-template-areas:"siren throws";}
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #perfDeck{height:104px;
+    grid-template-columns:minmax(0,1fr) var(--j4-mutes); grid-template-rows:minmax(0,1fr) 44px;
+    grid-template-areas:"siren mutes" "throws throws";}
   html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck > .latchbtn,
+  html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck .mutebtn .ss,
   html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck .bigtrig .s{display:none;}
   html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck .bigtrig .t{font-size:18px;}
   html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck .throwbtn .tt{font-size:11.5px; white-space:normal; line-height:1.15;}
@@ -559,16 +584,17 @@ body::after{
     html.zd-m #zd-stage > .zd-pwa-in-stage{flex:1 1 100%;}
     html.zd-m #zd-stage > #xypad{flex:1 1 0; height:auto; min-height:0;}
     html.zd-m #zd-stage > #perfDeck{flex:0 0 clamp(250px, 40vw, 360px); height:auto;
-      grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr) 48px;
-      grid-template-areas:"siren throws" "latch throws";}
+      grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr) 64px 48px;
+      grid-template-areas:"siren throws" "mutes throws" "latch throws";}
     html.zd-m #perfDeck > .latchbtn{flex-direction:row;}
     html.zd-m #perfDeck > .throws{grid-template-columns:minmax(0,1fr); grid-template-rows:repeat(3,minmax(0,1fr));}
+    html.zd-m #perfDeck .mutebtn .ss{display:none;}
     /* peek a media pantalla: el sheet a la izquierda y se sigue tocando a la derecha */
     html.zd-m #zd-sheet.peek{right:50%; height:var(--zd-stage-h); max-height:none;}
     html.zd-m #zd-sheet.peek .knobs{grid-template-columns:minmax(0,1fr);}   /* media pantalla: una columna */
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{left:50%; height:var(--zd-stage-h); flex-flow:column nowrap;}
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #xypad{flex:1 1 auto;}
-    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #perfDeck{flex:none; height:64px;}
+    html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage > #perfDeck{flex:none; height:110px;}
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) #perfDeck > .throws{grid-template-columns:repeat(3,minmax(0,1fr));
       grid-template-rows:minmax(0,1fr);}
   }
@@ -2732,6 +2758,7 @@ Object.assign(window.ZD_M, {
         <span class="axlab x" id="xLab">X</span>
         <span class="axlab y" id="yLab">Y</span>
         <span class="padmode" id="padMode">WAIL</span>
+        <span class="burnnote" id="burnNote" role="status" aria-live="polite"></span>
       </div>
       <div class="padtargets" id="padTargets">
         <div class="field"><span class="lab">EJE X</span><div class="seg" id="padXSeg"></div></div>
@@ -2752,6 +2779,14 @@ Object.assign(window.ZD_M, {
           <span class="s" id="sirenHint">MANTENÉ APRETADO · [ESPACIO]</span>
         </button>
         <button type="button" class="latchbtn" id="latchBtn"><span class="lled"></span><span>LATCH</span></button>
+        <div class="mutes" id="muteRow">
+          <button type="button" class="throwbtn mutebtn" id="muteBtn" aria-pressed="false"
+            aria-label="MUTE: silencia la salida mientras lo mantenés apretado; el eco y la reverb siguen y al soltar se oyen sus colas (tecla 9)"
+            title="Mantené apretado: silencia la salida y deja correr las colas (tecla 9)"><span class="tt">MUTE</span><span class="ss">MANTENÉ</span><span class="kk">[9]</span></button>
+          <button type="button" class="throwbtn mutebtn burnbtn" id="burnBtn" aria-pressed="false"
+            aria-label="BURNOUT: silencio total hasta volver a tocarlo; corta la sirena, FEEDBACK ∞, ECHO THROW y las colas del eco y la reverb (tecla 0)"
+            title="Silencio total hasta otro toque: corta la sirena, ∞, throw y las colas (tecla 0)"><span class="lled" aria-hidden="true"></span><span class="tt">BURNOUT</span><span class="ss" id="burnSub">SILENCIO TOTAL</span><span class="kk">[0]</span></button>
+        </div>
         <div class="throws" id="throwRow"></div>
       </div>
       <div class="strip" id="strip" role="group" aria-label="Tira de teclas de C3 a G4 (con el teclado de la PC: filas Z y Q)"></div>
@@ -2798,7 +2833,7 @@ Object.assign(window.ZD_M, {
   </section>
 
   <div class="foot" id="footNote">
-    <span>Teclado PC: fila <kbd>Z</kbd> <kbd>S</kbd> <kbd>X</kbd> <kbd>D</kbd> <kbd>C</kbd>… y <kbd>Q</kbd> <kbd>2</kbd> <kbd>W</kbd>… (2 octavas) · <kbd>Espacio</kbd> SIREN · <kbd>1</kbd> ECHO THROW · <kbd>4</kbd> FEEDBACK ∞ · <kbd>8</kbd> KILL</span>
+    <span>Teclado PC: fila <kbd>Z</kbd> <kbd>S</kbd> <kbd>X</kbd> <kbd>D</kbd> <kbd>C</kbd>… y <kbd>Q</kbd> <kbd>2</kbd> <kbd>W</kbd>… (2 octavas) · <kbd>Espacio</kbd> SIREN · <kbd>1</kbd> ECHO THROW · <kbd>4</kbd> FEEDBACK ∞ · <kbd>8</kbd> KILL (corta la sirena directa, quedan los ecos) · <kbd>9</kbd> MUTE (mientras la mantenés; quedan las colas) · <kbd>0</kbd> BURNOUT (silencio total; otra vez para volver)</span>
     <span class="filtnote" id="filtStatus">filtro: —</span>
     <div class="hint">
       <span class="hw">J4-Sirens Station //</span>
@@ -2912,6 +2947,7 @@ let wowLFO=null, flutLFO=null, wowGain=null, flutGain=null;
 let revConv=null, revWet=null, revTone=null, revSum=null, revSend=null;
 let phStages=[], phLFO=null, phDepthG=null, phFB=null, phWet=null, phDry=null, phSum=null;
 let throwOn=false, fbInfOn=false, killOn=false;
+let muteGain=null, muteOn=false, burnOn=false;   // MUTE / BURNOUT: ver "MUTE y BURNOUT" más abajo
 
 let curNote=null;         // midi sonando (o null)
 const held=[];            // pila [{id,midi}] para prioridad última-nota
@@ -3043,7 +3079,11 @@ async function initAudio(){
   comp=ctx.createDynamicsCompressor();
   comp.threshold.value=-6; comp.knee.value=6; comp.ratio.value=12;
   comp.attack.value=0.003; comp.release.value=0.15;
-  master.connect(comp); comp.connect(analyser); analyser.connect(C2_OUT || ctx.destination);
+  // MUTE / BURNOUT: muteGain entre el compresor y el analizador, así REC, el
+  // visualizador y el canal del hub reciben el silencio. Apagado vale 1.
+  muteGain=ctx.createGain(); muteGain.gain.value=muteTarget();
+  master.connect(comp); comp.connect(muteGain).connect(analyser);
+  analyser.connect(C2_OUT || ctx.destination);
 
   osc.start(); noiseSrc.start(); modeLFO.start();
   userLFO.forEach(l=>l.osc.start());
@@ -3051,6 +3091,7 @@ async function initAudio(){
   audioReady=true;
   applyMode(); applyReso(); applyCutoffBase(); applyLFOs();
   applyEcho(); applyReverb(); applyPhaser();
+  if(burnOn) burnEnter();   // BURNOUT tocado (tecla 0) antes de que terminara de armarse el grafo
   runScope();
 }
 
@@ -3239,17 +3280,10 @@ function buildFX(){
   // ---- TAPE ECHO ----
   echoDry=ctx.createGain(); echoDry.gain.value=1;
   echoIn=ctx.createGain(); echoIn.gain.value=1;
-  echoDelay=ctx.createDelay(2.0); echoDelay.delayTime.value=P.echo.time;
-  echoHP=ctx.createBiquadFilter(); echoHP.type='highpass'; echoHP.frequency.value=170;
-  echoLP=ctx.createBiquadFilter(); echoLP.type='lowpass'; echoLP.frequency.value=P.echo.tone;
-  echoSat=ctx.createWaveShaper(); setSat(echoSat,P.echo.sat);
-  echoFB=ctx.createGain(); echoFB.gain.value=P.echo.fb;
   echoWet=ctx.createGain(); echoWet.gain.value=P.echo.mix;
   echoSum=ctx.createGain();
-  echoIn.connect(echoDelay);
-  echoDelay.connect(echoHP).connect(echoLP).connect(echoSat);   // filtros en el loop
-  echoSat.connect(echoWet).connect(echoSum);                    // retorno wet
-  echoSat.connect(echoFB).connect(echoDelay);                   // feedback (autooscila)
+  echoLoop();
+  echoWet.connect(echoSum);                                     // retorno wet
   // wow & flutter -> tiempo de delay (wobble de cinta)
   wowLFO=ctx.createOscillator(); wowLFO.type='sine'; wowLFO.frequency.value=0.5;
   flutLFO=ctx.createOscillator(); flutLFO.type='triangle'; flutLFO.frequency.value=6.5;
@@ -3271,6 +3305,19 @@ function buildFX(){
   echoSum.connect(revSend).connect(revConv).connect(revTone).connect(revWet).connect(revSum);
 
   fxOut=revSum;
+}
+/* El lazo del tape echo: delay, filtros y saturación de cinta adentro, y el
+   feedback. Lo arma buildFX y lo vuelve a armar BURNOUT, con la memoria en cero. */
+function echoLoop(){
+  echoDelay=ctx.createDelay(2.0); echoDelay.delayTime.value=P.echo.time;
+  echoHP=ctx.createBiquadFilter(); echoHP.type='highpass'; echoHP.frequency.value=170;
+  echoLP=ctx.createBiquadFilter(); echoLP.type='lowpass'; echoLP.frequency.value=P.echo.tone;
+  echoSat=ctx.createWaveShaper(); setSat(echoSat,P.echo.sat);
+  echoFB=ctx.createGain(); echoFB.gain.value=P.echo.fb;
+  echoIn.connect(echoDelay);
+  echoDelay.connect(echoHP).connect(echoLP).connect(echoSat);   // filtros en el loop
+  echoSat.connect(echoWet);                                     // hacia el retorno wet
+  echoSat.connect(echoFB).connect(echoDelay);                   // feedback (autooscila)
 }
 
 function applyEcho(){
@@ -3294,9 +3341,125 @@ function applyPhaser(){
   phWet.gain.setTargetAtTime(P.ph.on?P.ph.mix:0,t,.05);
 }
 /* momentáneos de performance */
-function setThrow(on){ throwOn=on; if(!echoIn)return; echoIn.gain.setTargetAtTime(on?2.6:1,ctx.currentTime,on?0.005:0.06); }
+function setThrow(on){ throwOn=on; if(!echoIn)return; echoIn.gain.setTargetAtTime(sendGain(),ctx.currentTime,on&&!burnOn?0.005:0.06); }
 function setFbInf(on){ fbInfOn=on; if(!echoFB)return; echoFB.gain.setTargetAtTime(on?1.06:P.echo.fb,ctx.currentTime,on?0.02:0.12); }
 function setKill(on){ killOn=on; if(!echoDry)return; echoDry.gain.setTargetAtTime(on?0:1,ctx.currentTime,0.008); }
+/* envío al eco: con BURNOUT queda cerrado aunque se apriete ECHO THROW */
+function sendGain(){ return burnOn?0:(throwOn?2.6:1); }
+
+/* ---- MUTE y BURNOUT ----
+   Los dos mueven muteGain, el GainNode que va entre el compresor y el
+   analizador: se silencia la salida entera, y REC, el visualizador y el
+   canal del hub C2 reciben ese silencio (el mute es un gesto de la
+   performance: la toma lo graba). Apagados, muteGain vale 1 y la salida es
+   la de siempre. Rampa con setTargetAtTime de 2 ms: el 95 % en 6 ms, sin clics.
+   MUTE: mientras se sostiene (botón o tecla 9). Solo mueve muteGain: el eco y
+   la reverb siguen corriendo por dentro y al soltar se oyen sus colas, como
+   el mute de un canal en la mesa. Con BURNOUT puesto no hace nada.
+   BURNOUT: un toque (o la tecla 0) y queda así hasta otro toque. Silencio
+   total: corta las voces y deja el VCA en 0 exacto (en reposo queda en
+   0,0001, y esa fuga alcanza para que el lazo del eco se vuelva a cebar),
+   apaga FEEDBACK ∞ y ECHO THROW, cierra los envíos al eco y a la reverb y, con
+   la salida ya en silencio, cambia el lazo del eco y el convolver por nodos
+   nuevos, con la memoria en cero (freshTails). Al volver no queda ninguna
+   cola. Lo que se toque durante el BURNOUT no llega al eco ni a la reverb.
+   No va en el autoguardado ni en los slots: al abrir, siempre suena. */
+const MUTE_TAU=0.002;
+const muteSrc=new Set();      // lo que tiene apretado el MUTE: punteros, 'key' (tecla 9), 'kbd' (Espacio/Enter con el foco)
+let burnTimer=null, burnFresh=true, burnReadyAt=0;
+function muteTarget(){ return (muteOn||burnOn)?0:1; }
+function applyMute(){
+  if(!muteGain) return;
+  const t=ctx.currentTime, v=muteTarget(), g=muteGain.gain;
+  if(v && !burnFresh) return;   // falta vaciar las colas: abre burnFlush cuando termine
+  g.cancelScheduledValues(t);
+  g.setTargetAtTime(v, v?Math.max(t,burnReadyAt):t, MUTE_TAU);   // volver, recién cuando lo vaciado terminó de salir
+}
+function setMuteSrc(src,on){
+  if(on){ if(burnOn||muteSrc.has(src)) return; muteSrc.add(src); }
+  else if(!muteSrc.delete(src)) return;
+  const was=muteOn; muteOn=muteSrc.size>0;
+  if(muteOn!==was){ applyMute(); renderMute(); syncPlaying(); }
+}
+/* nunca un MUTE colgado: sin foco, en segundo plano o al irse de la página */
+function releaseMute(){ if(!muteSrc.size) return; muteSrc.clear(); muteOn=false; applyMute(); renderMute(); syncPlaying(); }
+function setBurnout(on){
+  on=!!on; if(on===burnOn) return;
+  burnOn=on;
+  if(audioReady){ if(on) burnEnter(); else burnExit(); }
+  renderMute(); syncPlaying();
+}
+function burnEnter(){
+  const t=ctx.currentTime;
+  applyMute();
+  held.slice().forEach(h=>noteOff(h.id));                        // SIREN (también en latch), tira y teclado
+  document.querySelectorAll('#strip .key.on').forEach(k=>k.classList.remove('on'));
+  setThrow(false); setFbInf(false); markThrow(0,false); markThrow(1,false);
+  [vca.gain, echoIn.gain, revSend.gain].forEach(g=>{ g.cancelScheduledValues(t); g.setTargetAtTime(0,t,MUTE_TAU); g.setValueAtTime(0,t+0.03); });
+  burnFresh=false; burnReadyAt=Infinity;
+  clearTimeout(burnTimer); burnTimer=setTimeout(burnFlush,40);    // con la salida ya en silencio
+}
+function burnFlush(){
+  clearTimeout(burnTimer); burnTimer=null;
+  if(burnFresh) return;
+  burnFresh=true; freshTails();
+  burnReadyAt=ctx.currentTime+0.03;   // el compresor mira 6 ms adelante: lo viejo termina de salir en silencio
+  if(!burnOn) burnExit();             // se volvió antes de que terminara de vaciar: abre ahora
+}
+function burnExit(){
+  if(!burnFresh) return;              // todavía vaciando (la salida aún no llegó a 0): abre burnFlush
+  const t=ctx.currentTime, at=Math.max(t,burnReadyAt);
+  [[echoIn.gain,sendGain()],[revSend.gain,1]].forEach(([g,v])=>{ g.cancelScheduledValues(t); g.setTargetAtTime(v,at,MUTE_TAU); });
+  applyMute();
+}
+/* lazo del eco y convolver nuevos (buffers en cero); los viejos se desconectan */
+function freshTails(){
+  [echoDelay,echoHP,echoLP,echoSat,echoFB].forEach(n=>{ try{ n.disconnect(); }catch(e){} });
+  try{ echoIn.disconnect(echoDelay); }catch(e){}
+  try{ wowGain.disconnect(echoDelay.delayTime); }catch(e){}
+  try{ flutGain.disconnect(echoDelay.delayTime); }catch(e){}
+  echoLoop();
+  if(fbInfOn) echoFB.gain.value=1.06;
+  wowGain.connect(echoDelay.delayTime); flutGain.connect(echoDelay.delayTime);
+  const old=revConv;
+  try{ old.disconnect(); }catch(e){}
+  try{ revSend.disconnect(old); }catch(e){}
+  revConv=ctx.createConvolver(); revConv.buffer=old.buffer;
+  revSend.connect(revConv); revConv.connect(revTone);
+}
+function renderMute(){
+  const m=document.getElementById('muteBtn'), b=document.getElementById('burnBtn');
+  const sub=document.getElementById('burnSub'), note=document.getElementById('burnNote');
+  if(m){ m.classList.toggle('on',muteOn); m.setAttribute('aria-pressed',muteOn?'true':'false'); m.setAttribute('aria-disabled',burnOn?'true':'false'); }
+  if(b){ b.classList.toggle('on',burnOn); b.setAttribute('aria-pressed',burnOn?'true':'false'); }
+  if(sub) sub.textContent=burnOn?'TOCÁ PARA VOLVER':'SILENCIO TOTAL';
+  if(note) note.textContent=burnOn?'BURNOUT · SILENCIO TOTAL — tocá BURNOUT para volver':'';
+}
+function buildMuteUI(){
+  const m=document.getElementById('muteBtn'), b=document.getElementById('burnBtn');
+  if(m){
+    // como los throws: el puntero queda capturado, así que soltar fuera del botón también lo suelta
+    const on=e=>{ if(e.button>0) return; e.preventDefault(); try{ m.setPointerCapture(e.pointerId); }catch(_){} setMuteSrc(e.pointerId,true); };
+    const off=e=>setMuteSrc(e.pointerId,false);
+    m.addEventListener('pointerdown',on); m.addEventListener('pointerup',off);
+    m.addEventListener('pointercancel',off); m.addEventListener('lostpointercapture',off);
+    m.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); if(!e.repeat) setMuteSrc('kbd',true); } });
+    m.addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter') setMuteSrc('kbd',false); });
+    m.addEventListener('blur',()=>setMuteSrc('kbd',false));
+    m.addEventListener('contextmenu',e=>e.preventDefault());
+  }
+  if(b){
+    // salta al apoyar el dedo, como un kill de hardware; el click solo cuenta si
+    // viene del teclado o de un lector de pantalla (detail 0)
+    b.addEventListener('pointerdown',e=>{ if(e.button>0) return; e.preventDefault(); try{ b.setPointerCapture(e.pointerId); }catch(_){} setBurnout(!burnOn); });
+    b.addEventListener('click',e=>{ if(e.detail===0) setBurnout(!burnOn); });
+    b.addEventListener('contextmenu',e=>e.preventDefault());
+  }
+  window.addEventListener('blur',releaseMute);
+  window.addEventListener('pagehide',releaseMute);
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') releaseMute(); });
+  renderMute();
+}
 
 /* --- UI de efectos --- */
 function buildFXUI(){
@@ -3328,13 +3491,14 @@ function buildThrows(){
   const defs=[
     {t:'ECHO THROW',k:'1',set:setThrow},
     {t:'FEEDBACK ∞',k:'4',set:setFbInf},
-    {t:'KILL',      k:'8',set:setKill}
+    {t:'KILL',      k:'8',set:setKill, hint:'corta la sirena directa; los ecos y la reverb siguen sonando'}
   ];
   // momentaneos: activos mientras haya un dedo encima. El puntero queda
   // capturado, asi que correr el pulgar no los suelta antes de tiempo.
   defs.forEach(d=>{
     const b=el('button','throwbtn'); b.type='button'; b.setAttribute('aria-pressed','false');
-    b.setAttribute('aria-label',d.t+' (momentáneo, tecla '+d.k+')');
+    b.setAttribute('aria-label',d.t+(d.hint?': '+d.hint:'')+' (momentáneo, tecla '+d.k+')');
+    if(d.hint) b.title=d.t+': '+d.hint+' (tecla '+d.k+')';
     b.append(el('span','tt',d.t), el('span','kk','['+d.k+']'));
     new MutationObserver(()=>b.setAttribute('aria-pressed',b.classList.contains('on')?'true':'false')).observe(b,{ attributes:true, attributeFilter:['class'] });
     const ptrs=new Set();
@@ -4205,6 +4369,8 @@ function bindKeyboard(){
     if(e.code==='Digit1'){e.preventDefault(); if(!heldKeys.has('Digit1')){heldKeys.add('Digit1'); setThrow(true); markThrow(0,true);} return;}
     if(e.code==='Digit4'){e.preventDefault(); if(!heldKeys.has('Digit4')){heldKeys.add('Digit4'); setFbInf(true); markThrow(1,true);} return;}
     if(e.code==='Digit8'){e.preventDefault(); if(!heldKeys.has('Digit8')){heldKeys.add('Digit8'); setKill(true); markThrow(2,true);} return;}
+    if(e.code==='Digit9'){e.preventDefault(); if(!heldKeys.has('Digit9')){heldKeys.add('Digit9'); setMuteSrc('key',true);} return;}
+    if(e.code==='Digit0'){e.preventDefault(); setBurnout(!burnOn); return;}
     if(e.code==='Space'){ e.preventDefault(); if(!heldKeys.has('Space')){heldKeys.add('Space'); if(latchMode) sirenToggle(); else noteOn('space',57);} return; }
     const m=KEYMAP[e.code]; if(m==null)return; e.preventDefault();
     if(heldKeys.has(e.code))return; heldKeys.add(e.code);
@@ -4215,6 +4381,7 @@ function bindKeyboard(){
     if(e.code==='Digit1'){ heldKeys.delete('Digit1'); setThrow(false); markThrow(0,false); return; }
     if(e.code==='Digit4'){ heldKeys.delete('Digit4'); setFbInf(false); markThrow(1,false); return; }
     if(e.code==='Digit8'){ heldKeys.delete('Digit8'); setKill(false); markThrow(2,false); return; }
+    if(e.code==='Digit9'){ heldKeys.delete('Digit9'); setMuteSrc('key',false); return; }
     if(e.code==='Space'){ heldKeys.delete('Space'); if(!latchMode) noteOff('space'); return; }
     const m=KEYMAP[e.code]; if(m==null)return;
     heldKeys.delete(e.code); noteOff('k'+e.code); hlKey(m,false);
@@ -4256,7 +4423,7 @@ function buildUI(){
   buildPadUI();
   buildPresetsUI();
   buildRecUI();
-  buildStrip(); buildBigTrig(); bindKeyboard();
+  buildStrip(); buildBigTrig(); buildMuteUI(); bindKeyboard();
   syncPressed(document.body);   // body y no .wrap: en el shell los botones viven en los sheets
 }
 
@@ -4393,7 +4560,7 @@ if(!HOST && window.ZD && ZD.audio){
    haya voz, REC o un momentaneo apretado, y 15 s mas por las colas del eco y
    la reverb. Fuera de eso la pantalla se puede apagar. */
 let playingOn=false, idleTimer=null;
-function soundBusy(){ return voiceActive || recState==='rec' || throwOn || fbInfOn || killOn; }
+function soundBusy(){ return voiceActive || recState==='rec' || throwOn || fbInfOn || killOn || muteOn; }
 function syncPlaying(){
   if(HOST || !(window.ZD && ZD.audio) || !ctx) return;
   if(soundBusy()){
