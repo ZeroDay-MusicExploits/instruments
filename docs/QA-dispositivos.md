@@ -37,6 +37,11 @@ ni frenan el scroll (arrastre horizontal relativo). Medido en Chromium con
 toques por CDP; falta el pulgar en el teléfono (apartado 1, "Toque y layout", y
 lo mismo en Android).
 
+**Actualizado con F2b (2026-10-06, `reports/F2b.md`).** El VCA de J4 queda en 0
+exacto en reposo: encendido y sin tocar nada ya no sube solo a −14 dBFS.
+Medido en Chromium (`tools/tests/j4-reposo.test.mjs`); falta escucharlo en el
+teléfono (apartado 1). Sin arreglar: después de una nota el eco se autosostiene.
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -191,6 +196,13 @@ se marcan en cada lugar donde se ejecutan.
       (una vez). J4: lo mismo con los slots `dubsiren.preset.*`.
 - [ ] **P2** · J4 · Nivel con FEEDBACK ∞ en auriculares (`reports/j4.md`,
       riesgos).
+- [ ] **P1** · J4 · En reposo (F2b): patch de fábrica (sin sesión guardada, o
+      "Empezar de cero"), encender y dejarlo **1 minuto sin tocar nada**, con
+      auriculares y el volumen alto: tiene que quedar en silencio (antes subía
+      solo a un zumbido fuerte en ~10 s). Después, SIREN y soltar: el final de
+      la nota no hace clic. Lo que sigue sonando es el eco, que con el patch de
+      fábrica se autosostiene (sin arreglar, `reports/F2b.md`): anotar cómo se
+      oye; BURNOUT lo corta.
 
 ---
 
