@@ -186,6 +186,9 @@ adentro y vuelve al prender el eco.
 
 ## 3 · Opciones (para decidir; ninguna aplicada)
 
+**Decidido el 2026-10-06: B**, aplicada en [`F2c.md`](F2c.md). El techo
+terminó dependiendo del TIME (la misma caída por segundo); ahí está por qué.
+
 Las tres se simularon dentro de la página medida (el instrumento no
 cambió): `applyPatch` para FEEDBACK, la ganancia de `echoFB` para el techo y
 `setSat` reemplazada para la curva normalizada. FEEDBACK ∞ (`echoFB` = 1,06)

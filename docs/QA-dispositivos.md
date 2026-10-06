@@ -42,6 +42,12 @@ exacto en reposo: encendido y sin tocar nada ya no sube solo a −14 dBFS.
 Medido en Chromium (`tools/tests/j4-reposo.test.mjs`); falta escucharlo en el
 teléfono (apartado 1). Sin arreglar: después de una nota el eco se autosostiene.
 
+**Actualizado con F2c (2026-10-06, `reports/F2c.md`).** El eco de J4 se apaga
+solo: con ∞ apagado la ganancia del lazo tiene un techo que depende del TIME,
+y la perilla FEEDBACK se reescaló para que su máximo sea ese techo. Con ∞ sigue
+autooscilando como antes. Medido en Chromium (`tools/tests/j4-cola.test.mjs`);
+falta escucharlo en el teléfono (apartado 1).
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -200,9 +206,17 @@ se marcan en cada lugar donde se ejecutan.
       "Empezar de cero"), encender y dejarlo **1 minuto sin tocar nada**, con
       auriculares y el volumen alto: tiene que quedar en silencio (antes subía
       solo a un zumbido fuerte en ~10 s). Después, SIREN y soltar: el final de
-      la nota no hace clic. Lo que sigue sonando es el eco, que con el patch de
-      fábrica se autosostiene (sin arreglar, `reports/F2b.md`): anotar cómo se
-      oye; BURNOUT lo corta.
+      la nota no hace clic.
+- [ ] **P1** · J4 · El eco se apaga solo (F2c): SIREN y soltar con el patch
+      de fábrica y en cada uno de los 6 presets; la cola se apaga sola, sin
+      crecer en el medio (antes 5 de 7 no se apagaban nunca). FEEDBACK de 0 a
+      100 % con la sirena latcheada: hasta ~25 % igual que antes, de ahí la cola
+      se alarga de a poco, sin saltos ni tramo muerto. Con FEEDBACK ∞
+      mantenido sigue autooscilando fuerte, y al soltarlo se apaga. Anotar si
+      alguna cola de preset quedó corta (`reports/F2c.md`, sección 4).
+- [ ] **P1** · J4 · Acid Scream varias veces seguidas: si J4 queda mudo hasta
+      recargar, es el NaN del filtro ladder (bug previo, sin arreglar,
+      `reports/F2c.md`, sección 6). Anotar en qué equipo pasa.
 
 ---
 
