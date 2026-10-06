@@ -332,7 +332,7 @@ para escuchar y **un solo** botón de descarga, el del WAV (que pasa por
 **solo la tarjeta**, para el resultado de su render offline; la captura en vivo
 la usan Nebularp, J4 y MonoMoon.
 
-## `zd-mobile` v4 — shell portrait-first
+## `zd-mobile` v5 — shell portrait-first
 
 Reemplaza al shell landscape v1 y a `#zd-rotate`. Barra superior de 48 px →
 zona de tocar → tabs de 56 px + `env(safe-area-inset-bottom)` → bottom sheets
@@ -412,6 +412,11 @@ nodo se mueve de lugar, así que el selector tiene que seguir encontrándolo des
   `descartados: section.hero (sin caja en el shell)`.
 - **Un `<style id="zd-mobile-skin">` no debería bajar de 44 px** el alto de los
   nodos de `transport`: pisa el piso que puso `zd-mobile` v4 (ver changelog).
+- **Nada del skin entra en el carril de los sheets** (v5): los 32 px de la
+  derecha de `.zd-sbody` son para scrollear. Sin márgenes negativos,
+  `position:absolute` hacia la derecha ni anchos fijos más grandes que el sheet;
+  un pane que desborda a lo ancho mete sus controles en el carril (lo detecta
+  `zd-mobile-rail`).
 
 API:
 
@@ -433,6 +438,33 @@ ZD.mobile.mq                       // la media query de activación
 `<style id="zd-mobile-skin">` de un instrumento puede decidir otra cosa a
 sabiendas. Ojo con eso: si el skin fija `min-height` con más especificidad, gana
 el skin y el control vuelve a quedar corto. Lo chequea el test.
+
+**Carril de scroll lateral en los sheets (v5).** El borde derecho de
+`#zd-sheet .zd-sbody` es un carril de `--zd-rail` (32 px) sin ningún control:
+el cuerpo del sheet llega hasta el borde de la pantalla (se come los 7 px de
+padding del sheet) y reserva esos 32 px como padding derecho. Como el padding es
+parte del scroller, un arrastre vertical ahí scrollea de forma nativa (con
+inercia, `overscroll-behavior:contain`) y un toque no cae en ningún control: en
+el carril nunca se cambia un parámetro, haya knobs, sliders o teclados en el
+resto del sheet. Vale igual en modo *peek*.
+
+- Encima va un indicador fino, `.zd-rail` (`aria-hidden`, `pointer-events:none`):
+  una pista de 2 px y una barra de 4 px con el color de acento, proporcional a
+  la parte visible, que se ensancha mientras se scrollea. Solo se ve si hay
+  algo para scrollear. Lo mantienen al día el `scroll` del cuerpo, `resize` y un
+  `ResizeObserver` sobre el cuerpo y los panes (cuando el contenido crece solo).
+- En táctil (`pointer:coarse`) se esconde la barra nativa del sheet (en móvil
+  es overlay y aparece y se va); con mouse (`pointer:fine`) queda la nativa, que
+  se puede arrastrar, y el indicador no se muestra.
+- El ancho útil del sheet baja 23 px (342 → 319 a 360 px de ancho). Un
+  instrumento puede ensanchar el carril (`html.zd-m #zd-sheet{--zd-rail:40px}`),
+  no angostarlo: el mínimo es 32.
+- El carril no arregla lo que pasa **fuera** de él: un knob con
+  `touch-action:none` o un `<input type=range>` nativo siguen agarrando el dedo
+  si el swipe empieza encima. Ver `reports/F3-barrido-scroll.md` y, para los
+  sliders, lo que hizo CronBeat (`bindSheetSliders()`).
+
+Lo verifica `node tools/tests/zd-mobile-rail.test.mjs` en los 5 instrumentos.
 
 **Entrar y salir son idempotentes y reversibles (v3).** El shell se arma una
 sola vez (`build()`), pero los nodos se mueven en cada `enter()` y vuelven a su
@@ -670,7 +702,7 @@ que queden **vacíos** al salir. Imprime lo que resolvió, así se ve de entrada
 un selector de `ZD_M` no matchea nada:
 
 ```
-  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v4 · 4 ciclos
+  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v5 · 4 ciclos
   keep=[seqPanel, stepEditPanel, perfPanel] transport=[playBtn, .tempo-box, clipLed]
   tab seq (SEQ) = [tempoKnob, tapBtn, scope, .seq-top, kbPanel]
 ```
@@ -701,6 +733,51 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-06 · `zd-mobile` v4 → v5
+
+Pedido de uso en el teléfono: "en CronBeat, el scroll de los distintos menús
+(pads, seq, fx…): en el lateral debe ser más seguro poder scrollear, sin cambiar
+todo el tiempo sin querer los parámetros de los efectos". En los sheets casi
+todo el ancho es de controles (sliders de 44 px apilados, filas de knobs), así
+que no había por dónde scrollear sin agarrar uno.
+
+- Carril de scroll lateral: `.zd-sbody` llega al borde derecho del sheet
+  (`margin-right:calc(-7px - safe-area)`) y reserva `--zd-rail` (32 px) de
+  padding a la derecha, sin controles. Arrastrar ahí scrollea nativo; tocar no
+  hace nada.
+- Indicador `.zd-rail` sobre el carril (barra fina proporcional, sin punteros,
+  `aria-hidden`), visible solo si el sheet tiene para scrollear y con
+  `pointer:coarse`. En táctil se esconde la barra nativa del sheet.
+- Sin cambios en la API pública ni en el contrato de `window.ZD_M`. El DOM del
+  sheet suma un hijo (`div.zd-rail` después de `.zd-sbody`).
+- El ancho útil de los sheets baja 23 px. Medido en los 5 a 360×640, 390×844,
+  768×1024 y 844×390 contra la geometría de v4: ningún control pierde alto,
+  ninguna grilla pierde columnas, no aparece scroll horizontal y nada queda en
+  el carril. Lo que sí cambia:
+  - CronBeat (ajustado en su skin, mismo commit): la grilla de patrones A–H pasa
+    a 2 px de separación (38×48 a 360 px, el mínimo de SPEC R1 para 8
+    columnas) y la matriz de envíos ajusta separaciones (sliders de 48 px).
+  - **MonoMoon, OSC, 360 px**: los 18 botones de forma de onda (grilla de 6
+    adentro de 51 px de paddings) pasan de 46×44 a 42×44: siguen con 44 de alto
+    pero quedan por debajo de 44 en el eje corto. No tiene arreglo desde el
+    bloque sin bajar el carril de 32 px. Arreglo propuesto para la sesión de
+    MonoMoon: 3×2 en pantallas angostas (ver `reports/F3-barrido-scroll.md`).
+  - Reflujos de filas `flex-wrap` (no son grillas, un renglón más): Acid EXPORT
+    a 360 px apila `↓ GUARDAR JSON` y `↑ CARGAR JSON`; MonoMoon MOD (la nota
+    del modulador), J4 PAD y SESIÓN, CronBeat SAMPLE (barra del editor) y
+    Nebularp ESCALA a 768×1024 y 844×390 (botones de escala).
+  - Los sliders alternativos de las filas de knob pierden los 23 px de ancho
+    (J4 a 360 px: 99 → 76), con el alto intacto.
+  - MonoMoon FILTRO y VOZ a 844×390 ya desbordaban a lo ancho con v4 (464 px de
+    contenido en 408): con el carril siguen desbordando y sus sliders entran en
+    la franja. Es del skin de MonoMoon (los `.ctl` en landscape).
+
+Lo verifica `node tools/tests/zd-mobile-rail.test.mjs`: en cada pestaña de los 5
+(peek incluidas) el carril mide ≥32 px y no tiene controles, el indicador se ve
+(o no) según haya scroll, y un swipe vertical real por CDP en el carril
+scrollea, ida y vuelta, sin cambiar ningún valor del documento; y la comparación
+de layout de arriba en los 4 viewports.
 
 ### 2026-10-04 · documentación (sin cambio de bloque)
 

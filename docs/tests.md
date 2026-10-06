@@ -38,6 +38,7 @@ Orden de uso:
 | `zd-audio-resumed.test.mjs` | Cuántas veces corre `onResumed` de `zd-audio`. | sí |
 | `zd-pwa-choice.test.mjs` | Banner, ↓ y menú tras `userChoice` / `appinstalled` (`zd-pwa` v3). | sí |
 | `zd-mobile-cycle.test.mjs` | Conformidad de `zd-mobile` para cualquier instrumento (`--file`, `--cycles`). | sí |
+| `zd-mobile-rail.test.mjs` | Carril de scroll lateral de `zd-mobile` v5 en los sheets de los 5 (`--file` para uno): ≥32 px sin controles, indicador, swipe vertical real (CDP) que scrollea sin cambiar ningún valor, también en *peek*; y, contra la geometría de v4, ningún control pierde alto ni una grilla columnas, sin scroll horizontal nuevo, a 360×640, 390×844, 768×1024 y 844×390. | sí |
 | `acid-first-key.test.mjs` | Acid: el primer toque de una tecla no deja una nota colgada y arma un solo `AudioContext` (E1). | sí |
 | `first-hit.test.mjs` | CB, NB, MM, J4: con el audio sin destrabar o suspendido el golpe espera al destrabe; corriendo, sale en el `pointerdown` (iOS emulado, E1). | sí |
 | `pc-keys.test.mjs` | Los 5: los atajos del teclado de PC no le roban teclas a knobs, botones ni modales (E1). | sí |
@@ -66,7 +67,11 @@ adaptador C2. Cada instrumento suma lo propio (ver el encabezado de su archivo).
 
 Los helpers están en `tools/tests/lib/` (`serve.mjs`: servidor estático bajo
 `/instruments/` como GitHub Pages; `load-block.mjs`, `block-page.mjs`, `smf.mjs`,
-`acid-midi.mjs`, `anchors.mjs`: cuenta `<a>` anidados sobre el HTML generado).
+`acid-midi.mjs`, `anchors.mjs`: cuenta `<a>` anidados sobre el HTML generado;
+`touch.mjs`: swipes, arrastres y toques de verdad por CDP
+—`Input.dispatchTouchEvent`—, que pasan por `touch-action`, el scroll nativo y
+el `pointercancel` de Chromium; `page.touchscreen.tap()` no sirve para medir si
+un swipe scrollea).
 
 ## Notas
 

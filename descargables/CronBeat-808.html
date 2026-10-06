@@ -466,9 +466,11 @@
   html.zd-m #zd-sheet input[type=range]::-moz-range-track{height:6px; border-radius:1px; background:#050804; box-shadow:0 0 0 1px var(--zd-line)}
   html.zd-m #zd-sheet input[type=range]::-moz-range-thumb{width:18px; height:28px}
 
-  /* SEQ: patrones A–H en una grilla de 8, acciones, tempo y globales */
+  /* SEQ: patrones A–H en una grilla de 8, acciones, tempo y globales.
+     Separación de 2px: con el carril de zd-mobile v5 (32px a la derecha) a
+     360px de ancho cada botón mide 38×48, el mínimo de SPEC R1 para 8 columnas. */
   html.zd-m #zd-sheet .patbar{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center}
-  html.zd-m #zd-sheet .patbtns{grid-column:1 / -1; display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:4px; order:2}
+  html.zd-m #zd-sheet .patbtns{grid-column:1 / -1; display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:2px; order:2}
   html.zd-m #zd-sheet .patbtn{width:auto; height:48px; font-size:15px}
   html.zd-m #zd-sheet .patops{margin:0}
   html.zd-m #zd-sheet .seqacts{display:flex; gap:8px}
@@ -514,13 +516,15 @@
   html.zd-m #zd-sheet .fx-card h3{margin:-8px -10px 6px; padding:8px 10px}
   html.zd-m #zd-sheet .fx-ctl label, html.zd-m #zd-sheet .fx-ctl output{font-size:12px}
   html.zd-m #zd-sheet .seg button{height:44px; font-size:12px}
-  html.zd-m #zd-sheet .matrix{padding:4px 6px}
-  html.zd-m #zd-sheet .mrow{grid-template-columns:repeat(4,minmax(0,1fr)); gap:2px 8px; padding:4px 4px}
+  /* matriz: separaciones justas para que, con el carril de zd-mobile v5, cada
+     slider de envío mida ≥44px de ancho a 360px (4 por fila) */
+  html.zd-m #zd-sheet .matrix{padding:4px 4px}
+  html.zd-m #zd-sheet .mrow{grid-template-columns:repeat(4,minmax(0,1fr)); gap:2px 4px; padding:4px 2px}
   html.zd-m #zd-sheet .mrow .mname{grid-column:1 / -1; font-size:12px}
   html.zd-m #zd-sheet .mrow.head .mh{font-size:11px}
-  html.zd-m #zd-sheet .mcell{gap:4px; min-width:0}
+  html.zd-m #zd-sheet .mcell{gap:3px; min-width:0}
   html.zd-m #zd-sheet .mcell input[type=range]{min-width:0; width:100%}
-  html.zd-m #zd-sheet .mcell output{width:24px; font-size:11px}
+  html.zd-m #zd-sheet .mcell output{width:22px; font-size:11px}
   @media (min-width:600px){ html.zd-m #zd-sheet .fx-panel{grid-template-columns:1fr 1fr} }
 
   /* SAMPLE: editor con la forma de onda arriba (touch-action:none en el canvas) */
@@ -1844,7 +1848,7 @@ window.ZD_M = {
 };
 </script>
 <script>
-/* ZD-BLOCK:zd-mobile v4 */
+/* ZD-BLOCK:zd-mobile v5 */
 /* Shell portrait-first: barra superior 48px + zona de tocar + tabs 56px +
    bottom sheets. Se configura entero por window.ZD_M (ningun selector ni
    texto del instrumento vive aca). Un solo movimiento de nodos por activacion:
@@ -1854,7 +1858,11 @@ window.ZD_M = {
    salio de build() (que corre una sola vez) y vive en enter(), asi que volver
    a entrar despues de un exit() vuelve a armar el shell en vez de dejar el
    stage vacio. Ademas el ciclo conserva el foco y el scroll de la pagina.
-   v4: los controles de la barra superior miden 44px en los dos ejes (SPEC R1). */
+   v4: los controles de la barra superior miden 44px en los dos ejes (SPEC R1).
+   v5: carril de scroll lateral. El borde derecho de .zd-sbody es padding
+   (--zd-rail, 32px) sin ningun control: arrastrar ahi en vertical scrollea el
+   sheet de forma nativa y nunca toca un parametro. Encima va un indicador
+   fino (.zd-rail, sin punteros) con la posicion del scroll. */
 (function () {
   'use strict';
   var ZD = window.ZD || (window.ZD = {});
@@ -1923,7 +1931,7 @@ window.ZD_M = {
     'bottom:calc(var(--zd-tabs-h) + var(--zd-sab));background:rgba(3,5,2,.6);opacity:0;visibility:hidden;',
     'transition:opacity .16s,visibility 0s .16s}',
     'html.zd-m.zd-sheet-full #zd-scrim{opacity:1;visibility:visible;transition:opacity .16s}',
-    '#zd-sheet{position:fixed;z-index:45;left:0;right:0;bottom:calc(var(--zd-tabs-h) + var(--zd-sab));',
+    '#zd-sheet{--zd-rail:32px;position:fixed;z-index:45;left:0;right:0;bottom:calc(var(--zd-tabs-h) + var(--zd-sab));',
     'display:flex;flex-direction:column;max-height:70dvh;',
     'padding:0 calc(7px + var(--zd-sar)) 8px calc(7px + var(--zd-sal));',
     'background:var(--zd-panel,#111b0f);border-top:2px solid var(--zd-outline,#000);',
@@ -1944,7 +1952,27 @@ window.ZD_M = {
     '#zd-sheet .zd-sclose{flex:none;width:44px;height:36px;cursor:pointer;font-size:14px;color:var(--zd-ink,#e9ebef);',
     'background:var(--zd-panel-2,#1c2430);border:1px solid var(--zd-outline,#000);border-radius:var(--zd-r,4px);',
     'box-shadow:0 0 0 1px var(--zd-line,#2a3f24);touch-action:manipulation}',
-    '#zd-sheet .zd-sbody{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px 2px 4px}',
+    /* v5 · carril de scroll: el cuerpo llega hasta el borde derecho del sheet
+       (se come los 7px de padding del sheet) y reserva --zd-rail de padding a la
+       derecha. El padding es parte del scroller, asi que un arrastre vertical
+       ahi scrollea nativo (con inercia) y un toque no cae en ningun control.
+       Un skin no tiene que meter nada en esa franja (margenes negativos,
+       position:absolute, anchos fijos mas grandes que el sheet). */
+    '#zd-sheet .zd-sbody{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;',
+    'margin-right:calc(-7px - var(--zd-sar));padding:2px calc(var(--zd-rail) + var(--zd-sar)) 4px 2px}',
+    /* indicador: pista de 2px y barra de 4px centradas en el carril; sin punteros
+       (el dedo tiene que llegar al padding del scroller, que esta debajo) */
+    '#zd-sheet .zd-rail{position:absolute;z-index:1;top:0;right:var(--zd-sar);width:var(--zd-rail);height:0;pointer-events:none}',
+    '#zd-sheet .zd-rail[hidden]{display:none}',
+    '#zd-sheet .zd-rail::before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:2px;margin-left:-1px;',
+    'border-radius:1px;background:var(--zd-line,#2a3f24);opacity:.6}',
+    '#zd-sheet .zd-rail i{position:absolute;left:50%;top:0;width:4px;height:0;margin-left:-2px;border-radius:2px;',
+    'background:var(--inst-accent,var(--zd-phosphor,#7fdc5c));opacity:.5;transition:opacity .25s,width .15s,margin-left .15s}',
+    '#zd-sheet .zd-rail.on i{width:6px;margin-left:-3px;opacity:.95}',
+    /* en tactil manda el indicador (la barra nativa es overlay y aparece y se va);
+       con mouse queda la barra nativa, que se puede arrastrar, y el indicador sobra */
+    '@media (pointer:coarse){#zd-sheet .zd-sbody{scrollbar-width:none}#zd-sheet .zd-sbody::-webkit-scrollbar{display:none}}',
+    '@media (pointer:fine){#zd-sheet .zd-rail{display:none}}',
     '#zd-sheet .zd-pane{display:none;flex-direction:column;gap:9px}',
     '#zd-sheet .zd-pane.on{display:flex}',
     '#zd-sheet .zd-pane>*{margin:0!important}',
@@ -1954,7 +1982,7 @@ window.ZD_M = {
     'box-shadow:0 0 0 1px var(--zd-line,#2a3f24);touch-action:manipulation;text-align:left;width:100%}',
     '#zd-sheet .zd-mitem[hidden]{display:none}',
     '#zd-sheet .zd-mnote{font-size:11.5px;line-height:1.5;color:var(--zd-ink-faint,#859a7b);padding:2px 2px 0}',
-    '@media (prefers-reduced-motion:reduce){#zd-sheet,#zd-scrim{transition:none}}'
+    '@media (prefers-reduced-motion:reduce){#zd-sheet,#zd-scrim,#zd-sheet .zd-rail i{transition:none}}'
   ].join('');
 
   /* La media query de activacion no menciona orientacion: rotar no re-mueve nodos. */
@@ -1984,6 +2012,7 @@ window.ZD_M = {
   /* trRef: la columna de transporte de la barra superior. build() corre una sola
      vez, pero moveNodes() corre en cada enter(), asi que el destino se guarda. */
   var trRef = null, savedFocus = null, savedScroll = null;
+  var rail, railThumb, railRAF = 0, railTimer = 0;
 
   function build() {
     if (built) return;
@@ -2035,7 +2064,12 @@ window.ZD_M = {
     close.type = 'button'; close.setAttribute('aria-label', 'Cerrar panel');
     head.appendChild(close);
     sheetBody = mk('div', 'zd-sbody');
-    sheet.append(handle, head, sheetBody);
+    rail = mk('div', 'zd-rail');
+    rail.setAttribute('aria-hidden', 'true');
+    rail.hidden = true;
+    railThumb = mk('i');
+    rail.appendChild(railThumb);
+    sheet.append(handle, head, sheetBody, rail);
 
     cfgTabs.forEach(function (t) {
       var pane = mk('div', 'zd-pane');
@@ -2084,6 +2118,41 @@ window.ZD_M = {
     window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && open) { e.stopPropagation(); close_(); } });
     dragToClose(handle);
     dragToClose(head);
+
+    sheetBody.addEventListener('scroll', function () {
+      railSoon();
+      rail.classList.add('on');
+      clearTimeout(railTimer);
+      railTimer = setTimeout(function () { rail.classList.remove('on'); }, 700);
+    }, { passive: true });
+    window.addEventListener('resize', railSoon);
+    /* el contenido de un pane cambia de alto solo (una cancion con mas bloques,
+       un sample cargado): sin esto el indicador queda con el largo viejo */
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(railSoon);
+      ro.observe(sheetBody);
+      for (var k in panes) ro.observe(panes[k]);
+    }
+  }
+
+  /* Indicador del carril: alineado con .zd-sbody (offsetTop/offsetHeight
+     respecto del sheet, que es position:fixed) y la barra proporcional a la
+     parte visible. Solo se ve si hay algo para scrollear. */
+  function railSoon() { if (!railRAF) railRAF = requestAnimationFrame(railUpdate); }
+  function railUpdate() {
+    railRAF = 0;
+    if (!rail || !open) return;
+    var ch = sheetBody.clientHeight, sh = sheetBody.scrollHeight, boxH = sheetBody.offsetHeight;
+    var can = ch > 0 && sh > ch + 1;
+    rail.hidden = !can;
+    if (!can) return;
+    rail.style.top = sheetBody.offsetTop + 'px';
+    rail.style.height = boxH + 'px';
+    var track = Math.max(0, boxH - 12);
+    var h = Math.min(track, Math.max(28, Math.round(track * ch / sh)));
+    var y = Math.round((track - h) * Math.min(1, sheetBody.scrollTop / (sh - ch)));
+    railThumb.style.height = h + 'px';
+    railThumb.style.transform = 'translateY(' + (6 + y) + 'px)';
   }
 
   /* El titulo acepta ['ACID ','BASS-303'] -> el 2do tramo va en <b>. */
@@ -2133,6 +2202,7 @@ window.ZD_M = {
     document.documentElement.classList.add('zd-sheet-open');
     document.documentElement.classList.toggle('zd-sheet-full', !tab.peek);
     if (ZD.mobile) ZD.mobile.openTab = id;
+    railSoon();
     fire();
   }
   function close_() {

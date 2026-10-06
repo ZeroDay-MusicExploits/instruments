@@ -6,7 +6,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 1. Sin backend, sin frameworks en runtime, sin build obligatorio para **usar** los instrumentos. Cada instrumento sigue siendo **un HTML autocontenido**.
 2. **No** extraer skin/shell a un módulo compartido. Lo compartido se maneja como **bloques copiados idénticos** (3.3), delimitados con `/* ZD-BLOCK:<nombre> v<n> */ … /* /ZD-BLOCK:<nombre> */` y verificados con `tools/check-blocks.mjs`.
-3. **No romper C2**: no tocar los bloques "adaptador C2", `window.HOST` ni el canal `zeroday_sync`. `window.ZD_M` se mantiene como nombre del objeto de configuración del shell y **no se renombra**. Las claves de la config del shell v1 (`title`, `slots`, `place`, `menus`) ya no las lee nadie (`zd-mobile` v4 lee solo `name`, `titleParts`, `logo`, `logoAlt`, `transport`, `keep`, `tabs`, `menuTitle`, `menu`, `menuNotes`, `onEnter`, `onExit`) y se pueden borrar; de ahora en más **solo se agregan claves nuevas** y no se quita ninguna que lea un bloque `ZD` o el hub C2. Si una tarea afecta el adaptador C2, parar y avisar.
+3. **No romper C2**: no tocar los bloques "adaptador C2", `window.HOST` ni el canal `zeroday_sync`. `window.ZD_M` se mantiene como nombre del objeto de configuración del shell y **no se renombra**. Las claves de la config del shell v1 (`title`, `slots`, `place`, `menus`) ya no las lee nadie (`zd-mobile` v4 y v5 leen solo `name`, `titleParts`, `logo`, `logoAlt`, `transport`, `keep`, `tabs`, `menuTitle`, `menu`, `menuNotes`, `onEnter`, `onExit`) y se pueden borrar; de ahora en más **solo se agregan claves nuevas** y no se quita ninguna que lea un bloque `ZD` o el hub C2. Si una tarea afecta el adaptador C2, parar y avisar.
    - *Pendiente (anotado por D, sin resolver):* J4-Sirens Station todavía conserva las claves v1 (`J4-Sirens_Station.html`, literal de `window.ZD_M` + `Object.assign` con las v2); Acid, CronBeat, MonoMoon y Nebularp ya las sacaron. No hay `reports/E1.md` ni commits de E1 que las limpien, y `descargables/` no se toca desde la sesión D. Antes de borrarlas en J4, confirmar con quien mantiene el hub C2 (fuera de este repo) que no lee `iframe.contentWindow.ZD_M`. Ver `reports/D1-barrido.md`, f.
 4. No reescribir motores de audio ni cambiar el sonido.
 5. Nombres de archivo y **URLs actuales no cambian**: `index.html`, `landing-*.html`, `privacidad.html`, `404.html`, `descargables/<Instrumento>.html`.
@@ -113,7 +113,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 ### 3.4 Anexo por instrumento
 
-**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v4 (shell portrait), `zd-audio` v2, `zd-store` v1, `zd-ui` v2, `zd-rec` v2, `zd-dl` v1, `zd-midi` v2, `zd-pwa` v3. Versiones y changelog: `docs/zd-blocks.md`.
+**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v5 (shell portrait, con carril de scroll en los sheets), `zd-audio` v2, `zd-store` v1, `zd-ui` v2, `zd-rec` v2, `zd-dl` v1, `zd-midi` v2, `zd-pwa` v3. Versiones y changelog: `docs/zd-blocks.md`.
 
 **ACID BASS-303** (piloto)
 - Portrait: steps 2×8 arriba; editor del paso (nota / accent / slide / gate) debajo; pad XY cutoff/resonance siempre visible; tabs [Seq | Sonido | Filtro | Patrón | Export].
