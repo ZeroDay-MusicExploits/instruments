@@ -38,7 +38,10 @@
 //      aplicado antes de encender). RMS del sostenido y del release: Δ ≤ 0,05 dB.
 //      Forma de onda: la diferencia queda > 60 dB bajo la señal (lo que queda
 //      es la fuga de 0,0001 de antes). Control: la versión actual dos veces da
-//      < −110 dBFS de diferencia.
+//      la misma salida, salvo un piso de < −80 dBFS (RMS > 80 dB bajo la
+//      señal). No siempre es bit a bit: medido entre −121 dBFS y −∞ en el seco
+//      y entre −93 dBFS y −∞ con reverb (el ConvolverNode de Chromium procesa
+//      la cola de la IR en otro hilo).
 //
 //   node tools/tests/j4-reposo.test.mjs
 //
@@ -430,9 +433,9 @@ for (const [name, patch, rel] of [['seco', PATCH.dry, 1.5], ['eco + reverb', PAT
       ['release 0–1 s', P0 + SUS, P0 + SUS + 1], ['después', P0 + SUS + 1, Infinity]].filter(([, x, y]) => y > x && x * now.sr < now.bufs[0].length);
     const parts = seg.map(([n, x, y]) => { const d = diffOf(now, base, x, y); return `${n} ${fmt(d.max)} (RMS ${fmt(d.rms)})`; }).join(' · ');
     console.log(`  ${name} · sostenido: antes ${b.sus.toFixed(3)} · ahora ${a.sus.toFixed(3)} dBFS RMS (Δ ${dSus.toFixed(4)} dB) · release ${rel} s: antes ${b.rel.toFixed(3)} · ahora ${a.rel.toFixed(3)} (Δ ${dRel.toFixed(4)} dB)`);
-    console.log(`    forma de onda (${now.bufs[0].length} muestras × 2 canales, pico ${fmt(peak)} dBFS, RMS ${fmt(all)}): ahora vs ahora máx |dif| ${fmt(self.max)} dBFS · ahora vs antes máx |dif| ${fmt(vs.max)} dBFS (a los ${(vs.at - P0).toFixed(3)} s de la nota), RMS de la diferencia ${fmt(vs.rms)} dBFS (${fmt(vs.rms - all)} dB bajo la señal)`);
+    console.log(`    forma de onda (${now.bufs[0].length} muestras × 2 canales, pico ${fmt(peak)} dBFS, RMS ${fmt(all)}): ahora vs ahora máx |dif| ${fmt(self.max)} dBFS (RMS ${fmt(self.rms)}) · ahora vs antes máx |dif| ${fmt(vs.max)} dBFS (a los ${(vs.at - P0).toFixed(3)} s de la nota), RMS de la diferencia ${fmt(vs.rms)} dBFS (${fmt(vs.rms - all)} dB bajo la señal)`);
     console.log(`    ahora vs antes, máx |dif| por tramo en dBFS: ${parts}`);
-    assert.ok(self.max < -110, `control: la misma versión dos veces da la misma salida (máx |dif| ${fmt(self.max)} dBFS)`);
+    assert.ok(self.max < -80 && self.rms < all - 80, `control: la misma versión dos veces da la misma salida (máx |dif| ${fmt(self.max)} dBFS, RMS ${fmt(self.rms - all)} dB bajo la señal)`);
     assert.ok(a.sus > -30, `control: la nota suena (${a.sus.toFixed(1)} dBFS)`);
     assert.ok(Math.abs(dSus) <= 0.05, `nota sostenida: Δ ${dSus.toFixed(4)} dB (tolerancia 0,05)`);
     assert.ok(Math.abs(dRel) <= 0.05, `release: Δ ${dRel.toFixed(4)} dB (tolerancia 0,05)`);
