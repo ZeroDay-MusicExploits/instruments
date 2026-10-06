@@ -458,8 +458,15 @@
   html.zd-m #zd-sheet select.bars, html.zd-m #zd-sheet .ed-top select, html.zd-m #zd-sheet .songrow select{height:44px; font-size:13px}
 
   /* sliders: la pista se dibuja con pseudo-elementos y la caja del input mide
-     44px, así el dedo agarra el control en todo el alto (SPEC R1) */
-  html.zd-m #zd-sheet input[type=range]{height:44px; margin:0; background:transparent; box-shadow:none}
+     44px, así el dedo agarra el control en todo el alto (SPEC R1).
+     El gesto no lo maneja el input nativo (en Chrome el touchstart ya salta la
+     perilla al dedo) sino bindSheetSliders(): el input no recibe punteros y su
+     contenedor deja pasar el scroll vertical (pan-y) y le da el horizontal al
+     script. pinch-zoom: el zoom de la página sigue andando (SPEC R1). */
+  html.zd-m #zd-sheet input[type=range]{height:44px; margin:0; background:transparent; box-shadow:none;
+    pointer-events:none; touch-action:pan-y pinch-zoom}
+  html.zd-m #zd-sheet .field .row, html.zd-m #zd-sheet .fx-ctl, html.zd-m #zd-sheet .ed-ctl,
+  html.zd-m #zd-sheet .mcell, html.zd-m #zd-sheet .pmsl, html.zd-m #zd-sheet .songrow .reps{touch-action:pan-y pinch-zoom}
   html.zd-m #zd-sheet input[type=range]::-webkit-slider-runnable-track{height:6px; border-radius:1px; background:#050804;
     box-shadow:0 0 0 1px var(--zd-line), inset 0 1px 2px #000}
   html.zd-m #zd-sheet input[type=range]::-webkit-slider-thumb{width:20px; height:30px; margin-top:-12px}
@@ -538,7 +545,7 @@
   html.zd-m #zd-sheet .ed-controls{grid-template-columns:1fr; gap:8px}
   html.zd-m #zd-sheet .ed-card{padding:8px 10px}
   html.zd-m #zd-sheet .ed-ctl label, html.zd-m #zd-sheet .ed-ctl output{font-size:12px}
-  html.zd-m #zd-sheet .edtoggle{min-height:36px}
+  html.zd-m #zd-sheet .edtoggle{min-height:44px}
   @media (min-width:600px){ html.zd-m #zd-sheet .ed-controls{grid-template-columns:repeat(3,minmax(0,1fr))} }
 
   /* CANCIÓN: bloques en dos renglones y archivo abajo */
@@ -3473,6 +3480,93 @@ function refreshMix(){ for(let t=0;t<mixRows.length;t++) refreshMixRow(t); }
 /* Al entrar al shell: la mezcla refleja lo que se haya tocado en escritorio. */
 function cbShellEnter(){ refreshMix(); refreshTrkName(); }
 
+/* ---- sliders de los sheets en el teléfono ----
+   En html.zd-m #zd-sheet los <input type=range> no reciben punteros
+   (pointer-events:none en zd-mobile-skin). Motivo: Chrome mueve la perilla a
+   la posición del dedo ya en el touchstart, antes de saber si el gesto es un
+   scroll, y con ~20 sliders de 44px apilados intentar scrollear el sheet
+   cambiaba parámetros. El dedo cae en el contenedor del slider, que tiene
+   touch-action:pan-y, y acá se decide qué es el gesto:
+   - vertical dominante: es scroll, lo hace el navegador; el slider no se toca.
+   - empieza en la perilla (zona de 44×44 alrededor de su centro): mueve el
+     valor en cuanto el dedo va de costado (|dx|≥|dy|, 3 px).
+   - empieza en la pista: solo con movimiento horizontal dominante (|dx|>|dy|)
+     tras 10 px. Tocar la pista no salta el valor.
+   En los dos casos el valor es relativo: se mueve desde donde estaba, en la
+   proporción del dedo sobre el recorrido de la perilla (mínimo 160 px, así los
+   sliders angostos de la matriz no son nerviosos). Si el navegador se queda
+   con el gesto a mitad de camino (pointercancel), el valor vuelve.
+   El input sigue siendo el de siempre: el valor se escribe en él y se
+   despachan input/change, así que los handlers, el autoguardado, el deshacer y
+   la exportación no cambian; el foco, el teclado (flechas, Inicio, Fin) y la
+   semántica de slider son los nativos. Un doble toque despacha dblclick en el
+   input (el PAN de la mezcla vuelve al centro, como con el doble clic). */
+function bindSheetSliders(){
+  const THUMB=20, ZONE=22, SLOP_THUMB=3, SLOP_TRACK=10, MIN_SPAN=160, DBL_MS=350, DBL_PX=24;
+  let g=null, lastTap=null;
+  const num=(v,d)=>{ const n=parseFloat(v); return isFinite(n)?n:d; };
+  const span=i=>{ const min=num(i.min,0), max=num(i.max,100); return { min, max: max>min?max:min+1 }; };
+  const fire=(i,type)=> i.dispatchEvent(new Event(type, { bubbles:true }));
+  const focusIt=i=>{ if(document.activeElement!==i){ try{ i.focus({ preventScroll:true }); }catch(_){ i.focus(); } } };
+  /* centro de la perilla: recorre el ancho del input menos el de la perilla (20px en el skin) */
+  function thumbX(i, r){ const s=span(i); return r.left+THUMB/2+(num(i.value,s.min)-s.min)/(s.max-s.min)*Math.max(0, r.width-THUMB); }
+  /* el input no recibe punteros, así que se busca por geometría: la caja del
+     input más la zona de la perilla, que en los extremos se sale 12px */
+  function hit(x, y){
+    let best=null, bd=Infinity;
+    document.querySelectorAll('#zd-sheet .zd-pane.on input[type=range]').forEach(i=>{
+      if(i.disabled) return; const r=i.getBoundingClientRect(); if(!r.width || !r.height) return;
+      if(y<r.top || y>r.bottom || x<r.left-(ZONE-THUMB/2) || x>r.right+(ZONE-THUMB/2)) return;
+      const d= x<r.left ? r.left-x : x>r.right ? x-r.right : 0;
+      if(d<bd){ bd=d; best=i; }
+    });
+    return best;
+  }
+  document.addEventListener('pointerdown', e=>{
+    if(g || !e.isPrimary || (e.pointerType==='mouse' && e.button!==0)) return;
+    if(!(window.ZD && ZD.mobile && ZD.mobile.active) || !e.target.closest || !e.target.closest('#zd-sheet .zd-sbody')) return;
+    const i=hit(e.clientX, e.clientY); if(!i) return;
+    const r=i.getBoundingClientRect();
+    g={ i, id:e.pointerId, x0:e.clientX, y0:e.clientY, v0:i.value, onThumb:Math.abs(e.clientX-thumbX(i,r))<=ZONE,
+        px:Math.max(MIN_SPAN, r.width-THUMB), drag:false, scroll:false };
+    /* sin los mousedown de compatibilidad: el del toque caería en el contenedor
+       (no enfocable) y le sacaría el foco al slider; con mouse, además, no hay
+       selección de texto. No frena el scroll: eso lo decide touch-action. */
+    e.preventDefault();
+  });
+  document.addEventListener('pointermove', e=>{
+    if(!g || e.pointerId!==g.id || g.scroll) return;
+    const dx=e.clientX-g.x0, dy=e.clientY-g.y0;
+    if(!g.drag){
+      const ax=Math.abs(dx), ay=Math.abs(dy);
+      if(Math.max(ax,ay) < (g.onThumb?SLOP_THUMB:SLOP_TRACK)) return;
+      if(g.onThumb ? ax<ay : ax<=ay){ g.scroll=true; return; }
+      g.drag=true; lastTap=null; focusIt(g.i);
+    }
+    const s=span(g.i), before=g.i.value;
+    g.i.value=String(num(g.v0,s.min)+dx/g.px*(s.max-s.min));   // el input redondea al step y recorta al rango
+    if(g.i.value!==before) fire(g.i,'input');
+  });
+  document.addEventListener('pointerup', e=>{
+    if(!g || e.pointerId!==g.id) return;
+    const s=g; g=null;
+    if(s.drag){ if(s.i.value!==s.v0) fire(s.i,'change'); return; }
+    if(s.scroll){ lastTap=null; return; }
+    /* toque: no cambia nada; enfoca el slider (teclado) y cuenta para el doble toque */
+    focusIt(s.i);
+    const now=performance.now();
+    if(lastTap && lastTap.i===s.i && now-lastTap.t<DBL_MS && Math.hypot(e.clientX-lastTap.x, e.clientY-lastTap.y)<DBL_PX){
+      lastTap=null;
+      s.i.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, cancelable:true, clientX:e.clientX, clientY:e.clientY }));
+    } else lastTap={ i:s.i, t:now, x:e.clientX, y:e.clientY };
+  });
+  document.addEventListener('pointercancel', e=>{
+    if(!g || e.pointerId!==g.id) return;
+    const s=g; g=null; lastTap=null;
+    if(s.drag && s.i.value!==s.v0){ s.i.value=s.v0; fire(s.i,'input'); fire(s.i,'change'); }
+  });
+}
+
 /* ---- deshacer / rehacer ----
    Cubre lo que se edita a mano: pasos, patrones (limpiar, aleatorio, pegar,
    MIDI importado), lo grabado con REC y el arreglo de la canción. No cubre
@@ -4289,7 +4383,7 @@ if(!HOST && window.ZD && ZD.audio){
   note.textContent='MIDI no disponible en este navegador (Web MIDI): Patrón→MIDI y Canción→MIDI igual descargan un archivo .mid.';
   note.hidden=false; })();
 document.querySelectorAll('.fx-ctl, .ed-ctl, .field').forEach(c=>{ const l=c.querySelector('label'), i=c.querySelector('input[type=range]'); if(l && i && i.id) l.htmlFor=i.id; });
-buildRuler(); buildTracks(); buildPads(); buildMatrix(); buildMixer(); bindTrackBar(); bindPadOpts(); selectTrack(0); buildPatBar(); bindFX(); bindEditor(); seedPattern(); renderSong(); renderAll(); updatePatBar(); refreshFXControls(); refreshEditorPadList(); setTempo(tempo);
+buildRuler(); buildTracks(); buildPads(); buildMatrix(); buildMixer(); bindTrackBar(); bindPadOpts(); selectTrack(0); buildPatBar(); bindFX(); bindEditor(); bindSheetSliders(); seedPattern(); renderSong(); renderAll(); updatePatBar(); refreshFXControls(); refreshEditorPadList(); setTempo(tempo);
 const isTouch=(window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
 setView(isTouch ? 'pads' : 'seq');
 initSession();

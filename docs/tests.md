@@ -52,6 +52,7 @@ Orden de uso:
 | `install-info.test.mjs` | «Instalar en la computadora y en el teléfono»: tabla del índice, resumen en las 5 landings, FAQ; los textos «↓ Instalar» y «Compartir → Agregar a inicio» existen en `zd-pwa` y en los 5 instrumentos; header en una fila de 320 a 1440 px. | sí |
 | `acid-verify.test.mjs` | Verificación completa de Acid Bass-303 (el piloto). | sí |
 | `cronbeat-verify.test.mjs` | Verificación completa de CronBeat-8:08: 24 casos (R1–R5, C2 simulado, extras). | sí |
+| `cronbeat-sheet-sliders.test.mjs` | CronBeat: sliders de los sheets en el teléfono, con toques reales por CDP. En PADS, SEQ, FX, SAMPLE y CANCIÓN un swipe vertical que arranca en la pista o en la perilla scrollea sin cambiar nada; tocar la pista no salta el valor y lo enfoca; arrastre horizontal relativo y proporcional (perilla, pista, <10 px no mueve, matriz con recorrido mínimo de 160 px) que llega al estado, al JSON y al autoguardado; ← → Inicio Fin después del toque; doble toque en el PAN de la mezcla = 0; controles ≥44 px y sin scroll horizontal a 360×640, 390×844, 768×1024 y 844×390. 6 casos. | sí |
 | `monomoon-verify.test.mjs` | Verificación completa de MonoMoon'70: 23 casos. | sí |
 | `nebularp-verify.test.mjs` | Verificación completa de Nebularp 2035: 17 casos (incluye la rotación de tablet). | sí |
 | `j4-verify.test.mjs` | Verificación completa de J4-Sirens Station: 18 casos. | sí |
