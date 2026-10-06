@@ -107,6 +107,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .btn--accent { background: var(--accent); color: #070b06; box-shadow: 0 4px 0 var(--accent-dark); }
 .btn--outline { border: 1px solid var(--zd-line2); color: var(--zd-ink); background: transparent; }
+/* a:hover pinta el link de verde claro y ganaba por especificidad: sobre el fondo de acento el texto quedaba ilegible */
+.btn--accent:hover { color: #070b06; }
 .btn--sm { padding: 9px 14px; min-height: 40px; font-size: 12px; box-shadow: 0 3px 0 var(--accent-dark); }
 .btn--block { width: 100%; }
 .btn[disabled] { opacity: .6; cursor: default; }
@@ -129,6 +131,8 @@ section.block { padding: 36px 0 64px; }
 @media (min-width: 860px) { .hero { grid-template-columns: repeat(2, 1fr); padding: 80px 0 64px; } }
 .hero__copy { display: flex; flex-direction: column; gap: 22px; }
 .hero__ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+/* Landing de cada instrumento: los dos botones juntos; en pantalla angosta se apilan a todo el ancho */
+@media (max-width: 479px) { .hero__ctas--stack { flex-direction: column; } .hero__ctas--stack .btn { width: 100%; } }
 .hero__art { display: flex; justify-content: center; overflow: hidden; padding-right: 2px; }
 .hero__art-card { position: relative; padding: 16px; border: 1px solid var(--zd-line); border-radius: 6px; background: var(--zd-panel); }
 .hero__art-card img { width: min(100%, 380px); height: auto; border-radius: 3px; background: #ecebe5; padding: 6px; }

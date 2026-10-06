@@ -173,11 +173,11 @@ export function buildLandingPage(data, slug) {
         <span class="eyebrow">${esc(I.num)} · ${esc(I.type)}</span>
         <h1 class="h1">${esc(I.name)}</h1>
         <p class="lede" style="color:var(--accent);font-size:16px">${esc(I.tagline)}</p>
-        <p class="lede" style="max-width:580px">${esc(I.what)}</p>
-        <div class="hero__ctas">
+        <div class="hero__ctas hero__ctas--stack">
           <a href="#descargar" class="btn btn--accent">DESCARGAR GRATIS</a>
-          <a href="#probar" class="btn btn--outline">▶ Probar ahora</a>
+          <a href="${esc(I.file)}" class="btn btn--outline">▶ Probar ahora</a>
         </div>
+        <p class="lede" style="max-width:580px">${esc(I.what)}</p>
       </div>
       <dl class="spec">
         ${specRows.map(([k, v]) => `<div class="spec__row"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('\n        ')}
