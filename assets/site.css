@@ -83,6 +83,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 
 .site-nav { display: none; align-items: center; gap: 20px; font-size: 12px; letter-spacing: .1em; margin-left: auto; }
 .site-nav a { color: var(--zd-dim); }
+/* `.site-nav a` (0,1,1) le ganaba a .btn--accent: el CTA quedaba gris sobre verde (contraste 2,0:1) */
+.site-nav .btn--accent { color: #070b06; }
 @media (min-width: 860px) { .site-nav { display: flex; } .site-menu { display: none !important; } }
 
 .site-menu { margin-left: auto; position: relative; }
