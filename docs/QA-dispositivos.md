@@ -30,6 +30,13 @@ hasta otro toque). Medidos en Chromium (`tools/tests/j4-mute.test.mjs`); falta
 el pulgar en el teléfono y el cambio de app (apartados 1 y 3; en Android, lo
 mismo que en el 1).
 
+**Actualizado con F3 (2026-10-06, `reports/F3-barrido-scroll.md`).** Los sheets
+de los 5 tienen un carril de scroll lateral (`zd-mobile` v5: 32 px a la derecha
+sin controles) y los sliders de los sheets de CronBeat ya no saltan al tocarlos
+ni frenan el scroll (arrastre horizontal relativo). Medido en Chromium con
+toques por CDP; falta el pulgar en el teléfono (apartado 1, "Toque y layout", y
+lo mismo en Android).
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -142,10 +149,27 @@ se marcan en cada lugar donde se ejecutan.
       menú. VoiceOver: anuncia «BURNOUT, seleccionado» y el aviso.
 - [ ] **P1** · Todos los que tienen knobs · Arrastre, doble tap y long-press sin
       que iOS abra la lupa ni el menú contextual (`-webkit-touch-callout:none`).
-- [ ] **P1** · CB · AC · Sliders dentro de un sheet: un arrastre vertical que
-      empieza sobre un slider no hace scroll del sheet (`touch-action:none` en
-      todos los `input[type=range]`); NB lo resolvió con `pan-y`. Ver
-      `reports/D1-barrido.md`, a.
+- [ ] **P1** · CB · Sliders de los sheets (F3), con el pulgar, sobre todo en
+      FX: scrollear con swipes rápidos y lentos que arrancan encima de un
+      slider (en el medio y en el carril) no cambia ningún valor; tocar la pista
+      no salta el valor; arrastrar de costado desde la perilla o la pista lo
+      mueve desde donde estaba; los sliders angostos de la matriz de envíos se
+      pueden ajustar; doble toque en un PAN de la mezcla lo centra; un swipe en
+      diagonal o scrollea o ajusta, nunca las dos cosas. En iOS, que
+      `touch-action:pan-y` en el contenedor deje pasar el vertical y frene el
+      horizontal, y que el foco quede en el slider después del toque.
+- [ ] **P1** · Todos · Carril de scroll lateral de los sheets (`zd-mobile` v5):
+      con el pulgar, scrollear por el borde derecho en todas las pestañas, también
+      en *peek*, nunca cambia un parámetro; el indicador se ve, no tapa nada y la
+      barra nativa no aparece encima; en Android con navegación por gestos, el
+      swipe por el borde no dispara "atrás". El ancho útil es 23 px menor: que no
+      se corte ningún texto a 360 px (AC EXPORT, MM OSC con botones de onda de
+      42 px de ancho).
+- [ ] **P1** · AC · NB · MM · J4 · Sin arreglar (F3): un swipe vertical que
+      arranca sobre un knob de un sheet no scrollea y cambia el valor; tocar un
+      slider alternativo salta el valor (en AC además no scrollea). Confirmar en
+      el teléfono antes de priorizar el arreglo propuesto en
+      `reports/F3-barrido-scroll.md`.
 - [ ] **P1** · CB · Editor de sample: arrastrar inicio/fin en el canvas dentro
       del sheet sin que el sheet se cierre ni scrollee. BPM editable de la barra
       superior: teclado numérico y layout con el teclado abierto.
