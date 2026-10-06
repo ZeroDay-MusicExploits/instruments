@@ -16,7 +16,7 @@ export function buildPrivacidadPage(data) {
 
   const body = `${renderHeader({ site, ctaHref: 'index.html#descargar', nav: [] })}
 <main class="page page--plain legal">
-  <div class="wrap" style="padding:48px 0 80px;max-width:760px;display:flex;flex-direction:column;gap:36px">
+  <div class="wrap" style="padding-top:48px;padding-bottom:80px;max-width:760px;display:flex;flex-direction:column;gap:36px">
     <div style="display:flex;flex-direction:column;gap:14px">
       <a href="index.html" class="btn-link" style="padding-left:0">← INICIO</a>
       <h1>Privacidad</h1>
