@@ -31,8 +31,10 @@
 //      controla contra getFrequencyResponse.
 //   2b El techo, medido como en F2b (semilla de −80 dB en 219 Hz y 2,6 kHz, dB
 //      por repetición): con la perilla al máximo, ≤ L (TIME de fábrica y 2 s).
-//   3  Más perilla = cola más larga: fábrica en 0,25 · 0,5 · 0,8 · 1,1, la
-//      energía de la cola crece y las cuatro bajan de −60 antes de los 30 s.
+//   3  Más perilla = cola más larga: fábrica en 0,25 · 0,5 · 0,8 · 1,1, el RMS
+//      de la cola entre 2 y 20 s (sin la nota, que varía de toma a toma con la
+//      fase del LFO de la sirena) crece, el tiempo hasta −60 no baja y las
+//      cuatro bajan de −60 antes de los 30 s.
 //   4  ∞ intacto, contra el commit base: con ∞ puesto, el FEEDBACK efectivo en
 //      el grafo es 1,06 en las dos versiones y, con ∞ desde antes de la nota
 //      (render repetible), la salida tiene el mismo RMS por segundo (±0,05 dB).
@@ -252,7 +254,9 @@ async function tail(name, variant = {}, { path = URL_PATH, dur = 34, tries = 8 }
       let low = Infinity, grow = 0;
       v.forEach((x, i) => { if (i > 0 && x > -120) grow = Math.max(grow, x - low); low = Math.min(low, x); });
       const bad = c.reduce((a, x) => a + x.bad, 0);
-      const energy = dB(Math.sqrt(c.filter((_, i) => (i + 1) * W <= 30 + 1e-9).reduce((a, x) => a + x.rms * x.rms, 0)));
+      // la cola sin la nota: RMS de las ventanas entre 2 y 20 s
+      const mid = c.filter((_, i) => i * W >= 2 - 1e-9 && (i + 1) * W <= 20 + 1e-9);
+      const energy = dB(Math.sqrt(mid.reduce((a, x) => a + x.rms * x.rms, 0) / mid.length));
       return { name, variant, p, W, v, t60: (last + 1) * W, never: last === v.length - 1, grow, bad, sus: dB(sus.rms), energy, errors, attempt };
     } finally { await ctx.close(); }
   }
@@ -359,10 +363,10 @@ test('2b · techo medido como en F2b (semilla en los picos de los filtros), peri
 test('3 · fábrica con la perilla en 0,25 · 0,5 · 0,8 · 1,1: la cola crece y siempre se apaga', async () => {
   const knob = [0.25, 0.5, 0.8, 1.1];
   const res = await pool(knob.map((fb) => () => tail('fábrica', { fb })));
-  for (const r of res) console.log(`  ${show(r)} · energía 0–30 s ${fmt(r.energy, 2)} dB`);
+  for (const r of res) console.log(`  ${show(r)} · cola 2–20 s ${fmt(r.energy, 2)} dBFS RMS`);
   for (let i = 0; i < res.length; i++) {
     assert.ok(!res[i].never && res[i].t60 <= 30, `${label(res[i])}: < −60 dBFS antes de 30 s`);
-    if (i) assert.ok(res[i].energy > res[i - 1].energy, `más perilla, más cola: ${knob[i - 1]} → ${knob[i]} da ${fmt(res[i - 1].energy, 2)} → ${fmt(res[i].energy, 2)} dB`);
+    if (i) assert.ok(res[i].energy > res[i - 1].energy, `más perilla, más cola: ${knob[i - 1]} → ${knob[i]} da ${fmt(res[i - 1].energy, 2)} → ${fmt(res[i].energy, 2)} dBFS RMS entre 2 y 20 s`);
     if (i) assert.ok(res[i].t60 >= res[i - 1].t60, `más perilla, no menos tiempo: ${knob[i - 1]} → ${knob[i]} da ${fmt(res[i - 1].t60)} → ${fmt(res[i].t60)} s`);
   }
 });
