@@ -31,6 +31,14 @@
 //      a las 10 τ (si el objetivo es 0, ya cuando baja de ~4,5e-5) y salta al
 //      objetivo: e^-10, −87 dB de escalón en la envolvente.
 //   2b Una nota tocada durante el release no queda cortada por ese 0.
+//   3  Con una nota, suena igual que antes del arreglo (commit base), seco y con
+//      eco + reverb: la toma (los dos canales, muestra a muestra) de una nota
+//      sostenida 1,5 s y su release, en frames fijos y con un render repetible
+//      (semilla para Math.random, fuentes alineadas a un mismo frame, el patch
+//      aplicado antes de encender). RMS del sostenido y del release: Δ ≤ 0,05 dB.
+//      Forma de onda: la diferencia queda > 60 dB bajo la señal (lo que queda
+//      es la fuga de 0,0001 de antes). Control: la versión actual dos veces da
+//      < −110 dBFS de diferencia.
 //
 //   node tools/tests/j4-reposo.test.mjs
 //
@@ -85,19 +93,20 @@ const INIT_TAP = () => {
       return true;
     }
   });
-  // graba n muestras del canal 0 desde el frame de t0 (o desde que llega el pedido, si ya pasó)
+  // graba n muestras (canales 0 y 1; si entra mono, el 1 repite el 0) desde el frame de t0
+  // (o desde que llega el pedido, si ya pasó)
   registerProcessor('zd-cap', class extends AudioWorkletProcessor {
     constructor(){ super(); this.req = null;
-      this.port.onmessage = (e) => { this.req = { f0: Math.round(e.data.t0 * sampleRate), first: -1, buf: new Float32Array(e.data.n), k: 0 }; }; }
+      this.port.onmessage = (e) => { const n = e.data.n; this.req = { f0: Math.round(e.data.t0 * sampleRate), first: -1, bufs: [new Float32Array(n), new Float32Array(n)], k: 0 }; }; }
     process(inp){
       const r = this.req; if (!r) return true;
-      const d = inp[0] && inp[0][0];
-      for (let i = 0; i < 128 && r.k < r.buf.length; i++) {
+      const ch = inp[0] || [], d0 = ch[0], d1 = ch[1] || ch[0], n = r.bufs[0].length;
+      for (let i = 0; i < 128 && r.k < n; i++) {
         if (currentFrame + i < r.f0) continue;
         if (r.first < 0) r.first = currentFrame + i;
-        r.buf[r.k++] = d ? d[i] : 0;
+        r.bufs[0][r.k] = d0 ? d0[i] : 0; r.bufs[1][r.k] = d1 ? d1[i] : 0; r.k++;
       }
-      if (r.k === r.buf.length) { this.port.postMessage({ first: r.first, sr: sampleRate, buf: r.buf }, [r.buf.buffer]); this.req = null; }
+      if (r.k === n) { this.port.postMessage({ first: r.first, sr: sampleRate, buf: r.bufs[0], bufs: r.bufs }, r.bufs.map((b) => b.buffer)); this.req = null; }
       return true;
     }
   });`;
@@ -133,6 +142,11 @@ const INIT_TAP = () => {
   window.__edgeOn = (c, src) => {
     const node = sink(c, src, 'zd-edge');
     return () => new Promise((ok) => { node.port.onmessage = (e) => ok(e.data); node.port.postMessage('get'); });
+  };
+  /** Graba la salida de J4 (el tap). -> (t0, n) => Promise<{first, sr, bufs}> */
+  window.__capOn = (c, src) => {
+    const cap = sink(c, src || c.__tap, 'zd-cap');
+    return (t0, n) => new Promise((ok) => { cap.port.onmessage = (e) => ok(e.data); cap.port.postMessage({ t0, n }); });
   };
   /** Sonda de la envolvente: un GainNode alimentado con 1 que recibe las mismas
    *  llamadas de automatización que `param`. -> (t0, n) => Promise<{first, sr, buf}> */
@@ -333,3 +347,96 @@ test('2b · una nota tocada durante el release no queda cortada por el 0 program
     assert.deepEqual(errors, []);
   } finally { await ctx.close(); }
 });
+
+// ─────────────── 3 · con una nota, suena igual que antes del arreglo ──────────
+
+/* Render repetible entre dos páginas: la IR de la reverb y el ruido salen de
+   Math.random (con semilla, las dos versiones arman los mismos), y todas las
+   fuentes (osciladores, LFOs, ruido) arrancan en el mismo frame, t0: el primer
+   start() de un oscilador lo fija 1 s adelante y los que llegan antes de t0
+   arrancan ahí. El patch se aplica antes de encender (initAudio lo arma) y
+   el segundo de margen deja que toda rampa de arranque (τ ≤ 0,05 s) llegue a
+   su valor antes de t0: desde ahí todo es constante hasta la nota, así la
+   fase del oscilador y de los LFOs en la nota es la misma en cada página. */
+const REPEAT = () => {
+  let x = 0x2545f491;
+  Math.random = () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; return (x >>> 0) / 4294967296; };
+  const start = AudioScheduledSourceNode.prototype.start;
+  AudioScheduledSourceNode.prototype.start = function (when, ...rest) {
+    const c = this.context;
+    if (!c.__t0 && this instanceof OscillatorNode) c.__t0 = Math.ceil((c.currentTime + 1) * c.sampleRate / 128) * 128 / c.sampleRate;
+    return start.call(this, !when && c.__t0 && c.currentTime < c.__t0 ? c.__t0 : when, ...rest);
+  };
+  /** Corre fn() con ctx.currentTime = T: noteOn/noteOff programan todo en ese frame exacto. */
+  window.__at = (T, fn) => {
+    Object.defineProperty(ctx, 'currentTime', { configurable: true, get: () => T });
+    try { fn(); } finally { delete ctx.currentTime; }
+  };
+};
+// eco estable (lazo 0,25 × 2,7 < 1), sin wow, y reverb corta: lo que pasa por el lazo del eco y el convolver
+PATCH.fx = { ...PATCH.dry, echo: { time: 0.31, fb: 0.25, tone: 3400, wow: 0, sat: 1.8, mix: 0.5, on: true },
+  rev: { mode: 'plate', decay: 1.2, tone: 4200, mix: 0.3, on: true } };
+
+const SUS = 1.5;   // s de nota sostenida
+/** Una nota en frames fijos (t0 + 3 s), sostenida SUS s y soltada; graba la salida hasta `rel` s después. */
+async function take(path, patch, rel) {
+  const { ctx, page, errors } = await open({ width: 1280, height: 860 }, { path, init: REPEAT });
+  try {
+    await setPatch(page, patch);                  // antes de encender: solo P
+    await powerOn(page);
+    const { t0, sr } = await page.evaluate(() => ({ t0: ctx.__t0, sr: ctx.sampleRate }));
+    assert.ok(t0 > 0, 'control: las fuentes arrancaron alineadas');
+    const tOn = t0 + 3, tOff = tOn + SUS, pre = 0.05;
+    await page.evaluate(() => { window.__capOut = window.__capOn(ctx); });
+    await page.waitForFunction((t) => ctx.currentTime > t, tOn - 0.4, { timeout: 15000 });
+    await page.evaluate(([t, n]) => { window.__got = window.__capOut(t, n); }, [tOn - pre, Math.round((pre + SUS + rel) * sr)]);
+    await page.evaluate((T) => window.__at(T, () => noteOn('pad', 57)), tOn);
+    await page.waitForFunction((t) => ctx.currentTime > t, tOff - 0.3, { timeout: 15000 });
+    await page.evaluate((T) => window.__at(T, () => noteOff('pad')), tOff);
+    await page.waitForFunction((t) => ctx.currentTime > t, tOff + rel + 0.1, { timeout: 30000 });
+    const got = await page.evaluate(async () => { const g = await window.__got; return { first: g.first, sr: g.sr, bufs: g.bufs.map((b) => Array.from(b)) }; });
+    assert.equal(got.first, Math.round((tOn - pre) * sr), 'control: la toma arranca en el frame pedido');
+    return { ...got, pre, errors };
+  } finally { await ctx.close(); }
+}
+/** RMS en dBFS (dos canales) de [a, b) s desde el principio de la toma. */
+const rmsOf = (g, a, b) => {
+  let ss = 0, n = 0;
+  for (const d of g.bufs) for (let i = Math.round(a * g.sr); i < Math.round(b * g.sr); i++) { ss += d[i] * d[i]; n++; }
+  return dB(Math.sqrt(ss / n));
+};
+/** Diferencia muestra a muestra en [a, b) s de la toma: máximo absoluto y RMS, en dBFS. */
+const diffOf = (g, h, a = 0, b = Infinity) => {
+  let mx = 0, ss = 0, n = 0, at = 0;
+  const i0 = Math.round(a * g.sr), i1 = Math.min(g.bufs[0].length, Math.round(b * g.sr));
+  for (let c = 0; c < 2; c++) for (let i = i0; i < i1; i++) { const d = g.bufs[c][i] - h.bufs[c][i], x = Math.abs(d); if (x > mx) { mx = x; at = i; } ss += d * d; n++; }
+  return { max: dB(mx), rms: dB(Math.sqrt(ss / n)), at: at / g.sr };
+};
+
+for (const [name, patch, rel] of [['seco', PATCH.dry, 1.5], ['eco + reverb', PATCH.fx, 3]]) {
+  test(`3 · ${name}: nota sostenida y release iguales al commit base (RMS ≤ 0,05 dB; forma de onda)`, async (t) => {
+    if (!baseHtml) { t.skip(`sin git o sin la base ${BASE}`); return; }
+    const now = await take(URL_PATH, patch, rel);
+    const again = await take(URL_PATH, patch, rel);
+    const base = await take(BASE_PATH, patch, rel);
+    const w = { sus: [now.pre + 0.1, now.pre + SUS], rel: [now.pre + SUS, now.pre + SUS + rel] };
+    const lv = (g) => ({ sus: rmsOf(g, ...w.sus), rel: rmsOf(g, ...w.rel) });
+    const a = lv(now), b = lv(base);
+    const dSus = a.sus - b.sus, dRel = a.rel - b.rel;
+    const self = diffOf(now, again), vs = diffOf(now, base), all = rmsOf(now, 0, now.bufs[0].length / now.sr);
+    const peak = dB(Math.max(...now.bufs.map((d) => d.reduce((m, v) => Math.max(m, Math.abs(v)), 0))));
+    // por tramo: antes de la nota (en la versión de antes ya sonaba la fuga), ataque, sostenido, release y cola
+    const P0 = now.pre, seg = [['antes de la nota', 0, P0], ['ataque 0–0,2 s', P0, P0 + 0.2], ['sostenido', P0 + 0.2, P0 + SUS],
+      ['release 0–1 s', P0 + SUS, P0 + SUS + 1], ['después', P0 + SUS + 1, Infinity]].filter(([, x, y]) => y > x && x * now.sr < now.bufs[0].length);
+    const parts = seg.map(([n, x, y]) => { const d = diffOf(now, base, x, y); return `${n} ${fmt(d.max)} (RMS ${fmt(d.rms)})`; }).join(' · ');
+    console.log(`  ${name} · sostenido: antes ${b.sus.toFixed(3)} · ahora ${a.sus.toFixed(3)} dBFS RMS (Δ ${dSus.toFixed(4)} dB) · release ${rel} s: antes ${b.rel.toFixed(3)} · ahora ${a.rel.toFixed(3)} (Δ ${dRel.toFixed(4)} dB)`);
+    console.log(`    forma de onda (${now.bufs[0].length} muestras × 2 canales, pico ${fmt(peak)} dBFS, RMS ${fmt(all)}): ahora vs ahora máx |dif| ${fmt(self.max)} dBFS · ahora vs antes máx |dif| ${fmt(vs.max)} dBFS (a los ${(vs.at - P0).toFixed(3)} s de la nota), RMS de la diferencia ${fmt(vs.rms)} dBFS (${fmt(vs.rms - all)} dB bajo la señal)`);
+    console.log(`    ahora vs antes, máx |dif| por tramo en dBFS: ${parts}`);
+    assert.ok(self.max < -110, `control: la misma versión dos veces da la misma salida (máx |dif| ${fmt(self.max)} dBFS)`);
+    assert.ok(a.sus > -30, `control: la nota suena (${a.sus.toFixed(1)} dBFS)`);
+    assert.ok(Math.abs(dSus) <= 0.05, `nota sostenida: Δ ${dSus.toFixed(4)} dB (tolerancia 0,05)`);
+    assert.ok(Math.abs(dRel) <= 0.05, `release: Δ ${dRel.toFixed(4)} dB (tolerancia 0,05)`);
+    assert.ok(vs.rms < all - 60, `misma forma de onda: la diferencia queda ${fmt(vs.rms - all)} dB bajo la señal (tiene que ser más de 60)`);
+    assert.deepEqual([...now.errors, ...again.errors, ...base.errors], []);
+  });
+}
