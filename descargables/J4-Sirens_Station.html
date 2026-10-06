@@ -3023,6 +3023,7 @@ const A4=440, mtof=m=>A4*Math.pow(2,(m-69)/12);
 
 /* ---- worklet ladder (Stilson/Smith, autooscila) ---- */
 const LADDER_CODE = `
+const SQ12=Math.sqrt(12);
 class Ladder extends AudioWorkletProcessor{
   static get parameterDescriptors(){return [
     {name:'cutoff',defaultValue:1200,minValue:20,maxValue:16000,automationRate:'a-rate'},
@@ -3050,6 +3051,9 @@ class Ladder extends AudioWorkletProcessor{
         this.s[1]=this.s[0]*p+this.oy[0]*p - k*this.s[1];
         this.s[2]=this.s[1]*p+this.oy[1]*p - k*this.s[2];
         this.s[3]=this.s[2]*p+this.oy[2]*p - k*this.s[3];
+        // pasado √12 la sigmoide ya no acota (|s3-s3³/6| > |s3|) y el estado crece
+        // hasta Infinity/NaN y deja mudo a J4: se reinicia el filtro (incluye NaN)
+        if(!(Math.abs(this.s[3])<=SQ12)){ this.s[0]=this.s[1]=this.s[2]=this.s[3]=0; x=0; }
         this.s[3]=this.s[3]-(this.s[3]*this.s[3]*this.s[3])/6; // sigmoide band-limited
         this.ox=x;this.oy[0]=this.s[0];this.oy[1]=this.s[1];this.oy[2]=this.s[2];
         out[n]=this.s[3];
