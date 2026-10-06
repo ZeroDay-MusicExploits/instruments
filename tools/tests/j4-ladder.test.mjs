@@ -14,8 +14,9 @@
 //      sostenidos y pausas distintos): salida finita en cada toma, cada toma suena
 //      (RMS de la nota > −30 dBFS) y, después, Police Alarm suena. Se mide la
 //      guarda desde afuera (una sonda en la salida del filtro: la muestra en 0
-//      exacto después de una distinta de 0): cuántas veces se activa, cuánto
-//      tarda el filtro en volver (< 50 ms) y el clic en la salida de J4.
+//      exacto después de una distinta de 0): cuántas veces se activa y cuánto
+//      tarda el filtro en volver (< 50 ms). El clic, comparado contra tomas sin
+//      activación, se mide en reports/F2d-ladder.mjs --only clic.
 //   2  Barrido determinista (semilla fija) de CUTOFF, RESO y DRIVE con notas, en
 //      el patch de fábrica y los 6 presets, a 44,1 y 48 kHz (más los extremos):
 //      la salida es siempre finita y al final J4 suena.
@@ -268,16 +269,14 @@ test('1 · Acid Scream, 52 tomas de SIREN a 44,1 kHz: salida finita, cada toma s
   }
 });
 
-test('1b · la guarda en esas 52 tomas: activaciones, el filtro vuelve en < 50 ms y el clic en la salida', async () => {
+test('1b · la guarda en esas 52 tomas: activaciones y el filtro vuelve en < 50 ms', async () => {
   const res = await acidRuns();
   for (const r of res) assert.equal(r.lad.badF, 0, 'la salida del filtro no tiene muestras no finitas');
   const ev = res.flatMap((r) => r.lad.ev);
   console.log(`  activaciones de la guarda: ${ev.length} en ${res.length * 13} tomas (${res.map((r) => r.lad.ev.length).join(' + ')})`);
-  for (const e of ev) console.log(`    t ${e.t.toFixed(3)} s · filtro: última muestra ${e.last.toFixed(3)} → 0, vuelve a −6 dB del RMS previo en ${fmt(e.back, 2)} ms · salida de J4 (20 ms): escalón máx. ${fmt(dB(e.stepPost), 1)} dBFS (en los 20 ms anteriores ${fmt(dB(e.stepPre), 1)}), pico ${fmt(dB(e.peakPost), 1)} dBFS, caída de nivel ${fmt(e.dip, 1)} dB`);
-  if (ev.length) {
-    const sp = ev.map((e) => dB(e.stepPost) - dB(e.stepPre));
-    console.log(`  peor vuelta del filtro ${fmt(Math.max(...ev.map((e) => e.back)), 2)} ms · escalón en la salida contra el de los 20 ms anteriores: ${fmt(Math.min(...sp), 1)} a ${fmt(Math.max(...sp), 1)} dB · peor caída de nivel ${fmt(Math.min(...ev.map((e) => e.dip)), 1)} dB`);
-  }
+  // el clic, contra tomas sin activación en el mismo momento de la nota: reports/F2d-ladder.mjs --only clic
+  for (const e of ev) console.log(`    t ${e.t.toFixed(3)} s · filtro: última muestra ${e.last.toFixed(3)} → 0, vuelve a −6 dB del RMS previo en ${fmt(e.back, 2)} ms · salida de J4 en los 20 ms siguientes: escalón máx. ${fmt(dB(e.stepPost), 1)} dBFS, pico ${fmt(dB(e.peakPost), 1)} dBFS`);
+  if (ev.length) console.log(`  peor vuelta del filtro ${fmt(Math.max(...ev.map((e) => e.back)), 2)} ms`);
   ev.forEach((e) => assert.ok(e.back >= 0 && e.back < 50, `t ${e.t}: el filtro tiene que volver en < 50 ms (${e.back} ms)`));
 });
 
