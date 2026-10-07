@@ -3,13 +3,17 @@
 // del sitio y se registra desde cada descargable como:
 //   navigator.serviceWorker.register('../sw.js', { scope: '../' })
 // así su scope queda en /instruments/ sin importar desde qué instrumento
-// se registre primero. Ver docs/pwa.md para las condiciones de activación
-// (bloque zd-pwa) y el contrato del postMessage de "nueva versión".
+// se registre primero. Ojo: ese es el scope del SERVICE WORKER. El scope de
+// cada manifest es otra cosa y es el de su propio archivo (manifests/*.webmanifest,
+// "scope": "../descargables/<Archivo>.html"): si compartieran "../", en Android
+// la app instalada de uno capturaba los links a los otros 4. Ver docs/pwa.md
+// para eso, las condiciones de activación (bloque zd-pwa) y el contrato del
+// postMessage de "nueva versión".
 //
 // No cachea descargables-zeroday.zip a propósito: es pesado, cambia cuando
 // cambia cualquier instrumento y no hace falta offline.
 
-const VERSION = 'zd-v4';
+const VERSION = 'zd-v5';
 const CACHE_NAME = `zd-cache-${VERSION}`;
 
 const PRECACHE_URLS = [
