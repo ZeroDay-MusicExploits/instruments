@@ -454,7 +454,10 @@
   html.zd-m #zd-sheet .ctl{display:grid; grid-template-columns:44px minmax(62px,auto) minmax(60px,1fr) 58px;
     grid-template-areas:"k l s v"; align-items:center; gap:8px; padding:2px 8px;
     background:var(--zd-well); border:1px solid var(--zd-line-soft); border-radius:var(--zd-r);}
-  html.zd-m #zd-sheet .ctl > .knob{grid-area:k; --sz:40px;}
+  /* el knob del sheet deja pasar el swipe vertical (scrollea el sheet) y se
+     ajusta de costado (Knob._bind, F3 decisión A); 44px, el mínimo de SPEC R1 */
+  html.zd-m #zd-sheet .ctl > .knob{grid-area:k; --sz:44px; cursor:ew-resize; touch-action:pan-y; touch-action:pan-y pinch-zoom;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;}
   html.zd-m #zd-sheet .ctl > .lab{grid-area:l; font-size:11.5px; text-align:left; white-space:normal; line-height:1.2;}
   html.zd-m #zd-sheet .ctl > .kslider{grid-area:s; display:block; width:100%; min-width:0; height:44px; margin:0; accent-color:var(--accent);}
   html.zd-m #zd-sheet .ctl > .val{grid-area:v; text-align:right; font-size:12.5px; min-height:0;}
@@ -3429,8 +3432,9 @@ const SECTION_NAME={ ampSection:'Amplitud', fenvSection:'Contorno de filtro', fi
 function knobLabel(el){ const ctl=el.closest('.ctl'), lab=ctl&&ctl.querySelector('.lab'), t=lab? lab.textContent.trim() : 'Valor';
   const sec=el.closest('[id$="Section"]'), pre=sec&&SECTION_NAME[sec.id]; return pre? pre+' · '+t : t; }
 
-/* Knob: arrastre vertical, doble tap = valor de fábrica, long-press = valor numérico,
-   rueda del mouse, flechas y un slider alternativo que solo se ve en los sheets móviles. */
+/* Knob: arrastre vertical (de costado en los sheets del teléfono), doble tap = valor de
+   fábrica, long-press = valor numérico, rueda del mouse, flechas y un slider alternativo
+   que solo se ve en los sheets móviles. */
 class Knob{
   constructor(el, {min,max,value,curve='lin',step=0,format,parse,hint,label,onChange}){
     this.el=el; this.min=min; this.max=max; this.curve=curve; this.step=step;
@@ -3464,20 +3468,36 @@ class Knob{
       { title:this.label.toUpperCase(), value:f(this.value), maxlength:16, label:this.label, ok:'APLICAR' })
     .then(t=>{ if(t==null||!String(t).trim()) return; const v=this.parse(String(t));
       if(!isFinite(v)) ZD.toast('Ese valor no se entiende: '+String(t).slice(0,24), {kind:'error'}); else this.set(v); }); }
+  /* En un sheet del shell móvil (F3, decisión A) el knob no se queda con el
+     dedo: el swipe vertical scrollea el sheet (touch-action:pan-y en
+     zd-mobile-skin) y el valor se ajusta con un arrastre horizontal dominante,
+     relativo y sin demora (240 px = todo el recorrido, como el vertical). Fuera
+     de los sheets (macros), arrastre vertical como siempre. */
   _bind(){
     const el=this.el; let startY=0, startN=0, dragging=false, moved=0, lp=null, lpFired=false, lastTap=0;
+    let inSheet=false, axis=null, startX=0, startV=0;
     const clearLP=()=>{ if(lp){ clearTimeout(lp); lp=null; } };
-    el.addEventListener('pointerdown',(e)=>{ if(e.button>0) return; e.preventDefault();
-      dragging=true; moved=0; lpFired=false; startY=e.clientY; startN=this._norm(this.value);
+    el.addEventListener('pointerdown',(e)=>{ if(e.button>0) return;
+      inSheet=!!(window.ZD && ZD.mobile && ZD.mobile.active && el.closest('#zd-sheet'));
+      if(!inSheet) e.preventDefault();   // en el sheet, que nada del pointerdown frene el scroll
+      dragging=true; moved=0; lpFired=false; axis=null; startX=e.clientX; startY=e.clientY; startV=this.value; startN=this._norm(this.value);
       el.classList.add('active'); try{ el.setPointerCapture(e.pointerId); }catch(_){}
       try{ el.focus({preventScroll:true}); }catch(_){ el.focus(); }
       clearLP(); lp=setTimeout(()=>{ lp=null; lpFired=true; dragging=false; el.classList.remove('active'); this.ask(); }, 550); });
-    el.addEventListener('pointermove',(e)=>{ if(!dragging) return; const dy=startY-e.clientY;
+    el.addEventListener('pointermove',(e)=>{ if(!dragging) return;
+      if(inSheet){ const dx=e.clientX-startX, ax=Math.abs(dx), ay=Math.abs(e.clientY-startY);
+        moved=Math.max(moved,ax,ay); if(moved>5) clearLP();
+        if(!axis){ if(moved<4) return; axis=ax>ay?'x':'y'; clearLP(); if(axis==='y') el.classList.remove('active'); }
+        if(axis==='y') return;   // es scroll: lo hace el navegador
+        this.set(this._denorm(startN+dx/240*(e.shiftKey?0.25:1))); return; }
+      const dy=startY-e.clientY;
       if(Math.abs(dy)>5) clearLP(); moved=Math.max(moved,Math.abs(dy));
       const fine=e.shiftKey?0.25:1; this.set(this._denorm(startN+dy/240*fine)); });
     const end=(e)=>{ clearLP(); if(!dragging) return; dragging=false; el.classList.remove('active');
       try{ el.releasePointerCapture(e.pointerId); }catch(_){}
-      if(lpFired || moved>5 || e.type==='pointercancel') return;
+      // si el navegador se quedó con el gesto (scroll) a mitad de un ajuste, el valor vuelve
+      if(inSheet && e.type==='pointercancel' && axis==='x' && this.value!==startV) this.set(startV);
+      if(lpFired || moved>5 || e.type==='pointercancel' || (inSheet && axis)) return;
       const now=performance.now(); if(now-lastTap<320){ lastTap=0; this.reset(); } else lastTap=now; };
     el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
     el.addEventListener('wheel',(e)=>{ const fine=e.shiftKey?0.2:1;

@@ -463,7 +463,10 @@
   html.zd-m #zd-sheet .knob-bank{display:grid; grid-template-columns:1fr; gap:7px; flex-wrap:nowrap;}
   html.zd-m #zd-sheet .knob-wrap{flex-direction:row; align-items:center; gap:9px; width:auto;
     background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r); padding:4px 8px;}
-  html.zd-m #zd-sheet .knob-wrap .knob{order:0; width:42px; height:42px; flex:none;}
+  /* el knob del sheet deja pasar el swipe vertical (scrollea el sheet) y se
+     ajusta de costado (makeKnob, F3 decisión A); 44px, el mínimo de SPEC R1 */
+  html.zd-m #zd-sheet .knob-wrap .knob{order:0; width:44px; height:44px; flex:none; cursor:ew-resize;
+    touch-action:pan-y; touch-action:pan-y pinch-zoom;}
   html.zd-m #zd-sheet .knob-wrap .knob-label{order:1; flex:none; width:74px; min-height:0;
     text-align:left; justify-content:flex-start; font-size:11px; letter-spacing:.06em;}
   html.zd-m #zd-sheet .knob-wrap .knob-slider{order:2; display:block; flex:1; min-width:64px; height:44px;}
@@ -3198,17 +3201,33 @@ function makeKnob(mount,key,label,opt){ opt=opt||{}; const c=CTRL[key];
     fineStep:(c.step||(c.max-c.min)/200), pageStep:(c.max-c.min)/10, label:label,
     get:()=>params[key], set:v=>setParam(key,v), format:v=>c.fmt(v), onEnter:askValue }) : null;
   let dragging=false, startY=0, startNorm=0, moved=0, lpTimer=null, lpFired=false, lastTap=0;
+  // En un sheet del shell móvil (F3, decisión A) el knob no se queda con el
+  // dedo: el swipe vertical scrollea el sheet (touch-action:pan-y en
+  // zd-mobile-skin) y el valor se ajusta con un arrastre horizontal dominante,
+  // relativo y sin demora (180 px = todo el recorrido, como el vertical). Fuera
+  // de los sheets, arrastre vertical como siempre.
+  let inSheet=false, axis=null, startX=0, startVal=0;
   function clearLP(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } }
-  knob.addEventListener('pointerdown', e=>{ e.preventDefault(); dragging=true; moved=0; lpFired=false;
-    startY=e.clientY; startNorm=(params[key]-c.min)/(c.max-c.min); knob.setPointerCapture(e.pointerId); knob.classList.add('grab');
+  knob.addEventListener('pointerdown', e=>{ inSheet=!!(window.ZD&&ZD.mobile&&ZD.mobile.active&&knob.closest('#zd-sheet'));
+    // en el sheet sin preventDefault: que nada del pointerdown pueda frenar el scroll
+    if(!inSheet) e.preventDefault(); dragging=true; moved=0; lpFired=false; axis=null;
+    startX=e.clientX; startY=e.clientY; startVal=params[key]; startNorm=(params[key]-c.min)/(c.max-c.min); knob.setPointerCapture(e.pointerId); knob.classList.add('grab');
     clearLP(); lpTimer=setTimeout(()=>{ lpTimer=null; lpFired=true; dragging=false; knob.classList.remove('grab'); askValue(); }, 550);
     if(window.ZD&&ZD.audio) ZD.audio.unlock(); else Engine.ensure(); });
-  knob.addEventListener('pointermove', e=>{ if(!dragging) return; const dyAbs=Math.abs(startY-e.clientY);
+  knob.addEventListener('pointermove', e=>{ if(!dragging) return;
+    if(inSheet){ const dx=e.clientX-startX, ax=Math.abs(dx), ay=Math.abs(e.clientY-startY);
+      moved=Math.max(moved,ax,ay); if(moved>6) clearLP();
+      if(!axis){ if(moved<4) return; axis=ax>ay?'x':'y'; clearLP(); if(axis==='y') knob.classList.remove('grab'); }
+      if(axis==='y') return;   // es scroll: lo hace el navegador
+      const norm=clamp(startNorm+dx*(e.shiftKey?0.28:1)/180,0,1); setParam(key,c.min+norm*(c.max-c.min)); return; }
+    const dyAbs=Math.abs(startY-e.clientY);
     if(dyAbs>6) clearLP(); moved=Math.max(moved,dyAbs);
     const sens=e.shiftKey?0.28:1, dy=(startY-e.clientY)*sens, norm=clamp(startNorm+dy/180,0,1); setParam(key,c.min+norm*(c.max-c.min)); });
   const end=e=>{ clearLP(); if(!dragging) return; dragging=false;
     try{knob.releasePointerCapture(e.pointerId);}catch(_){} knob.classList.remove('grab');
-    if(lpFired || moved>6) return;
+    // si el navegador se quedó con el gesto (scroll) a mitad de un ajuste, el valor vuelve
+    if(inSheet && e.type==='pointercancel'){ if(axis==='x' && params[key]!==startVal) setParam(key,startVal); return; }
+    if(lpFired || moved>6 || (inSheet && axis)) return;
     const now=performance.now(); if(now-lastTap<320){ setParam(key,c.def); lastTap=0; } else lastTap=now; };
   knob.addEventListener('pointerup',end); knob.addEventListener('pointercancel',end);
   knob.addEventListener('wheel', e=>{ e.preventDefault(); const step=(c.max-c.min)*(e.shiftKey?0.005:0.02); setParam(key,params[key]-Math.sign(e.deltaY)*step); }, {passive:false});

@@ -548,12 +548,36 @@ Reglas para el skin:
   más chico que la fila, el `pan-y` queda en el envoltorio.
 - La caja del input conviene que mida 44px de alto (SPEC R1): el bloque solo
   agarra el dedo dentro de esa caja (más la zona de la perilla a los costados).
-- **Los knobs no son de este bloque**: cada instrumento tiene el suyo. Si un
-  knob de la misma fila tiene `touch-action:none`, el dedo que arranca sobre él
-  sigue sin scrollear: eso lo resuelve el código de knobs de cada instrumento.
+- **Los knobs no son de este bloque**: cada instrumento tiene el suyo (ver
+  abajo).
 
 Lo verifican `node tools/tests/zd-sheet-input.test.mjs` (Acid, Nebularp,
 MonoMoon y J4) y `node tools/tests/cronbeat-sheet-sliders.test.mjs` (CronBeat).
+
+**Knobs en los sheets (convención, no es código del bloque).** Para que la
+fila entera responda igual ("vertical scrollea, horizontal ajusta", decisión A
+de F3), el knob que está en un sheet sigue el mismo modelo que el slider de su
+fila. Lo hacen Acid, Nebularp, MonoMoon y J4 en su propio código de knobs:
+
+- En el `zd-mobile-skin`, el knob del sheet lleva `touch-action:pan-y
+  pinch-zoom` (en vez de `none`), 44×44 px y `cursor:ew-resize`.
+- En el `pointerdown`, si `ZD.mobile.active` y el knob está adentro de
+  `#zd-sheet`: sin `preventDefault()` (que nada frene el scroll) y sin decidir
+  todavía. A los 4 px de movimiento: horizontal dominante (|dx| > |dy|) ajusta
+  el valor en relativo, con la misma sensibilidad que tenía el arrastre
+  vertical; si no, es scroll y el knob no hace nada más (el navegador manda
+  `pointercancel`). Sin demora: no hay pulsación para armar el knob.
+- Un `pointercancel` después de haber ajustado devuelve el valor al de antes.
+- Doble toque = valor por defecto, long-press (550 ms quieto) = entrada
+  numérica, teclado y `role="slider"`: igual que antes. Un gesto que se movió
+  no cuenta como toque.
+- Fuera de los sheets (macros de MonoMoon, BPM de Nebularp) y en el escritorio
+  sin shell, el arrastre vertical de siempre. Con el shell activo en una
+  ventana angosta de escritorio, el knob del sheet también va de costado con el
+  mouse (el mismo modelo que el slider de su fila); la rueda y el teclado no
+  cambian.
+
+Lo verifica `node tools/tests/sheet-knobs.test.mjs`.
 
 ## `zd-pwa` v3 — service worker, Instalar y la oferta proactiva
 

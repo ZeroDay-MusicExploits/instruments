@@ -565,7 +565,9 @@ body::after{
   html.zd-m #zd-sheet .knobs{display:grid; grid-template-columns:minmax(0,1fr); gap:6px;}
   html.zd-m #zd-sheet .knob{flex-direction:row; align-items:center; gap:9px; padding:3px 8px;
     background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r);}
-  html.zd-m #zd-sheet .dial{--d:42px; order:0;}
+  /* la perilla del sheet deja pasar el swipe vertical (scrollea el sheet) y se
+     ajusta de costado (knobUI, F3 decisión A); 44px, el mínimo de SPEC R1 */
+  html.zd-m #zd-sheet .dial{--d:44px; order:0; cursor:ew-resize; touch-action:pan-y; touch-action:pan-y pinch-zoom;}
   html.zd-m #zd-sheet .knob .lab{order:1; width:72px; flex:none; text-align:left;}
   html.zd-m #zd-sheet .knob .kslider{order:2; display:block; flex:1; min-width:60px; height:44px; margin:0;}
   html.zd-m #zd-sheet .knob .val{order:3; width:62px; flex:none; text-align:right;}
@@ -4472,8 +4474,9 @@ function buildSeg(host, opts, get, onPick){
 }
 
 /* --- perilla ---
-   Arrastre vertical con captura del puntero (sin listeners en window, que en
-   tactil frenaban el scroll de toda la pagina), valor siempre visible, doble
+   Arrastre vertical (de costado en los sheets del telefono) con captura del
+   puntero (sin listeners en window, que en tactil frenaban el scroll de toda
+   la pagina), valor siempre visible, doble
    tap = valor por defecto, long-press = valor numerico en la unidad que se ve,
    rueda del mouse y un slider alternativo que solo aparece en los sheets del
    shell movil (SPEC R1). */
@@ -4511,25 +4514,41 @@ function knobUI(hostEl, o){ // o = {key, label, aria, get, set, specKey}
     // zd-ui enfoca el input en el cuadro siguiente sin seleccionarlo: tipear sumaba al valor viejo
     requestAnimationFrame(()=>requestAnimationFrame(()=>{ const i=document.querySelector('.zd-dlg input'); if(i) i.select(); }));
   }
+  /* En un sheet del shell movil (F3, decision A) la perilla no se queda con el
+     dedo: el swipe vertical scrollea el sheet (touch-action:pan-y en
+     zd-mobile-skin) y el valor se ajusta con un arrastre horizontal dominante,
+     relativo y sin demora (200 px = todo el recorrido, como el vertical). */
   let pid=null, startY=0, startN=0, moved=0, lpTimer=null, lpFired=false, lastTap=0;
+  let inSheet=false, axis=null, startX=0, startV=0;
   const clearLP=()=>{ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } };
   dial.addEventListener('pointerdown',e=>{
     if(pid!=null) return;
-    e.preventDefault();
-    pid=e.pointerId; startY=e.clientY; startN=getN(); moved=0; lpFired=false;
+    inSheet=!!(window.ZD&&ZD.mobile&&ZD.mobile.active&&dial.closest('#zd-sheet'));
+    if(!inSheet) e.preventDefault();   // en el sheet, que nada del pointerdown frene el scroll
+    pid=e.pointerId; startX=e.clientX; startY=e.clientY; startN=getN(); startV=o.get(); moved=0; lpFired=false; axis=null;
     try{ dial.setPointerCapture(pid); }catch(_){}
     wrap.classList.add('drag'); clearLP();
     lpTimer=setTimeout(()=>{ lpTimer=null; lpFired=true; pid=null; wrap.classList.remove('drag'); askValue(); },550);
   });
   dial.addEventListener('pointermove',e=>{
     if(e.pointerId!==pid) return;
+    if(inSheet){
+      const dx=e.clientX-startX, ax=Math.abs(dx), ay=Math.abs(e.clientY-startY);
+      moved=Math.max(moved,ax,ay); if(moved>6) clearLP();
+      if(!axis){ if(moved<4) return; axis=ax>ay?'x':'y'; clearLP(); if(axis==='y') wrap.classList.remove('drag'); }
+      if(axis==='y') return;   // es scroll: lo hace el navegador
+      setN(startN+dx*(e.shiftKey?0.28:1)/200);
+      return;
+    }
     const dy=startY-e.clientY; moved=Math.max(moved,Math.abs(dy)); if(moved>6) clearLP();
     setN(startN+dy*(e.shiftKey?0.28:1)/200);
   });
   const end=e=>{
     if(e.pointerId!==pid) return;
     pid=null; clearLP(); wrap.classList.remove('drag');
-    if(lpFired||moved>6||e.type!=='pointerup') return;
+    // si el navegador se quedo con el gesto (scroll) a mitad de un ajuste, el valor vuelve
+    if(inSheet&&e.type!=='pointerup'&&axis==='x'&&o.get()!==startV){ o.set(startV); render(); markDirty(); }
+    if(lpFired||moved>6||e.type!=='pointerup'||(inSheet&&axis)) return;
     const now=performance.now(); if(now-lastTap<320){ lastTap=0; reset(); } else lastTap=now;   // doble tap = reset
   };
   dial.addEventListener('pointerup',end); dial.addEventListener('pointercancel',end); dial.addEventListener('lostpointercapture',end);

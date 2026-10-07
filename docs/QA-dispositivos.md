@@ -217,8 +217,16 @@ se marcan en cada lugar donde se ejecutan.
       mueve desde donde estaba (en las filas de knob el slider mide 60–100 px y
       el recorrido es de 160 px: la perilla va más lenta que el dedo). En AC,
       Swing y Densidad (ahora de 44 px de alto). En iOS, lo mismo que para CB.
-- [ ] **P1** · AC · NB · MM · J4 · Sin arreglar (F3): un swipe vertical que
-      arranca sobre un knob de un sheet no scrollea y cambia el valor.
+- [ ] **P1** · AC · NB · MM · J4 · Knobs de los sheets (F3, decisión A), con el
+      pulgar en cada sheet: un swipe vertical que arranca encima de un knob
+      scrollea el sheet y no cambia el valor; el knob se ajusta arrastrando de
+      costado (sin demora, desde donde estaba); un swipe en diagonal o scrollea
+      o ajusta, nunca las dos cosas; doble toque = valor por defecto y
+      long-press = entrada numérica siguen andando (sin lupa ni menú de iOS).
+      En iOS, que `touch-action:pan-y` en el knob deje pasar el scroll y que
+      sacar el `preventDefault()` del `pointerdown` no traiga selección de
+      texto. Fuera de los sheets (macros de MM, BPM de NB) sigue el arrastre
+      vertical.
 - [ ] **P1** · CB · Editor de sample: arrastrar inicio/fin en el canvas dentro
       del sheet sin que el sheet se cierre ni scrollee. BPM editable de la barra
       superior: teclado numérico y layout con el teclado abierto.
@@ -392,6 +400,10 @@ se marcan en cada lugar donde se ejecutan.
       de FX (en la pista, en la perilla y en el carril) scrollean el sheet **sin
       cambiar ningún valor**; tocar la pista no salta; arrastrar de costado lo
       mueve desde donde estaba; doble toque en el PAN de la mezcla lo centra.
+- [ ] **P1** · AC · NB · MM · J4 · Sliders y knobs de los sheets en Android
+      (apartado 1, F3): swipes verticales que arrancan encima de un slider o de
+      un knob scrollean sin cambiar nada; de costado ajustan desde donde estaba;
+      tocar no cambia nada.
 - [ ] **P1** · J4 · MM · AC · Las pruebas de F2b a F2e del apartado 1
       ("Persistencia") también en Android: J4 en reposo y el eco que se apaga
       solo, Acid Scream 20 veces y el pad XY en la esquina; MM 10 minutos con la

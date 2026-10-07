@@ -516,6 +516,10 @@
     background:var(--zd-well); border:1px solid var(--zd-line); border-radius:var(--zd-r); padding:3px 8px;}
   html.zd-m #zd-sheet .knob .dial,
   html.zd-m #zd-sheet .knob svg{width:44px; height:44px; flex:none;}
+  /* el knob del sheet deja pasar el swipe vertical (scrollea el sheet) y se
+     ajusta de costado (makeKnob, F3 decisión A) */
+  html.zd-m #zd-sheet .knob .dial{cursor:ew-resize; touch-action:pan-y; touch-action:pan-y pinch-zoom;
+    -webkit-touch-callout:none;}
   html.zd-m #zd-sheet .knob .kname{order:1; flex:none; width:80px; text-align:left;}
   html.zd-m #zd-sheet .knob .kslider{order:2; display:block; flex:1; min-width:60px;}
   html.zd-m #zd-sheet .knob .kval{order:3; flex:none; width:66px; text-align:right; font-size:12px;}
@@ -3750,16 +3754,31 @@ window.ZD_M = {
     render();
 
     // arrastre vertical · doble tap = reset · long-press = entrada numérica (SPEC R1)
+    // En un sheet del shell móvil (F3, decisión A) el knob no se queda con el
+    // dedo: el swipe vertical scrollea el sheet (touch-action:pan-y en
+    // zd-mobile-skin) y el valor se ajusta con un arrastre horizontal dominante,
+    // relativo y sin demora (180 px = todo el recorrido, como el vertical).
     let dragging = false, startY = 0, startF = 0, moved = 0, lpTimer = null, lpFired = false, lastTap = 0;
+    let inSheet = false, axis = null, startX = 0, startV = 0;
     const clearLP = () => { if (lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     dial.addEventListener("pointerdown", (e) => {
-      dragging = true; moved = 0; lpFired = false; startY = e.clientY; startF = clamp(toFrac(value), 0, 1);
+      inSheet = !!(window.ZD && ZD.mobile && ZD.mobile.active && dial.closest("#zd-sheet"));
+      dragging = true; moved = 0; lpFired = false; axis = null; startX = e.clientX; startY = e.clientY; startV = value; startF = clamp(toFrac(value), 0, 1);
       try { dial.setPointerCapture(e.pointerId); } catch(err){}
-      e.preventDefault();
+      if (!inSheet) e.preventDefault();             // en el sheet, que nada del pointerdown frene el scroll
       clearLP(); lpTimer = setTimeout(() => { lpTimer = null; lpFired = true; dragging = false; askValue(); }, 550);
     });
     dial.addEventListener("pointermove", (e) => {
       if (!dragging) return;
+      if (inSheet){
+        const dx = e.clientX - startX, ax = Math.abs(dx), ay = Math.abs(e.clientY - startY);
+        moved = Math.max(moved, ax, ay);
+        if (moved > 6) clearLP();
+        if (!axis){ if (moved < 4) return; axis = ax > ay ? "x" : "y"; clearLP(); }
+        if (axis === "y") return;                         // es scroll: lo hace el navegador
+        set(fromFrac(clamp(startF + dx / (e.shiftKey ? 480 : 180), 0, 1)));
+        return;
+      }
       const dy = Math.abs(e.clientY - startY);
       if (dy > 6) clearLP();
       moved = Math.max(moved, dy);
@@ -3772,7 +3791,9 @@ window.ZD_M = {
       if (!dragging) return;
       dragging = false;
       try { dial.releasePointerCapture(e.pointerId); } catch(err){}
-      if (lpFired || moved > 6) return;
+      // si el navegador se quedó con el gesto (scroll) a mitad de un ajuste, el valor vuelve
+      if (inSheet && e.type === "pointercancel"){ if (axis === "x" && value !== startV) set(startV); return; }
+      if (lpFired || moved > 6 || (inSheet && axis)) return;
       const now = performance.now();
       if (now - lastTap < 320){ set(opt.value); lastTap = 0; } else lastTap = now;
     };
