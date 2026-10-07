@@ -15,6 +15,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 8. No afirmar que algo "funciona en iOS" sin haberlo probado; listarlo en "A verificar en dispositivo".
 9. **Los claims del sitio deben coincidir con el código.** Los textos de estado (`exporta`, `guarda`, `app`) salen de `data/instrumentos.json` y solo se activan cuando el instrumento lo cumple.
 10. **Sesiones C (instrumentos):** trabajar en un worktree propio; commits con `git commit -- <rutas>`; no tocar archivos compartidos (ZIP, `data/instrumentos.json`, `sw.js`, `docs/`, `tools/`, otros instrumentos); entregar `reports/<slug>.md`. El ZIP, `data/instrumentos.json` y `sw.js` los resuelve la sesión de integración (D).
+    - *Alcance de la regla:* lo de no tocar archivos compartidos (incluida `docs/`) vale para sesiones que corren **en paralelo** en ramas o worktrees distintos, donde dos sesiones editando el mismo archivo se pisan al fusionar. Una sesión **secuencial sobre `main`** (la anterior ya terminó y se fusionó) **sí puede** actualizar `docs/tests.md` y `docs/QA-dispositivos.md` (en el mismo commit que el cambio o en uno aparte), por ejemplo al agregar un test o al dejar algo por probar en un dispositivo. El ZIP, `data/instrumentos.json` y `sw.js` siguen siendo de la sesión de integración.
 
 ### 3.2 Un solo archivo, dos usos
 
