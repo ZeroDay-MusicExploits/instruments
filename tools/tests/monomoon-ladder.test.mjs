@@ -1,29 +1,33 @@
 #!/usr/bin/env node
 // tools/tests/monomoon-ladder.test.mjs
 //
-// MonoMoon'70: el filtro 'moog-ladder' no da NaN (F2d, ver reports/F2d-monomoon.md).
-// El estado del filtro es lineal (la tanh está solo en la salida). Con Mod → Filtro
-// y la fuente de modulación (Osc3) a frecuencia de audio, el corte cambia más
-// rápido de lo que el modelo tolera y el estado crece sin límite: la salida queda
-// clavada en ±1 (el "colapso") hasta que el estado desborda a Infinity y NaN. El
-// NaN no se va nunca (pasa al DC-block y a la salida) y MonoMoon queda mudo hasta
-// recargar. Medido con el patch de fábrica + Mod → Filtro, rueda Mod 1 y Osc3 en
-// 2': NaN a los 0,5 s del primer acorde.
+// MonoMoon'70: el filtro 'moog-ladder' no da NaN (F2d, reports/F2d-monomoon.md) y
+// su estado queda acotado (F2e, reports/F2e.md). Antes el estado era lineal (la
+// tanh estaba solo en la salida): con Mod → Filtro y el Osc3 a frecuencia de audio
+// crecía sin límite hasta Infinity y NaN, y MonoMoon quedaba mudo hasta recargar.
+// F2d agregó una guarda (si el estado deja de ser finito, se reinicia). F2e satura
+// la realimentación (x −= tanh(out4)·fb): como cada etapa tiene polo |1−f| < 1, con
+// la realimentación acotada el estado queda acotado y la guarda no debería
+// activarse nunca, tampoco en la condición dirigida de F2d (patch de fábrica +
+// Mod → Filtro + rueda Mod 1 + Osc3 en 2').
 //
 //   1  Mod → Filtro con el Osc3 a frecuencia de audio (RESO 0,32 · 0,6 · 0,9;
 //      Osc3 en 2' y 8'; rueda Mod 0,7 y 1; 44,1 y 48 kHz): con notas, la salida y
 //      la del filtro son finitas, y después el patch «Bajo gordo» suena.
 //   2  Fuzz determinista (semilla fija, 60 s) con Mod → Filtro: notas, acordes,
 //      ruedas, macros, Osc3, voz: salida finita y al final suena.
-//   3  Bit a bit, en el navegador: el ladder del commit base y el de ahora corren
-//      lado a lado dentro del worklet (el grafo recibe el de antes). Los 7
-//      presets con notas, ruedas y macros, y el fuzz del caso 2: toda muestra
-//      anterior a la primera activación de la guarda es idéntica, y la guarda
-//      solo se activa en la muestra en que el estado de antes dejó de ser finito.
-//   4  Bit a bit, sin navegador: el código de los dos worklets en Node, 1500
-//      tomas con corte, contorno y modulación a frecuencia de audio al azar
-//      (semilla fija): las que antes quedaban finitas, idénticas; las que
-//      divergían, finitas.
+//   3  En el navegador, el ladder de antes de F2d (BASE, lineal y sin guarda) y el
+//      de ahora corren lado a lado dentro del worklet sobre la misma entrada (el
+//      grafo recibe el de antes). Los 7 presets con notas, ruedas y macros, la
+//      condición dirigida y el fuzz del caso 2: con el de ahora la guarda se
+//      activa 0 veces, la salida es finita y |out4| no pasa de la cota
+//      demostrable (1,7e14 con la entrada ≤ 7); control: el de antes diverge en
+//      la condición dirigida.
+//   4  En Node, 1500 tomas al azar (corte, contorno y modulación hasta frecuencia
+//      de audio, entrada hasta 6,3; semilla fija): con el de ahora, 0 activaciones,
+//      salida finita y |out4| bajo la cota; con RESO 0 (realimentación 0) la
+//      salida es la misma bit a bit que con el de F2d (BASE_F2D); control: el de
+//      antes de F2d diverge en al menos 20.
 //
 //   node tools/tests/monomoon-ladder.test.mjs          # ~3 min
 //
@@ -39,13 +43,20 @@ import { ROOT } from './lib/load-block.mjs';
 
 const FILE = 'descargables/MonoMoon70.html';
 const URL_PATH = '/' + FILE;
-const BASE = '22fb1d2';   // main antes de la guarda (F2d)
+const BASE = '22fb1d2';       // main antes de la guarda (F2d): realimentación lineal, sin guarda
+const BASE_F2D = '70a916a';   // main con la guarda de F2d, antes de la realimentación saturada (F2e)
+/* Cota demostrable de |out4| con la realimentación saturada: |x| ≤ (I + 3,86)·0,35013·f⁴ con
+   f ≤ 1,148, cada etapa tiene ganancia ≤ 1,3/(1 − máx|1−f|) = 1,3/0,00058 (f ≥ 1,16·0,0005):
+   |out4| ≤ (1,3/0,00058)⁴ · 0,609 · (I + 3,86) ≈ 1,54e13·(I + 3,86). */
+const bound = (I) => Math.pow(1.3 / (1.16 * 0.0005), 4) * 0.35013 * Math.pow(1.16 * 0.99, 4) * (I + 4 * 0.965);
 
 const moogOf = (html) => { const m = html.match(/const MOOG_WORKLET = `([\s\S]*?)`;/); if (!m) throw new Error('no encontré MOOG_WORKLET'); return m[1]; };
 const NOW = moogOf(readFileSync(join(ROOT, FILE), 'utf8'));
-let OLD = null;
-try { OLD = moogOf(execFileSync('git', ['-C', ROOT, 'show', `${BASE}:${FILE}`], { encoding: 'utf8', maxBuffer: 64 << 20 })); }
-catch (e) { OLD = null; }
+let OLD = null, F2D = null;
+try {
+  OLD = moogOf(execFileSync('git', ['-C', ROOT, 'show', `${BASE}:${FILE}`], { encoding: 'utf8', maxBuffer: 64 << 20 }));
+  F2D = moogOf(execFileSync('git', ['-C', ROOT, 'show', `${BASE_F2D}:${FILE}`], { encoding: 'utf8', maxBuffer: 64 << 20 }));
+} catch (e) { OLD = null; F2D = null; }
 const PRESETS = ['Bajo gordo', 'Sub redondo', 'Lead filoso', 'Pad cálido', 'Órgano hueco', 'Auto-wah (osc3 LFO)', 'Resonante zumbón'];
 
 /* Antes de la página: sampleRate, tap de la salida y medidor (no finitas, pico,
@@ -98,7 +109,8 @@ const HELPERS = () => {
 };
 
 /* Caso 3: 'moog-ladder' corre el de antes (A) y el de ahora (B) como objetos,
-   una muestra por vez con los mismos valores, y entrega A. */
+   una muestra por vez con los mismos valores, y entrega A. En B se cuentan las
+   activaciones de la guarda y el máximo de |out4|. */
 function twinSource(oldCode, newCode) {
   const plain = (code) => code.replace('class MoogLadder extends AudioWorkletProcessor', 'class MoogLadder extends __P').replace("registerProcessor('moog-ladder', MoogLadder);", 'return MoogLadder;');
   const counted = newCode.replace(/if\(!Number\.isFinite\(this\.out4\)\)\{/, '$&this.__g=(this.__g||0)+1;');
@@ -112,7 +124,7 @@ registerProcessor('moog-ladder', class extends AudioWorkletProcessor {
   constructor(){ super(); this.a = new A(); this.b = new B();
     this.i = [[new Float32Array(1)]]; this.oa = [[new Float32Array(1)]]; this.ob = [[new Float32Array(1)]];
     this.p = { cutoff: new Float32Array(1), cutoffMod: new Float32Array(1), resonance: new Float32Array(1) };
-    this.d = { n: 0, firstGuard: -1, guards: 0, firstMism: -1, mismBeforeGuard: 0, aBadState: -1, bBad: 0 };
+    this.d = { n: 0, firstGuard: -1, guards: 0, aBadState: -1, bBad: 0, bMax: 0 };
     this.port.onmessage = () => this.port.postMessage(this.d); }
   process(inputs, outputs, params){
     const o = outputs[0][0]; if (!o) return true;
@@ -127,7 +139,7 @@ registerProcessor('moog-ladder', class extends AudioWorkletProcessor {
       if (g > d.guards) { d.guards = g; if (d.firstGuard < 0) d.firstGuard = fr; }
       if (d.aBadState < 0 && !Number.isFinite(this.a.out4)) d.aBadState = fr;
       if (!(yb - yb === 0)) d.bBad++;
-      if (!Object.is(ya, yb)) { if (d.firstMism < 0) d.firstMism = fr; if (d.firstGuard < 0) d.mismBeforeGuard++; }
+      if (Math.abs(this.b.out4) > d.bMax) d.bMax = Math.abs(this.b.out4);
       d.n++;
       o[n] = ya;
     }
@@ -257,13 +269,26 @@ test('2 · fuzz determinista de 60 s con Mod → Filtro (44,1 y 48 kHz): salida 
   }
 });
 
-// ─────────────── 3 · bit a bit en el navegador ───────────────
+// ─────────────── 3 · en el navegador: la guarda no se activa ───────────────
 
-test('3 · bit a bit: antes de la primera activación de la guarda, el ladder de ahora da lo mismo que el de antes; la guarda solo se activa donde el estado de antes dejó de ser finito', async (t) => {
+test('3 · navegador: con el de ahora la guarda se activa 0 veces (presets, condición dirigida y fuzz), la salida es finita y |out4| queda bajo la cota', async (t) => {
   if (!OLD) { t.skip(`sin git o sin la base ${BASE}`); return; }
   const twin = twinSource(OLD, NOW);
+  const read = (page) => page.evaluate(() => new Promise((ok) => { const n = engine.filter.node; n.port.onmessage = (e) => ok(e.data); n.port.postMessage(0); }));
+  /* Una página que casi no renderizó (el worklet procesó menos de la mitad de lo que dura
+     la página) es un problema del arnés, no del filtro: pasó ~1 de cada 10 corridas en F2e,
+     sin errores, con el worklet en 0 muestras o cortado a los 0,4 s. Se informa y se repite
+     una vez; si se repite, el caso falla. */
+  const once = (fn) => async () => {
+    for (let k = 1; ; k++) {
+      const t0 = Date.now(), r = await fn();
+      r.want = Math.round((Date.now() - t0) / 1000 * r.sr * 0.5);
+      if (r.d.n >= r.want || k === 2) return r;
+      console.log(`  ${r.what}: el worklet procesó ${r.d.n} muestras (esperadas ≥ ${r.want}): la página casi no renderizó, se repite`);
+    }
+  };
   const jobs = [];
-  for (const sr of [44100, 48000]) for (const p of PRESETS) jobs.push(async () => {
+  for (const sr of [44100, 48000]) for (const p of PRESETS) jobs.push(once(async () => {
     const { ctx, page, errors } = await open({ sr, twin });
     try {
       await page.evaluate((x) => __fz.preset(x), p);
@@ -275,45 +300,52 @@ test('3 · bit a bit: antes de la primera activación de la guarda, el ladder de
         await page.evaluate(([c, r]) => { __fz.knob('cutoff', c); __fz.knob('res', r); }, [(k * 0.37) % 1, (k * 0.29) % 1]);
         await page.waitForTimeout(420);
       }
-      const d = await page.evaluate(() => new Promise((ok) => { const n = engine.filter.node; n.port.onmessage = (e) => ok(e.data); n.port.postMessage(0); }));
-      return { what: `${p} · ${sr} Hz`, d, errors };
+      return { what: `${p} · ${sr} Hz`, sr, d: await read(page), errors };
     } finally { await ctx.close(); }
-  });
-  for (const sr of [44100, 48000]) jobs.push(async () => {
+  }));
+  for (const sr of [44100, 48000]) jobs.push(once(async () => {
+    const { ctx, page, errors } = await open({ sr, twin });
+    try {
+      // la condición dirigida de F2d: patch de fábrica + Mod → Filtro + rueda 1 + Osc3 en 2'
+      await page.evaluate(() => __fz.filtmod({ res: 0.32, foot: 5, wheel: 1 }));
+      await play(page, 8);
+      return { what: `dirigida · ${sr} Hz`, sr, d: await read(page), errors };
+    } finally { await ctx.close(); }
+  }));
+  for (const sr of [44100, 48000]) jobs.push(once(async () => {
     const { ctx, page, errors } = await open({ sr, twin });
     try {
       await fuzz(page, 30, 0x6d6f6f6e + sr);
-      const d = await page.evaluate(() => new Promise((ok) => { const n = engine.filter.node; n.port.onmessage = (e) => ok(e.data); n.port.postMessage(0); }));
-      return { what: `fuzz con Mod → Filtro · ${sr} Hz`, d, errors };
+      return { what: `fuzz con Mod → Filtro · ${sr} Hz`, sr, d: await read(page), errors };
     } finally { await ctx.close(); }
-  });
+  }));
   const res = await pool(jobs);
-  let stable = 0, div = 0;
-  for (const r of res) {
-    const d = r.d; if (d.aBadState >= 0) div++; else stable++;
-    console.log(`  ${r.what.padEnd(36)} ${d.n} muestras · antes: ${d.aBadState >= 0 ? 'estado no finito en el frame ' + d.aBadState : 'finito'} · guarda: ${d.guards ? d.guards + ' (primera en ' + d.firstGuard + ')' : '0'} · distintas antes de la guarda: ${d.mismBeforeGuard} · ahora no finitas: ${d.bBad}`);
-  }
-  console.log(`  ${stable} páginas en las que el ladder de antes quedó finito, ${div} en las que divergió`);
   for (const r of res) {
     const d = r.d;
-    assert.ok(d.n > 0, `${r.what}: control, el par corrió`);
-    assert.equal(d.mismBeforeGuard, 0, `${r.what}: ${d.mismBeforeGuard} muestras distintas antes de la primera activación (primera en ${d.firstMism})`);
-    assert.equal(d.bBad, 0, `${r.what}: el ladder de ahora dio muestras no finitas`);
-    if (d.aBadState < 0) assert.equal(d.guards, 0, `${r.what}: con el estado de antes finito la guarda no se puede activar`);
-    if (d.firstGuard >= 0) assert.equal(d.firstGuard, d.aBadState, `${r.what}: la primera activación (${d.firstGuard}) tiene que caer en la muestra en que el de antes dejó de ser finito (${d.aBadState})`);
+    console.log(`  ${r.what.padEnd(36)} ${d.n} muestras · antes de F2d: ${d.aBadState >= 0 ? 'estado no finito en el frame ' + d.aBadState : 'finito'} · ahora: guarda ${d.guards}, máx |out4| ${d.bMax.toFixed(2)}, no finitas ${d.bBad}`);
   }
-  assert.ok(stable >= 10 && div >= 1, `control: hay páginas de los dos tipos (${stable} finitas, ${div} divergentes)`);
+  for (const r of res) {
+    const d = r.d;
+    assert.ok(d.n >= r.want, `${r.what}: control, el par corrió (${d.n} muestras, esperadas ≥ ${r.want})`);
+    assert.equal(d.guards, 0, `${r.what}: con la realimentación saturada la guarda no se tiene que activar (${d.guards}, la primera en ${d.firstGuard})`);
+    assert.equal(d.bBad, 0, `${r.what}: el ladder de ahora dio muestras no finitas`);
+    assert.ok(d.bMax <= bound(7), `${r.what}: |out4| ${d.bMax} por encima de la cota ${bound(7).toExponential(2)}`);
+  }
+  const dir = res.filter((r) => /^dirigida/.test(r.what));
+  assert.ok(dir.every((r) => r.d.aBadState >= 0), `control: en la condición dirigida el ladder de antes de F2d diverge (${dir.map((r) => r.d.aBadState).join(', ')})`);
 });
 
-// ─────────────── 4 · bit a bit sin navegador ───────────────
+// ─────────────── 4 · en Node ───────────────
 
 function makeLadder(code, sr) {
   let C = null;
   new Function('AudioWorkletProcessor', 'registerProcessor', 'sampleRate', code)(class { constructor() { this.port = {}; } }, (n, c) => { C = c; }, sr);
   return new C();
 }
-function render(code, c) {
+/** `onLadder` recibe el objeto del worklet; se lleva en `__max` el máximo de |out4|. */
+function render(code, c, onLadder) {
   const L = makeLadder(code, c.sr), B = 128, N = Math.round(c.secs * c.sr), y = new Float32Array(N);
+  if (onLadder) onLadder(L);
   const inp = [[new Float32Array(B)]], out = [[new Float32Array(B)]];
   const pr = { cutoff: new Float32Array(B), cutoffMod: new Float32Array(B), resonance: new Float32Array([c.res]) };
   let ph = 0, mph = 0;
@@ -327,28 +359,42 @@ function render(code, c) {
       pr.cutoff[n] = c.cutoff; pr.cutoffMod[n] = Math.max(-12000, Math.min(12000, c.modC * m + c.contour * env));
     }
     L.process(inp, out, pr);
+    if (onLadder) L.__max = Math.max(L.__max || 0, Math.abs(L.out4));   // al final de cada bloque de 128
     y.set(out[0][0].subarray(0, Math.min(B, N - b * B)), b * B);
   }
   return y;
 }
 
-test('4 · bit a bit en Node: 1500 tomas al azar (modulación del corte hasta frecuencia de audio): las finitas, idénticas; las que divergían, finitas', (t) => {
-  if (!OLD) { t.skip(`sin git o sin la base ${BASE}`); return; }
+test('4 · Node: 1500 tomas al azar, con el de ahora 0 activaciones de la guarda, salida finita y |out4| bajo la cota; con RESO 0, igual bit a bit al de F2d', (t) => {
+  if (!OLD || !F2D) { t.skip(`sin git o sin las bases ${BASE} y ${BASE_F2D}`); return; }
+  const counted = NOW.replace(/if\(!Number\.isFinite\(this\.out4\)\)\{/, '$&this.__g=(this.__g||0)+1;');
+  assert.notEqual(counted, NOW, 'control: la guarda de F2d sigue en el código');
   let s = 0x4d6f6f6e;
   const rnd = () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296; };
   const pick = (a) => a[Math.floor(rnd() * a.length)], logU = (a, b) => a * Math.pow(b / a, rnd());
-  const tally = { runs: 0, stable: 0, div: 0, mism: 0, nowBad: 0 };
+  const tally = { runs: 0, guards: 0, nowBad: 0, maxOut4: 0, overBound: 0, oldDiv: 0, zero: 0, zeroMism: 0 };
   for (let r = 0; r < 1500; r++) {
-    const c = { sr: pick([22050, 44100, 48000, 96000]), secs: 0.7, cutoff: logU(20, 18000), res: rnd() * 0.965, f0: logU(30, 2000), amp: 0.3 + rnd() * 6, wave: pick(['saw', 'square', 'tri']),
+    const c = { sr: pick([22050, 32000, 44100, 48000, 96000]), secs: 0.7, cutoff: logU(20, 18000), res: rnd() < 0.1 ? 0 : rnd() * 0.965, f0: logU(30, 2000), amp: 0.3 + rnd() * 6, wave: pick(['saw', 'square', 'tri']),
       modHz: logU(0.1, 4200), modC: rnd() < 0.3 ? 0 : rnd() * 4200, modWave: pick(['saw', 'tri', 'sin']), contour: (rnd() * 2 - 1) * 4800, fa: logU(0.001, 0.5), fd: logU(0.002, 2) };
-    const a = render(OLD, c), b = render(NOW, c);
-    let aBad = false, mism = 0, bBad = 0;
-    for (let i = 0; i < a.length; i++) { if (!Number.isFinite(a[i])) aBad = true; if (!Number.isFinite(b[i])) bBad++; if (!Object.is(a[i], b[i])) mism++; }
-    tally.runs++; if (aBad) tally.div++; else { tally.stable++; if (mism) tally.mism++; }
-    if (bBad) tally.nowBad++;
+    const L = { code: counted, ref: null };
+    const b = render(L.code, c, (lad) => { L.ref = lad; });
+    if (b.some((v) => !Number.isFinite(v))) tally.nowBad++;
+    tally.guards += L.ref.__g || 0;
+    tally.maxOut4 = Math.max(tally.maxOut4, L.ref.__max || 0);
+    if ((L.ref.__max || 0) > bound(c.amp)) tally.overBound++;
+    const a = render(OLD, c);
+    if (a.some((v) => !Number.isFinite(v))) tally.oldDiv++;
+    if (c.res === 0) {
+      tally.zero++;
+      const f = render(F2D, c);
+      for (let i = 0; i < b.length; i++) if (!Object.is(f[i], b[i])) { tally.zeroMism++; break; }
+    }
+    tally.runs++;
   }
-  console.log(`  ${tally.runs} tomas · antes finitas ${tally.stable} (con alguna muestra distinta: ${tally.mism}) · antes divergían ${tally.div} (ahora no finitas: ${tally.nowBad})`);
-  assert.equal(tally.mism, 0, 'las tomas que antes quedaban finitas tienen que dar la misma salida bit a bit');
-  assert.equal(tally.nowBad, 0, 'ninguna toma da muestras no finitas con el ladder de ahora');
-  assert.ok(tally.div >= 20 && tally.stable >= 1000, `control: hay tomas de los dos tipos (${tally.div} divergían, ${tally.stable} no)`);
+  console.log(`  ${tally.runs} tomas · ahora: guarda ${tally.guards}, no finitas ${tally.nowBad}, máx |out4| ${tally.maxOut4.toFixed(2)} (cota con la entrada ≤ 6,3: ${bound(6.3).toExponential(2)}) · antes de F2d divergían ${tally.oldDiv} · con RESO 0 (${tally.zero} tomas) distintas del de F2d: ${tally.zeroMism}`);
+  assert.equal(tally.guards, 0, 'con la realimentación saturada la guarda no se tiene que activar');
+  assert.equal(tally.nowBad, 0, 'ninguna toma da muestras no finitas');
+  assert.equal(tally.overBound, 0, '|out4| tiene que quedar bajo la cota');
+  assert.equal(tally.zeroMism, 0, 'con RESO 0 la salida es la misma que con el ladder de F2d');
+  assert.ok(tally.oldDiv >= 20 && tally.zero >= 50, `control: el de antes de F2d diverge en ${tally.oldDiv} tomas; ${tally.zero} tomas con RESO 0`);
 });

@@ -55,7 +55,7 @@ Orden de uso:
 | `cronbeat-verify.test.mjs` | Verificación completa de CronBeat-8:08: 24 casos (R1–R5, C2 simulado, extras). | sí |
 | `cronbeat-sheet-sliders.test.mjs` | CronBeat: sliders de los sheets en el teléfono, con toques reales por CDP. En PADS, SEQ, FX, SAMPLE y CANCIÓN un swipe vertical que arranca en la pista o en la perilla scrollea sin cambiar nada; tocar la pista no salta el valor y lo enfoca; arrastre horizontal relativo y proporcional (perilla, pista, <10 px no mueve, matriz con recorrido mínimo de 160 px) que llega al estado, al JSON y al autoguardado; ← → Inicio Fin después del toque; doble toque en el PAN de la mezcla = 0; controles ≥44 px y sin scroll horizontal a 360×640, 390×844, 768×1024 y 844×390. 6 casos. | sí |
 | `monomoon-verify.test.mjs` | Verificación completa de MonoMoon'70: 23 casos. | sí |
-| `monomoon-ladder.test.mjs` | MonoMoon: el filtro `moog-ladder` no da NaN (F2d). Con Mod → Filtro y el Osc3 a frecuencia de audio (24 configuraciones de RESO, Osc3, rueda Mod y sampleRate) y en un fuzz determinista de 60 s: salida y filtro finitos y después «Bajo gordo» suena; el ladder de antes y el de ahora lado a lado dentro del worklet (iguales bit a bit hasta la primera activación, que cae justo en la muestra en que el estado de antes deja de ser finito) y lo mismo en Node con 1500 tomas. 4 casos (~3 min). | sí |
+| `monomoon-ladder.test.mjs` | MonoMoon: el filtro `moog-ladder` no da NaN (F2d) y, con la realimentación saturada (F2e), su estado queda acotado. Con Mod → Filtro y el Osc3 a frecuencia de audio (24 configuraciones de RESO, Osc3, rueda Mod y sampleRate) y en un fuzz determinista de 60 s: salida y filtro finitos y después «Bajo gordo» suena; el ladder de antes de F2d y el de ahora lado a lado dentro del worklet en los 7 presets, la condición dirigida de F2d y el fuzz: la guarda se activa 0 veces y \|out4\| queda bajo la cota demostrable; en Node, 1500 tomas: lo mismo, y con RESO 0 la misma salida bit a bit que con el de F2d. 4 casos (~3 min). | sí |
 | `nebularp-verify.test.mjs` | Verificación completa de Nebularp 2035: 17 casos (incluye la rotación de tablet). | sí |
 | `j4-verify.test.mjs` | Verificación completa de J4-Sirens Station: 18 casos. | sí |
 | `j4-mute.test.mjs` | J4: MUTE (silencia la salida mientras se mantiene y deja las colas) y BURNOUT (silencio total; vacía el eco y la reverb): nivel de salida medido por bloque con un AudioWorklet, nada deja un MUTE colgado, REC, hub C2 falso, botones en 4 viewports y, con el mute apagado, la misma salida que el commit base. 15 casos. | sí |
@@ -92,7 +92,9 @@ un swipe scrollea).
 - `j4-cola` compara ∞, el feedback bajo y el formato de lo que se guarda contra
   `27707d5` (main antes del techo del eco); sin ese commit se saltean esas partes.
 - `j4-ladder` y `monomoon-ladder` toman el ladder de antes de `22fb1d2` (main
-  antes de las guardas) con `git show`; sin ese commit se saltean los casos 3 y 4.
+  antes de las guardas) con `git show`, y `monomoon-ladder` además el de
+  `70a916a` (con la guarda de F2d, antes de la realimentación saturada); sin
+  esos commits se saltean los casos 3 y 4.
 - Chromium headless arranca todo `AudioContext` en `running`: lo que depende de
   la política de gestos de iOS se **emula** y **no reemplaza** la prueba en un
   iPhone (ver `docs/QA-dispositivos.md`). `first-hit` envuelve el
