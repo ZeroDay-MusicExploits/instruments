@@ -51,6 +51,7 @@ Orden de uso:
 | `index-cards.test.mjs` | Índice: cada card con «▶ Probar» (HTML) y el link al manual (landing), sin `<a>` anidados en las 8 páginas del sitio; 44 px; clics y Tab; el hero no cambia. | sí |
 | `install-info.test.mjs` | «Instalar en la computadora y en el teléfono»: tabla del índice, resumen en las 5 landings, FAQ; los textos «↓ Instalar» y «Compartir → Agregar a inicio» existen en `zd-pwa` y en los 5 instrumentos; header en una fila de 320 a 1440 px. | sí |
 | `acid-verify.test.mjs` | Verificación completa de Acid Bass-303 (el piloto). | sí |
+| `acid-svf.test.mjs` | Acid: el SVF acota el corte a 0,45 × sampleRate (F2e). En Node, el código de antes y el de ahora en la grilla del barrido de F2d (945 tomas): idénticos muestra a muestra a 44,1, 48, 88,2 y 96 kHz; a 32 kHz cambian solo las tomas con el corte sobre 14,4 kHz; a 22,05 y 32 kHz, finitos. En el navegador, los dos SVF lado a lado en el instrumento con el secuenciador sonando (0 muestras distintas a 44,1 y 48 kHz) y la grilla a 22,05 y 32 kHz sin NaN. 3 casos (~1 min). | sí |
 | `cronbeat-verify.test.mjs` | Verificación completa de CronBeat-8:08: 24 casos (R1–R5, C2 simulado, extras). | sí |
 | `cronbeat-sheet-sliders.test.mjs` | CronBeat: sliders de los sheets en el teléfono, con toques reales por CDP. En PADS, SEQ, FX, SAMPLE y CANCIÓN un swipe vertical que arranca en la pista o en la perilla scrollea sin cambiar nada; tocar la pista no salta el valor y lo enfoca; arrastre horizontal relativo y proporcional (perilla, pista, <10 px no mueve, matriz con recorrido mínimo de 160 px) que llega al estado, al JSON y al autoguardado; ← → Inicio Fin después del toque; doble toque en el PAN de la mezcla = 0; controles ≥44 px y sin scroll horizontal a 360×640, 390×844, 768×1024 y 844×390. 6 casos. | sí |
 | `monomoon-verify.test.mjs` | Verificación completa de MonoMoon'70: 23 casos. | sí |
@@ -102,4 +103,6 @@ un swipe scrollea).
   concreto. Por eso sigue en `reports/`.
 - Un test de la corrida completa puede fallar por carga de la máquina sin que
   haya un bug (por ejemplo la rotación de Nebularp: ver `reports/D1-logs/LEEME.md`).
+- `acid-svf` toma el worklet de antes de `70a916a` (main antes del tope) con
+  `git show`; sin ese commit se saltean los casos 1 y 2.
   Antes de culpar al código, correrlo solo con `--only`.
