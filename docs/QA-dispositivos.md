@@ -56,7 +56,9 @@ falta el teléfono (apartado 1, "Persistencia"). En la misma tanda
 (`reports/F2d-monomoon.md`): el «colapsa y se reinicia» de MonoMoon era un NaN
 del filtro con Mod → Filtro a frecuencia de audio, que lo dejaba mudo hasta
 recargar; ahora el filtro se reinicia (el zumbido saturado previo sigue, sin
-arreglar).
+arreglar). Y el barrido sin arreglos (`reports/F2d-barrido-nan.md`): Acid da
+NaN con el `AudioContext` a menos de 32 kHz (su SVF no acota el corte a
+Nyquist); Nebularp y CronBeat, finitos.
 
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
@@ -248,6 +250,11 @@ se marcan en cada lugar donde se ejecutan.
 - [ ] **P2** · MM · Mod → Filtro con el Osc3 audible: el zumbido saturado
       puede durar segundos antes de volver. Anotar si es tolerable o si se
       prefiere alguna de las opciones de `reports/F2d-monomoon.md`, sección 5.
+- [ ] **P2** · AC · Con la salida a menos de 32 kHz (por ejemplo, un auricular
+      Bluetooth en modo llamada): CUTOFF y ENV MOD altos con el secuenciador
+      sonando. Si queda mudo hasta recargar, es el NaN del SVF
+      (`reports/F2d-barrido-nan.md`, sin arreglar). Anotar el equipo y la
+      frecuencia de muestreo de un WAV grabado con REC en ese momento.
 
 ---
 
