@@ -1,6 +1,6 @@
 # Bloques `ZD` · API y cómo pegarlos
 
-Los 9 bloques compartidos que piden SPEC 3.1.2 y 3.4 (más `zd-sheet-input`, de F3). Se copian **byte a byte
+Los 9 bloques compartidos: los 8 que piden SPEC 3.1.2 y 3.4 más `zd-sheet-input` (de F3). Se copian **byte a byte
 idénticos** en los 5 `descargables/*.html`: no llevan ni un selector, ni un
 texto, ni un slug del instrumento — todo entra por configuración. Se verifican
 con `node tools/check-blocks.mjs`.
@@ -795,7 +795,7 @@ que queden **vacíos** al salir. Imprime lo que resolvió, así se ve de entrada
 un selector de `ZD_M` no matchea nada:
 
 ```
-  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v5 · 4 ciclos
+  descargables/Acid_Bass-303.html · ZD_M "ACID BASS-303" · zd-mobile v6 · 4 ciclos
   keep=[seqPanel, stepEditPanel, perfPanel] transport=[playBtn, .tempo-box, clipLed]
   tab seq (SEQ) = [tempoKnob, tapBtn, scope, .seq-top, kbPanel]
 ```

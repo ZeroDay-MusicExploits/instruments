@@ -6,7 +6,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 1. Sin backend, sin frameworks en runtime, sin build obligatorio para **usar** los instrumentos. Cada instrumento sigue siendo **un HTML autocontenido**.
 2. **No** extraer skin/shell a un módulo compartido. Lo compartido se maneja como **bloques copiados idénticos** (3.3), delimitados con `/* ZD-BLOCK:<nombre> v<n> */ … /* /ZD-BLOCK:<nombre> */` y verificados con `tools/check-blocks.mjs`.
-3. **No romper C2**: no tocar los bloques "adaptador C2", `window.HOST` ni el canal `zeroday_sync`. `window.ZD_M` se mantiene como nombre del objeto de configuración del shell y **no se renombra**. Las claves de la config del shell v1 (`title`, `slots`, `place`, `menus`) ya no las lee nadie (`zd-mobile` v4 y v5 leen solo `name`, `titleParts`, `logo`, `logoAlt`, `transport`, `keep`, `tabs`, `menuTitle`, `menu`, `menuNotes`, `onEnter`, `onExit`) y se pueden borrar; de ahora en más **solo se agregan claves nuevas** y no se quita ninguna que lea un bloque `ZD` o el hub C2. Si una tarea afecta el adaptador C2, parar y avisar.
+3. **No romper C2**: no tocar los bloques "adaptador C2", `window.HOST` ni el canal `zeroday_sync`. `window.ZD_M` se mantiene como nombre del objeto de configuración del shell y **no se renombra**. Las claves de la config del shell v1 (`title`, `slots`, `place`, `menus`) ya no las lee nadie (`zd-mobile` v4, v5 y v6 leen solo `name`, `titleParts`, `logo`, `logoAlt`, `transport`, `keep`, `tabs`, `menuTitle`, `menu`, `menuNotes`, `onEnter`, `onExit`) y se pueden borrar; de ahora en más **solo se agregan claves nuevas** y no se quita ninguna que lea un bloque `ZD` o el hub C2. Si una tarea afecta el adaptador C2, parar y avisar.
    - *Pendiente (anotado por D, sin resolver):* J4-Sirens Station todavía conserva las claves v1 (`J4-Sirens_Station.html`, literal de `window.ZD_M` + `Object.assign` con las v2); Acid, CronBeat, MonoMoon y Nebularp ya las sacaron. No hay `reports/E1.md` ni commits de E1 que las limpien, y `descargables/` no se toca desde la sesión D. Antes de borrarlas en J4, confirmar con quien mantiene el hub C2 (fuera de este repo) que no lee `iframe.contentWindow.ZD_M`. Ver `reports/D1-barrido.md`, f.
 4. No reescribir motores de audio ni cambiar el sonido.
 5. Nombres de archivo y **URLs actuales no cambian**: `index.html`, `landing-*.html`, `privacidad.html`, `404.html`, `descargables/<Instrumento>.html`.
@@ -38,7 +38,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 - Tipografía: labels ≥11 px, valores ≥12 px, texto corrido ≥14 px. Hoy hay 8–32 declaraciones ≤10,5 px por archivo.
 - Viewport: `width=device-width, initial-scale=1, viewport-fit=cover`. **Quitar** `maximum-scale` y `user-scalable=no`. Gestos por `touch-action`.
 - `100vh` → `100dvh` con fallback. `overscroll-behavior:none` en la zona de tocar. `-webkit-touch-callout:none` y `user-select:none` **solo** en superficies de tocar.
-- Knobs: arrastre vertical, valor visible mientras se arrastra, doble tap = reset, long-press = entrada numérica; slider alternativo en móvil.
+- Knobs: arrastre vertical, valor visible mientras se arrastra, doble tap = reset, long-press = entrada numérica; slider alternativo en móvil. **Dentro de los sheets del teléfono** (y de los del shell activo en una ventana angosta de escritorio, también con mouse) el knob se ajusta con un **arrastre horizontal dominante**, relativo y sin demora, y el gesto vertical scrollea el sheet: un swipe que arranca sobre un knob no cambia su valor. **Fuera de los sheets** (las macros de MonoMoon, el BPM de Nebularp) y en **escritorio ancho** sigue el arrastre vertical. Los sliders (`<input type=range>`) de los sheets siguen la misma regla (el vertical scrollea, el horizontal ajusta en relativo) y tocar la pista no salta el valor (`zd-sheet-input`); el carril lateral de los sheets (`zd-mobile` v5) es siempre scroll. Doble tap, long-press, teclado y `role="slider"` no cambian.
 - **Volver al sitio**: entrada "← Sitio" en el menú móvil (hoy el footer se oculta en el shell horizontal). El link lleva `rel="noopener"`.
 
 #### R2 · PWA real
@@ -114,7 +114,7 @@ Zero Day · Music Exploits. Se conserva la numeración 3.x porque los prompts ci
 
 ### 3.4 Anexo por instrumento
 
-**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v5 (shell portrait, con carril de scroll en los sheets), `zd-audio` v2, `zd-store` v1, `zd-ui` v2, `zd-rec` v2, `zd-dl` v1, `zd-midi` v2, `zd-pwa` v3. Versiones y changelog: `docs/zd-blocks.md`.
+**Bloques `ZD` compartidos** (los produce la sesión B y se pegan idénticos en los demás): `zd-mobile` v6 (shell portrait, con carril de scroll en los sheets y el ✕ de la cabecera de 44×44), `zd-sheet-input` v1 (sliders de los sheets: el swipe vertical scrollea, el arrastre horizontal ajusta, tocar la pista no salta el valor), `zd-audio` v2, `zd-store` v1, `zd-ui` v2, `zd-rec` v2, `zd-dl` v1, `zd-midi` v2, `zd-pwa` v3. Versiones y changelog: `docs/zd-blocks.md`.
 
 **ACID BASS-303** (piloto)
 - Portrait: steps 2×8 arriba; editor del paso (nota / accent / slide / gate) debajo; pad XY cutoff/resonance siempre visible; tabs [Seq | Sonido | Filtro | Patrón | Export].
