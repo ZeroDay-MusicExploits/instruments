@@ -29,6 +29,9 @@
 //    piso que pone zd-mobile v4). Este es el chequeo que más se le escapa a un
 //    instrumento: si su `zd-mobile-skin` fija un `min-height` menor con más
 //    especificidad, gana el skin. Ver docs/zd-blocks.md.
+// 6. El ✕ de la cabecera de los sheets mide 44×44 en cada pestaña y en el menú
+//    (zd-mobile v6; antes 44×36), sin que crezca la fila de la cabecera ni se
+//    meta en el cuerpo del sheet, y recibe el toque en todo su alto.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { serveRoot, loadPlaywright } from './lib/serve.mjs';
@@ -443,6 +446,41 @@ test(`zd-mobile v${VERSION} · ${FILE} · los controles de la barra superior mid
       assert.deepEqual(small, [], `${v.width}×${v.height}: controles por debajo de 44 px en el eje corto`);
       const noScroll = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
       assert.ok(noScroll, `${v.width}×${v.height}: la barra no puede generar scroll horizontal`);
+    } finally { await ctx.close(); }
+  }
+});
+
+/* SPEC R1 en la cabecera de los sheets (zd-mobile v6): el ✕ mide 44×44 en cada
+   pestaña y en el menú, sin que la cabecera crezca (la fila sigue en 36 px y el
+   cuerpo del sheet no pierde alto) ni el ✕ se meta en el cuerpo. */
+test(`zd-mobile v${VERSION} · ${FILE} · el ✕ de la cabecera de los sheets mide 44×44 (SPEC R1)`, async () => {
+  for (const v of PAIRS.flatMap((p) => [p.a, p.b]).filter((v) => v.shell)) {
+    const { ctx, page } = await openInstrument(v);
+    try {
+      const ids = CFG.tabs.map((t) => t.id).concat('__menu');
+      const seen = [];
+      for (const id of ids) {
+        await page.evaluate((id) => ZD.mobile.open(id), id);
+        await page.waitForTimeout(240);
+        const m = await page.evaluate(() => {
+          const x = document.querySelector('#zd-sheet .zd-sclose'), hd = document.querySelector('#zd-sheet .zd-shead'), sb = document.querySelector('#zd-sheet .zd-sbody');
+          const r = x.getBoundingClientRect(), rh = hd.getBoundingClientRect(), rb = sb.getBoundingClientRect();
+          return { w: r.width, h: r.height, head: rh.height - parseFloat(getComputedStyle(hd).paddingBottom), gap: rb.top - r.bottom,
+            /* en los bordes de arriba y de abajo no hay otra parte del sheet (el handle,
+               el cuerpo) que le coma los 4 px de cada lado. Lo que esté fuera del sheet
+               no cuenta: la pantalla de encendido de J4 o MonoMoon tapa todo. */
+            hit: [r.top + 2, r.top + r.height / 2, r.bottom - 2].every((y) => {
+              const e = document.elementFromPoint(r.left + r.width / 2, y);
+              return e === x || !document.getElementById('zd-sheet').contains(e);
+            }) };
+        });
+        seen.push(`${id} ${Math.round(m.w)}×${Math.round(m.h)}`);
+        assert.ok(m.w >= 43.5 && m.h >= 43.5, `${v.width}×${v.height} · ${id}: el ✕ mide ${m.w}×${m.h}, tiene que ser ≥44×44`);
+        assert.ok(m.hit, `${v.width}×${v.height} · ${id}: el ✕ tiene que recibir el toque en todo su alto`);
+        assert.ok(m.head <= 36.5, `${v.width}×${v.height} · ${id}: la fila de la cabecera creció a ${m.head} px (era 36)`);
+        assert.ok(m.gap >= 0, `${v.width}×${v.height} · ${id}: el ✕ se mete ${-m.gap} px en el cuerpo del sheet`);
+      }
+      console.log(`  ${v.width}×${v.height} · ✕ ${seen.join(' · ')}`);
     } finally { await ctx.close(); }
   }
 });

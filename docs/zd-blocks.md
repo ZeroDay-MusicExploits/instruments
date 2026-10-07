@@ -332,7 +332,7 @@ para escuchar y **un solo** botón de descarga, el del WAV (que pasa por
 **solo la tarjeta**, para el resultado de su render offline; la captura en vivo
 la usan Nebularp, J4 y MonoMoon.
 
-## `zd-mobile` v5 — shell portrait-first
+## `zd-mobile` v6 — shell portrait-first
 
 Reemplaza al shell landscape v1 y a `#zd-rotate`. Barra superior de 48 px →
 zona de tocar → tabs de 56 px + `env(safe-area-inset-bottom)` → bottom sheets
@@ -382,7 +382,8 @@ Reglas del contrato:
 - `peek: true` limita el sheet a 45dvh y **no** pone scrim, así la zona de
   tocar sigue usable mientras se ajusta (SPEC R1).
 - El sheet cierra por tap afuera, botón ✕, Escape y swipe hacia abajo sobre el
-  handle o la cabecera.
+  handle o la cabecera. El ✕ mide 44×44 (v6) con un margen de −4 px arriba y
+  abajo: la fila de la cabecera sigue en 36 px y el cuerpo no pierde alto.
 
 ### Reglas para los selectores de `ZD_M`
 
@@ -760,7 +761,8 @@ La lista completa (incluidos `cronbeat-verify`, `monomoon-verify`,
 - `zd-mobile-cycle` · conformidad de `zd-mobile` para **cualquier** instrumento:
   el ciclo salir/entrar del shell en los tres pares de viewport, el cableado de
   eventos, el foco, el scroll, el banner de `zd-pwa` y los ≥44 px de los
-  controles de la barra superior. No sabe nada de un instrumento en particular.
+  controles de la barra superior y el ✕ de 44×44 de la cabecera de los sheets.
+  No sabe nada de un instrumento en particular.
 - `zd-sheet-input` · los sliders de los sheets con toques reales por CDP, en
   Acid, Nebularp, MonoMoon y J4: el swipe vertical scrollea sin cambiar nada,
   el toque no salta el valor, el arrastre horizontal es relativo, el teclado y
@@ -824,6 +826,23 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-07 · `zd-mobile` v5 → v6
+
+El ✕ de la cabecera de los sheets medía 44×36 (en algunos layouts, 44×40) y
+SPEC R1 pide ≥44 px en el eje corto.
+
+- `.zd-sclose` pasa a 44×44, con `margin:-4px 0`: el margen negativo deja la
+  fila de la cabecera en 36 px, como antes. El botón se mete 4 px en el aire
+  del handle (que está centrado y mide 72 px: no llega a la derecha) y 4 px en
+  el padding de abajo de la cabecera (7 px): no pisa ningún control ni el
+  cuerpo del sheet, que no pierde alto (en *peek* tampoco).
+- Sin cambios en la API pública, en el contrato de `window.ZD_M` ni en el DOM.
+
+Lo verifica `node tools/tests/zd-mobile-cycle.test.mjs` (caso nuevo: en cada
+pestaña y en el menú, en los viewports con shell, el ✕ mide 44×44, la fila de
+la cabecera no crece, el ✕ no se mete en el cuerpo y ninguna otra parte del
+sheet le come los bordes). Corre en verde en los 5 con `--file`.
 
 ### 2026-10-07 · `zd-sheet-input` v1 (bloque nuevo)
 
