@@ -1,10 +1,13 @@
 # PWA: integración `zd-pwa`
 
-Qué hay en el repo y qué tiene que pegar cada instrumento en su propio
-HTML (`descargables/<Instrumento>.html`) para cumplir SPEC R2 y 3.2.
-Nada de esto se aplicó a los instrumentos: lo integra la sesión que está
-trabajando esos archivos, pegando el bloque `zd-pwa` **idéntico** en los
-5 (SPEC 3.1.2 — luego verificable con `tools/check-blocks.mjs`).
+Qué hay en el repo y qué lleva cada instrumento en su propio HTML
+(`descargables/<Instrumento>.html`) para cumplir SPEC R2 y 3.2.
+
+**Estado:** el bloque `zd-pwa` (hoy v3) está pegado **idéntico** en los 5
+instrumentos (SPEC 3.1.2; lo verifica `tools/check-blocks.mjs`), cada uno con su
+`<link rel="manifest">` estático, y `sw.js` está en `zd-v5`. Lo que sigue
+describe qué lleva cada HTML y por qué; lo que falta probar en un dispositivo
+está al final (sección 5) y en [`docs/QA-dispositivos.md`](QA-dispositivos.md).
 
 ## Dónde vive cada cosa
 
@@ -20,6 +23,51 @@ Todas las rutas de `zd-pwa` son relativas **desde `descargables/`**, que
 es donde vive cada instrumento (SPEC 3.2: ese HTML es a la vez lo que se
 sirve y lo que se descarga).
 
+## Scope de cada manifest: su propio archivo
+
+Cada manifest declara como `scope` **el HTML de su instrumento**, y no una
+carpeta. Las URLs del manifest son relativas **al manifest** (`manifests/`):
+
+```json
+"id":        "../descargables/Acid_Bass-303.html",
+"start_url": "../descargables/Acid_Bass-303.html",
+"scope":     "../descargables/Acid_Bass-303.html"
+```
+
+**Por qué.** Antes los 5 compartían `"scope": "../"`, que es todo
+`/instruments/`. En Android, la app instalada de Acid capturaba los links a
+los otros 4 y no dejaba instalarlos (así quedó anotado en el commit `6d1f100`;
+la causa exacta dentro de Chrome no se investigó). El
+`scope` es lo que le dice al navegador qué URLs pertenecen a una app instalada;
+si el de un instrumento contiene a los otros cuatro, los cinco quedan
+mezclados. Con el scope de un solo archivo, cada instrumento se instala por
+separado y se abre en su propia ventana (SPEC R2). Es lo que se hizo en el
+commit `6d1f100`, junto con el paso del service worker a `zd-v4`.
+
+**La regla: los scopes no se solapan.**
+
+- Ningún `scope` puede ser prefijo del `scope` ni del `start_url` de otro
+  instrumento. Un scope de carpeta (`../`, `../descargables/`) los solapa a
+  todos.
+- Tampoco se puede omitir: sin `scope`, el navegador usa la carpeta del
+  `start_url`, que es la misma para los 5.
+- Cada `id` es distinto (es lo que identifica a la app instalada).
+- Un instrumento nuevo copia el patrón: `id`, `start_url` y `scope` apuntan a su
+  propio HTML.
+
+**Lo que no cambia.** El scope del **service worker** sigue siendo
+`/instruments/` (`register('../sw.js', { scope: '../' })`): un único `sw.js`
+para los 5, sin importar desde qué instrumento se registre primero. Es otra
+cosa que el scope del manifest, y que el del SW contenga a los de los
+manifests es correcto (el SW controla el `start_url` de cada uno).
+
+**Cómo se verifica.** `node tools/tests/pwa-scopes.test.mjs` (Node puro): los
+`id` son distintos, cada `scope` es su propio archivo, cada `start_url` cae en
+su scope y fuera de los otros 4, ningún scope es prefijo de otro y el
+`theme_color` coincide con el `<meta name="theme-color">` de su HTML. Falla si
+alguien vuelve a poner `"scope": "../"`. Lo que falta probar en el teléfono
+está en la sección 5.
+
 ## 1 · Qué agregar al `<head>`
 
 Por instrumento (ejemplo con `cronbeat`; reemplazar `<slug>` y
@@ -32,9 +80,9 @@ Por instrumento (ejemplo con `cronbeat`; reemplazar `<slug>` y
 <meta name="apple-mobile-web-app-title" content="CronBeat">
 ```
 
-`<meta name="theme-color">` ya existe en los 5 instrumentos — no hace
-falta tocarlo, solo confirmar que coincide con el `theme_color` del
-manifest.
+`<meta name="theme-color">` existe en los 5 instrumentos y coincide con el
+`theme_color` de su manifest (hoy `#070b06` en los 5). Si se cambia uno hay
+que cambiar el otro: lo comprueba `tools/tests/pwa-scopes.test.mjs`.
 
 `short_name` / `apple-mobile-web-app-title` por instrumento (SPEC R7 —
 nunca "Minimoog" ni "Ritmos"):
@@ -54,7 +102,7 @@ sobra (SPEC R2, "Quitar el manifest armado con `blob:`").
 
 ## 2 · El bloque `zd-pwa`
 
-> **Actualización (v2).** El síntoma "no me ofrece instalar" no era un bug de
+> **Actualización (v2; hoy los 5 llevan la v3).** El síntoma "no me ofrece instalar" no era un bug de
 > instalabilidad: probado por HTTP bajo `/instruments/`,
 > `Page.getInstallabilityErrors` da `[]`, el manifest valida (nombre, íconos
 > 192/512/512-maskable en 200, `start_url` dentro de `scope`, `display`), el
@@ -206,19 +254,23 @@ registrado.
 
 ## 4 · Service worker y "nueva versión"
 
-`sw.js` (raíz, cache `zd-v3`) precachea los 5 instrumentos + manifests +
-íconos y sirve HTML con *stale-while-revalidate*. Al activar una versión
-nueva manda `postMessage({type:'zd-sw-updated', version:'zd-v3'})` a las
-pestañas abiertas; `zd-pwa` lo escucha y solo muestra el toast si
+`sw.js` (raíz, cache `zd-cache-<VERSION>`, hoy `zd-v5`) precachea los 5
+instrumentos + manifests + íconos y sirve HTML con *stale-while-revalidate*.
+Al activar una versión nueva manda `postMessage({type:'zd-sw-updated',
+version:'zd-v5'})` (la `VERSION` vigente) a las pestañas abiertas; `zd-pwa` lo escucha y solo muestra el toast si
 `hadController` era `true` (evita mostrar "Nueva versión" en el primer
 install, cuando técnicamente no había nada previo que actualizar).
 
-Para forzar una nueva versión: subir `VERSION` en `sw.js` (hoy `zd-v3`;
-la próxima, `zd-v4`). El `activate` del SW nuevo borra los `zd-cache-*` viejos.
-Subió a `zd-v2` con el hotfix de `zd-mobile` v3 y `zd-midi` v2 (2026-10-03) y a
+Para forzar una nueva versión: subir `VERSION` en `sw.js` (hoy `zd-v5`; la
+próxima, `zd-v6`). El `activate` del SW nuevo borra los `zd-cache-*` viejos.
+Subió a `zd-v2` con el hotfix de `zd-mobile` v3 y `zd-midi` v2 (2026-10-03), a
 `zd-v3` con la versión mobile-first (`zd-ui` v2, `zd-audio` v2, `zd-rec` v2,
-`zd-pwa` v3 y los 5 instrumentos nuevos, 2026-10-04): es lo que hace que las
-copias cacheadas del instrumento se reemplacen.
+`zd-pwa` v3 y los 5 instrumentos nuevos, 2026-10-04), a `zd-v4` con el scope
+propio de cada manifest (2026-10-05, el que está publicado) y a `zd-v5` con
+los cambios de los instrumentos de 2026-10-05 a 2026-10-07 (`zd-mobile` v5,
+J4, MonoMoon, Acid y CronBeat; ver `CHANGELOG.md`): es lo que hace que las
+copias cacheadas del instrumento se reemplacen. Subirla una sola vez por
+publicación, desde la que está publicada.
 
 ## 5 · A verificar en dispositivo
 
@@ -245,6 +297,16 @@ dispositivo físico ni en Safari/Firefox real: queda pendiente.
 
 ### Android Chrome
 
+- [x] Los 5 instalados en el mismo teléfono (scope propio de cada manifest):
+      se instalaron los 5. Lo verificó el usuario el 2026-10-05 en su Android,
+      tras el cambio de scope; dispositivo y versión de Chrome sin anotar.
+- [ ] Con los 5 instalados: cada uno abre en su propia ventana, un link de un
+      instrumento a otro no se abre dentro de la ventana de la app (sale al
+      navegador), y «Abrir en pantalla completa» (Probalo acá) y «▶ Probar»
+      abren el instrumento correcto. Lo del 2026-10-05 no lo cubre.
+- [ ] Una instalación hecha con el manifest viejo (`scope: "../"`, antes de
+      `zd-v4`): ver si Chrome la pasa sola al scope nuevo o hay que
+      desinstalarla y volver a instalar. No está probado.
 - [ ] `beforeinstallprompt` real (no sintético): el banner aparece solo tras
       el gesto/engagement que pide Chrome, y el ícono + nombre corto en el
       diálogo nativo son los correctos.

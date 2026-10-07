@@ -7,8 +7,10 @@ verificar en dispositivo" de `reports/cronbeat.md`, `reports/monomoon.md`,
 `reports/D1-barrido.md`. Acid Bass-303 no tiene reporte propio: sus puntos
 salen de las pruebas compartidas y del barrido (apartado "Primer toque").
 
-**Estado: ningún punto está probado en un dispositivo.** Tampoco se probó en
-WebKit ni en Firefox.
+**Estado: casi ningún punto está probado en un dispositivo.** La excepción: el
+usuario instaló los 5 instrumentos en su Android el 2026-10-05, después del
+cambio de scope (apartado 4; no se anotó el modelo ni la versión de Chrome, y
+no cubre el resto de esa prueba). Tampoco se probó en WebKit ni en Firefox.
 
 **Actualizado por E1 (2026-10-04, `reports/E1.md`).** Cambió lo que hay que
 mirar en el primer toque (el golpe ya no se programa con el audio suspendido:
@@ -69,6 +71,17 @@ J4: el final del release ya no tiene el escalón intermitente de −112 dB
 (inaudible). Medido en Chromium; falta el teléfono (apartado 1,
 "Persistencia").
 
+**Actualizado con los scopes de los manifests y el cierre de F2 y F3
+(2026-10-07).** Cada manifest tiene como scope su propio archivo (antes
+compartían `"scope": "../"` y, en Android, la app instalada de Acid capturaba
+los links a los otros 4 y no dejaba instalarlos; `docs/pwa.md`, test
+`pwa-scopes`). Se agregaron al P0-2 la prueba de los 5 en el mismo teléfono
+(apartado 4), y quedaron en la lista las verificaciones de `reports/F2b.md` a
+`F2e.md` que faltaban (recarga con sesión guardada y nota durante el release,
+TIME y FEEDBACK al máximo, sesiones de antes del techo del eco, doble toque de
+las macros de MM, WebKit y Firefox) y las de Android de J4, CronBeat y las
+demás. `sw.js` pasó a `zd-v5`.
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -89,7 +102,7 @@ se marcan en cada lugar donde se ejecutan.
 | # | Prueba | Dónde se hace | Qué mirar |
 |---|---|---|---|
 | P0-1 | Primer toque en iOS con el switch de silencio | iPhone Safari y PWA | Con el switch activado y desactivado, **el primer golpe/nota suena** (no mudo, no tarde) en los 5 |
-| P0-2 | Instalar y abrir offline | iPhone PWA, Android Chrome | Se instala con su ícono y nombre; en modo avión real abre y suena |
+| P0-2 | Instalar y abrir offline | iPhone PWA, Android Chrome | Se instala con su ícono y nombre; en modo avión real abre y suena. En Android, los 5 en el mismo teléfono: se instalan por separado y cada uno abre en su ventana (el 2026-10-05 el usuario confirmó que se instalaron los 5) |
 | P0-3 | Rotación de tablet | iPad / tablet | Rotar vertical ↔ horizontal **sonando**: sin cortes, el shell se rearma, no se pierde la sesión |
 | P0-4 | Web Share de WAV, MIDI y JSON | iPhone Safari y PWA | Los tres archivos salen por la hoja de Compartir y se pueden guardar en Archivos |
 
@@ -227,21 +240,32 @@ se marcan en cada lugar donde se ejecutan.
       "Empezar de cero"), encender y dejarlo **1 minuto sin tocar nada**, con
       auriculares y el volumen alto: tiene que quedar en silencio (antes subía
       solo a un zumbido fuerte en ~10 s). Después, SIREN y soltar: el final de
-      la nota no hace clic.
+      la nota no hace clic (con DRIVE al máximo y el volumen al 100 %, escuchar
+      el último segundo del release con auriculares). Lo mismo **después de
+      recargar** con la sesión guardada (F2b: el VCA arranca en 0 aunque el patch
+      restaurado tenga el lazo > 1). Y **una nota durante el release**: SIREN,
+      soltar y volver a tocar enseguida, varias veces; suena entera y no se
+      corta al segundo.
 - [ ] **P1** · J4 · El eco se apaga solo (F2c): SIREN y soltar con el patch
       de fábrica y en cada uno de los 6 presets; la cola se apaga sola, sin
       crecer en el medio (antes 5 de 7 no se apagaban nunca). FEEDBACK de 0 a
       100 % con la sirena latcheada: hasta ~25 % igual que antes, de ahí la cola
       se alarga de a poco, sin saltos ni tramo muerto. Con FEEDBACK ∞
       mantenido sigue autooscilando fuerte, y al soltarlo se apaga. Anotar si
-      alguna cola de preset quedó corta (`reports/F2c.md`, sección 4).
+      alguna cola de preset quedó corta (`reports/F2c.md`, sección 4). Con TIME
+      y FEEDBACK al máximo (TIME 1,2 s) la cola dura más pero se apaga antes de
+      ~25 s. Abrir un patch o una sesión guardados antes de esta versión: suenan
+      igual que antes si su FEEDBACK era bajo, y con cola finita si se
+      autosostenía.
 - [ ] **P1** · J4 · Acid Scream **20 veces seguidas** (SIREN con pausas
       distintas), y después Police Alarm: J4 tiene que sonar siempre (antes,
       a 44,1 kHz, quedaba mudo hasta recargar en la mayoría de las tomas;
       `reports/F2d.md`). Con auriculares, anotar si en el ataque de alguna toma
       se oye un clic o un hueco de ~3 ms (la guarda; medido como un pozo de
       ~1,5 dB). Anotar el equipo y, si se puede, su frecuencia de muestreo (a
-      48 kHz Acid Scream no llega a la zona).
+      48 kHz Acid Scream no llega a la zona). Repetir también en Safari
+      (iOS) y en Firefox (lo pide `reports/F2d.md`: la guarda es JavaScript puro,
+      pero no se probó en WebKit ni en Firefox).
 - [ ] **P1** · J4 · Pad XY a la esquina de arriba a la derecha (X = CUTOFF,
       Y = RESO) con cualquier patch, sin tocar notas, y después SIREN: tiene que
       sonar (antes quedaba mudo). Arriba de ~8,4 kHz con RESO alta el sonido
@@ -255,7 +279,9 @@ se marcan en cada lugar donde se ejecutan.
       toque?); (4) «TOCÁ PARA ENCENDER» + «Sesión restaurada» (la página se
       recargó: ¿habías salido de la app o bloqueado el teléfono?); (5) «Tocá
       para reanudar» (el sistema suspendió el audio).
-      `reports/F2d-monomoon.md`, sección 8.
+      `reports/F2d-monomoon.md`, sección 8. Además, el **doble toque sin
+      querer**: tocar las macros con el pulgar como se toca de verdad y anotar
+      si alguna vuelve a fábrica sin intención (doble toque = valor de fábrica).
 - [ ] **P1** · MM · **Mod → Filtro con el Osc3 a frecuencia de audio durante
       5 minutos** (F2e: Osc3 → teclado, rango 8' a 2', rueda Mod arriba, RESO
       de 30 a 100 %): no tiene que quedar mudo nunca. Con la realimentación
@@ -330,6 +356,18 @@ se marcan en cada lugar donde se ejecutan.
       diálogo nativo con ícono y nombre correctos; aceptar → toast "App
       instalada" y no vuelve; el "↓" y el ítem de menú se esconden. **Abrir
       instalada en modo avión real.**
+- [x] **P0-2** · Todos · **Instalar los 5 en el mismo teléfono** (scope propio de
+      cada manifest, `docs/pwa.md`): los 5 se instalan, uno por uno. *Verificado
+      por el usuario el 2026-10-05 en su Android, después del cambio de scope;
+      modelo y versión de Chrome sin anotar.* Solo cubre que se instalan.
+- [ ] **P0-2** · Todos · Con los 5 instalados en el mismo teléfono: **cada uno
+      abre en su propia ventana** (no dentro de la de otro), un link de un
+      instrumento a otro no se abre dentro de la ventana de la app (sale al
+      navegador), y **«Abrir en pantalla completa»** (Probalo acá) y **«▶ Probar»**
+      (índice y landing) abren el instrumento correcto, también con la app de
+      otro ya instalada. Si una instalación hecha antes del cambio de scope sigue
+      con el scope viejo, anotar si Chrome la actualiza sola o hay que
+      reinstalar.
 - [ ] **P2** · Todos · Chrome ⋮ → «Instalar app» (WebAPK, con su entrada en el
       cajón de apps) y, si se puede, Firefox, Edge u Opera: según MDN solo agregan
       un acceso directo que abre el sitio en el navegador (la tabla del sitio lo
@@ -340,6 +378,20 @@ se marcan en cada lugar donde se ejecutan.
       antes de la v3, decían que el banner quedaba visible: ya no).
 - [ ] **P1** · Todos · Primer toque, segundo plano, llamada y bloqueo: overlay
       "Tocá para reanudar" y reanudar.
+- [ ] **P1** · J4 · MUTE y BURNOUT (apartado 1, "Toque y layout"), en Android:
+      **MUTE: ver que no quede colgado al cambiar de app** (gesto de inicio,
+      selector de apps, bloqueo de pantalla, llamada, botón o gesto «atrás») con
+      el botón apretado; al volver no queda muteado. BURNOUT: un toque silencia
+      todo, el aviso sobre el pad se lee y otro toque vuelve.
+- [ ] **P1** · CB · Sliders de los sheets en Android (apartado 1, F3): swipes
+      verticales (rápidos y lentos, y en diagonal) que arrancan encima de un slider
+      de FX (en la pista, en la perilla y en el carril) scrollean el sheet **sin
+      cambiar ningún valor**; tocar la pista no salta; arrastrar de costado lo
+      mueve desde donde estaba; doble toque en el PAN de la mezcla lo centra.
+- [ ] **P1** · J4 · MM · AC · Las pruebas de F2b a F2e del apartado 1
+      ("Persistencia") también en Android: J4 en reposo y el eco que se apaga
+      solo, Acid Scream 20 veces y el pad XY en la esquina; MM 10 minutos con la
+      resonancia alta y con Mod → Filtro; Acid con la salida a menos de 32 kHz.
 - [ ] **P1** · Todos · Multitáctil real; gesto de "atrás" del sistema con un
       sheet abierto (no está manejado: sale de la página).
 - [ ] **P1** · Todos · Web Share / descarga de WAV, MIDI y JSON (Android usa
