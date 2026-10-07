@@ -4130,8 +4130,12 @@ function glideTo(midi){
    REL_KNEE (-80 dB) y de ahí una recta a 0 en otra τ, con la misma pendiente:
    no hay escalón. El setTarget no se deja seguir más abajo porque Chromium lo
    da por terminado cuando pasa ~4,5e-5 (-87 dB) y salta a 0 (medido en
-   tools/tests/j4-reposo.test.mjs). Una nota nueva cancela todo eso
-   (cancelScheduledValues) y arranca desde donde esté. */
+   tools/tests/j4-reposo.test.mjs). La recta se ancla en tk con otro setTarget
+   y no con setValueAtTime(REL_KNEE): a veces el hilo de audio ya renderizó el
+   bloque que empieza en ctx.currentTime y la exponencial arranca un bloque
+   tarde; llega a tk en REL_KNEE × 1,026 y forzar REL_KNEE era un escalón de
+   -112 dB. Así la recta sale del valor que haya (reports/F2e.md). Una nota
+   nueva cancela todo eso (cancelScheduledValues) y arranca desde donde esté. */
 const REL_KNEE=1e-4;
 function ampGate(on){
   const t=ctx.currentTime, g=vca.gain;
@@ -4147,7 +4151,7 @@ function ampGate(on){
     if(now>REL_KNEE){
       const tk=t+tau*Math.log(now/REL_KNEE);
       g.setTargetAtTime(0, t, tau);
-      g.setValueAtTime(REL_KNEE, tk);
+      g.setTargetAtTime(0, tk, tau);        // ancla: la recta arranca del valor en tk
       g.linearRampToValueAtTime(0, tk+tau);
     } else g.linearRampToValueAtTime(0, t+tau*now/REL_KNEE);
   }

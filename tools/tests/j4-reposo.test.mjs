@@ -265,7 +265,15 @@ async function release(path, patch) {
     const tau = await page.evaluate(() => Math.max(.005, P.rel / 1000 / 3));
     await page.evaluate((n) => { window.__capP = window.__cap(ctx.currentTime, Math.ceil((0.05 + n) * ctx.sampleRate)); }, 12 * tau);
     await page.waitForTimeout(50);
-    const { tOff, g0 } = await page.evaluate(() => { const g0 = vca.gain.value; noteOff('pad'); return { tOff: ctx.currentTime, g0 }; });
+    // tOff es el t que usa ampGate (su primer setValueAtTime), no una lectura de ctx.currentTime
+    // después de noteOff: si el hilo de audio rinde un bloque mientras corre noteOff, esa lectura
+    // queda 128 muestras adelante y la rodilla y el 0 esperados se corren un bloque (F2e)
+    const { tOff, g0 } = await page.evaluate(() => {
+      const g0 = vca.gain.value, sv = vca.gain.setValueAtTime; let tAmp = null;
+      vca.gain.setValueAtTime = function (v, t) { if (tAmp === null) tAmp = t; return sv.apply(this, arguments); };
+      try { noteOff('pad'); } finally { vca.gain.setValueAtTime = sv; }
+      return { tOff: tAmp, g0 };
+    });
     const knee = Math.log(g0 / 1e-4) + 1;          // en τ: la exponencial hasta 1e-4 y la recta de una τ
     const tZero = tOff + knee * tau;
     await page.waitForFunction((t) => ctx.currentTime > t, tOff + 12 * tau + 1.1, { timeout: 15000 });
