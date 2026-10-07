@@ -903,6 +903,9 @@ que no había por dónde scrollear sin agarrar uno.
     pero quedan por debajo de 44 en el eje corto. No tiene arreglo desde el
     bloque sin bajar el carril de 32 px. Arreglo propuesto para la sesión de
     MonoMoon: 3×2 en pantallas angostas (ver `reports/F3-barrido-scroll.md`).
+    *Arreglado el 2026-10-07 en el skin de MonoMoon, sin cambiar la grilla:
+    menos padding en el recuadro de la onda y 2 px de separación (44,2×44 a
+    360 px).*
   - Reflujos de filas `flex-wrap` (no son grillas, un renglón más): Acid EXPORT
     a 360 px apila `↓ GUARDAR JSON` y `↑ CARGAR JSON`; MonoMoon MOD (la nota
     del modulador), J4 PAD y SESIÓN, CronBeat SAMPLE (barra del editor) y
@@ -911,7 +914,8 @@ que no había por dónde scrollear sin agarrar uno.
     (J4 a 360 px: 99 → 76), con el alto intacto.
   - MonoMoon FILTRO y VOZ a 844×390 ya desbordaban a lo ancho con v4 (464 px de
     contenido en 408): con el carril siguen desbordando y sus sliders entran en
-    la franja. Es del skin de MonoMoon (los `.ctl` en landscape).
+    la franja. Es del skin de MonoMoon (los `.ctl` en landscape). *Arreglado
+    el 2026-10-07: el peek a media pantalla va con una columna de knobs.*
 
 Lo verifica `node tools/tests/zd-mobile-rail.test.mjs`: en cada pestaña de los 5
 (peek incluidas) el carril mide ≥32 px y no tiene controles, el indicador se ve

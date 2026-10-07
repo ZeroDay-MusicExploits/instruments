@@ -465,7 +465,13 @@
      vertical scrollea, el arrastre horizontal ajusta en relativo, tocar la pista
      no salta el valor); la perilla nativa mide 16px */
   html.zd-m #zd-sheet{--zd-thumb:16px;}
-  html.zd-m #zd-sheet .ctl.wave-ctl{display:flex; flex-direction:column; align-items:stretch; padding:6px 8px;}
+  /* formas de onda: 6 en una fila de botones de ≥44 px de ancho también a 360 px.
+     Con el carril de zd-mobile (32 px a la derecha) quedaban 268 px adentro de
+     51 px de paddings anidados y salían 42 por botón: el recuadro de la onda
+     pasa de 8 a 4 px de padding a los costados y la grilla de 3 a 2 px de
+     separación (6 × 44,3 px), sin achicar el carril ni agregar filas. */
+  html.zd-m #zd-sheet .ctl.wave-ctl{display:flex; flex-direction:column; align-items:stretch; padding:6px 4px;}
+  html.zd-m #zd-sheet .waves{column-gap:2px;}
   html.zd-m #zd-sheet .wave-ctl .wave-lab{grid-area:auto; text-align:center; margin:4px 0 0;}
 
   html.zd-m #zd-sheet .osc-rows{gap:8px;}
@@ -525,6 +531,10 @@
     html.zd-m #macroPanel .knob{--sz:36px;}
     /* el sheet peek ocupa la mitad izquierda y el teclado sigue a la derecha */
     html.zd-m #zd-sheet.peek{right:50%; height:auto; max-height:none; top:calc(var(--zd-top-h) + var(--zd-sat));}
+    /* peek a media pantalla: una columna de knobs. Con dos (la regla de ≥600 px)
+       cada fila .ctl pide ~266 px y FILTRO y VOZ desbordaban a lo ancho (453 px
+       de contenido en 415) y metían sliders en el carril. */
+    html.zd-m #zd-sheet.peek .grid-knobs{grid-template-columns:1fr;}
     html.zd-m.zd-sheet-open:not(.zd-sheet-full) #zd-stage{left:50%; height:var(--zd-stage-h);
       grid-template-columns:minmax(0,1fr); grid-template-areas:"kb"; grid-template-rows:minmax(0,1fr);}
     html.zd-m #zd-sheet{max-height:80dvh;}

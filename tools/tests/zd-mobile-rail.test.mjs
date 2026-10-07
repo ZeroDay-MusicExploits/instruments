@@ -43,15 +43,11 @@ const FILES = ['Acid_Bass-303.html', 'CronBeat-808.html', 'J4-Sirens_Station.htm
 if (!FILES.length) { console.error(`--file ${only}: no es uno de los 5 instrumentos`); process.exit(2); }
 const VERSION = readBlock('zd-mobile').version;
 /* Pérdidas de ANCHO conocidas por el carril, de controles que siguen midiendo
-   ≥44 de alto, en archivos que esta tarea no puede tocar. Cada una tiene su
-   arreglo propuesto en reports/F3-barrido-scroll.md. Una pérdida de ALTO no
-   tiene excepción. */
-const KNOWN_NARROW = {
-  // OSC: grilla de 6 formas de onda adentro de 51 px de paddings anidados; a
-  // 360 px pasa de 46 a 42 de ancho. Arreglo (sesión de MonoMoon): 3×2 en
-  // pantallas angostas.
-  'MonoMoon70.html': ['button.wave-btn'],
-};
+   ≥44 de alto, en archivos que una tarea no puede tocar: { archivo: [nombre] }.
+   Una pérdida de ALTO no tiene excepción. Estuvo la de los botones de forma de
+   onda de MonoMoon (OSC, 46 → 42 de ancho a 360 px), que se arregló en su skin
+   (F3, tarea 4): la lista quedó vacía. */
+const KNOWN_NARROW = {};
 const SB = '#zd-sheet .zd-sbody';
 const SWIPE_VP = { width: 360, height: 640 };
 const LAYOUT_VPS = [{ width: 360, height: 640 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 844, height: 390 }];

@@ -208,8 +208,10 @@ se marcan en cada lugar donde se ejecutan.
       en *peek*, nunca cambia un parámetro; el indicador se ve, no tapa nada y la
       barra nativa no aparece encima; en Android con navegación por gestos, el
       swipe por el borde no dispara "atrás". El ancho útil es 23 px menor: que no
-      se corte ningún texto a 360 px (AC EXPORT, MM OSC con botones de onda de
-      42 px de ancho).
+      se corte ningún texto a 360 px (AC EXPORT, MM OSC con los 6 botones de
+      onda en una fila de 44 px de ancho, con menos aire entre ellos). MM en el
+      teléfono acostado: los sheets FILTRO y VOZ, a media pantalla, van en una
+      columna y no tienen scroll horizontal.
 - [ ] **P1** · AC · NB · MM · J4 · Sliders de los sheets (bloque `zd-sheet-input`,
       el manejo de CronBeat): con el pulgar, swipes verticales rápidos y lentos
       que arrancan encima de un slider (en la pista y en la perilla) scrollean

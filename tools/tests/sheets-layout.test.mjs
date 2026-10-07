@@ -38,18 +38,18 @@ const KNOWN = {
   'J4-Sirens_Station.html': [
     ['ENV·LFO', 'button.on'], ['ENV·LFO', 'button'], ['FX', '#echoOn'], ['FX', '#revOn'], ['FX', '#phOn'], ['SESIÓN', 'a'],
   ],
-  // interruptores de 48×28, el ✕ de borrar patch (43×44) y links de texto;
-  // los botones de onda de OSC a 360 px (42×44) los arregla F3 tarea 4
+  // interruptores de 48×28, el ✕ de borrar patch (43×44) y links de texto
   'MonoMoon70.html': [
     ['OSC', 'div.toggle'], ['OSC', '#noiseTog'], ['MOD', '#osc3KbdTog'], ['MOD', '#oscModTog'], ['MOD', '#filtModTog'], ['MOD', '#glideTog'],
-    ['PATCHES', '#btnDelPatch'], ['PATCHES', 'a'], ['OSC', 'button.wave-btn'],
+    ['PATCHES', '#btnDelPatch'], ['PATCHES', 'a'],
   ],
   // botones de escala/arpegio de 33–41 de ancho y links de texto
   'Nebularp_2035.html': [['ESCALA', 'button'], ['ARP', 'button'], ['TECLADO', 'a']],
 };
-/* Pestañas que ya desbordaban a lo ancho con zd-mobile v4 (ver zd-mobile-rail):
-   [viewport, pestaña]. Las arregla F3 tarea 4. */
-const KNOWN_HSCROLL = { 'MonoMoon70.html': [['844×390', 'FILTRO'], ['844×390', 'VOZ']] };
+/* Pestañas que desbordan a lo ancho por algo de antes: { archivo: [[viewport,
+   pestaña]] }. Estuvieron FILTRO y VOZ de MonoMoon a 844×390 (desde zd-mobile
+   v4), que se arreglaron en su skin (F3, tarea 4): la lista quedó vacía. */
+const KNOWN_HSCROLL = {};
 
 const PROBE = () => {
   const CTL = 'button,input:not([type=hidden]),select,textarea,a[href],[role=slider],[role=button],[role=switch],[role=checkbox],[role=tab],[contenteditable=true],[tabindex]:not([tabindex="-1"])';
