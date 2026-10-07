@@ -48,6 +48,12 @@ y la perilla FEEDBACK se reescaló para que su máximo sea ese techo. Con ∞ si
 autooscilando como antes. Medido en Chromium (`tools/tests/j4-cola.test.mjs`);
 falta escucharlo en el teléfono (apartado 1).
 
+**Actualizado con F2d (2026-10-06, `reports/F2d.md`).** El filtro ladder de J4
+ya no queda en NaN: si el estado pasa √12 se reinicia (antes J4 quedaba mudo
+hasta recargar con Acid Scream a 44,1 kHz o con el pad XY en la esquina de
+arriba a la derecha). Medido en Chromium (`tools/tests/j4-ladder.test.mjs`);
+falta el teléfono (apartado 1, "Persistencia").
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -214,9 +220,17 @@ se marcan en cada lugar donde se ejecutan.
       se alarga de a poco, sin saltos ni tramo muerto. Con FEEDBACK ∞
       mantenido sigue autooscilando fuerte, y al soltarlo se apaga. Anotar si
       alguna cola de preset quedó corta (`reports/F2c.md`, sección 4).
-- [ ] **P1** · J4 · Acid Scream varias veces seguidas: si J4 queda mudo hasta
-      recargar, es el NaN del filtro ladder (bug previo, sin arreglar,
-      `reports/F2c.md`, sección 6). Anotar en qué equipo pasa.
+- [ ] **P1** · J4 · Acid Scream **20 veces seguidas** (SIREN con pausas
+      distintas), y después Police Alarm: J4 tiene que sonar siempre (antes,
+      a 44,1 kHz, quedaba mudo hasta recargar en la mayoría de las tomas;
+      `reports/F2d.md`). Con auriculares, anotar si en el ataque de alguna toma
+      se oye un clic o un hueco de ~3 ms (la guarda; medido como un pozo de
+      ~1,5 dB). Anotar el equipo y, si se puede, su frecuencia de muestreo (a
+      48 kHz Acid Scream no llega a la zona).
+- [ ] **P1** · J4 · Pad XY a la esquina de arriba a la derecha (X = CUTOFF,
+      Y = RESO) con cualquier patch, sin tocar notas, y después SIREN: tiene que
+      sonar (antes quedaba mudo). Arriba de ~8,4 kHz con RESO alta el sonido
+      puede volverse áspero: es el filtro reiniciándose, no un cuelgue.
 
 ---
 

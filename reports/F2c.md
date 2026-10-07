@@ -261,6 +261,10 @@ tomas de Acid Scream daban −∞.
 - **En los tests:** `j4-cola` detecta las muestras no finitas apenas suena la
   nota, avisa y repite la toma (hasta 8 veces). Una toma con NaN no mide el
   eco.
+- **Arreglado el 2026-10-06 con la opción (a)** ([`F2d.md`](F2d.md)): si el
+  estado pasa √12, el filtro se reinicia. No es solo Acid Scream: con el corte
+  por encima de ~0,19 × sampleRate y RESO desde ~0,5 diverge con cualquier
+  patch (el pad XY en la esquina, sin notas).
 
 ---
 
