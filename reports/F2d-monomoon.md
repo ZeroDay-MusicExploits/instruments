@@ -278,6 +278,12 @@ frecuencia de audio, que hoy es justamente el colapso; ninguna se aplicó):
 Si se quiere ir más allá de la guarda, recomiendo (b), con escucha y
 aprobación.
 
+**Actualización (F2e, [`F2e.md`](F2e.md)):** (b) se aplicó para evaluar. Acota
+el estado y la guarda ya no se activa, pero **no saca el zumbido**: viene de la
+normalización de la cadena directa (0,35013·f⁴ a la entrada), no de la
+realimentación. Lo que lo saca es normalizar cada etapa (variante (d) de F2e,
+medida y no aplicada). La afirmación de arriba sobre (b) era incompleta.
+
 ## 6 · Verificación
 
 Chromium de Playwright, headless, `--autoplay-policy=no-user-gesture-required`.

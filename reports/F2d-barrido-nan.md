@@ -105,6 +105,10 @@ Nyquist el SVF queda finito (medido: 11 025 Hz a 22,05 kHz), y a 32 kHz o más
 el corte (≤ 16 kHz) nunca pasa de ahí, así que el sonido queda bit a bit igual.
 J4 (0,45 × sr) y MonoMoon (0,99 × Nyquist) ya lo acotan.
 
+**Arreglado en F2e** ([`F2e.md`](F2e.md)): el tope quedó en 0,45 × sampleRate
+(a sr/2, tan(π/2) se dispara). A 44,1 kHz o más es idéntico; a 32 kHz cambian
+las tomas con el corte sobre 14,4 kHz; a 22,05 kHz ya no hay NaN.
+
 ### 2.2 · Nebularp 2035
 
 **Fuzz (44,1 kHz):** 10 min, 2 942 acciones sobre 30 perillas, la grilla de

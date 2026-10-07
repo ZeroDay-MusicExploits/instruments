@@ -60,6 +60,15 @@ arreglar). Y el barrido sin arreglos (`reports/F2d-barrido-nan.md`): Acid da
 NaN con el `AudioContext` a menos de 32 kHz (su SVF no acota el corte a
 Nyquist); Nebularp y CronBeat, finitos.
 
+**Actualizado con F2e (2026-10-07, `reports/F2e.md`).** MonoMoon satura la
+realimentación del filtro (para evaluar: se revierte solo): ya no puede quedar
+mudo, pero con Mod → Filtro a frecuencia de audio el zumbido saturado sigue
+(medido); se iría con otro cambio, todavía no aprobado. Acid acota el corte de
+su filtro: ya no da NaN a menos de 32 kHz, y a 44,1 kHz o más suena idéntico.
+J4: el final del release ya no tiene el escalón intermitente de −112 dB
+(inaudible). Medido en Chromium; falta el teléfono (apartado 1,
+"Persistencia").
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -247,14 +256,24 @@ se marcan en cada lugar donde se ejecutan.
       recargó: ¿habías salido de la app o bloqueado el teléfono?); (5) «Tocá
       para reanudar» (el sistema suspendió el audio).
       `reports/F2d-monomoon.md`, sección 8.
-- [ ] **P2** · MM · Mod → Filtro con el Osc3 audible: el zumbido saturado
-      puede durar segundos antes de volver. Anotar si es tolerable o si se
-      prefiere alguna de las opciones de `reports/F2d-monomoon.md`, sección 5.
+- [ ] **P1** · MM · **Mod → Filtro con el Osc3 a frecuencia de audio durante
+      5 minutos** (F2e: Osc3 → teclado, rango 8' a 2', rueda Mod arriba, RESO
+      de 30 a 100 %): no tiene que quedar mudo nunca. Con la realimentación
+      saturada (F2e, para evaluar) **el zumbido saturado va a seguir** (medido:
+      62 tramos de ≥ 100 ms en 60 s); se va con la variante (d) de
+      `reports/F2e.md`, sección 1.3, todavía no aprobada. Anotar si con lo de
+      ahora es tolerable o si se aprueba (d).
+- [ ] **P1** · MM · **Los presets antes y después de F2e** (revertir el commit de
+      MonoMoon para escuchar el antes): una nota grave, media y aguda en cada
+      uno. Con RESO baja la diferencia medida es ≤ 0,27 dB; mirar sobre todo
+      «Resonante zumbón» en notas agudas (+0,66 dB) y «Órgano hueco» (+0,27 dB).
 - [ ] **P2** · AC · Con la salida a menos de 32 kHz (por ejemplo, un auricular
       Bluetooth en modo llamada): CUTOFF y ENV MOD altos con el secuenciador
-      sonando. Si queda mudo hasta recargar, es el NaN del SVF
-      (`reports/F2d-barrido-nan.md`, sin arreglar). Anotar el equipo y la
-      frecuencia de muestreo de un WAV grabado con REC en ese momento.
+      sonando. Ya no tiene que quedar mudo (F2e acota el corte del SVF). Anotar
+      el equipo y la frecuencia de muestreo de un WAV grabado con REC.
+- [ ] **P2** · J4 · El final de las notas con auriculares (SIREN y soltar,
+      varias veces): ningún clic. F2e cambió cómo se ancla la rodilla del
+      release, a −100 dBFS o menos: no debería oírse nada distinto.
 
 ---
 
