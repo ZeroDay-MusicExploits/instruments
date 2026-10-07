@@ -112,6 +112,8 @@ Funciona en vertical y en horizontal. En el teléfono, la barra superior lleva T
 - FX — las 4 tarjetas de efectos y los envíos por pista.
 - SAMPLE — el editor de sample no destructivo.
 - CANCIÓN — modo canción y archivo (JSON, abrir, MIDI, compases, WAV).
+- Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
+- Sliders de los sheets — tocar la pista no cambia el valor; el valor cambia con un arrastre horizontal (desde la perilla o desde la pista, relativo a donde estaba). Un swipe vertical encima de un slider scrollea el sheet. Doble toque en el PAN de la mezcla lo vuelve al centro.
 - Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
 ### Pestañas principales
@@ -205,6 +207,7 @@ Funciona en vertical y en horizontal. Arriba van REC (con tiempo y LED CLIP) y e
 - OSC · FILTRO · MOD · VOZ — sheets de sonido; mientras están abiertos el teclado sigue disponible para tocar.
 - PATCHES — presets, biblioteca, JSON, la última toma de REC, MIDI de entrada y la ayuda del teclado de PC.
 - Knobs — arrastre vertical, doble tap = valor de fábrica, long-press (o Enter) = valor numérico.
+- Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 
 ### Encendido y cabecera
 - **Pulsá para encender** — desbloquea el audio al primer toque.
@@ -233,6 +236,7 @@ Mezclador de osciladores más **Ruido** (Nivel, tipo Blanco/Rosa).
 - **Osc3 → teclado** (si el oscilador 3 sigue o no el teclado).
 - **Mod → Osciladores** / **Mod → Filtro** (destinos de la modulación).
 - Truco clásico: poné Osc3 en rango **LO** y sin seguimiento de teclado para que actúe como **LFO**, combinado con Ruido. La profundidad se controla con la **rueda Mod**.
+- Con **Mod → Filtro** y el Osc3 a frecuencia de audio (rangos 8', 4' o 2') el filtro puede saturarse y sonar un zumbido fuerte; para modular el corte usá el Osc3 en **LO** (como LFO). Ya no se queda mudo hasta recargar: el filtro se reinicia solo y la realimentación está saturada (cambio de timbre mínimo en resonancias altas).
 
 ### Contorno de filtro (2ª envolvente)
 - **Cantidad, Ataque, Caída, Sostén, Relaj.**
@@ -291,6 +295,7 @@ Funciona en vertical y en horizontal. Arriba, el orbit y una columna con BPM, ta
 - ESCALA · ARP · SONIDO · ESPACIO — sheets de ajuste; con ellos abiertos el piano, el latch y la octava siguen a mano para tocar.
 - TECLADO — panel Sesión: última toma de REC, guardar/abrir JSON, Empezar de cero, modo liviano del visualizador y ayuda del teclado de PC.
 - Knobs — doble tap = reset, long-press (o Enter) = valor numérico, slider alternativo en los sheets.
+- Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 - Menú ⋯ — ← Sitio, Instalar app, guardar/abrir sesión (JSON) y Empezar de cero.
 
 ### Arranque
@@ -378,12 +383,13 @@ Una sirena dub completa: motor de síntesis con varios modos, cadena de efectos 
 <summary><strong>Manual de usuario completo</strong></summary>
 
 ### En el teléfono (vertical)
-Funciona en vertical y en horizontal. El pad XY ocupa gran parte de la pantalla y, debajo, el deck de performance al alcance del pulgar: SIREN grande (mantener o LATCH), ECHO THROW, FEEDBACK ∞ y KILL.
+Funciona en vertical y en horizontal. El pad XY ocupa gran parte de la pantalla y, debajo, el deck de performance al alcance del pulgar: una fila de arriba con SIREN grande (mantener), LATCH, MUTE y BURNOUT y, debajo, los throws (ECHO THROW, FEEDBACK ∞ y KILL).
 
-- SIRENA · ENV·LFO · FX · PAD — sheets de ajuste; mientras están abiertos quedan el pad y una fila con SIREN y los throws para tocar.
+- SIRENA · ENV·LFO · FX · PAD — sheets de ajuste; mientras están abiertos quedan el pad, una fila con SIREN, MUTE y BURNOUT y otra con los throws para tocar.
 - PAD — ejes del pad, teclado de notas (en el teléfono, 4 filas de 5 en cuartas) y opciones del visualizador.
 - SESIÓN — grabación (REC), patches y archivos.
 - Perillas — arrastre vertical, doble tap = valor por defecto, long-press (o Enter) = valor numérico.
+- Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 - Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
 ### Encendido
@@ -411,6 +417,14 @@ Dos LFOs independientes para modular parámetros del motor.
 - **Phaser Dub**.
 - (De fábrica: **echo throw** / **feedback infinito** / **kill switches** para los cortes clásicos de dub en vivo.)
 
+### Reposo y eco
+En reposo (encendido y sin tocar nada) J4 queda en silencio exacto. Y el eco se apaga solo: la cola decae hasta desaparecer.
+
+- **Techo del eco** — la ganancia del lazo del eco tiene un techo que depende del TIME: `L = min(0,97 ; 10^(−1,8·TIME/20))`, que con el TIME de fábrica (0,38 s) es 0,924. La perilla FEEDBACK llega hasta ese techo; hasta ~25 % de la perilla suena igual que antes.
+- **FEEDBACK ∞** — sigue autooscilando a propósito; al soltarlo la cola se apaga.
+- **Cuánto tarda en apagarse** — tiempo medido para bajar de −60 dBFS tras mantener SIREN 1 s y soltar: fábrica 9,1 s · Classic Wail 11,4 s · Police Alarm 7,8 s · Acid Scream 7,2 s · UFO Random 15,8 s · Cosmic Drone 18,0 s · Feedback Dub 16,0 s.
+- En Feedback Dub el eco desbocado ahora solo sale con ∞.
+
 ### Pad X-Y
 Pad táctil asignable: **Eje X** y **Eje Y** se pueden mapear a distintos parámetros del motor para tocar en vivo con un dedo.
 
@@ -418,19 +432,35 @@ Pad táctil asignable: **Eje X** y **Eje Y** se pueden mapear a distintos parám
 - **SIREN** — botón de disparo; **mantené apretado** para sostener el sonido.
 - `[ESPACIO]` — mismo disparo desde el teclado.
 
+### MUTE, BURNOUT y KILL
+Tres maneras de cortar el sonido, cada una con un alcance distinto.
+
+- **KILL** (tecla `8`, mientras se mantiene) — corta solo la sirena directa y los ecos; la reverb y las colas siguen sonando.
+- **MUTE** (tecla `9`, mientras se mantiene) — silencia toda la salida. El eco y la reverb siguen por dentro, así que al soltar se oyen sus colas.
+- **BURNOUT** (tecla `0`; un toque lo enciende y otro lo apaga) — silencio total: corta la sirena (también en LATCH), FEEDBACK ∞ y ECHO THROW, y vacía las colas del eco y la reverb, así que al volver no queda ninguna cola.
+- Con BURNOUT encendido, el pad avisa «BURNOUT · SILENCIO TOTAL — tocá BURNOUT para volver».
+- BURNOUT no se guarda: al abrir el instrumento, siempre suena.
+- REC y el hub C2 reciben el silencio de MUTE y de BURNOUT: lo que cortás queda así en la toma.
+- ECHO THROW (tecla `1`), FEEDBACK ∞ (tecla `4`) y KILL (tecla `8`) son momentáneos: valen mientras se mantienen.
+
 ### Patches · Presets
-- **Banco de fábrica** — 11 presets de fábrica (ampliado en la última fase).
+- **Banco de fábrica** — 6 presets de fábrica: Classic Wail, Police Alarm, Acid Scream, UFO Random, Cosmic Drone y Feedback Dub.
 - **Guardar en este navegador**.
 - **Exportar / Importar JSON** — Exportar, Copiar (al portapapeles), Importar archivo, Aplicar JSON.
 
 ### Teclado de PC
-Mapeo de 2 octavas.
+Mapeo de 2 octavas y teclas de performance.
 
 | Tecla | Acción |
 |---|---|
 | `Z S X D C …` | Primera octava |
 | `Q 2 W …` | Segunda octava |
 | `[ESPACIO]` | Disparo de sirena (mantener apretado) |
+| `1` | ECHO THROW (mientras se mantiene) |
+| `4` | FEEDBACK ∞ (mientras se mantiene) |
+| `8` | KILL (mientras se mantiene) |
+| `9` | MUTE (mientras se mantiene) |
+| `0` | BURNOUT (un toque lo enciende y otro lo apaga) |
 
 ### Extras de la última fase
 - **Ring modulator**.
@@ -452,7 +482,7 @@ Mapeo de 2 octavas.
 Exporta **WAV · MIDI · JSON**. Autoguarda en el navegador (IndexedDB, con respaldo en `localStorage`) y es instalable como PWA desde la web.
 
 ### Estado del roadmap
-4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y presets · F4 ring modulator, bitcrusher, drift en Drone y banco ampliado a 11 presets. Versión mobile-first: layout vertical con pad XY protagonista, deck de performance con hold/latch, sheets, autoguardado del estado actual, REC → WAV, MIDI de performance, JSON completo, visualizador de baja carga y PWA instalable con uso sin conexión.
+4 fases completas: F1 motor + 5 modos + filtro resonante + teclado PC/touch · F2 cadena dub (tape echo, reverb spring/plate, phaser, echo throw/feedback infinito/kill) · F3 pad X-Y, visualizador psicodélico y presets · F4 ring modulator, bitcrusher, drift en Drone y banco de fábrica de 6 presets. Versión mobile-first: layout vertical con pad XY protagonista, deck de performance con hold/latch, sheets, autoguardado del estado actual, REC → WAV, MIDI de performance, JSON completo, visualizador de baja carga y PWA instalable con uso sin conexión.
 
 </details>
 
@@ -476,6 +506,7 @@ Funciona en vertical y en horizontal. Arriba, los 16 pasos en 2 filas de 8 con e
 - PATRÓN — generador de patrones y banco de fábrica.
 - EXPORT — patches (JSON), MIDI y WAV.
 - Knobs — arrastre vertical, doble tap = reset, long-press (o Enter) = valor numérico.
+- Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 - Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
 ### Encendido y transporte

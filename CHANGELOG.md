@@ -5,6 +5,48 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Unreleased]
 
+### Ajustes tras las primeras pruebas (2026-10-05 a 2026-10-07)
+Lo que salió de usar los instrumentos en el teléfono y de medir los reportes
+`reports/F2b.md` a `F3-barrido-scroll.md`. Medido en Chromium (Playwright); en un
+dispositivo real, lo único confirmado es que los 5 se instalan en un Android
+(lo verificó a mano el usuario el 2026-10-05). Lo que falta oír o tocar está en
+`docs/QA-dispositivos.md`.
+
+- **PWA: un scope propio por instrumento.** Antes los 5 manifests compartían
+  `scope: "../"` y, en Android, la app instalada de Acid capturaba los links a
+  los otros 4 y no dejaba instalarlos. Ahora el `scope` de cada manifest es su
+  propio archivo, con `id` distinto, y un test (`pwa-scopes`) falla si dos scopes
+  se solapan. `sw.js` pasa a `zd-v5`; su scope sigue siendo `/instruments/`.
+- **Sitio.** «▶ Probar ahora» (landing) y «▶ Probar» (cards del índice) abren la
+  HTML del instrumento; sección nueva «Instalar en la computadora y en el
+  teléfono» (tabla en el índice, resumen en cada landing y FAQ).
+  `sitemap.xml` determinista: el `<lastmod>` de cada URL solo cambia cuando
+  cambia esa página, no con la fecha del build.
+- **J4-Sirens Station.** MUTE (mientras se mantiene) y BURNOUT (silencio total
+  hasta otro toque; no se guarda), con las teclas 1, 4, 8, 9 y 0 para ECHO THROW,
+  FEEDBACK ∞, KILL, MUTE y BURNOUT. En reposo queda en silencio exacto y el eco
+  se apaga solo (techo de la ganancia del lazo según el TIME; FEEDBACK ∞ sigue
+  autooscilando a propósito). El final del release ya no tiene un escalón de
+  −112 dB. Corregido el manual, el roadmap, el README y la landing: el banco de
+  fábrica tiene **6** presets, no 11.
+- **Guarda contra NaN en el filtro** de J4 y de MonoMoon: el filtro se reinicia
+  solo cuando su estado se dispara (en J4, si pasa de √12; en MonoMoon, si deja
+  de ser finito). Antes el audio quedaba mudo hasta recargar.
+- **MonoMoon.** Realimentación saturada en el filtro de escalera (cambio de timbre
+  mínimo en resonancias altas). Con Mod → Filtro y el Osc3 a frecuencia de audio
+  todavía puede sonar un zumbido saturado; para modular el corte, Osc3 en LO.
+- **Acid.** El corte del filtro queda acotado a 0,45 × la frecuencia de muestreo:
+  con el `AudioContext` a menos de 32 kHz (por ejemplo un auricular Bluetooth en
+  modo llamada) el filtro daba NaN y Acid quedaba mudo. A 44,1 kHz o más suena
+  igual que antes.
+- **Sheets del teléfono.** `zd-mobile` v5: carril lateral de 32 px sin controles,
+  con una barra fina que muestra la posición, para scrollear sin cambiar un
+  parámetro (en los 5). CronBeat además: los sliders de los sheets ya no saltan al
+  tocarlos ni frenan el scroll (el valor cambia con un arrastre horizontal;
+  doble toque en el PAN de la mezcla lo vuelve al centro). En Acid, Nebularp,
+  MonoMoon y J4 un swipe vertical que arranca sobre un knob todavía cambia el
+  valor y los sliders alternativos saltan al tocarlos (`reports/F3-barrido-scroll.md`).
+
 ### Versión mobile-first (2026-10-04)
 Los 5 instrumentos pasan a funcionar **en vertical** (360×640 como mínimo)
 y dejan de pedir girar el teléfono: sin `#zd-rotate`, sin `maximum-scale` ni
@@ -32,7 +74,7 @@ y dejan de pedir girar el teléfono: sin `#zd-rotate`, sin `maximum-scale` ni
   reanudar tras interrupciones («Tocá para reanudar»), Wake Lock mientras
   suena e indicador de CLIP (solo mide).
 - **PWA real**: `manifests/*.webmanifest` estáticos, íconos, `sw.js` con
-  precache versionado (`zd-v3`) y aviso de nueva versión; oferta de instalación
+  precache versionado (`zd-v3` en ese momento; la versión vigente está en `sw.js`) y aviso de nueva versión; oferta de instalación
   descartable (`zd-pwa` v3).
 - **Extras**: CronBeat con deshacer/rehacer, velocidad por altura del dedo,
   note repeat y choke de hats (opcional); Nebularp con autoplay generativo;
