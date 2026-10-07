@@ -28,7 +28,7 @@ const SRC = join(ROOT, 'descargables');
 const CANON = join(ROOT, 'tools', 'blocks');
 
 // mismo orden y nombres que tools/check-blocks.mjs
-const BLOCKS = ['zd-mobile', 'zd-audio', 'zd-store', 'zd-ui', 'zd-rec', 'zd-dl', 'zd-midi', 'zd-pwa'];
+const BLOCKS = ['zd-mobile', 'zd-sheet-input', 'zd-audio', 'zd-store', 'zd-ui', 'zd-rec', 'zd-dl', 'zd-midi', 'zd-pwa'];
 
 const argv = process.argv.slice(2);
 const CHECK = argv.includes('--check');

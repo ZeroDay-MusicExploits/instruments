@@ -16,7 +16,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'descargables');
 const CANON = join(ROOT, 'tools', 'blocks');
 
-const BLOCKS = ['zd-mobile', 'zd-audio', 'zd-store', 'zd-ui', 'zd-rec', 'zd-dl', 'zd-midi', 'zd-pwa'];
+const BLOCKS = ['zd-mobile', 'zd-sheet-input', 'zd-audio', 'zd-store', 'zd-ui', 'zd-rec', 'zd-dl', 'zd-midi', 'zd-pwa'];
 
 const FILES = readdirSync(SRC).filter((f) => f.endsWith('.html')).sort();
 

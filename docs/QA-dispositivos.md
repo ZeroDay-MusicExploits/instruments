@@ -210,11 +210,15 @@ se marcan en cada lugar donde se ejecutan.
       swipe por el borde no dispara "atrás". El ancho útil es 23 px menor: que no
       se corte ningún texto a 360 px (AC EXPORT, MM OSC con botones de onda de
       42 px de ancho).
+- [ ] **P1** · AC · NB · MM · J4 · Sliders de los sheets (bloque `zd-sheet-input`,
+      el manejo de CronBeat): con el pulgar, swipes verticales rápidos y lentos
+      que arrancan encima de un slider (en la pista y en la perilla) scrollean
+      sin cambiar ningún valor; tocar la pista no salta; arrastrar de costado lo
+      mueve desde donde estaba (en las filas de knob el slider mide 60–100 px y
+      el recorrido es de 160 px: la perilla va más lenta que el dedo). En AC,
+      Swing y Densidad (ahora de 44 px de alto). En iOS, lo mismo que para CB.
 - [ ] **P1** · AC · NB · MM · J4 · Sin arreglar (F3): un swipe vertical que
-      arranca sobre un knob de un sheet no scrollea y cambia el valor; tocar un
-      slider alternativo salta el valor (en AC además no scrollea). Confirmar en
-      el teléfono antes de priorizar el arreglo propuesto en
-      `reports/F3-barrido-scroll.md`.
+      arranca sobre un knob de un sheet no scrollea y cambia el valor.
 - [ ] **P1** · CB · Editor de sample: arrastrar inicio/fin en el canvas dentro
       del sheet sin que el sheet se cierre ni scrollee. BPM editable de la barra
       superior: teclado numérico y layout con el teclado abierto.

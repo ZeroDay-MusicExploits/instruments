@@ -469,6 +469,12 @@
   html.zd-m #zd-sheet .knob-wrap .knob-slider{order:2; display:block; flex:1; min-width:64px; height:44px;}
   html.zd-m #zd-sheet .knob-wrap .knob-val{order:3; flex:none; width:62px; text-align:right; font-size:12px;}
   @media (min-width:620px){ html.zd-m #zd-sheet .knob-bank{grid-template-columns:1fr 1fr;} }
+  /* sliders del sheet: los maneja el bloque zd-sheet-input (el swipe vertical
+     scrollea, el arrastre horizontal ajusta en relativo, tocar la pista no salta
+     el valor). La perilla mide 16px (--zd-thumb). Swing y Densidad pasan de 26
+     a 44px de alto, como los demás: el dedo agarra el control en todo el alto. */
+  html.zd-m #zd-sheet{--zd-thumb:16px;}
+  html.zd-m #zd-sheet #swing, html.zd-m #zd-sheet #density{height:44px;}
 
   /* ---- landscape y tablets: mejora progresiva, no otro layout ---- */
   @media (min-width:600px){
@@ -494,7 +500,7 @@
      Se copian byte a byte en los 5 instrumentos (SPEC 3.1.2) y se verifican con
      `node tools/check-blocks.mjs`. No editarlos acá: editar tools/blocks/.
      Orden: zd-ui · zd-store · zd-audio · zd-dl · zd-midi · zd-rec ·
-            config window.ZD_M · zd-mobile · zd-pwa                     ===== -->
+            config window.ZD_M · zd-mobile · zd-sheet-input · zd-pwa    ===== -->
 <script>
 /* ZD-BLOCK:zd-ui v2 */
 /* Toasts, modales con Promise y accesibilidad de controles continuos.
@@ -2223,6 +2229,167 @@ window.ZD_M = {
   else init();
 })();
 /* /ZD-BLOCK:zd-mobile */
+</script>
+<script>
+/* ZD-BLOCK:zd-sheet-input v1 */
+/* Sliders (<input type=range>) de los sheets del shell movil (zd-mobile) con
+   el dedo: un swipe vertical scrollea el sheet y no toca el valor, un arrastre
+   horizontal lo ajusta de forma relativa y tocar la pista no lo salta. Es el
+   manejo que F3 resolvio adentro de CronBeat (bindSheetSliders), promovido a
+   bloque sin cambiarle nada.
+   Por que: Chrome mueve la perilla a la posicion del dedo ya en el touchstart,
+   antes de saber si el gesto es un scroll, y con sliders de 44px apilados
+   intentar scrollear un sheet cambiaba parametros.
+   Como: en html.zd-m #zd-sheet .zd-sbody el input no recibe punteros
+   (pointer-events:none) y su contenedor (el padre directo, que este bloque
+   marca con .zd-si-host) tiene touch-action:pan-y: el vertical lo scrollea el
+   navegador y el horizontal llega aca. Un handler delegado en document decide:
+   - vertical dominante: es scroll, lo hace el navegador; el slider no se toca.
+   - empieza en la perilla (zona de 44x44 alrededor de su centro): mueve el
+     valor en cuanto el dedo va de costado (|dx|>=|dy|, 3 px).
+   - empieza en la pista: solo con movimiento horizontal dominante (|dx|>|dy|)
+     tras 10 px. Tocar la pista no salta el valor.
+   En los dos casos el valor es relativo: se mueve desde donde estaba, en la
+   proporcion del dedo sobre el recorrido de la perilla (minimo 160px, asi los
+   sliders angostos no son nerviosos). Si el navegador se queda con el gesto a
+   mitad de camino (pointercancel), el valor vuelve.
+   El input sigue siendo el de siempre: el valor se escribe en el y se
+   despachan input/change, asi que los handlers del instrumento, el
+   autoguardado y la exportacion no cambian; el foco, el teclado (flechas,
+   Inicio, Fin) y la semantica de slider son los nativos. Un toque enfoca el
+   slider; un doble toque despacha dblclick en el input.
+   Lo unico del instrumento es el ancho de la perilla, que se lee de la
+   variable CSS --zd-thumb del input (20px si no esta). Fuera del shell, o
+   fuera de los sheets, no hace nada. */
+(function () {
+  'use strict';
+  var ZD = window.ZD || (window.ZD = {});
+  if (ZD.sheetInput) return;
+
+  var CLS = 'zd-si-host';
+  var CSS = [
+    'html.zd-m #zd-sheet .zd-sbody input[type=range]{pointer-events:none}',
+    /* pinch-zoom: el zoom de la pagina sigue andando (SPEC R1). La primera
+       declaracion queda para un navegador que no entienda pinch-zoom. */
+    'html.zd-m #zd-sheet .zd-sbody .' + CLS + '{touch-action:pan-y;touch-action:pan-y pinch-zoom}'
+  ].join('');
+  var st = document.createElement('style');
+  st.id = 'zd-sheet-input-css';
+  st.textContent = CSS;
+  (document.head || document.documentElement).appendChild(st);
+
+  var THUMB = 20, ZONE = 22, SLOP_THUMB = 3, SLOP_TRACK = 10, MIN_SPAN = 160, DBL_MS = 350, DBL_PX = 24;
+  var g = null, lastTap = null;
+
+  function num(v, d) { var n = parseFloat(v); return isFinite(n) ? n : d; }
+  function span(i) { var min = num(i.min, 0), max = num(i.max, 100); return { min: min, max: max > min ? max : min + 1 }; }
+  function fire(i, type) { i.dispatchEvent(new Event(type, { bubbles: true })); }
+  function focusIt(i) { if (document.activeElement !== i) { try { i.focus({ preventScroll: true }); } catch (_) { i.focus(); } } }
+  function thumbW(i) { var t = parseFloat(getComputedStyle(i).getPropertyValue('--zd-thumb')); return t > 0 ? t : THUMB; }
+  /* centro de la perilla: recorre el ancho del input menos el de la perilla */
+  function thumbX(i, r, t) { var s = span(i); return r.left + t / 2 + (num(i.value, s.min) - s.min) / (s.max - s.min) * Math.max(0, r.width - t); }
+  function shell() { return !!(ZD.mobile && ZD.mobile.active); }
+
+  /* El input no recibe punteros, asi que se busca por geometria: la caja del
+     input mas la zona de la perilla, que en los extremos se sale del input. */
+  function hit(x, y) {
+    var best = null, bd = Infinity;
+    var list = document.querySelectorAll('#zd-sheet .zd-pane.on input[type=range]');
+    for (var k = 0; k < list.length; k++) {
+      var i = list[k];
+      if (i.disabled) continue;
+      var r = i.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      var out = ZONE - thumbW(i) / 2;
+      if (y < r.top || y > r.bottom || x < r.left - out || x > r.right + out) continue;
+      var d = x < r.left ? r.left - x : x > r.right ? x - r.right : 0;
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  }
+
+  document.addEventListener('pointerdown', function (e) {
+    if (g || !e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (!shell() || !e.target.closest || !e.target.closest('#zd-sheet .zd-sbody')) return;
+    var i = hit(e.clientX, e.clientY);
+    if (!i) return;
+    var r = i.getBoundingClientRect(), t = thumbW(i);
+    g = { i: i, id: e.pointerId, x0: e.clientX, y0: e.clientY, v0: i.value, onThumb: Math.abs(e.clientX - thumbX(i, r, t)) <= ZONE,
+      px: Math.max(MIN_SPAN, r.width - t), drag: false, scroll: false };
+    /* sin los mousedown de compatibilidad: el del toque caeria en el contenedor
+       (no enfocable) y le sacaria el foco al slider; con mouse, ademas, no hay
+       seleccion de texto. No frena el scroll: eso lo decide touch-action. */
+    e.preventDefault();
+  });
+  document.addEventListener('pointermove', function (e) {
+    if (!g || e.pointerId !== g.id || g.scroll) return;
+    var dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+    if (!g.drag) {
+      var ax = Math.abs(dx), ay = Math.abs(dy);
+      if (Math.max(ax, ay) < (g.onThumb ? SLOP_THUMB : SLOP_TRACK)) return;
+      if (g.onThumb ? ax < ay : ax <= ay) { g.scroll = true; return; }
+      g.drag = true; lastTap = null; focusIt(g.i);
+    }
+    var s = span(g.i), before = g.i.value;
+    g.i.value = String(num(g.v0, s.min) + dx / g.px * (s.max - s.min));   // el input redondea al step y recorta al rango
+    if (g.i.value !== before) fire(g.i, 'input');
+  });
+  document.addEventListener('pointerup', function (e) {
+    if (!g || e.pointerId !== g.id) return;
+    var s = g; g = null;
+    if (s.drag) { if (s.i.value !== s.v0) fire(s.i, 'change'); return; }
+    if (s.scroll) { lastTap = null; return; }
+    /* toque: no cambia nada; enfoca el slider (teclado) y cuenta para el doble toque */
+    focusIt(s.i);
+    var now = performance.now();
+    if (lastTap && lastTap.i === s.i && now - lastTap.t < DBL_MS && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < DBL_PX) {
+      lastTap = null;
+      s.i.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: e.clientX, clientY: e.clientY }));
+    } else lastTap = { i: s.i, t: now, x: e.clientX, y: e.clientY };
+  });
+  document.addEventListener('pointercancel', function (e) {
+    if (!g || e.pointerId !== g.id) return;
+    var s = g; g = null; lastTap = null;
+    if (s.drag && s.i.value !== s.v0) { s.i.value = s.v0; fire(s.i, 'input'); fire(s.i, 'change'); }
+  });
+
+  /* touch-action se decide al apoyar el dedo, antes de cualquier handler: el
+     contenedor tiene que estar marcado de antes. Se marcan los padres de los
+     sliders que hay en el sheet y se vuelve a mirar cada vez que cambian sus
+     nodos (zd-mobile los mueve al entrar; un instrumento puede crear sliders
+     con el sheet abierto). Fuera del sheet la clase no hace nada. */
+  function mark() {
+    var sheet = document.getElementById('zd-sheet');
+    if (!sheet) return;
+    var list = sheet.querySelectorAll('.zd-sbody input[type=range]');
+    for (var k = 0; k < list.length; k++) {
+      var p = list[k].parentElement;
+      if (p && !p.classList.contains(CLS)) p.classList.add(CLS);
+    }
+  }
+  var watched = null;
+  function watch() {
+    var sheet = document.getElementById('zd-sheet');
+    if (!sheet || sheet === watched) return;
+    watched = sheet;
+    if (window.MutationObserver) new MutationObserver(mark).observe(sheet, { childList: true, subtree: true });
+    mark();
+  }
+  function init() {
+    watch();
+    /* el shell se arma en el primer enter() y avisa con un resize */
+    window.addEventListener('resize', watch);
+  }
+
+  ZD.sheetInput = {
+    host: CLS,
+    refresh: function () { watch(); mark(); }
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+/* /ZD-BLOCK:zd-sheet-input */
 </script>
 <script>
 /* ZD-BLOCK:zd-pwa v3 */

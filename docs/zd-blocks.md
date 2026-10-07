@@ -1,6 +1,6 @@
 # Bloques `ZD` · API y cómo pegarlos
 
-Los 8 bloques compartidos que piden SPEC 3.1.2 y 3.4. Se copian **byte a byte
+Los 9 bloques compartidos que piden SPEC 3.1.2 y 3.4 (más `zd-sheet-input`, de F3). Se copian **byte a byte
 idénticos** en los 5 `descargables/*.html`: no llevan ni un selector, ni un
 texto, ni un slug del instrumento — todo entra por configuración. Se verifican
 con `node tools/check-blocks.mjs`.
@@ -16,11 +16,11 @@ Un bloque es el tramo que va de `/* ZD-BLOCK:<nombre> v<n> */` a
 
 ## Dónde van
 
-Los 8 van **en el `<head>`**, en este orden, después de los `<style>` del skin
+Los 9 van **en el `<head>`**, en este orden, después de los `<style>` del skin
 y **antes** del `<script>` del instrumento:
 
 ```
-zd-ui → zd-store → zd-audio → zd-dl → zd-midi → zd-rec → [config ZD_M] → zd-mobile → zd-pwa
+zd-ui → zd-store → zd-audio → zd-dl → zd-midi → zd-rec → [config ZD_M] → zd-mobile → zd-sheet-input → zd-pwa
 ```
 
 Por qué en el `<head>` y no antes de `</body>`:
@@ -461,8 +461,8 @@ resto del sheet. Vale igual en modo *peek*.
   no angostarlo: el mínimo es 32.
 - El carril no arregla lo que pasa **fuera** de él: un knob con
   `touch-action:none` o un `<input type=range>` nativo siguen agarrando el dedo
-  si el swipe empieza encima. Ver `reports/F3-barrido-scroll.md` y, para los
-  sliders, lo que hizo CronBeat (`bindSheetSliders()`).
+  si el swipe empieza encima. Ver `reports/F3-barrido-scroll.md`; los sliders
+  los resuelve `zd-sheet-input` (abajo) y los knobs, cada instrumento.
 
 Lo verifica `node tools/tests/zd-mobile-rail.test.mjs` en los 5 instrumentos.
 
@@ -493,6 +493,67 @@ layout.
 El CSS instrumento por instrumento (qué tan alto va el pad, cuántas columnas
 tienen los steps, qué pasa en landscape) va en un `<style id="zd-mobile-skin">`
 propio, colgado de `html.zd-m`. Ese `<style>` **no** es parte del bloque.
+
+## `zd-sheet-input` v1 — sliders de los sheets con el dedo
+
+Los `<input type=range>` que quedan adentro de los sheets de `zd-mobile`
+(`html.zd-m #zd-sheet .zd-sbody`) se manejan con el dedo así:
+
+- **Swipe vertical** (desde la pista o desde la perilla): scrollea el sheet,
+  nativo y con inercia, y **no cambia el valor**.
+- **Arrastre horizontal**: ajusta el valor **en relativo**, desde donde estaba,
+  en la proporción del dedo sobre el recorrido de la perilla
+  (`Δvalor = Δx / max(160, ancho − perilla) × rango`). Desde la perilla
+  (zona de 44×44 alrededor de su centro) arranca con |dx| ≥ |dy| tras 3 px;
+  desde la pista, con |dx| > |dy| tras 10 px.
+- **Toque en la pista**: no salta el valor; enfoca el slider (teclado nativo:
+  flechas, Inicio, Fin). **Doble toque**: despacha `dblclick` en el input.
+- Si el navegador se queda con el gesto a mitad de camino (`pointercancel`),
+  el valor vuelve al de antes.
+
+Es lo que F3 resolvió adentro de CronBeat (`bindSheetSliders()`), promovido a
+bloque sin cambiarle nada (ver `reports/F3-barrido-scroll.md`). Por qué hace
+falta: Chrome mueve la perilla a la posición del dedo ya en el `touchstart`,
+antes de saber si el gesto es un scroll.
+
+Cómo:
+
+- Inyecta `<style id="zd-sheet-input-css">`: en los sheets el input no recibe
+  punteros (`pointer-events:none`) y el **padre directo** de cada slider, que el
+  bloque marca con la clase `zd-si-host`, tiene `touch-action:pan-y
+  pinch-zoom`. El vertical lo hace el navegador; el horizontal llega al script.
+  Fuera del sheet la clase no hace nada.
+- `touch-action` se decide al apoyar el dedo, antes de cualquier handler, así
+  que el contenedor tiene que estar marcado de antes: un `MutationObserver`
+  sobre `#zd-sheet` vuelve a marcar cada vez que cambian sus nodos (`zd-mobile`
+  los mueve al entrar; un instrumento puede crear sliders con el sheet
+  abierto, como los bloques de la canción de CronBeat).
+- Un handler delegado en `document` busca el slider por geometría (el input no
+  ve el dedo), escribe el valor en el input y despacha `input`/`change`: los
+  handlers del instrumento, el autoguardado y la exportación no cambian.
+
+Lo único del instrumento es el **ancho de la perilla**, que el bloque lee de la
+variable CSS `--zd-thumb` del input (20px si no está). Va en el
+`zd-mobile-skin`: `html.zd-m #zd-sheet{--zd-thumb:16px}`.
+
+```js
+ZD.sheetInput.refresh()   // volver a marcar a mano (no hace falta: lo hace solo)
+ZD.sheetInput.host        // 'zd-si-host'
+```
+
+Reglas para el skin:
+
+- El slider tiene que ser **hijo directo** del contenedor que recibe el dedo
+  (la fila del knob, `.fx-ctl`, `.mcell`…). Si el input va envuelto en algo
+  más chico que la fila, el `pan-y` queda en el envoltorio.
+- La caja del input conviene que mida 44px de alto (SPEC R1): el bloque solo
+  agarra el dedo dentro de esa caja (más la zona de la perilla a los costados).
+- **Los knobs no son de este bloque**: cada instrumento tiene el suyo. Si un
+  knob de la misma fila tiene `touch-action:none`, el dedo que arranca sobre él
+  sigue sin scrollear: eso lo resuelve el código de knobs de cada instrumento.
+
+Lo verifican `node tools/tests/zd-sheet-input.test.mjs` (Acid, Nebularp,
+MonoMoon y J4) y `node tools/tests/cronbeat-sheet-sliders.test.mjs` (CronBeat).
 
 ## `zd-pwa` v3 — service worker, Instalar y la oferta proactiva
 
@@ -619,13 +680,15 @@ Reglas:
   `sync-blocks` pega y `check-blocks` verifica. Son dos pasos a propósito.
 
 Desde el merge de las sesiones C (2026-10-04) los 5 instrumentos tienen los 8
-bloques pegados: `sync-blocks` no debería mostrar ningún "pendiente".
+bloques de entonces, y desde 2026-10-07 también `zd-sheet-input`, pegado a mano
+en los 5 justo después de `zd-mobile`: `sync-blocks` no debería mostrar ningún
+"pendiente".
 
 ---
 
 ## Checklist para pegarlos en un instrumento nuevo
 
-1. Copiar los 8 archivos de `tools/blocks/` al `<head>`, en el orden de arriba,
+1. Copiar los 9 archivos de `tools/blocks/` al `<head>`, en el orden de arriba,
    con el `window.ZD_M` del instrumento entre `zd-rec` y `zd-mobile`.
 2. Agregar los 4 tags de `zd-pwa` al `<head>` (manifest, apple-touch-icon y los
    dos `apple-mobile-web-app-*`).
@@ -674,6 +737,10 @@ La lista completa (incluidos `cronbeat-verify`, `monomoon-verify`,
   el ciclo salir/entrar del shell en los tres pares de viewport, el cableado de
   eventos, el foco, el scroll, el banner de `zd-pwa` y los ≥44 px de los
   controles de la barra superior. No sabe nada de un instrumento en particular.
+- `zd-sheet-input` · los sliders de los sheets con toques reales por CDP, en
+  Acid, Nebularp, MonoMoon y J4: el swipe vertical scrollea sin cambiar nada,
+  el toque no salta el valor, el arrastre horizontal es relativo, el teclado y
+  el autoguardado siguen; y que los 5 tengan el bloque.
 - `acid-verify` · la verificación completa del piloto, la que hay que volver a
   pasar después de tocar un bloque: viewports 360×640 / 390×844 / 768×1024 /
   844×390 / 1440×900, autoguardado, export JSON+MIDI+WAV (con ida y vuelta del
@@ -733,6 +800,36 @@ npm i -D playwright && npx playwright install chromium
 Cuando sube un bloque, sube también el número del delimitador
 (`/* ZD-BLOCK:<nombre> v<n> */`) y hay que volver a pegarlo en los instrumentos
 que lo tengan: `node tools/sync-blocks.mjs` y después `node tools/check-blocks.mjs`.
+
+### 2026-10-07 · `zd-sheet-input` v1 (bloque nuevo)
+
+De `reports/F3-barrido-scroll.md` (punto 1 de "Qué haría falta"): en Acid,
+Nebularp, MonoMoon y J4 tocar un slider de un sheet saltaba el valor y, en
+Acid (`touch-action:none` en todos los `input[type=range]`), además no se podía
+scrollear arrancando encima. CronBeat ya lo había resuelto adentro
+(`bindSheetSliders()` más dos reglas de su skin).
+
+- El manejo de CronBeat pasa a un bloque, sin cambios de lógica: mismas
+  constantes (perilla de 44×44, 3 px desde la perilla, 10 px desde la pista,
+  recorrido mínimo de 160 px, doble toque en 350 ms), mismo `preventDefault()`
+  en el `pointerdown`, mismo `pointercancel` que devuelve el valor.
+- Lo que era del skin de CronBeat lo pone el bloque: `pointer-events:none` en
+  los sliders del sheet y `touch-action:pan-y pinch-zoom` en su contenedor.
+  En vez de una lista de selectores (`.fx-ctl`, `.mcell`, `.pmsl`…), el
+  contenedor es el padre directo de cada slider, marcado con `zd-si-host`
+  (en CronBeat son los mismos elementos).
+- El ancho de la perilla sale de `--zd-thumb` (20px por defecto, el de
+  CronBeat). Acid lo pone en 16px, Nebularp en 22 y MonoMoon y J4 (perilla
+  nativa) en 16.
+- CronBeat borra `bindSheetSliders()` y esas dos reglas; sus 6 casos de
+  `cronbeat-sheet-sliders` y los 24 de `cronbeat-verify` siguen en verde sin
+  tocar los tests.
+- En Acid, Swing y Densidad pasan de 26 a 44px de alto en el sheet (como los
+  demás sliders), así el dedo los agarra en todo el alto.
+- `check-blocks` y `sync-blocks` suman el bloque a su lista. Va pegado en los 5
+  después de `zd-mobile`.
+
+Lo verifica `node tools/tests/zd-sheet-input.test.mjs`.
 
 ### 2026-10-06 · `zd-mobile` v4 → v5
 
