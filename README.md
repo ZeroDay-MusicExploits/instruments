@@ -206,7 +206,8 @@ Funciona en vertical y en horizontal. Arriba van REC (con tiempo y LED CLIP) y e
 - Teclado — dos octavas; en pantallas angostas pasa a dos filas de una octava (la grave abajo). El glissando funciona entre filas.
 - OSC · FILTRO · MOD · VOZ — sheets de sonido; mientras están abiertos el teclado sigue disponible para tocar.
 - PATCHES — presets, biblioteca, JSON, la última toma de REC, MIDI de entrada y la ayuda del teclado de PC.
-- Knobs — arrastre vertical, doble tap = valor de fábrica, long-press (o Enter) = valor numérico.
+- Knobs — en los sheets, arrastre horizontal (el gesto vertical scrollea el sheet); las macros de la zona de tocar y los knobs en una ventana ancha de escritorio, arrastre vertical. Doble tap = valor de fábrica, long-press (o Enter) = valor numérico.
+- Sliders de los sheets — tocar la pista no cambia el valor; el valor cambia con un arrastre horizontal (desde la perilla o desde la pista, relativo a donde estaba). Un swipe vertical encima de un slider scrollea el sheet.
 - Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 
 ### Encendido y cabecera
@@ -294,7 +295,8 @@ Funciona en vertical y en horizontal. Arriba, el orbit y una columna con BPM, ta
 
 - ESCALA · ARP · SONIDO · ESPACIO — sheets de ajuste; con ellos abiertos el piano, el latch y la octava siguen a mano para tocar.
 - TECLADO — panel Sesión: última toma de REC, guardar/abrir JSON, Empezar de cero, modo liviano del visualizador y ayuda del teclado de PC.
-- Knobs — doble tap = reset, long-press (o Enter) = valor numérico, slider alternativo en los sheets.
+- Knobs — en los sheets, arrastre horizontal (el gesto vertical scrollea el sheet) o el slider de la fila; el BPM de la zona de tocar y los knobs en una ventana ancha de escritorio, arrastre vertical. Doble tap = reset, long-press (o Enter) = valor numérico.
+- Sliders de los sheets — tocar la pista no cambia el valor; el valor cambia con un arrastre horizontal (desde la perilla o desde la pista, relativo a donde estaba). Un swipe vertical encima de un slider scrollea el sheet.
 - Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 - Menú ⋯ — ← Sitio, Instalar app, guardar/abrir sesión (JSON) y Empezar de cero.
 
@@ -388,7 +390,8 @@ Funciona en vertical y en horizontal. El pad XY ocupa gran parte de la pantalla 
 - SIRENA · ENV·LFO · FX · PAD — sheets de ajuste; mientras están abiertos quedan el pad, una fila con SIREN, MUTE y BURNOUT y otra con los throws para tocar.
 - PAD — ejes del pad, teclado de notas (en el teléfono, 4 filas de 5 en cuartas) y opciones del visualizador.
 - SESIÓN — grabación (REC), patches y archivos.
-- Perillas — arrastre vertical, doble tap = valor por defecto, long-press (o Enter) = valor numérico.
+- Perillas — en los sheets, arrastre horizontal: el gesto vertical scrollea el sheet; en una ventana ancha de escritorio, arrastre vertical. Doble tap = valor por defecto, long-press (o Enter) = valor numérico.
+- Sliders de los sheets — tocar la pista no cambia el valor; el valor cambia con un arrastre horizontal (desde la perilla o desde la pista, relativo a donde estaba). Un swipe vertical encima de un slider scrollea el sheet.
 - Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 - Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
@@ -505,7 +508,8 @@ Funciona en vertical y en horizontal. Arriba, los 16 pasos en 2 filas de 8 con e
 - SONIDO y FILTRO — oscilador, distorsión y filtro resonante; mientras están abiertos el pad XY y los pasos siguen disponibles.
 - PATRÓN — generador de patrones y banco de fábrica.
 - EXPORT — patches (JSON), MIDI y WAV.
-- Knobs — arrastre vertical, doble tap = reset, long-press (o Enter) = valor numérico.
+- Knobs — en los sheets (TEMPO incluido), arrastre horizontal: el gesto vertical scrollea el sheet; en una ventana ancha de escritorio, arrastre vertical. Doble tap = reset, long-press (o Enter) = valor numérico.
+- Sliders de los sheets — tocar la pista no cambia el valor; el valor cambia con un arrastre horizontal (desde la perilla o desde la pista, relativo a donde estaba). Un swipe vertical encima de un slider scrollea el sheet.
 - Carril lateral — en los sheets, el borde derecho (32 px, con una barra fina que muestra la posición) no tiene controles: arrastrar ahí en vertical solo scrollea y nunca cambia un parámetro.
 - Menú ⋯ — ← Sitio, Instalar app y Empezar de cero.
 
