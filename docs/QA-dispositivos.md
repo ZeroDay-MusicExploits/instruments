@@ -52,7 +52,11 @@ falta escucharlo en el teléfono (apartado 1).
 ya no queda en NaN: si el estado pasa √12 se reinicia (antes J4 quedaba mudo
 hasta recargar con Acid Scream a 44,1 kHz o con el pad XY en la esquina de
 arriba a la derecha). Medido en Chromium (`tools/tests/j4-ladder.test.mjs`);
-falta el teléfono (apartado 1, "Persistencia").
+falta el teléfono (apartado 1, "Persistencia"). En la misma tanda
+(`reports/F2d-monomoon.md`): el «colapsa y se reinicia» de MonoMoon era un NaN
+del filtro con Mod → Filtro a frecuencia de audio, que lo dejaba mudo hasta
+recargar; ahora el filtro se reinicia (el zumbido saturado previo sigue, sin
+arreglar).
 
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
@@ -231,6 +235,19 @@ se marcan en cada lugar donde se ejecutan.
       Y = RESO) con cualquier patch, sin tocar notas, y después SIREN: tiene que
       sonar (antes quedaba mudo). Arriba de ~8,4 kHz con RESO alta el sonido
       puede volverse áspero: es el filtro reiniciándose, no un cuelgue.
+- [ ] **P1** · MM · **10 minutos con la resonancia alta** (F2d): tocar normal,
+      moviendo macros, pad y ruedas, con y sin Mod → Filtro. Si algo «colapsa»
+      o «se reinicia», anotar **cuál** de estas pasó: (1) un zumbido saturado
+      que vuelve solo (el colapso con Mod → Filtro, sin arreglar: ¿rango del
+      Osc3? ¿rueda Mod?); (2) mudo y no vuelve con ninguna nota ni preset (no
+      debería pasar más); (3) una perilla o macro vuelve a fábrica (¿doble
+      toque?); (4) «TOCÁ PARA ENCENDER» + «Sesión restaurada» (la página se
+      recargó: ¿habías salido de la app o bloqueado el teléfono?); (5) «Tocá
+      para reanudar» (el sistema suspendió el audio).
+      `reports/F2d-monomoon.md`, sección 8.
+- [ ] **P2** · MM · Mod → Filtro con el Osc3 audible: el zumbido saturado
+      puede durar segundos antes de volver. Anotar si es tolerable o si se
+      prefiere alguna de las opciones de `reports/F2d-monomoon.md`, sección 5.
 
 ---
 

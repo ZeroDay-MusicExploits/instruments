@@ -389,6 +389,12 @@ llegar a lo mismo.
 - **Wake lock de 60 s.** Si se deja el instrumento sonando con una nota
   sostenida por un controlador MIDI que se cuelga, la pantalla queda prendida
   (hay notas abiertas). Pánico con Espacio o el CC123 la sueltan.
+- **NaN en el filtro con Mod → Filtro** (encontrado y arreglado el 2026-10-06,
+  [`F2d-monomoon.md`](F2d-monomoon.md)). Con Mod → Filtro y el Osc3 a
+  frecuencia de audio, el estado del `moog-ladder` crecía hasta NaN y MonoMoon
+  quedaba mudo hasta recargar: era el «colapsa y se reinicia». Ahora el filtro
+  se reinicia si su estado deja de ser finito. El crecimiento previo (la salida
+  saturada, el «colapso») sigue, sin arreglar.
 
 ---
 
