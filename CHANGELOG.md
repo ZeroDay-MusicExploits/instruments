@@ -65,7 +65,8 @@ dispositivo real, lo único confirmado es que los 5 se instalan en un Android
   ancho a 360 px, y FILTRO y VOZ ya no tienen scroll horizontal con el teléfono
   acostado. Medido en Chromium con toques reales por CDP (tests `sheet-knobs`,
   `zd-sheet-input`, `sheets-layout`); **sin probar con un pulgar ni en iOS**
-  (`docs/QA-dispositivos.md`).
+  (`docs/QA-dispositivos.md`). `sw.js` pasa a `zd-v6` y el ZIP se regenera con
+  los 5 instrumentos de ahora.
 
 ### Versión mobile-first (2026-10-04)
 Los 5 instrumentos pasan a funcionar **en vertical** (360×640 como mínimo)

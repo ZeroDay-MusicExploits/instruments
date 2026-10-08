@@ -5,7 +5,7 @@ Qué hay en el repo y qué lleva cada instrumento en su propio HTML
 
 **Estado:** el bloque `zd-pwa` (hoy v3) está pegado **idéntico** en los 5
 instrumentos (SPEC 3.1.2; lo verifica `tools/check-blocks.mjs`), cada uno con su
-`<link rel="manifest">` estático, y `sw.js` está en `zd-v5`. Lo que sigue
+`<link rel="manifest">` estático, y `sw.js` está en `zd-v6`. Lo que sigue
 describe qué lleva cada HTML y por qué; lo que falta probar en un dispositivo
 está al final (sección 5) y en [`docs/QA-dispositivos.md`](QA-dispositivos.md).
 
@@ -254,22 +254,24 @@ registrado.
 
 ## 4 · Service worker y "nueva versión"
 
-`sw.js` (raíz, cache `zd-cache-<VERSION>`, hoy `zd-v5`) precachea los 5
+`sw.js` (raíz, cache `zd-cache-<VERSION>`, hoy `zd-v6`) precachea los 5
 instrumentos + manifests + íconos y sirve HTML con *stale-while-revalidate*.
 Al activar una versión nueva manda `postMessage({type:'zd-sw-updated',
-version:'zd-v5'})` (la `VERSION` vigente) a las pestañas abiertas; `zd-pwa` lo escucha y solo muestra el toast si
+version:'zd-v6'})` (la `VERSION` vigente) a las pestañas abiertas; `zd-pwa` lo escucha y solo muestra el toast si
 `hadController` era `true` (evita mostrar "Nueva versión" en el primer
 install, cuando técnicamente no había nada previo que actualizar).
 
-Para forzar una nueva versión: subir `VERSION` en `sw.js` (hoy `zd-v5`; la
-próxima, `zd-v6`). El `activate` del SW nuevo borra los `zd-cache-*` viejos.
+Para forzar una nueva versión: subir `VERSION` en `sw.js` (hoy `zd-v6`; la
+próxima, `zd-v7`). El `activate` del SW nuevo borra los `zd-cache-*` viejos.
 Subió a `zd-v2` con el hotfix de `zd-mobile` v3 y `zd-midi` v2 (2026-10-03), a
 `zd-v3` con la versión mobile-first (`zd-ui` v2, `zd-audio` v2, `zd-rec` v2,
 `zd-pwa` v3 y los 5 instrumentos nuevos, 2026-10-04), a `zd-v4` con el scope
-propio de cada manifest (2026-10-05, el que está publicado) y a `zd-v5` con
-los cambios de los instrumentos de 2026-10-05 a 2026-10-07 (`zd-mobile` v5,
-J4, MonoMoon, Acid y CronBeat; ver `CHANGELOG.md`): es lo que hace que las
-copias cacheadas del instrumento se reemplacen. Subirla una sola vez por
+propio de cada manifest (2026-10-05), a `zd-v5` con los cambios de los
+instrumentos de 2026-10-05 a 2026-10-07 (`zd-mobile` v5, J4, MonoMoon, Acid y
+CronBeat; es la publicada) y a `zd-v6` con los knobs y sliders de los sheets
+(`zd-mobile` v6, `zd-sheet-input` v1, los 5 instrumentos; 2026-10-07, falta
+publicarla; ver `CHANGELOG.md`): es lo que hace que las copias cacheadas del
+instrumento se reemplacen. Subirla una sola vez por
 publicación, desde la que está publicada.
 
 ## 5 · A verificar en dispositivo
