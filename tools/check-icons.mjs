@@ -15,7 +15,9 @@
 //      esquina más lejana de cada píxel, o sea, del lado conservador.
 // Y de las referencias, con el mismo criterio de «existe y mide lo que dice»:
 //   6. manifests/<slug>.webmanifest: íconos any 192 y 512 y maskable 512, sin
-//      «monochrome», con `sizes`, `type` y `purpose` que coinciden con el archivo;
+//      «monochrome», con `sizes`, `type` y `purpose` que coinciden con el archivo, y
+//      `background_color` y `theme_color` iguales al color del sitio (data.site.themeColor,
+//      el fondo oscuro de la UI; pwa-scopes ya compara theme_color con el <meta> de cada HTML);
 //   7. sw.js precachea los 20 PNG;
 //   8. los <link rel="icon"> y <link rel="apple-touch-icon"> de las páginas del sitio
 //      (index, landings, privacidad, 404) apuntan a un PNG que existe y mide lo que
@@ -111,6 +113,10 @@ function checkManifest(slug) {
     if (!existsSync(abs)) { fail(`${rel}: ${it.src} no existe`); continue; }
     const png = PNG.sync.read(readFileSync(abs));
     if (png.width !== size || png.height !== size) fail(`${rel}: ${it.src} mide ${png.width}×${png.height}, declara ${it.sizes}`);
+  }
+  const theme = data.site.themeColor.toLowerCase();
+  for (const k of ['background_color', 'theme_color']) {
+    if (String(man[k]).toLowerCase() !== theme) fail(`${rel}: ${k} es ${man[k]} y el color del sitio es ${theme}`);
   }
   for (const i of icons) if (/monochrome/.test(i.purpose || '')) fail(`${rel}: declara un ícono «monochrome» y el diseño no lo trajo (${i.src})`);
   if (icons.length !== want.length) fail(`${rel}: tiene ${icons.length} íconos, se esperan ${want.length}`);

@@ -26,7 +26,9 @@ dice su nombre, sea 100 % opaco y tenga el fondo del acento de
 `data/instrumentos.json`; que en el maskable todo el contenido quede dentro de la
 zona segura (círculo de radio 40 % del lado, 204,8 px en 512); que ningún ícono tenga
 contenido pegado al borde; y que los manifests y `sw.js` apunten a esos archivos con
-el tamaño que declaran.
+el tamaño que declaran, sin íconos «monochrome» y con `background_color` y `theme_color`
+iguales al color del sitio (`#070b06`, el fondo oscuro de la UI: es el primer pintado de
+la app instalada, y la ventana de los íconos es `#0b130a`, casi el mismo negro).
 
 **Íconos del sitio** (`assets/`; no son de ningún instrumento): «0xD» verde sobre un
 cuadrado redondeado casi negro, con las esquinas transparentes. `templates/layout.mjs`
