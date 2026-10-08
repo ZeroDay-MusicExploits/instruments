@@ -43,9 +43,29 @@ dispositivo real, lo único confirmado es que los 5 se instalan en un Android
   con una barra fina que muestra la posición, para scrollear sin cambiar un
   parámetro (en los 5). CronBeat además: los sliders de los sheets ya no saltan al
   tocarlos ni frenan el scroll (el valor cambia con un arrastre horizontal;
-  doble toque en el PAN de la mezcla lo vuelve al centro). En Acid, Nebularp,
-  MonoMoon y J4 un swipe vertical que arranca sobre un knob todavía cambia el
-  valor y los sliders alternativos saltan al tocarlos (`reports/F3-barrido-scroll.md`).
+  doble toque en el PAN de la mezcla lo vuelve al centro). Para Acid,
+  Nebularp, MonoMoon y J4 el barrido (`reports/F3-barrido-scroll.md`) midió que
+  un swipe vertical sobre un knob cambiaba el valor y que los sliders saltaban al
+  tocarlos; se resolvió en la entrada de abajo.
+- **Knobs y sliders de los sheets (Acid, Nebularp, MonoMoon y J4; sliders
+  también en CronBeat).** Dentro de los sheets del teléfono, el swipe vertical
+  que arranca encima de un knob o de un slider scrollea el sheet y no cambia el
+  valor; el ajuste es un arrastre horizontal, relativo (desde donde estaba) y
+  sin demora. Tocar la pista de un slider ya no salta el valor. En los knobs
+  siguen igual el doble toque (valor por defecto), el long-press (valor
+  numérico), el teclado y `role="slider"`. Fuera de los sheets (macros de
+  MonoMoon, BPM de Nebularp) y en escritorio con la ventana ancha, el knob sigue
+  con arrastre vertical; con el shell activo en una ventana angosta de escritorio,
+  el knob del sheet también va de costado. Los sliders pasan a un bloque nuevo,
+  `zd-sheet-input` v1 (el manejo de CronBeat, sin cambios de lógica); los knobs
+  usan el mismo modelo en el código de cada instrumento. Los knobs del sheet miden
+  44×44 (Acid y J4 medían 42, MonoMoon 40) y, en Acid, Swing y Densidad pasan de
+  26 a 44 px de alto. `zd-mobile` v6: el ✕ de la cabecera de los sheets mide
+  44×44 (antes 44×36). MonoMoon: los 18 botones de onda de OSC miden ≥44 de
+  ancho a 360 px, y FILTRO y VOZ ya no tienen scroll horizontal con el teléfono
+  acostado. Medido en Chromium con toques reales por CDP (tests `sheet-knobs`,
+  `zd-sheet-input`, `sheets-layout`); **sin probar con un pulgar ni en iOS**
+  (`docs/QA-dispositivos.md`).
 
 ### Versión mobile-first (2026-10-04)
 Los 5 instrumentos pasan a funcionar **en vertical** (360×640 como mínimo)
