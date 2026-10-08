@@ -94,13 +94,4 @@ for (const slug of data.order) {
   console.log('og: home.png');
 }
 
-// Favicon simple: ">_" (el ícono de prompt del logo) en verde fósforo sobre fondo oscuro.
-{
-  const size = 64;
-  const c = new Canvas(size, size, '#070b06');
-  const scale = 5;
-  const w = textWidth('>_', scale);
-  drawText(c, '>_', Math.round((size - w) / 2), Math.round((size - 7 * scale) / 2), scale, '#7fdc5c');
-  writeFileSync(join(ROOT, 'assets/favicon.png'), c.toPNG());
-  console.log('favicon: assets/favicon.png');
-}
+// El favicon del sitio ya no sale de acá: son los PNG del diseño, optimizados por tools/make-site-icons.mjs.

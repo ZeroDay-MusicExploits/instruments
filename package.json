@@ -9,6 +9,7 @@
   "scripts": {
     "check-icons": "node tools/check-icons.mjs",
     "make-favicons": "node tools/make-favicons.mjs",
+    "make-site-icons": "node tools/make-site-icons.mjs",
     "build-zip": "node tools/build-zip.mjs",
     "check-zip": "node tools/check-zip.mjs"
   },

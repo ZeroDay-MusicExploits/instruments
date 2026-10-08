@@ -28,6 +28,16 @@ zona segura (círculo de radio 40 % del lado, 204,8 px en 512); que ningún íco
 contenido pegado al borde; y que los manifests y `sw.js` apunten a esos archivos con
 el tamaño que declaran.
 
+**Íconos del sitio** (`assets/`; no son de ningún instrumento): «0xD» verde sobre un
+cuadrado redondeado casi negro, con las esquinas transparentes. `templates/layout.mjs`
+declara en el `<head>` de cada página `favicon-32.png` (32×32), `favicon.png` (64×64) y,
+como `apple-touch-icon`, `favicon-180.png`. Las rutas son relativas (`assets/…`), así que
+también resuelven desde la 404, que las toma del `<base href="/instruments/">`. Salen de
+los PNG del diseño (`src/brand/zeroday-brand-assets/icons/`) pasados a paleta con alfa
+por `node tools/make-site-icons.mjs` (de 7–12 KB a 0,6–1,9 KB: el de 32 y el de 64 quedan
+idénticos píxel a píxel y el de 180, con un error medio de 0,05 sobre 255). El
+`favicon-512.png` del diseño no se usa: el sitio no tiene manifest.
+
 Todas las rutas de `zd-pwa` son relativas **desde `descargables/`**, que
 es donde vive cada instrumento (SPEC 3.2: ese HTML es a la vez lo que se
 sirve y lo que se descarga).

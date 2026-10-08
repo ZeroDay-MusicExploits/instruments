@@ -15,7 +15,9 @@ ${base ? `<base href="${esc(base)}">` : ''}
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${esc(canonical)}">
 ${robots ? `<meta name="robots" content="${esc(robots)}">` : ''}
-<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
 <link rel="stylesheet" href="assets/site.css">
 <meta name="theme-color" content="${esc(site.themeColor)}">
 <meta property="og:type" content="${esc(ogType)}">

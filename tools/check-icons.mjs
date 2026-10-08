@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Verifica los íconos de los 5 instrumentos. Sale con código 1 si
+// Verifica los íconos de los 5 instrumentos y los links de icono de las páginas del sitio. Sale con código 1 si
 // algo no cumple. Los PNG los entrega el diseño (src/brand/zeroday-brand-assets/icons/)
-// y se copian tal cual a icons/: acá no se generan, se comprueban.
+// y se copian a icons/ (los del sitio, optimizados, a assets/ con tools/make-site-icons.mjs): acá no se generan, se comprueban.
 //
 //   node tools/check-icons.mjs [--root <carpeta>]     (npm run check-icons)
 //
@@ -16,7 +16,11 @@
 // Y de las referencias, con el mismo criterio de «existe y mide lo que dice»:
 //   6. manifests/<slug>.webmanifest: íconos any 192 y 512 y maskable 512, sin
 //      «monochrome», con `sizes`, `type` y `purpose` que coinciden con el archivo;
-//   7. sw.js precachea los 20 PNG.
+//   7. sw.js precachea los 20 PNG;
+//   8. los <link rel="icon"> y <link rel="apple-touch-icon"> de las páginas del sitio
+//      (index, landings, privacidad, 404) apuntan a un PNG que existe y mide lo que
+//      declara `sizes`, y todos cuelgan de assets/ (relativo: sirve también bajo el
+//      <base href="/instruments/"> de la 404).
 //
 // Solo usa pngjs (devDependency) y módulos de Node.
 import { readFileSync, existsSync } from 'node:fs';
@@ -122,6 +126,27 @@ function checkServiceWorker(slugs) {
   }
 }
 
+function checkSiteLinks() {
+  const pages = ['index.html', ...data.order.map((k) => data.instruments[k].page), 'privacidad.html', '404.html'];
+  for (const page of pages) {
+    const html = read(page);
+    const head = html.slice(0, html.indexOf('</head>'));
+    const links = [...head.matchAll(/<link\b[^>]*\brel="(icon|apple-touch-icon)"[^>]*>/g)].map((m) => m[0]);
+    if (!links.some((l) => /rel="icon"/.test(l))) fail(`${page}: no tiene <link rel="icon">`);
+    if (!links.some((l) => /rel="apple-touch-icon"/.test(l))) fail(`${page}: no tiene <link rel="apple-touch-icon">`);
+    for (const l of links) {
+      const href = /href="([^"]+)"/.exec(l)?.[1];
+      const sizes = /sizes="(\d+)x(\d+)"/.exec(l);
+      if (!href || !href.startsWith('assets/')) { fail(`${page}: ${l} no apunta a assets/ (relativo a la raíz o al <base>)`); continue; }
+      if (!existsSync(join(ROOT, href))) { fail(`${page}: ${href} no existe`); continue; }
+      const png = readPng(href);
+      if (!sizes) fail(`${page}: ${href} no declara sizes`);
+      else if (png.width !== +sizes[1] || png.height !== +sizes[2]) fail(`${page}: ${href} mide ${png.width}×${png.height} y declara ${sizes[1]}×${sizes[2]}`);
+    }
+  }
+  console.log(`  ${pages.length} páginas revisadas`);
+}
+
 const slugs = [];
 console.log('Íconos de los instrumentos (icons/)');
 for (const key of data.order) {
@@ -134,10 +159,12 @@ console.log('Manifests y service worker');
 for (const slug of slugs) checkManifest(slug);
 checkServiceWorker(slugs);
 console.log(`  ${slugs.length} manifests y sw.js revisados`);
+console.log('Páginas del sitio');
+checkSiteLinks();
 
 if (fails.length) {
   console.error(`\nFALLA: ${fails.length} problema${fails.length === 1 ? '' : 's'}`);
   for (const f of fails) console.error('  ✗ ' + f);
   process.exit(1);
 }
-console.log(`\nOK: ${slugs.length * VARIANTS.length} íconos y ${slugs.length} manifests en regla.`);
+console.log(`\nOK: ${slugs.length * VARIANTS.length} íconos, ${slugs.length} manifests y las páginas del sitio en regla.`);
