@@ -46,7 +46,7 @@ Orden de uso:
 | `pc-keys.test.mjs` | Los 5: los atajos del teclado de PC no le roban teclas a knobs, botones ni modales (E1). | sí |
 | `logo-once.test.mjs` | El logo en base64 va una sola vez y se ve en todos sus lugares, en http y `file://` (E1). | sí |
 | `zd-rec-comments.test.mjs` | Ningún instrumento dice que `zd-rec` descarta la toma del tope (E1). | no |
-| `favicon.test.mjs` | Favicon inline (PNG 32×32, color de acento) en los 5, en http y `file://` (E1). | sí |
+| `favicon.test.mjs` | Favicon inline en los 5: un solo `<link rel="icon">`, PNG de 32×32, ≤ 2 KB y píxel (0,0) igual al acento del ícono de 192; y que resuelva a `data:` y cargue, en http y `file://` (E1). Cómo se genera: ver «Favicon de cada instrumento» en las notas. | sí |
 | `monomoon-midi.test.mjs` | MonoMoon pide Web MIDI con el botón «Conectar MIDI», no al cargar; sin Web MIDI y con hub C2 (E1). | sí |
 | `monomoon-xypad-a11y.test.mjs` | MonoMoon: el pad XY sin `aria-valuetext`, con el valor descrito y anunciado (E1). | sí |
 | `landing-probar.test.mjs` | Las 5 landings: «▶ Probar ahora» → archivo de `descargables/` (misma pestaña); «DESCARGAR GRATIS» y «Probar ahora» visibles sin scroll y ≥44 px a 360×640 y 1440×900; header sticky en una fila; «Probalo acá» intacto; sin `<a>` anidados. | sí |
@@ -89,6 +89,20 @@ un swipe scrollea).
 
 ## Notas
 
+- **Favicon de cada instrumento.** Es un PNG de 32×32 con paleta (~0,4 KB) inline
+  en el `<link rel="icon">` de `descargables/<Instrumento>.html`. Sale del ícono de
+  512 (`icons/<slug>-512.png`) en tres pasos: se aísla la ventana oscura (el nombre y
+  «ZERO DAY» no se leen a 32 px), se reduce a ~30 px de ancho y se centra sobre un
+  cuadrado de 32 px del color de acento, y se cuantiza a 24 colores con el acento como
+  entrada exacta de la paleta. `node tools/make-favicons.mjs` lo reproduce con pngjs y
+  los helpers de `tools/lib/` (`--out <carpeta>` guarda los PNG de 32 y de 16;
+  `--html` reemplaza el favicon inline de los 5 HTML). No da los mismos bytes que los
+  del diseño (`src/brand/zeroday-brand-assets/favicons/`, que son los que están hoy
+  en los HTML) sino una imagen equivalente: diferencia media ~5/255 por canal contra
+  los del diseño, mismo tamaño (375–427 B). El test no exige el método: solo 32×32, ≤ 2 KB y
+  píxel (0,0) = acento. En Nebularp el favicon del diseño traía el fondo en `#9a8cfe`
+  (el acento es `#9a8cff`) y se corrigió ese único byte de la paleta para que (0,0)
+  coincida.
 - Los `*-verify` de CronBeat y J4 comparan el adaptador C2 contra el commit
   `8bef265` con `git diff`, así que necesitan el historial completo (no sirven
   con un clon superficial).

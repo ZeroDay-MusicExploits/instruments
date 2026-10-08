@@ -50,6 +50,50 @@ export function encodePNG(width, height, pixels) {
   return Buffer.concat([sig, ihdr, idat, iend]);
 }
 
+// PNG con paleta (color type 3, 8 bits). `palette`: [[r,g,b,a], …] (hasta 256 entradas);
+// `indices`: Uint8Array de width*height con el índice de cada píxel. Si alguna entrada no es
+// opaca va un chunk tRNS: se ponen primero las entradas con alfa < 255 para que el tRNS
+// llegue solo hasta la última y no repita 255 para el resto. Solo IHDR, PLTE, tRNS, IDAT e
+// IEND (sin chunks de fecha ni de software): misma entrada, mismos bytes.
+export function encodeIndexedPNG(width, height, indices, palette) {
+  if (palette.length < 1 || palette.length > 256) throw new Error(`paleta de ${palette.length} entradas`);
+  const order = palette.map((_, i) => i).sort((a, b) => (palette[a][3] < 255 ? 0 : 1) - (palette[b][3] < 255 ? 0 : 1) || a - b);
+  const remap = new Uint8Array(palette.length);
+  order.forEach((old, now) => { remap[old] = now; });
+  const sorted = order.map((i) => palette[i]);
+
+  const ihdrData = Buffer.alloc(13);
+  ihdrData.writeUInt32BE(width, 0);
+  ihdrData.writeUInt32BE(height, 4);
+  ihdrData[8] = 8; // bit depth
+  ihdrData[9] = 3; // color type: paleta
+  const plte = Buffer.alloc(sorted.length * 3);
+  sorted.forEach(([r, g, b], i) => { plte[i * 3] = r; plte[i * 3 + 1] = g; plte[i * 3 + 2] = b; });
+  let transparent = 0;
+  sorted.forEach((c, i) => { if (c[3] < 255) transparent = i + 1; });
+
+  // Un solo filtro para toda la imagen (ninguno, Sub o Up): el que dé el IDAT más chico.
+  let best = null;
+  for (const filter of [0, 1, 2]) {
+    const raw = Buffer.alloc((width + 1) * height);
+    for (let y = 0; y < height; y++) {
+      raw[y * (width + 1)] = filter;
+      for (let x = 0; x < width; x++) {
+        const cur = remap[indices[y * width + x]];
+        const left = x ? remap[indices[y * width + x - 1]] : 0;
+        const up = y ? remap[indices[(y - 1) * width + x]] : 0;
+        raw[y * (width + 1) + 1 + x] = filter === 0 ? cur : filter === 1 ? (cur - left) & 255 : (cur - up) & 255;
+      }
+    }
+    const z = deflateSync(raw, { level: 9, memLevel: 9 });
+    if (!best || z.length < best.length) best = z;
+  }
+  const parts = [Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdrData), chunk('PLTE', plte)];
+  if (transparent) parts.push(chunk('tRNS', Buffer.from(sorted.slice(0, transparent).map((c) => c[3]))));
+  parts.push(chunk('IDAT', best), chunk('IEND', Buffer.alloc(0)));
+  return Buffer.concat(parts);
+}
+
 // Framebuffer helper RGBA simple.
 export class Canvas {
   constructor(width, height, bgHex) {
