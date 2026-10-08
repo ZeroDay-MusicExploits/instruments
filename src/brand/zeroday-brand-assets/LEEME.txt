@@ -1,0 +1,12 @@
+ZERO DAY · MUSIC EXPLOITS — assets de marca (íconos y favicons)
+
+icons/      lo que entregó el diseño (24 PNG): 5 instrumentos × (192, 512, 512-maskable, apple-touch-180)
+            más el set del sitio (favicon.png 64, favicon-32, favicon-180, favicon-512).
+favicons/   favicons por instrumento, generados desde icons/<slug>-512.png:
+            favicon-<slug>-32.png (el que va inline en el <head> de cada HTML, ~0,4 KB)
+            favicon-<slug>-16.png (de reserva; hoy el test exige un solo <link rel="icon">)
+            Método: se aísla la ventana oscura del ícono (sin los nombres, ilegibles a 32 px),
+            se reduce a 28 px de ancho sobre un cuadrado de 32 px del color de acento, y se
+            cuantiza a 24 colores. El píxel (0,0) es el acento, como pide favicon.test.mjs.
+
+Para usarlo en el repo:   mkdir -p src/brand && unzip zeroday-brand-assets.zip -d src/brand

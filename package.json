@@ -7,7 +7,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "make-icons": "node tools/make-icons.mjs",
+    "check-icons": "node tools/check-icons.mjs",
     "build-zip": "node tools/build-zip.mjs",
     "check-zip": "node tools/check-zip.mjs"
   },

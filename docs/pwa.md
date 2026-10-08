@@ -14,10 +14,19 @@ está al final (sección 5) y en [`docs/QA-dispositivos.md`](QA-dispositivos.md)
 | Qué | Dónde | Generado por |
 |---|---|---|
 | Manifest por instrumento | `manifests/<slug>.webmanifest` | estático, a mano |
-| Íconos (192, 512, 512 maskable, apple-touch 180) | `icons/<slug>-*.png` | `tools/make-icons.mjs` |
+| Íconos (192, 512, 512 maskable, apple-touch 180) | `icons/<slug>-*.png` | el diseño (`src/brand/zeroday-brand-assets/icons/`), copiados tal cual; `tools/check-icons.mjs` los verifica |
 | Service worker único | `sw.js` (raíz) | estático, a mano |
 
 Slugs: `cronbeat`, `monomoon`, `nebularp`, `j4-sirens`, `acid-bass`.
+
+Los íconos ya no se generan: son el diseño de la ventana de terminal con el número
+de cada instrumento (fondo del color de acento). `node tools/check-icons.mjs`
+(`npm run check-icons`) sale con código 1 si algo no cumple: que cada PNG mida lo que
+dice su nombre, sea 100 % opaco y tenga el fondo del acento de
+`data/instrumentos.json`; que en el maskable todo el contenido quede dentro de la
+zona segura (círculo de radio 40 % del lado, 204,8 px en 512); que ningún ícono tenga
+contenido pegado al borde; y que los manifests y `sw.js` apunten a esos archivos con
+el tamaño que declaran.
 
 Todas las rutas de `zd-pwa` son relativas **desde `descargables/`**, que
 es donde vive cada instrumento (SPEC 3.2: ese HTML es a la vez lo que se
