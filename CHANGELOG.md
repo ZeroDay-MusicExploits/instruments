@@ -5,6 +5,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Unreleased]
 
+### Íconos y favicons nuevos (2026-10-08)
+- **PWA.** `sw.js` pasa a `zd-v7` y el ZIP se regenera: cambiaron los 20 PNG de
+  `icons/` y el favicon inline de los 5 HTML, así que las copias cacheadas tienen
+  que reemplazarse.
+
 ### Ajustes tras las primeras pruebas (2026-10-05 a 2026-10-07)
 Lo que salió de usar los instrumentos en el teléfono y de medir los reportes
 `reports/F2b.md` a `F3-barrido-scroll.md`. Medido en Chromium (Playwright); en un

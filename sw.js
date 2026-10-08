@@ -13,7 +13,7 @@
 // No cachea descargables-zeroday.zip a propósito: es pesado, cambia cuando
 // cambia cualquier instrumento y no hace falta offline.
 
-const VERSION = 'zd-v6';
+const VERSION = 'zd-v7';
 const CACHE_NAME = `zd-cache-${VERSION}`;
 
 const PRECACHE_URLS = [
