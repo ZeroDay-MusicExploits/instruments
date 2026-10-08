@@ -87,6 +87,18 @@ TIME y FEEDBACK al máximo, sesiones de antes del techo del eco, doble toque de
 las macros de MM, WebKit y Firefox) y las de Android de J4, CronBeat y las
 demás. `sw.js` pasó a `zd-v5`.
 
+**Actualizado con los íconos y favicons nuevos (2026-10-08).** Los 5
+instrumentos tienen íconos nuevos (la ventana de terminal con su número y el
+nombre abajo, `icons/`), un favicon de 32 px propio en cada HTML, y el sitio
+estrena su favicon «0xD». Medido en Chromium: tamaños, opacidad, fondo y zona
+segura del maskable (`tools/check-icons.mjs`), instalabilidad y que los íconos se
+sirven (`tools/tests/icons-install.test.mjs`). **Ninguno se vio en un
+dispositivo real**: faltan el ícono adaptativo en Android (apartado 4), el
+apple-touch en iOS (apartado 2) y la pestaña con el favicon de 32 px (apartado
+5). **Una app ya instalada puede tardar en actualizar el ícono** (en Android a
+veces hay que reinstalarla): probar con una instalación limpia. `sw.js` pasó a
+`zd-v7`.
+
 Instrumentos: **CB** CronBeat-8:08 · **MM** MonoMoon'70 · **NB** Nebularp 2035
 · **J4** J4-Sirens Station · **AC** Acid Bass-303. "Todos" = los 5.
 
@@ -334,6 +346,16 @@ se marcan en cada lugar donde se ejecutan.
       desde Chrome, Edge y Firefox (lo dice MDN y la tabla del sitio lo repite;
       sin probar). Instalar desde «▶ Probar» (ventana principal), no desde el
       iframe de «Probalo acá».
+- [ ] **P1** · Todos · Ícono apple-touch (íconos nuevos): en «Compartir →
+      Agregar a inicio», la vista previa del diálogo y la pantalla de inicio
+      muestran el ícono de cada instrumento (ventana de terminal con el número y
+      el nombre abajo, sobre el color de acento) sin recortes ni bordes negros; iOS
+      le pone sus esquinas redondeadas. Los 5 se distinguen entre sí a simple vista.
+      Aparte, el del **sitio** (`assets/favicon-180.png`, «0xD»): al agregar el
+      índice a inicio, ese PNG tiene las esquinas transparentes y iOS pinta de
+      negro lo transparente de un `apple-touch-icon`: ver si se nota. Una app ya
+      agregada guarda el ícono de cuando se agregó; se espera que haga falta
+      quitarla y volver a agregarla para ver el nuevo (sin probar).
 - [ ] **P1** · Todos · En *standalone* real (no emulado) no aparecen el banner,
       el "↓" ni el ítem de menú "Instalar app".
 - [ ] **P0-1** · Todos · Repetir el primer toque con el switch de silencio **en
@@ -389,6 +411,16 @@ se marcan en cada lugar donde se ejecutan.
       otro ya instalada. Si una instalación hecha antes del cambio de scope sigue
       con el scope viejo, anotar si Chrome la actualiza sola o hay que
       reinstalar.
+- [ ] **P1** · Todos · Pantalla de inicio con ícono adaptativo (íconos nuevos):
+      instalar cada instrumento y mirar su ícono con las tres formas que ofrezca el
+      launcher: **círculo**, **cuadrado redondeado** y **«gota»**. En las tres, que se vean la ventana de terminal, el número y el
+      nombre sin recortes (el contenido del maskable llega a 197 px del centro y la
+      zona segura mide 204,8 de 512) y que el color de acento llene la forma. Mirar
+      también la pantalla de carga al abrir (el fondo es `#070b06`).
+- [ ] **P1** · Todos · Un instrumento **ya instalado** de antes de los íconos
+      nuevos: anotar si Chrome le cambia el ícono solo y cuánto tarda. Una app ya
+      instalada puede tardar en actualizar el ícono; en Android a veces hay que
+      desinstalarla y reinstalarla.
 - [ ] **P2** · Todos · Chrome ⋮ → «Instalar app» (WebAPK, con su entrada en el
       cajón de apps) y, si se puede, Firefox, Edge u Opera: según MDN solo agregan
       un acceso directo que abre el sitio en el navegador (la tabla del sitio lo
@@ -445,9 +477,13 @@ se marcan en cada lugar donde se ejecutan.
       notas; con el foco en la página, las letras tocan y Espacio da play. (NB y
       J4: con foco puesto con el mouse, Espacio sigue siendo play/SIREN a
       propósito.)
-- [ ] **P2** · Todos · Favicon (E1): la pestaña muestra el ícono del instrumento
-      (isotipo sobre su color de acento) en Chrome, Safari y Firefox, y en
-      `file://`; sin pedido a `/favicon.ico`.
+- [ ] **P1** · Todos · Favicon de 32 px (E1; íconos nuevos): la pestaña muestra el
+      ícono del instrumento (la ventana de terminal con el número, sin el nombre,
+      sobre su color de acento) en Chrome, Safari y Firefox, y en `file://`; sin
+      pedido a `/favicon.ico`. Mirarlo a 16 px reales y en una pantalla de alta
+      densidad, con los 5 instrumentos abiertos en pestañas contiguas: tienen que
+      distinguirse por el color y el número. Y el del sitio («0xD» en el índice,
+      las landings, privacidad y la 404).
 - [ ] **P2** · MM · VoiceOver (macOS/iOS) y TalkBack: el pad XY se anuncia como
       grupo con su nombre, al enfocarlo se lee el valor ("Corte … Hz, énfasis
       N") y cada flecha anuncia el valor nuevo (E1).

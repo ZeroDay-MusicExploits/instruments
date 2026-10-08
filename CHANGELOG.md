@@ -6,9 +6,42 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 ## [Unreleased]
 
 ### Íconos y favicons nuevos (2026-10-08)
+Diseño nuevo de los íconos, entregado en `src/brand/zeroday-brand-assets/` (con su
+`LEEME.txt`). Medido en Chromium; **ninguno se vio todavía en un dispositivo real**
+(`docs/QA-dispositivos.md`, apartados 2, 4 y 5).
+
+- **Íconos de los instrumentos.** Reemplazan al «0xD» recortado del logo que tenían
+  todos sobre su color de acento: cada uno es ahora una ventana de terminal con el número del instrumento (808, '70, 2035, J4 y
+  303) y su nombre abajo, sobre el color de acento. Los 20 PNG (192, 512, 512
+  maskable y apple-touch 180) son los del diseño, con los mismos nombres, así que
+  los manifests no cambian. Son 100 % opacos, con el fondo igual al acento de
+  `data/instrumentos.json` y, en los maskable, todo el contenido a 197 px del
+  centro (la zona segura mide 204,8 de 512). `tools/check-icons.mjs`
+  (`npm run check-icons`) lo verifica, sale con código 1 si algo no cumple y
+  reemplaza a `make-icons.mjs`, que ya no tenía fuente que recortar.
+- **Favicon de cada instrumento.** El de 32×32 inline de cada HTML es ahora la
+  ventana oscura del ícono (sin el nombre, que no se lee a 32 px) sobre el color de
+  acento: PNG con paleta de unos 0,4 KB. `tools/make-favicons.mjs` lo reproduce
+  desde `icons/<slug>-512.png` (imagen equivalente, no los mismos bytes). En
+  Nebularp el favicon del diseño traía el fondo en `#9a8cfe` y el acento es
+  `#9a8cff` (el test exige igualdad): se corrigió ese único byte de la paleta.
+  `favicon.test.mjs` exige 32×32, ≤ 2 KB y píxel (0,0) = acento.
+- **Favicon del sitio.** «0xD» verde sobre un cuadrado redondeado casi negro.
+  `assets/favicon.png` (64×64) es el del diseño, se suman `assets/favicon-32.png` y
+  `assets/favicon-180.png` (`apple-touch-icon` del sitio), y las páginas los declaran
+  (`sizes` 32×32, 64×64 y 180×180, con rutas relativas que también sirven a la 404
+  bajo su `<base>`). Optimizados a PNG con paleta y alfa: de 7–12 KB a 0,6–1,9 KB,
+  sin cambiar su aspecto (`tools/make-site-icons.mjs`). `build-og-images.mjs` ya no
+  escribe `assets/favicon.png`.
+- **Pruebas.** `tools/tests/icons-install.test.mjs`: con el repo servido bajo
+  `/instruments/`, los 5 son instalables (`Page.getInstallabilityErrors` = `[]`), los
+  íconos del manifest y el apple-touch responden 200 `image/png` con el tamaño que
+  declaran, y los íconos del sitio resuelven también desde la 404 en una ruta
+  anidada. `serveRoot` suma la opción `prefix`.
 - **PWA.** `sw.js` pasa a `zd-v7` y el ZIP se regenera: cambiaron los 20 PNG de
   `icons/` y el favicon inline de los 5 HTML, así que las copias cacheadas tienen
-  que reemplazarse.
+  que reemplazarse. Una app ya instalada puede tardar en actualizar el ícono (en
+  Android a veces hay que reinstalarla).
 
 ### Ajustes tras las primeras pruebas (2026-10-05 a 2026-10-07)
 Lo que salió de usar los instrumentos en el teléfono y de medir los reportes
