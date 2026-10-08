@@ -17,8 +17,10 @@ const TYPES = {
 /** Sirve ROOT en un puerto libre. -> { origin, close() }
  *  `extra` agrega rutas virtuales que no existen en el repo (para armar, por
  *  ejemplo, la página que embebe el instrumento en un iframe):
- *  { '/__iframe.html': { body: '<html>…', type: 'text/html; charset=utf-8' } } */
-export async function serveRoot(root = ROOT, extra = {}) {
+ *  { '/__iframe.html': { body: '<html>…', type: 'text/html; charset=utf-8' } }
+ *  `prefix` sirve el repo bajo esa carpeta, como GitHub Pages ('/instruments'): lo de afuera
+ *  da 404 y `base` es origin + prefix. Las rutas de `extra` se comparan con la ruta completa. */
+export async function serveRoot(root = ROOT, extra = {}, { prefix = '' } = {}) {
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url, 'http://localhost');
@@ -29,7 +31,12 @@ export async function serveRoot(root = ROOT, extra = {}) {
         res.end(req.method === 'HEAD' ? undefined : body);
         return;
       }
-      let rel = normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, '');
+      let path = url.pathname;
+      if (prefix) {
+        if (path !== prefix && !path.startsWith(prefix + '/')) { res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }).end('404'); return; }
+        path = path.slice(prefix.length) || '/';
+      }
+      let rel = normalize(decodeURIComponent(path)).replace(/^(\.\.[/\\])+/, '');
       if (rel.endsWith('/')) rel += 'index.html';
       const file = join(root, rel);
       if (!file.startsWith(root)) { res.writeHead(403).end('403'); return; }
@@ -50,6 +57,7 @@ export async function serveRoot(root = ROOT, extra = {}) {
   const { port } = server.address();
   return {
     origin: `http://127.0.0.1:${port}`,
+    base: `http://127.0.0.1:${port}${prefix}`,
     close: () => new Promise((ok) => server.close(ok)),
   };
 }
