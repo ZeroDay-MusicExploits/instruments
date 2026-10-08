@@ -32,12 +32,17 @@ hasta otro toque). Medidos en Chromium (`tools/tests/j4-mute.test.mjs`); falta
 el pulgar en el teléfono y el cambio de app (apartados 1 y 3; en Android, lo
 mismo que en el 1).
 
-**Actualizado con F3 (2026-10-06, `reports/F3-barrido-scroll.md`).** Los sheets
-de los 5 tienen un carril de scroll lateral (`zd-mobile` v5: 32 px a la derecha
-sin controles) y los sliders de los sheets de CronBeat ya no saltan al tocarlos
-ni frenan el scroll (arrastre horizontal relativo). Medido en Chromium con
-toques por CDP; falta el pulgar en el teléfono (apartado 1, "Toque y layout", y
-lo mismo en Android).
+**Actualizado con F3 y F3b (2026-10-06 y 2026-10-07,
+`reports/F3-barrido-scroll.md`).** Los sheets de los 5 tienen un carril de
+scroll lateral (`zd-mobile` v5: 32 px a la derecha sin controles). Los sliders
+de los sheets de los 5 ya no saltan al tocarlos ni frenan el scroll (arrastre
+horizontal relativo: CronBeat adentro, los otros 4 con `zd-sheet-input` v1). Los
+knobs de los sheets de Acid, Nebularp, MonoMoon y J4 se ajustan con arrastre
+**horizontal** y el swipe vertical scrollea (antes un swipe sobre un knob nunca
+scrolleaba y cambiaba el valor). El ✕ de la cabecera mide 44×44 (`zd-mobile` v6)
+y los botones de onda de MonoMoon OSC miden ≥44 de ancho a 360 px. Medido en
+Chromium con toques por CDP; **ningún gesto se probó con un pulgar ni en iOS**:
+falta (apartado 1, "Toque y layout", y lo mismo en Android).
 
 **Actualizado con F2b (2026-10-06, `reports/F2b.md`).** El VCA de J4 queda en 0
 exacto en reposo: encendido y sin tocar nada ya no sube solo a −14 dBFS.
@@ -220,7 +225,9 @@ se marcan en cada lugar donde se ejecutan.
       el recorrido es de 160 px: la perilla va más lenta que el dedo). En AC,
       Swing y Densidad (ahora de 44 px de alto). En iOS, lo mismo que para CB.
 - [ ] **P1** · AC · NB · MM · J4 · Knobs de los sheets (F3, decisión A), con el
-      pulgar en cada sheet: un swipe vertical que arranca encima de un knob
+      pulgar en **cada sheet que tiene knobs** (AC: SEQ —incluye TEMPO—, SONIDO
+      y FILTRO; NB: ARP, SONIDO y ESPACIO; MM: OSC, FILTRO, MOD y VOZ; J4:
+      SIRENA, ENV·LFO y FX): un swipe vertical que arranca encima de un knob
       scrollea el sheet y no cambia el valor; el knob se ajusta arrastrando de
       costado (sin demora, desde donde estaba); un swipe en diagonal o scrollea
       o ajusta, nunca las dos cosas; doble toque = valor por defecto y

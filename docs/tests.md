@@ -111,6 +111,13 @@ un swipe scrollea).
   concreto. Por eso sigue en `reports/`.
 - Un test de la corrida completa puede fallar por carga de la máquina sin que
   haya un bug (por ejemplo la rotación de Nebularp: ver `reports/D1-logs/LEEME.md`).
+  Antes de culpar al código, correrlo solo con `--only`.
+- Los casos de rotación de tablet esperan, tras cambiar el viewport, un tiempo
+  fijo (`waitForTimeout`) en `acid-verify` (220 ms), `monomoon-verify` (220),
+  `cronbeat-verify` (240) y `nebularp-verify` (350): son los candidatos a
+  fallar por carga. `j4-verify` ya no: espera a que `ZD.mobile.active` llegue al
+  estado pedido (más dos rAF), como `settle()` de `zd-mobile-cycle`. Se
+  corrobora corriendo el caso solo, 10 veces seguidas
+  (`node --test --test-name-pattern="rotación de tablet" tools/tests/j4-verify.test.mjs`).
 - `acid-svf` toma el worklet de antes de `70a916a` (main antes del tope) con
   `git show`; sin ese commit se saltean los casos 1 y 2.
-  Antes de culpar al código, correrlo solo con `--only`.
