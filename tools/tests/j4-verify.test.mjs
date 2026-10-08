@@ -96,6 +96,19 @@ async function powerOn(page) {
   await page.waitForFunction(() => !document.getElementById('power') && typeof ctx !== 'undefined' && ctx && ctx.state === 'running', null, { timeout: 8000 });
 }
 
+/* Espera a que el shell llegue al estado pedido (ZD.mobile.active) y a que
+   hayan corrido los listeners que vienen después. Reemplaza a dormir 220 ms
+   tras cambiar el viewport: el bloque reacciona a la media query y despacha el
+   resize en el frame siguiente, y con la máquina cargada (la corrida completa)
+   eso tardaba más y el caso fallaba una vez de cada tantas ("shell: expected
+   false, actual true"). Es la misma espera que `settle()` de
+   zd-mobile-cycle. Si el shell nunca llega, no corta acá: los asserts de abajo
+   miran el mismo estado y lo dicen con su mensaje. */
+async function settleShell(page, shell) {
+  await page.waitForFunction((want) => !!(window.ZD && ZD.mobile && ZD.mobile.active) === want, shell, { timeout: 10000 }).catch(() => {});
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+
 const rect = (page, sel) => page.evaluate((s) => {
   const e = document.querySelector(s);
   if (!e) return null;
@@ -424,7 +437,7 @@ test('J4 · rotación de tablet 1180×820 ↔ 820×1180 con la sirena sonando', 
     for (let i = 1; i <= 4; i++) {
       for (const v of [{ width: 820, height: 1180 }, { width: 1180, height: 820 }]) {
         await page.setViewportSize(v);
-        await page.waitForTimeout(220);
+        await settleShell(page, v.width === 820);
         const s = await page.evaluate(() => ({
           shell: !!(ZD.mobile && ZD.mobile.active), state: ctx.state, voice: voiceActive,
           stage: Array.from(document.getElementById('zd-stage').children).map((e) => e.id).filter(Boolean),
